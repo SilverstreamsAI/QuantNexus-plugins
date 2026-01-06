@@ -1,0 +1,39 @@
+{
+  "$schema": "https://quantnexus.io/schemas/plugin-manifest.json",
+  "id": "com.quantnexus.data-source-nexus",
+  "name": "data-source-nexus",
+  "displayName": "Data Source Nexus",
+  "version": "1.0.0",
+  "description": "Market data management with multi-source support, caching, and local storage",
+  "type": "nexus",
+  "category": "data",
+  "protocols": ["data-nexus"],
+  "contributes": {
+    "viewsContainers": {
+      "sidebar": [{
+        "id": "dataExplorer",
+        "title": "DATA",
+        "icon": "resources/data-icon.svg"
+      }]
+    },
+    "views": {
+      "dataExplorer": [{
+        "id": "data.sources",
+        "name": "Data Sources"
+      }],
+      "workbench": [{
+        "id": "data.config",
+        "name": "Data Configuration"
+      }]
+    },
+    "commands": [
+      { "id": "data.refresh", "title": "Refresh Data" },
+      { "id": "data.clearCache", "title": "Clear Cache" },
+      { "id": "data.import", "title": "Import Data" },
+      { "id": "data.export", "title": "Export Data" }
+    ]
+  },
+  "permissions": ["network", "database", "filesystem"],
+  "isolation": "trusted",
+  "activationEvents": ["onStartup"]
+}

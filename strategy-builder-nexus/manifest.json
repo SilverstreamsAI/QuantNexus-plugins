@@ -1,0 +1,49 @@
+{
+  "$schema": "https://quantnexus.io/schemas/plugin-manifest.json",
+  "id": "com.quantnexus.strategy-builder-nexus",
+  "name": "strategy-builder-nexus",
+  "displayName": "Strategy Builder Nexus",
+  "version": "1.0.0",
+  "description": "Strategy creation, market regime classification, and AI-powered code generation",
+  "type": "nexus",
+  "category": "strategy",
+  "protocols": ["strategy-nexus"],
+  "contributes": {
+    "viewsContainers": {
+      "sidebar": [{
+        "id": "strategyExplorer",
+        "title": "STRATEGY",
+        "icon": "resources/strategy-icon.svg"
+      }]
+    },
+    "views": {
+      "strategyExplorer": [{
+        "id": "strategy.tree",
+        "name": "Strategy Tree"
+      }],
+      "workbench": [{
+        "id": "strategy.hub",
+        "name": "Strategy Hub"
+      }, {
+        "id": "strategy.providerPortal",
+        "name": "Provider Portal"
+      }, {
+        "id": "strategy.groupList",
+        "name": "Strategy Groups"
+      }]
+    },
+    "editors": [{
+      "viewType": "strategy.regimeEditor",
+      "displayName": "Regime Editor",
+      "selector": [{ "resourceScheme": "strategy" }]
+    }],
+    "commands": [
+      { "id": "strategy.openHub", "title": "Open Strategy Hub" },
+      { "id": "strategy.generate", "title": "Generate Strategy Code" },
+      { "id": "strategy.validate", "title": "Validate Strategy" }
+    ]
+  },
+  "permissions": ["network:internal", "database"],
+  "isolation": "trusted",
+  "activationEvents": ["onView:strategy.tree", "onCommand:strategy.openHub"]
+}

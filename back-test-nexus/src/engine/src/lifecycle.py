@@ -54,7 +54,7 @@ class PluginMetrics:
 @dataclass
 class PluginConfig:
     """Plugin configuration."""
-    plugin_id: str = "com.quantnexus.backtest-engine"
+    plugin_id: str = "com.quantnexus.back-test-nexus"
     name: str = "Backtest Engine"
     version: str = "1.0.0"
     description: str = "Python-based backtest engine with Backtrader"

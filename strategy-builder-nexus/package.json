@@ -1,0 +1,95 @@
+{
+  "name": "com.quantnexus.strategy-builder-nexus",
+  "displayName": "Strategy Studio",
+  "version": "1.0.0",
+  "description": "Strategy management and generation plugin for QuantNexus",
+  "main": "./dist/extension.js",
+  "type": "strategy",
+  "category": "trading",
+  "author": "QuantNexus Team",
+  "license": "MIT",
+  "engines": {
+    "nexus": "^1.0.0"
+  },
+  "activationEvents": [
+    "onView:strategy.tree",
+    "onCommand:strategy.openHub"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "sidebar": [
+        {
+          "id": "strategyExplorer",
+          "title": "STRATEGY",
+          "icon": "resources/strategy-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "strategyExplorer": [
+        {
+          "id": "strategy.tree",
+          "name": "Strategy Tree"
+        }
+      ],
+      "workbench": [
+        {
+          "id": "strategy.hub",
+          "name": "Strategy Hub"
+        },
+        {
+          "id": "strategy.providerPortal",
+          "name": "Provider Portal"
+        },
+        {
+          "id": "strategy.groupList",
+          "name": "Strategy Groups"
+        }
+      ]
+    },
+    "editors": [
+      {
+        "viewType": "strategy.regimeEditor",
+        "displayName": "Regime Editor",
+        "selector": [
+          {
+            "resourceScheme": "strategy"
+          }
+        ]
+      }
+    ],
+    "treeDataProviders": [
+      {
+        "id": "strategyTreeProvider",
+        "viewId": "strategy.tree"
+      }
+    ],
+    "commands": [
+      {
+        "id": "strategy.openHub",
+        "title": "Open Strategy Hub"
+      },
+      {
+        "id": "strategy.selectNode",
+        "title": "Select Strategy Node"
+      },
+      {
+        "id": "strategy.refresh",
+        "title": "Refresh Strategy Tree"
+      }
+    ]
+  },
+  "permissions": [
+    "network:internal",
+    "database"
+  ],
+  "isolation": "trusted",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}

@@ -1,48 +1,48 @@
 {
   "$schema": "https://quantnexus.io/schemas/plugin-registry.json",
-  "version": "1.0.0",
-  "plugins": [
+  "version": "2.0.0",
+  "nexusPlugins": [
     {
-      "id": "com.quantnexus.data",
-      "name": "Data",
-      "path": "data",
+      "id": "com.quantnexus.data-source-nexus",
+      "name": "Data Source Nexus",
+      "path": "data-source-nexus",
       "category": "data",
-      "description": "Market data provider with multi-source support"
+      "bundled": true,
+      "description": "Market data management with multi-source support, caching, and local storage"
     },
+    {
+      "id": "com.quantnexus.strategy-builder-nexus",
+      "name": "Strategy Builder Nexus",
+      "path": "strategy-builder-nexus",
+      "category": "strategy",
+      "bundled": true,
+      "description": "Strategy creation, market regime classification, and AI-powered code generation"
+    },
+    {
+      "id": "com.quantnexus.back-test-nexus",
+      "name": "Backtest Nexus",
+      "path": "back-test-nexus",
+      "category": "execution",
+      "bundled": true,
+      "description": "Strategy backtesting with workflow UI, Python engine, and results visualization"
+    }
+  ],
+  "optionalPlugins": [
     {
       "id": "com.quantnexus.chart",
       "name": "Chart",
-      "path": "chart",
+      "path": "optional/chart",
       "category": "visualization",
-      "description": "Interactive charting component"
-    },
-    {
-      "id": "com.quantnexus.backtest",
-      "name": "Backtest",
-      "path": "backtest",
-      "category": "execution",
-      "description": "Backtesting UI and workflow"
-    },
-    {
-      "id": "com.quantnexus.backtest-engine",
-      "name": "Backtest Engine",
-      "path": "backtest-engine",
-      "category": "execution",
-      "description": "Python backtesting engine"
-    },
-    {
-      "id": "com.quantnexus.backtest-panel",
-      "name": "Backtest Panel",
-      "path": "backtest-panel",
-      "category": "ui",
-      "description": "Backtest results panel"
+      "bundled": false,
+      "description": "Standalone interactive charting component"
     },
     {
       "id": "com.quantnexus.ai-analyzer",
       "name": "AI Analyzer",
-      "path": "ai-analyzer",
+      "path": "optional/ai-analyzer",
       "category": "analysis",
-      "description": "AI-powered market analysis"
+      "bundled": false,
+      "description": "AI-powered strategy analysis and optimization"
     }
   ]
 }

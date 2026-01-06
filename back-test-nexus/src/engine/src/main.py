@@ -51,7 +51,7 @@ class PluginServer:
 
         # Lifecycle manager for Core integration
         config = PluginConfig(
-            plugin_id="com.quantnexus.backtest-engine",
+            plugin_id="com.quantnexus.back-test-nexus",
             name="Backtest Engine",
             version="1.0.0",
             description="Python-based backtest engine with Backtrader",

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://quantnexus.io/schemas/plugin-manifest.json",
+  "id": "com.quantnexus.back-test-nexus",
+  "name": "back-test-nexus",
+  "displayName": "Backtest Nexus",
+  "version": "1.0.0",
+  "description": "Strategy backtesting with workflow UI, Python engine, and results visualization",
+  "type": "nexus",
+  "category": "execution",
+  "protocols": ["backtest-nexus"],
+  "main": "./dist/index.js",
+  "executable": "python",
+  "args": ["src/engine/main.py", "--port", "50052"],
+  "services": {
+    "BacktestPlugin": {
+      "port": 50052,
+      "protocol": "grpc"
+    }
+  },
+  "contributes": {
+    "viewsContainers": {
+      "sidebar": [{
+        "id": "backtestExplorer",
+        "title": "BACKTEST",
+        "icon": "resources/backtest-icon.svg"
+      }]
+    },
+    "views": {
+      "backtestExplorer": [{
+        "id": "backtest.history",
+        "name": "Backtest History"
+      }],
+      "workbench": [{
+        "id": "backtest.workflow",
+        "name": "Backtest Workflow"
+      }, {
+        "id": "backtest.results",
+        "name": "Results"
+      }]
+    },
+    "bottomPanel": [{
+      "id": "backtest.trades",
+      "title": "Trades",
+      "icon": "list"
+    }, {
+      "id": "backtest.logs",
+      "title": "Logs",
+      "icon": "terminal"
+    }],
+    "commands": [
+      { "id": "backtest.run", "title": "Run Backtest", "keybinding": "F5" },
+      { "id": "backtest.stop", "title": "Stop Backtest", "keybinding": "Shift+F5" },
+      { "id": "backtest.export", "title": "Export Results" }
+    ]
+  },
+  "permissions": ["network:internal", "database", "filesystem"],
+  "isolation": "trusted",
+  "activationEvents": ["onCommand:backtest.*", "onStartup"],
+  "dependencies": {
+    "com.quantnexus.data-source-nexus": "^1.0.0"
+  }
+}

@@ -1,7 +1,7 @@
 {
-  "name": "@quantnexus/plugin-data",
+  "name": "com.quantnexus.back-test-nexus-ui",
   "version": "1.0.0",
-  "description": "QuantNexus Data Plugin - Market data provider",
+  "description": "QuantNexus Backtest Plugin - Strategy backtesting engine",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -10,15 +10,12 @@
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@clickhouse/client": "^1.0.0",
-    "better-sqlite3": "^11.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.11",
     "typescript": "^5.3.0"
   },
   "peerDependencies": {
-    "@quantnexus/types": "workspace:*"
+    "@quantnexus/types": "workspace:*",
+    "@quantnexus/plugin-data": "workspace:*"
   }
 }
