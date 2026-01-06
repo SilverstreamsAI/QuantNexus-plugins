@@ -1,0 +1,21 @@
+{
+  "name": "@quantnexus/plugin-backtest",
+  "version": "1.0.0",
+  "description": "QuantNexus Backtest Plugin - Strategy backtesting engine",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "peerDependencies": {
+    "@quantnexus/types": "workspace:*",
+    "@quantnexus/plugin-data": "workspace:*"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://quantnexus.io/schemas/plugin-registry.json",
+  "version": "1.0.0",
+  "plugins": [
+    {
+      "id": "com.quantnexus.data",
+      "name": "Data",
+      "path": "data",
+      "category": "data",
+      "description": "Market data provider with multi-source support"
+    },
+    {
+      "id": "com.quantnexus.chart",
+      "name": "Chart",
+      "path": "chart",
+      "category": "visualization",
+      "description": "Interactive charting component"
+    },
+    {
+      "id": "com.quantnexus.backtest",
+      "name": "Backtest",
+      "path": "backtest",
+      "category": "execution",
+      "description": "Backtesting UI and workflow"
+    },
+    {
+      "id": "com.quantnexus.backtest-engine",
+      "name": "Backtest Engine",
+      "path": "backtest-engine",
+      "category": "execution",
+      "description": "Python backtesting engine"
+    },
+    {
+      "id": "com.quantnexus.backtest-panel",
+      "name": "Backtest Panel",
+      "path": "backtest-panel",
+      "category": "ui",
+      "description": "Backtest results panel"
+    },
+    {
+      "id": "com.quantnexus.ai-analyzer",
+      "name": "AI Analyzer",
+      "path": "ai-analyzer",
+      "category": "analysis",
+      "description": "AI-powered market analysis"
+    }
+  ]
+}
