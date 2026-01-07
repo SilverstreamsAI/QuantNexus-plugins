@@ -3,8 +3,10 @@
   "id": "com.quantnexus.data-source-nexus",
   "name": "data-source-nexus",
   "displayName": "Data Source Nexus",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Market data management with multi-source support, caching, and local storage",
+  "main": "./ui/dist/plugins/data-source-nexus/ui/src/index.js",
+  "backend": "./backend/dist/plugins/data-source-nexus/backend/src/index.js",
   "type": "nexus",
   "category": "data",
   "protocols": ["data-nexus"],
@@ -18,7 +20,7 @@
     },
     "views": {
       "dataExplorer": [{
-        "id": "data.sources",
+        "id": "data.tree",
         "name": "Data Sources"
       }],
       "workbench": [{

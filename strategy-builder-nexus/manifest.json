@@ -5,6 +5,7 @@
   "displayName": "Strategy Builder Nexus",
   "version": "1.0.0",
   "description": "Strategy creation, market regime classification, and AI-powered code generation",
+  "main": "./dist/index.js",
   "type": "nexus",
   "category": "strategy",
   "protocols": ["strategy-nexus"],
