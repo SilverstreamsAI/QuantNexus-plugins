@@ -54,6 +54,13 @@ export interface BacktestPlugin extends PluginApi {
 }
 
 // =============================================================================
+// Plugin State
+// =============================================================================
+
+const disposables: Disposable[] = [];
+let treeProvider: any = null;
+
+// =============================================================================
 // Backtest Plugin Implementation
 // =============================================================================
 
@@ -74,7 +81,33 @@ class BacktestPluginImpl implements BacktestPlugin {
   // ===========================================================================
 
   async activate(): Promise<void> {
-    this.context.log.info('Backtest plugin activating...');
+    this.context.log.info('Backtest plugin (UI) activating...');
+
+    // Access windowApi from global (injected by host)
+    const windowApi = (globalThis as { nexus?: { window: unknown } }).nexus?.window;
+
+    if (windowApi) {
+      const api = windowApi as {
+        registerTreeDataProvider: (viewId: string, provider: unknown) => Disposable;
+        registerViewProvider: (viewId: string, provider: unknown) => Disposable;
+        setBreadcrumb: (items: unknown[]) => void;
+        openView: (viewId: string, options?: unknown) => Promise<void>;
+      };
+
+      // Register Tree Data Provider
+      const { BacktestTreeDataProvider } = await import('./providers/BacktestTreeDataProvider');
+      treeProvider = new BacktestTreeDataProvider();
+      disposables.push(api.registerTreeDataProvider('backtest.tree', treeProvider));
+      this.context.log.info('BacktestTreeDataProvider registered');
+
+      // Command: backtest.openWorkflow
+      this.context.commands.register('backtest.openWorkflow', () => {
+        api.setBreadcrumb([{ id: 'backtest', label: 'BACKTEST WORKFLOW' }]);
+        api.openView('backtest.workflow');
+      });
+    } else {
+      this.context.log.warn('windowApi not available - running in headless/fallback mode');
+    }
 
     // Register commands
     this.registerCommands();
@@ -95,6 +128,12 @@ class BacktestPluginImpl implements BacktestPlugin {
 
   async deactivate(): Promise<void> {
     this.context.log.info('Backtest plugin deactivating...');
+
+    // Dispose all registered providers
+    for (const disposable of disposables) {
+      disposable.dispose();
+    }
+    disposables.length = 0;
 
     // Stop any running backtest
     if (this.engine.isRunning()) {
