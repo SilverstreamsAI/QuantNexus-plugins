@@ -67,7 +67,7 @@ export class ProviderPortalProvider implements ViewProvider {
    */
   private getProviderName(providerId: string): string {
     const providerNames: Record<string, string> = {
-      'provider-nona': 'NONA ALGO CORE',
+      'provider-nona': 'Nona',
       'provider-aaa': 'AAA QUANT TOOLS',
     };
     return providerNames[providerId] || providerId.toUpperCase();

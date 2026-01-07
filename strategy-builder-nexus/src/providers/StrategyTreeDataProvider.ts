@@ -50,7 +50,7 @@ const mockTreeData: StrategyNode[] = [
   },
   {
     id: 'provider-nona',
-    label: 'NONA ALGO CORE',
+    label: 'Nona',
     type: 'provider',
     level: 2,
     children: [
