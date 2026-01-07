@@ -288,7 +288,7 @@ export const SMACrossoverStrategy: Strategy = {
 
     if (crossedBelow && ctx.position && ctx.position.quantity > 0) {
       ctx.log(`Sell signal: Fast SMA (${fastSMA.toFixed(2)}) crossed below Slow SMA (${slowSMA.toFixed(2)})`);
-      return ctx.close();
+      return ctx.close() as any;
     }
   },
 };
@@ -324,7 +324,7 @@ export const RSIMeanReversionStrategy: Strategy = {
 
     if (rsi > overbought && ctx.position && ctx.position.quantity > 0) {
       ctx.log(`Sell signal: RSI (${rsi.toFixed(2)}) above overbought (${overbought})`);
-      return ctx.close();
+      return ctx.close() as any;
     }
   },
 };

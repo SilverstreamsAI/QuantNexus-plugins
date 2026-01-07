@@ -90,8 +90,8 @@ export async function activate(context: PluginContext): Promise<PluginApi> {
   });
 
   // Command: Select Node (called from tree item click)
-  context.commands.register('strategy.selectNode', (node: StrategyNode) => {
-    handleNodeSelect(node, api);
+  context.commands.register('strategy.selectNode', (node: any) => {
+    handleNodeSelect(node as StrategyNode, api);
   });
 
   // Command: Refresh Tree

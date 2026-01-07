@@ -12,12 +12,11 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "jsx": "react-jsx",
     "paths": {
-      "@shared/types": ["../../types/src/index.ts"]
+      "@shared/types": ["../../apps/desktop/src/shared/types/index.ts"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../../apps/desktop/src/shared/types/**/*"],
   "exclude": ["node_modules", "dist"]
 }

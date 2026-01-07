@@ -305,10 +305,10 @@ class BacktestPluginImpl implements BacktestPlugin {
 
   private registerCommands(): void {
     this.context.commands.register('backtest.run', async (
-      strategyId: string,
-      symbol: string,
-      startDate: string,
-      endDate: string
+      strategyId: any,
+      symbol: any,
+      startDate: any,
+      endDate: any
     ) => {
       return this.run({
         strategyId,
@@ -328,7 +328,7 @@ class BacktestPluginImpl implements BacktestPlugin {
       this.context.ui.showNotification('Results cleared', 'info');
     });
 
-    this.context.commands.register('backtest.export', async (format: 'json' | 'csv' = 'json') => {
+    this.context.commands.register('backtest.export', async (format: any = 'json') => {
       if (!this.lastResult) {
         throw new Error('No results to export');
       }
@@ -336,11 +336,11 @@ class BacktestPluginImpl implements BacktestPlugin {
     });
 
     this.context.commands.register('backtest.optimize', async (
-      strategyId: string,
-      symbol: string,
-      startDate: string,
-      endDate: string,
-      paramRanges: Array<{ name: string; values: unknown[] }>
+      strategyId: any,
+      symbol: any,
+      startDate: any,
+      endDate: any,
+      paramRanges: any
     ) => {
       const request: BacktestRequest = {
         strategyId,

@@ -329,8 +329,9 @@ class DataPlugin implements DataSourcePlugin {
       if (this.cache) {
         if (event.type === 'quote' && 'bid' in event.data) {
           this.cache.setQuote(symbol, event.data as Quote);
-        } else if (event.type === 'bar' && 'open' in event.data) {
-          this.cache.appendBar(symbol, event.data.interval || '1d', event.data);
+        } else if (event.type === 'bar' && 'open' in (event.data as any)) {
+          const bar = event.data as any;
+          this.cache.appendBar(symbol, (bar as any).interval || '1d', bar);
         }
       }
 
@@ -485,8 +486,8 @@ class DataPlugin implements DataSourcePlugin {
       }
     });
 
-    this.context.commands.register('data.importCSV', async (filePath: string) => {
-      const csvProvider = this.providers.get('csv') as CSVProvider | undefined;
+    this.context.commands.register('data.importCSV', async (filePath: any) => {
+      const csvProvider = this.providers.get('csv') as any;
       if (!csvProvider) {
         throw new Error('CSV provider not available');
       }
@@ -495,9 +496,9 @@ class DataPlugin implements DataSourcePlugin {
     });
 
     this.context.commands.register('data.exportCSV', async (
-      symbol: string,
-      interval: Interval,
-      filePath: string
+      symbol: any,
+      interval: any,
+      filePath: any
     ) => {
       if (!this.storage) {
         throw new Error('Storage not available');

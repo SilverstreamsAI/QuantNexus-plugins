@@ -258,7 +258,7 @@ export class ClickHouseProvider implements DataProvider {
         format: 'JSONEachRow',
       });
 
-      const rows = await result.json<CHSymbolRow[]>();
+      const rows = await result.json<CHSymbolRow>();
 
       return rows.map(row => this.mapRowToSymbolInfo(row));
     } catch (error) {
@@ -289,7 +289,7 @@ export class ClickHouseProvider implements DataProvider {
         format: 'JSONEachRow',
       });
 
-      const rows = await result.json<CHSymbolRow[]>();
+      const rows = await result.json<CHSymbolRow>();
 
       if (rows.length === 0) {
         return {
@@ -339,7 +339,7 @@ export class ClickHouseProvider implements DataProvider {
         format: 'JSONEachRow',
       });
 
-      const rows = await result.json<CHSymbolRow[]>();
+      const rows = await result.json<CHSymbolRow>();
 
       return rows.map(row => this.mapRowToSymbolInfo(row));
     } catch (error) {
@@ -411,7 +411,7 @@ export class ClickHouseProvider implements DataProvider {
         format: 'JSONEachRow',
       });
 
-      const rows = await result.json<CHOHLCVRow[]>();
+      const rows = await result.json<CHOHLCVRow>();
 
       if (rows.length === 0) {
         return {
@@ -508,7 +508,7 @@ export class ClickHouseProvider implements DataProvider {
         format: 'JSONEachRow',
       });
 
-      const rows = await result.json<CHOHLCVRow[]>();
+      const rows = await result.json<CHOHLCVRow>();
 
       if (rows.length === 0) {
         return {
@@ -581,7 +581,7 @@ export class ClickHouseProvider implements DataProvider {
         format: 'JSONEachRow',
       });
 
-      const rows = await result.json<CHOHLCVRow[]>();
+      const rows = await result.json<CHOHLCVRow>();
 
       // Map results
       const rowMap = new Map<string, CHOHLCVRow>();

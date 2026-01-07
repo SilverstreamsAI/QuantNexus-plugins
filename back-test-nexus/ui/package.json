@@ -16,6 +16,6 @@
   },
   "peerDependencies": {
     "@quantnexus/types": "workspace:*",
-    "@quantnexus/plugin-data": "workspace:*"
+    "com.quantnexus.data-source-nexus": "workspace:*"
   }
 }

@@ -5,7 +5,6 @@
     "moduleResolution": "bundler",
     "lib": ["ES2022"],
     "outDir": "./dist",
-    "rootDir": "./src",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
@@ -16,9 +15,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "paths": {
-      "@shared/*": ["../../apps/desktop/src/shared/*"]
+      "@shared/*": ["../../../apps/desktop/src/shared/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../../../apps/desktop/src/shared/**/*"],
   "exclude": ["node_modules", "dist"]
 }

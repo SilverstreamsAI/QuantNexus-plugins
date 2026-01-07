@@ -14,6 +14,7 @@ import type { OHLCV, OHLCVSeries, Interval, Timestamp } from '@shared/types';
  * Backtest configuration
  */
 export interface BacktestConfig {
+  [key: string]: unknown;
   // Capital
   initialCapital: number;
   currency: string;
