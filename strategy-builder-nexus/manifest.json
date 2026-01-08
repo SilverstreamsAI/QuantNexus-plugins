@@ -9,6 +9,80 @@
   "type": "nexus",
   "category": "strategy",
   "protocols": ["strategy-nexus"],
+  "serviceEntitlements": [
+    {
+      "id": "regime_mode",
+      "name": "REGIME MODE",
+      "description": "Market environment and regime classification",
+      "tier": "free",
+      "defaultEnabled": true,
+      "category": "REGIME MODE"
+    },
+    {
+      "id": "indicator_entry_generator",
+      "name": "INDICATOR ENTRY GENERATOR",
+      "description": "Generate entry signals from technical indicators",
+      "tier": "free",
+      "defaultEnabled": true,
+      "category": "REGIME MODE"
+    },
+    {
+      "id": "kronos_predictor",
+      "name": "KRONOS PREDICTOR",
+      "description": "Time-series prediction engine",
+      "tier": "pro",
+      "defaultEnabled": true,
+      "category": "KRONOS MODE"
+    },
+    {
+      "id": "indicator_entry",
+      "name": "INDICATOR ENTRY",
+      "description": "Indicator-based entry signals",
+      "tier": "free",
+      "defaultEnabled": true,
+      "category": "KRONOS MODE"
+    },
+    {
+      "id": "ai_entry",
+      "name": "AI ENTRY",
+      "description": "AI-powered entry signal generation",
+      "tier": "pro",
+      "defaultEnabled": true,
+      "category": "KRONOS MODE"
+    },
+    {
+      "id": "market_observer",
+      "name": "MARKET OBSERVER",
+      "description": "Real-time market observation",
+      "tier": "free",
+      "defaultEnabled": true,
+      "category": "TRADER MODE"
+    },
+    {
+      "id": "ai_entry_generator",
+      "name": "AI ENTRY GENERATOR",
+      "description": "AI-powered entry generation for trading",
+      "tier": "pro",
+      "defaultEnabled": true,
+      "category": "TRADER MODE"
+    },
+    {
+      "id": "indicator_exit_generator",
+      "name": "INDICATOR EXIT GENERATOR",
+      "description": "Risk management and exit strategy generation",
+      "tier": "free",
+      "defaultEnabled": true,
+      "category": "RISK MANAGER"
+    },
+    {
+      "id": "ai_libero",
+      "name": "AI LIBERO",
+      "description": "Centralized AI control and autonomous agents",
+      "tier": "enterprise",
+      "defaultEnabled": true,
+      "category": "AI COMMAND CENTER"
+    }
+  ],
   "contributes": {
     "viewsContainers": {
       "sidebar": [{
