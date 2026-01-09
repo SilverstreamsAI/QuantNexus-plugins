@@ -12,7 +12,6 @@ import { StrategyTreeDataProvider } from './providers/StrategyTreeDataProvider';
 import { StrategyHubProvider } from './providers/StrategyHubProvider';
 import { ProviderPortalProvider } from './providers/ProviderPortalProvider';
 import { GroupListProvider } from './providers/GroupListProvider';
-import { RegimeEditorProvider } from './providers/RegimeEditorProvider';
 
 // Store disposables for cleanup
 const disposables: Disposable[] = [];
@@ -72,12 +71,9 @@ export async function activate(context: PluginContext): Promise<PluginApi> {
   // ---------------------------------------------------------------------------
   // Register Custom Editor Provider
   // ---------------------------------------------------------------------------
-
-  const regimeEditorProvider = new RegimeEditorProvider();
-  disposables.push(
-    api.registerCustomEditorProvider('strategy.regimeEditor', regimeEditorProvider)
-  );
-  context.log.info('RegimeEditorProvider registered');
+  // NOTE: RegimeEditorProvider is registered by strategy-plugin-bridge.tsx
+  // which has direct access to the RegimeEditor React component.
+  // Registering here would override the bridge's registration with an empty fallback.
 
   // ---------------------------------------------------------------------------
   // Register Commands
