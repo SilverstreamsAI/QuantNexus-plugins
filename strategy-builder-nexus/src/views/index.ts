@@ -1,20 +1,25 @@
 /**
  * Strategy Plugin Views
  *
- * This module re-exports the view components that will be rendered by the Host.
- * For now, these components are located in the desktop app's features folder.
- * They will be moved here as part of the full plugin extraction.
+ * View components are now located in this plugin:
+ * - RegimeDetectorPage: Main page component (uses modular UI components)
+ * - RegimeSelector: Market regime selector component (component2)
+ * - ExpressionInput: Expression builder input (part of component1)
+ * - StrategyCard: Strategy card display (part of component1)
+ *
+ * The strategy-plugin-bridge.tsx in the Host directly imports RegimeDetectorPage.
  *
  * @see TICKET_059 - Host/Plugin Architecture
+ * @see TICKET_077 - Silverstream UI Component Library
+ * @see TICKET_077_1 - Page Hierarchy
  */
 
-// Component paths (relative to desktop app)
-// These will be used to dynamically import components in the Host
+// View component paths for reference (actual imports are in strategy-plugin-bridge.tsx)
 export const VIEW_COMPONENTS = {
   'strategy.hub': '@renderer/features/strategy/components/hub/StrategyHub',
   'strategy.providerPortal': '@renderer/features/strategy/components/hub/ProviderPortal',
   'strategy.groupList': '@renderer/features/strategy/components/hub/StrategyGroupList',
-  'strategy.regimeEditor': '@renderer/features/strategy/components/regime/RegimeEditor',
+  'strategy.regimeEditor': '@strategy-plugin/components/pages/RegimeDetectorPage',
 } as const;
 
 export type ViewComponentId = keyof typeof VIEW_COMPONENTS;

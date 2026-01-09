@@ -11,6 +11,7 @@
 import React, { useState, useCallback } from 'react';
 import { Settings, Play } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { RegimeSelector } from '../ui/RegimeSelector';
 import { ExpressionInput } from '../ui/ExpressionInput';
 import { StrategyCard } from '../ui/StrategyCard';
 
@@ -43,6 +44,7 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
   const [strategyName, setStrategyName] = useState('New Strategy');
   const [isSaved, setIsSaved] = useState(false);
   const [strategies, setStrategies] = useState<Strategy[]>([]);
+  const [selectedRegime, setSelectedRegime] = useState('trend');
 
   // Handle strategy name change
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,10 +73,11 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
     if (onGenerate) {
       await onGenerate({
         name: strategyName,
+        regime: selectedRegime,
         strategies: strategies.map(s => s.expression),
       });
     }
-  }, [onGenerate, strategyName, strategies]);
+  }, [onGenerate, strategyName, selectedRegime, strategies]);
 
   return (
     <div className="h-full flex flex-col bg-color-terminal-bg text-color-terminal-text">
@@ -135,7 +138,14 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
           {/* Zone C: Variable Content Area                                   */}
           {/* ============================================================== */}
           <div className="flex-1 overflow-y-auto p-6">
-            {/* Expression Input */}
+            {/* component2: Regime Selector */}
+            <RegimeSelector
+              selectedRegime={selectedRegime}
+              onSelect={setSelectedRegime}
+              className="mb-8"
+            />
+
+            {/* component1: Expression Builder (Input + Cards) */}
             <ExpressionInput
               onAdd={handleAddStrategy}
               className="mb-6"
