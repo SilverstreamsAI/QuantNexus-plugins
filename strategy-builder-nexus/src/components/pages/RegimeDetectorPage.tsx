@@ -26,6 +26,8 @@ interface Strategy {
 interface RegimeDetectorPageProps {
   onGenerate?: (config: unknown) => Promise<void>;
   onSettingsClick?: () => void;
+  /** Page title from navigation - uses feature name from PluginHub button */
+  pageTitle?: string;
 }
 
 // -----------------------------------------------------------------------------
@@ -35,6 +37,7 @@ interface RegimeDetectorPageProps {
 export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
   onGenerate,
   onSettingsClick,
+  pageTitle,
 }) => {
   // State
   const [strategyName, setStrategyName] = useState('New Strategy');
@@ -80,7 +83,7 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
       {/* ================================================================== */}
       <div className="flex-shrink-0 h-12 px-6 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
         <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
-          Strategy Studio
+          {pageTitle || 'Strategy Studio'}
         </h1>
         <button
           onClick={onSettingsClick}
