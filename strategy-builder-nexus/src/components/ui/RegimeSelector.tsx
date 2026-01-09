@@ -93,8 +93,11 @@ export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
         {title}
       </h2>
 
-      {/* Regime Cards */}
-      <div className="flex flex-wrap gap-3">
+      {/* Regime Cards - 5 equal columns spanning full width */}
+      <div
+        className="grid gap-3"
+        style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}
+      >
         {options.map((option) => {
           const Icon = option.icon;
           const isSelected = selectedRegime === option.key;
@@ -105,7 +108,7 @@ export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
               onClick={() => handleSelect(option.key)}
               className={cn(
                 'flex flex-col items-center justify-center',
-                'min-w-[100px] px-6 py-4',
+                'py-4',
                 'border rounded-lg',
                 'bg-color-terminal-surface',
                 'transition-all duration-200',
