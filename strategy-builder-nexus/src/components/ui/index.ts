@@ -13,4 +13,4 @@ export { StrategyCard } from './StrategyCard';
 export type { StrategyCardProps } from './StrategyCard';
 
 export { RegimeSelector } from './RegimeSelector';
-export type { RegimeSelectorProps, RegimeOption } from './RegimeSelector';
+export type { RegimeSelectorProps, RegimeOption, BespokeData } from './RegimeSelector';

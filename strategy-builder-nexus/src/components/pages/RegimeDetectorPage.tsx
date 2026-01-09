@@ -11,9 +11,7 @@
 import React, { useState, useCallback } from 'react';
 import { Settings, Play } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { RegimeSelector } from '../ui/RegimeSelector';
-import { ExpressionInput } from '../ui/ExpressionInput';
-import { StrategyCard } from '../ui/StrategyCard';
+import { RegimeSelector, BespokeData, ExpressionInput, StrategyCard } from '../ui';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -45,6 +43,7 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
   const [isSaved, setIsSaved] = useState(false);
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [selectedRegime, setSelectedRegime] = useState('trend');
+  const [bespokeData, setBespokeData] = useState<BespokeData>({ name: '', notes: '' });
 
   // Handle strategy name change
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,10 +73,11 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
       await onGenerate({
         name: strategyName,
         regime: selectedRegime,
+        bespoke: selectedRegime === 'bespoke' ? bespokeData : undefined,
         strategies: strategies.map(s => s.expression),
       });
     }
-  }, [onGenerate, strategyName, selectedRegime, strategies]);
+  }, [onGenerate, strategyName, selectedRegime, bespokeData, strategies]);
 
   return (
     <div className="h-full flex flex-col bg-color-terminal-bg text-color-terminal-text">
@@ -142,6 +142,8 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
             <RegimeSelector
               selectedRegime={selectedRegime}
               onSelect={setSelectedRegime}
+              bespokeData={bespokeData}
+              onBespokeChange={setBespokeData}
               className="mb-8"
             />
 

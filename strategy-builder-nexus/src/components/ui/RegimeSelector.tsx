@@ -2,6 +2,7 @@
  * RegimeSelector Component (component2)
  *
  * Market regime selector with 5 icon cards.
+ * Includes Bespoke input area when "bespoke" mode is selected.
  * Used in Zone C of Strategy Studio pages.
  *
  * @see TICKET_077 - Silverstream UI Component Library
@@ -22,6 +23,11 @@ export interface RegimeOption {
   icon: React.ElementType;
 }
 
+export interface BespokeData {
+  name: string;
+  notes: string;
+}
+
 export interface RegimeSelectorProps {
   /** Component title */
   title?: string;
@@ -31,6 +37,10 @@ export interface RegimeSelectorProps {
   onSelect: (regime: string) => void;
   /** Custom options (overrides default) */
   options?: RegimeOption[];
+  /** Bespoke mode data */
+  bespokeData?: BespokeData;
+  /** Callback when bespoke data changes */
+  onBespokeChange?: (data: BespokeData) => void;
   /** Additional class names */
   className?: string;
 }
@@ -58,11 +68,23 @@ export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
   selectedRegime,
   onSelect,
   options = DEFAULT_OPTIONS,
+  bespokeData = { name: '', notes: '' },
+  onBespokeChange,
   className,
 }) => {
   const handleSelect = useCallback((key: string) => {
     onSelect(key);
   }, [onSelect]);
+
+  const handleBespokeNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onBespokeChange?.({ ...bespokeData, name: e.target.value });
+  }, [bespokeData, onBespokeChange]);
+
+  const handleBespokeNotesChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onBespokeChange?.({ ...bespokeData, notes: e.target.value });
+  }, [bespokeData, onBespokeChange]);
+
+  const isBespokeMode = selectedRegime === 'bespoke';
 
   return (
     <div className={cn('regime-selector', className)}>
@@ -127,6 +149,51 @@ export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
           );
         })}
       </div>
+
+      {/* Bespoke Input Area - shown when bespoke mode is selected */}
+      {isBespokeMode && (
+        <div className="mt-6 space-y-4 p-4 border border-color-terminal-border rounded-lg bg-color-terminal-surface/50">
+          {/* Bespoke Name Input */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
+              Bespoke Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={bespokeData.name}
+              onChange={handleBespokeNameChange}
+              placeholder="Enter custom regime name"
+              className={cn(
+                'w-full px-4 py-3 text-xs terminal-mono',
+                'bg-color-terminal-surface border rounded',
+                'text-black placeholder:text-gray-500',
+                'focus:outline-none focus:border-color-terminal-accent-gold/50',
+                'border-color-terminal-border'
+              )}
+            />
+          </div>
+
+          {/* Bespoke Notes Input */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
+              Notes <span className="text-color-terminal-text-muted">(Optional)</span>
+            </label>
+            <input
+              type="text"
+              value={bespokeData.notes}
+              onChange={handleBespokeNotesChange}
+              placeholder="Enter notes or description"
+              className={cn(
+                'w-full px-4 py-3 text-xs terminal-mono',
+                'bg-color-terminal-surface border rounded',
+                'text-black placeholder:text-gray-500',
+                'focus:outline-none focus:border-color-terminal-accent-gold/50',
+                'border-color-terminal-border'
+              )}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
