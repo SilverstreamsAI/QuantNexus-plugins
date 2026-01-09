@@ -2,7 +2,7 @@
   "$schema": "https://quantnexus.io/schemas/plugin-manifest.json",
   "id": "com.quantnexus.strategy-builder-nexus",
   "name": "strategy-builder-nexus",
-  "displayName": "Strategy Builder Nexus",
+  "displayName": "Nona Strategy Builder",
   "version": "1.0.0",
   "description": "Strategy creation, market regime classification, and AI-powered code generation",
   "main": "./dist/index.js",
@@ -12,7 +12,7 @@
   "serviceEntitlements": [
     {
       "id": "regime_mode",
-      "name": "REGIME MODE",
+      "name": "Regime Detector",
       "description": "Market environment and regime classification",
       "tier": "free",
       "defaultEnabled": true,
