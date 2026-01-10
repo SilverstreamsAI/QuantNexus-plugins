@@ -91,6 +91,79 @@
     ]
   },
   "contributes": {
+    "configuration": {
+      "title": "Strategy Builder Settings",
+      "properties": {
+        "strategy.dataSource": {
+          "type": "string",
+          "enum": ["local", "remote", "hybrid"],
+          "enumDescriptions": [
+            "Store data locally only",
+            "Store data on remote server",
+            "Use both local and remote storage"
+          ],
+          "default": "local",
+          "description": "Data storage mode for strategies",
+          "category": "Data",
+          "order": 1
+        },
+        "strategy.autoSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically save strategy changes",
+          "category": "General",
+          "order": 2
+        },
+        "strategy.autoSaveInterval": {
+          "type": "number",
+          "default": 30000,
+          "minimum": 5000,
+          "maximum": 300000,
+          "description": "Auto-save interval in milliseconds",
+          "category": "General",
+          "order": 3
+        },
+        "strategy.cacheEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable local caching for faster performance",
+          "category": "Performance",
+          "order": 4
+        },
+        "strategy.maxCacheSize": {
+          "type": "number",
+          "default": 100,
+          "minimum": 10,
+          "maximum": 1000,
+          "description": "Maximum cache size in MB",
+          "category": "Performance",
+          "order": 5
+        },
+        "strategy.apiEndpoint": {
+          "type": "string",
+          "default": "",
+          "description": "Custom API endpoint (leave empty for default)",
+          "category": "API",
+          "order": 6
+        },
+        "strategy.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for strategy service authentication",
+          "secret": true,
+          "category": "Credentials",
+          "order": 7
+        },
+        "strategy.nonaToken": {
+          "type": "string",
+          "default": "",
+          "description": "Nona platform access token",
+          "secret": true,
+          "category": "Credentials",
+          "order": 8
+        }
+      }
+    },
     "viewsContainers": {
       "sidebar": [{
         "id": "strategyExplorer",
