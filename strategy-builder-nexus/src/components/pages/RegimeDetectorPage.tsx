@@ -11,7 +11,11 @@
 import React, { useState, useCallback } from 'react';
 import { Settings, Play } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { RegimeSelector, BespokeData, ExpressionInput, StrategyCard } from '../ui';
+import { RegimeSelector, BespokeData, ExpressionInput, StrategyCard, IndicatorSelector, IndicatorBlock, IndicatorDefinition, StrategyTemplate } from '../ui';
+
+// Import indicator data
+import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
+import strategyTemplates from '../../../assets/indicators/strategy-templates-library.json';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -44,6 +48,7 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [selectedRegime, setSelectedRegime] = useState('trend');
   const [bespokeData, setBespokeData] = useState<BespokeData>({ name: '', notes: '' });
+  const [indicatorBlocks, setIndicatorBlocks] = useState<IndicatorBlock[]>([]);
 
   // Handle strategy name change
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,10 +79,11 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
         name: strategyName,
         regime: selectedRegime,
         bespoke: selectedRegime === 'bespoke' ? bespokeData : undefined,
+        indicators: indicatorBlocks,
         strategies: strategies.map(s => s.expression),
       });
     }
-  }, [onGenerate, strategyName, selectedRegime, bespokeData, strategies]);
+  }, [onGenerate, strategyName, selectedRegime, bespokeData, indicatorBlocks, strategies]);
 
   return (
     <div className="h-full flex flex-col bg-color-terminal-bg text-color-terminal-text">
@@ -144,6 +150,15 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
               onSelect={setSelectedRegime}
               bespokeData={bespokeData}
               onBespokeChange={setBespokeData}
+              className="mb-8"
+            />
+
+            {/* component3: Indicator Selector */}
+            <IndicatorSelector
+              indicators={indicatorData as IndicatorDefinition[]}
+              templates={strategyTemplates as Record<string, StrategyTemplate>}
+              blocks={indicatorBlocks}
+              onChange={setIndicatorBlocks}
               className="mb-8"
             />
 

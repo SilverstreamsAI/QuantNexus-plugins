@@ -13,10 +13,12 @@
     "sourceMap": true,
     "outDir": "./dist",
     "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
     "paths": {
       "@shared/types": ["../../apps/desktop/src/shared/types/index.ts"]
     }
   },
-  "include": ["src/**/*", "../../apps/desktop/src/shared/types/**/*"],
+  "include": ["src/**/*", "assets/**/*.json", "../../apps/desktop/src/shared/types/**/*"],
   "exclude": ["node_modules", "dist"]
 }

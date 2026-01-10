@@ -1,0 +1,5373 @@
+[
+  {
+    "name": "Acceleration Deceleration Oscillator",
+    "slug": "ACCDEOSC",
+    "aliases": [
+      "AccDeOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 5
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SMA"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.ACCDEOSC(self.data.close, period={period}, movav={movav})",
+    "output_lines": [
+      "accdeosc"
+    ]
+  },
+  {
+    "name": "Accum",
+    "slug": "CUMSUM",
+    "aliases": [
+      "CumSum",
+      "CumulativeSum"
+    ],
+    "params": [
+      {
+        "name": "seed",
+        "label": "Seed",
+        "type": "number",
+        "default": 0.0
+      }
+    ],
+    "template_keys": [
+      "threshold_simple",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.CUMSUM(self.data.close, seed={seed})",
+    "output_lines": [
+      "cumsum"
+    ]
+  },
+  {
+    "name": "Adaptive Moving Average",
+    "slug": "KAMA",
+    "aliases": [
+      "KAMA",
+      "MovingAverageAdaptive"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "fast",
+        "label": "Fast",
+        "type": "number",
+        "default": 2
+      },
+      {
+        "name": "slow",
+        "label": "Slow",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "moving_average",
+    "backtrader_code_template": "bt.indicators.KAMA(self.data.close, period={period}, fast={fast}, slow={slow})",
+    "output_lines": [
+      "kama"
+    ]
+  },
+  {
+    "name": "Adaptive Moving Average Envelope",
+    "slug": "KAMAENVELOPE",
+    "aliases": [
+      "KAMAEnvelope",
+      "MovingAverageAdaptiveEnvelope"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "fast",
+        "label": "Fast",
+        "type": "number",
+        "default": 2
+      },
+      {
+        "name": "slow",
+        "label": "Slow",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "perc",
+        "label": "Perc",
+        "type": "number",
+        "default": 2.5
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.KAMAENVELOPE(self.data.close, period={period}, fast={fast}, slow={slow}, perc={perc})",
+    "output_lines": [
+      "kamaenvelope"
+    ]
+  },
+  {
+    "name": "Adaptive Moving Average Oscillator",
+    "slug": "ADAPTIVEMOVINGAVERAGEOSC",
+    "aliases": [
+      "AdaptiveMovingAverageOsc",
+      "KAMAOscillator",
+      "KAMAOsc",
+      "MovingAverageAdaptiveOscillator",
+      "MovingAverageAdaptiveOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "fast",
+        "label": "Fast",
+        "type": "number",
+        "default": 2
+      },
+      {
+        "name": "slow",
+        "label": "Slow",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.ADAPTIVEMOVINGAVERAGEOSC(self.data.close, period={period}, fast={fast}, slow={slow})",
+    "output_lines": [
+      "adaptivemovingaverageosc"
+    ]
+  },
+  {
+    "name": "All N",
+    "slug": "ALLN",
+    "aliases": [
+      "AroonOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "internal_use_only": true,
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": false
+    },
+    "category": "other",
+    "output_lines": [
+      "alln"
+    ]
+  },
+  {
+    "name": "Any N",
+    "slug": "ANYN",
+    "aliases": [
+      "AroonOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "internal_use_only": true,
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": false
+    },
+    "category": "other",
+    "output_lines": [
+      "anyn"
+    ]
+  },
+  {
+    "name": "Apply N",
+    "slug": "APPLYN",
+    "aliases": [
+      "AroonOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "func",
+        "label": "Function",
+        "type": "select",
+        "default": "sum",
+        "options": [
+          {
+            "value": "sum",
+            "label": "Sum"
+          },
+          {
+            "value": "mean",
+            "label": "Mean"
+          },
+          {
+            "value": "max",
+            "label": "Max"
+          },
+          {
+            "value": "min",
+            "label": "Min"
+          },
+          {
+            "value": "std",
+            "label": "Standard Deviation"
+          }
+        ]
+      }
+    ],
+    "template_keys": [],
+    "internal_use_only": true,
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": false
+    },
+    "category": "other",
+    "output_lines": [
+      "applyn"
+    ]
+  },
+  {
+    "name": "Aroon Down",
+    "slug": "AROONDOWN",
+    "aliases": [
+      "AroonOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 70
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.AROONDOWN(self.data.close, period={period}, upperband={upperband}, lowerband={lowerband})",
+    "output_lines": [
+      "aroondown"
+    ]
+  },
+  {
+    "name": "Aroon Oscillator",
+    "slug": "AROONOSC",
+    "aliases": [
+      "AroonOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 70
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.AROONOSC(self.data.close, period={period}, upperband={upperband}, lowerband={lowerband})",
+    "output_lines": [
+      "aroonosc"
+    ]
+  },
+  {
+    "name": "Aroon Up",
+    "slug": "AROONUP",
+    "aliases": [
+      "AroonIndicator"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 70
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.AROONUP(self.data.close, period={period}, upperband={upperband}, lowerband={lowerband})",
+    "output_lines": [
+      "aroonup"
+    ]
+  },
+  {
+    "name": "Aroon Up Down",
+    "slug": "AROONUPDOWN",
+    "aliases": [
+      "AroonIndicator"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 70
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.AROONUPDOWN(self.data.close, period={period}, upperband={upperband}, lowerband={lowerband})",
+    "output_lines": [
+      "aroonupdown"
+    ]
+  },
+  {
+    "name": "Aroon Up Down Oscillator",
+    "slug": "AROONUPDOWNOSC",
+    "aliases": [
+      "AroonUpDownOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 70
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.AROONUPDOWNOSC(self.data.close, period={period}, upperband={upperband}, lowerband={lowerband})",
+    "output_lines": [
+      "aroonupdownosc"
+    ]
+  },
+  {
+    "name": "Average",
+    "slug": "ARITHMETICMEAN",
+    "aliases": [
+      "ArithmeticMean",
+      "Mean"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.ARITHMETICMEAN(self.data.close, period={period})",
+    "output_lines": [
+      "arithmeticmean"
+    ]
+  },
+  {
+    "name": "Average Directional Movement Index",
+    "slug": "ADX",
+    "aliases": [
+      "ADX"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SmoothedMovingAverage"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "trend",
+    "backtrader_code_template": "bt.indicators.ADX(self.data, period={period})",
+    "output_lines": [
+      "adx"
+    ]
+  },
+  {
+    "name": "Average Directional Movement Index Rating",
+    "slug": "ADXR",
+    "aliases": [
+      "ADXR"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SmoothedMovingAverage"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.ADXR(self.data.close, period={period}, movav={movav})",
+    "output_lines": [
+      "adxr"
+    ]
+  },
+  {
+    "name": "Average True Range",
+    "slug": "ATR",
+    "aliases": [
+      "ATR"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SmoothedMovingAverage"
+      }
+    ],
+    "template_keys": [
+      "volatility_threshold"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "volatility",
+    "backtrader_code_template": "bt.indicators.ATR(self.data, period={period})",
+    "output_lines": [
+      "atr"
+    ]
+  },
+  {
+    "name": "Awesome Oscillator",
+    "slug": "AO",
+    "aliases": [
+      "AwesomeOsc",
+      "AO"
+    ],
+    "params": [
+      {
+        "name": "fast",
+        "label": "Fast",
+        "type": "number",
+        "default": 5
+      },
+      {
+        "name": "slow",
+        "label": "Slow",
+        "type": "number",
+        "default": 34
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SMA"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.AO(self.data.close, fast={fast}, slow={slow}, movav={movav})",
+    "output_lines": [
+      "ao"
+    ]
+  },
+  {
+    "name": "Base Apply N",
+    "slug": "BASEAPPLYN",
+    "aliases": [
+      "BBands"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "func",
+        "label": "Function",
+        "type": "select",
+        "default": "sum",
+        "options": [
+          {
+            "value": "sum",
+            "label": "Sum"
+          },
+          {
+            "value": "mean",
+            "label": "Mean"
+          },
+          {
+            "value": "max",
+            "label": "Max"
+          },
+          {
+            "value": "min",
+            "label": "Min"
+          },
+          {
+            "value": "std",
+            "label": "Standard Deviation"
+          }
+        ]
+      }
+    ],
+    "template_keys": [],
+    "internal_use_only": true,
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": false
+    },
+    "category": "other",
+    "output_lines": [
+      "baseapplyn"
+    ]
+  },
+  {
+    "name": "Bollinger Bands",
+    "slug": "BBANDS",
+    "aliases": [
+      "BBands"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 20
+      },
+      {
+        "name": "devfactor",
+        "label": "Devfactor",
+        "type": "number",
+        "default": 2.0
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "MovingAverageSimple"
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.BBANDS(self.data.close, period={period}, devfactor={devfactor}, movav={movav})",
+    "output_lines": [
+      "bbands"
+    ]
+  },
+  {
+    "name": "Bollinger Bands Pct",
+    "slug": "BBANDSPCT",
+    "aliases": [
+      "CCI"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 20
+      },
+      {
+        "name": "devfactor",
+        "label": "Devfactor",
+        "type": "number",
+        "default": 2.0
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "MovingAverageSimple"
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.BBANDSPCT(self.data.close, period={period}, devfactor={devfactor}, movav={movav})",
+    "output_lines": [
+      "bbandspct"
+    ]
+  },
+  {
+    "name": "Coint N",
+    "slug": "COINTN",
+    "aliases": [
+      "CCI"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 10
+      },
+      {
+        "name": "regression",
+        "label": "Regression",
+        "type": "string",
+        "default": "c"
+      }
+    ],
+    "template_keys": [],
+    "internal_use_only": true,
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": false
+    },
+    "category": "other",
+    "output_lines": [
+      "cointn"
+    ]
+  },
+  {
+    "name": "Commodity Channel Index",
+    "slug": "CCI",
+    "aliases": [
+      "CCI"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 20
+      },
+      {
+        "name": "factor",
+        "label": "Factor",
+        "type": "number",
+        "default": 0.015
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "MovingAverageSimple"
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 100.0
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": -100.0
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "oscillator",
+    "backtrader_code_template": "bt.indicators.CCI(self.data, period={period})",
+    "output_lines": [
+      "cci"
+    ]
+  },
+  {
+    "name": "Cross Down",
+    "slug": "CROSSDOWN",
+    "aliases": [
+      "DPO"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 252
+      },
+      {
+        "name": "maperiod",
+        "label": "Maperiod",
+        "type": "number",
+        "default": 2
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SMA"
+      }
+    ],
+    "template_keys": [
+      "crossover_fast_slow_ma"
+    ],
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": true
+    },
+    "category": "other",
+    "output_lines": [
+      "crossdown"
+    ]
+  },
+  {
+    "name": "Cross Over",
+    "slug": "CROSSOVER",
+    "aliases": [
+      "DPO"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 252
+      },
+      {
+        "name": "maperiod",
+        "label": "Maperiod",
+        "type": "number",
+        "default": 2
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SMA"
+      }
+    ],
+    "template_keys": [
+      "crossover_fast_slow_ma"
+    ],
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": true
+    },
+    "category": "other",
+    "output_lines": [
+      "crossover"
+    ]
+  },
+  {
+    "name": "Cross Up",
+    "slug": "CROSSUP",
+    "aliases": [
+      "DPO"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 252
+      },
+      {
+        "name": "maperiod",
+        "label": "Maperiod",
+        "type": "number",
+        "default": 2
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SMA"
+      }
+    ],
+    "template_keys": [
+      "crossover_fast_slow_ma"
+    ],
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": true
+    },
+    "category": "other",
+    "output_lines": [
+      "crossup"
+    ]
+  },
+  {
+    "name": "DV2",
+    "slug": "DV2",
+    "aliases": [
+      "DPO"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 252
+      },
+      {
+        "name": "maperiod",
+        "label": "Maperiod",
+        "type": "number",
+        "default": 2
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SMA"
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.DV2(self.data.close, period={period}, maperiod={maperiod}, _movav={_movav})",
+    "output_lines": [
+      "dv2"
+    ]
+  },
+  {
+    "name": "Demark Pivot Point",
+    "slug": "DEMARKPIVOTPOINT",
+    "aliases": [
+      "DPO"
+    ],
+    "params": [
+      {
+        "name": "open",
+        "label": "Open",
+        "type": "string",
+        "default": "False"
+      },
+      {
+        "name": "close",
+        "label": "Close",
+        "type": "string",
+        "default": "False"
+      },
+      {
+        "name": "_autoplot",
+        "label": "Autoplot",
+        "type": "string",
+        "default": "True"
+      },
+      {
+        "name": "level1",
+        "label": "Level1",
+        "type": "number",
+        "default": 0.382
+      },
+      {
+        "name": "level2",
+        "label": "Level2",
+        "type": "number",
+        "default": 0.618
+      },
+      {
+        "name": "level3",
+        "label": "Level3",
+        "type": "number",
+        "default": 1.0
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.DEMARKPIVOTPOINT(self.data.close, open={open}, close={close}, _autoplot={_autoplot}, level1={level1}, level2={level2}, level3={level3})",
+    "output_lines": [
+      "demarkpivotpoint"
+    ]
+  },
+  {
+    "name": "Detrended Price Oscillator",
+    "slug": "DPO",
+    "aliases": [
+      "DPO"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 20
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "MovingAverageSimple"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "trend",
+    "backtrader_code_template": "bt.indicators.DetrendedPriceOsc(self.data.close, period={period})",
+    "output_lines": [
+      "dpo"
+    ]
+  },
+  {
+    "name": "Dickson Moving Average",
+    "slug": "DMA",
+    "aliases": [
+      "DMA",
+      "DicksonMA"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "gainlimit",
+        "label": "Gainlimit",
+        "type": "number",
+        "default": 50
+      },
+      {
+        "name": "hperiod",
+        "label": "Hperiod",
+        "type": "number",
+        "default": 7
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      },
+      {
+        "name": "_hma",
+        "label": "Hma",
+        "type": "string",
+        "default": "HMA"
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.DMA(self.data.close, period={period}, gainlimit={gainlimit}, hperiod={hperiod}, _movav={_movav}, _hma={_hma})",
+    "output_lines": [
+      "dma"
+    ]
+  },
+  {
+    "name": "Dickson Moving Average Envelope",
+    "slug": "DMAENVELOPE",
+    "aliases": [
+      "DMAEnvelope",
+      "DicksonMAEnvelope"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "gainlimit",
+        "label": "Gainlimit",
+        "type": "number",
+        "default": 50
+      },
+      {
+        "name": "hperiod",
+        "label": "Hperiod",
+        "type": "number",
+        "default": 7
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      },
+      {
+        "name": "_hma",
+        "label": "Hma",
+        "type": "string",
+        "default": "HMA"
+      },
+      {
+        "name": "perc",
+        "label": "Perc",
+        "type": "number",
+        "default": 2.5
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.DMAENVELOPE(self.data.close, period={period}, gainlimit={gainlimit}, hperiod={hperiod}, _movav={_movav}, _hma={_hma}, perc={perc})",
+    "output_lines": [
+      "dmaenvelope"
+    ]
+  },
+  {
+    "name": "Dickson Moving Average Oscillator",
+    "slug": "DICKSONMOVINGAVERAGEOSC",
+    "aliases": [
+      "DicksonMovingAverageOsc",
+      "DMAOscillator",
+      "DMAOsc",
+      "DicksonMAOscillator",
+      "DicksonMAOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "gainlimit",
+        "label": "Gainlimit",
+        "type": "number",
+        "default": 50
+      },
+      {
+        "name": "hperiod",
+        "label": "Hperiod",
+        "type": "number",
+        "default": 7
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      },
+      {
+        "name": "_hma",
+        "label": "Hma",
+        "type": "string",
+        "default": "HMA"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.DICKSONMOVINGAVERAGEOSC(self.data.close, period={period}, gainlimit={gainlimit}, hperiod={hperiod}, _movav={_movav}, _hma={_hma})",
+    "output_lines": [
+      "dicksonmovingaverageosc"
+    ]
+  },
+  {
+    "name": "Directional Indicator",
+    "slug": "DI",
+    "aliases": [
+      "DI"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SmoothedMovingAverage"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.DI(self.data.close, period={period}, movav={movav})",
+    "output_lines": [
+      "di"
+    ]
+  },
+  {
+    "name": "Directional Movement",
+    "slug": "DM",
+    "aliases": [
+      "DM"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SmoothedMovingAverage"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.DM(self.data.close, period={period}, movav={movav})",
+    "output_lines": [
+      "dm"
+    ]
+  },
+  {
+    "name": "Directional Movement Index",
+    "slug": "DMI",
+    "aliases": [
+      "DMI"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SmoothedMovingAverage"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "trend",
+    "backtrader_code_template": "bt.indicators.DirectionalMovement(self.data, period={period})",
+    "output_lines": [
+      "plusDI",
+      "minusDI"
+    ]
+  },
+  {
+    "name": "Double Exponential Moving Average",
+    "slug": "DEMA",
+    "aliases": [
+      "DEMA",
+      "MovingAverageDoubleExponential"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "moving_average",
+    "backtrader_code_template": "bt.indicators.DEMA(self.data.close, period={period})",
+    "output_lines": [
+      "dema"
+    ]
+  },
+  {
+    "name": "Double Exponential Moving Average Envelope",
+    "slug": "DEMAENVELOPE",
+    "aliases": [
+      "DEMAEnvelope",
+      "MovingAverageDoubleExponentialEnvelope"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      },
+      {
+        "name": "perc",
+        "label": "Perc",
+        "type": "number",
+        "default": 2.5
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.DEMAENVELOPE(self.data.close, period={period}, _movav={_movav}, perc={perc})",
+    "output_lines": [
+      "demaenvelope"
+    ]
+  },
+  {
+    "name": "Double Exponential Moving Average Oscillator",
+    "slug": "DOUBLEEXPONENTIALMOVINGAVERAGEOSC",
+    "aliases": [
+      "DoubleExponentialMovingAverageOsc",
+      "DEMAOscillator",
+      "DEMAOsc",
+      "MovingAverageDoubleExponentialOscillator",
+      "MovingAverageDoubleExponentialOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.DOUBLEEXPONENTIALMOVINGAVERAGEOSC(self.data.close, period={period}, _movav={_movav})",
+    "output_lines": [
+      "doubleexponentialmovingaverageosc"
+    ]
+  },
+  {
+    "name": "Down Day",
+    "slug": "DOWNDAY",
+    "aliases": [
+      "EMA",
+      "MovingAverageExponential"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.DOWNDAY(self.data.close, period={period})",
+    "output_lines": [
+      "downday"
+    ]
+  },
+  {
+    "name": "Down Day Bool",
+    "slug": "DOWNDAYBOOL",
+    "aliases": [
+      "EMA",
+      "MovingAverageExponential"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.DOWNDAYBOOL(self.data.close, period={period})",
+    "output_lines": [
+      "downdaybool"
+    ]
+  },
+  {
+    "name": "Down Move",
+    "slug": "DOWNMOVE",
+    "aliases": [
+      "EMA",
+      "MovingAverageExponential"
+    ],
+    "params": [
+      {
+        "name": "perc",
+        "label": "Perc",
+        "type": "number",
+        "default": 2.5
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.DOWNMOVE(self.data.close, perc={perc})",
+    "output_lines": [
+      "downmove"
+    ]
+  },
+  {
+    "name": "Envelope",
+    "slug": "ENVELOPE",
+    "aliases": [
+      "EMA",
+      "MovingAverageExponential"
+    ],
+    "params": [
+      {
+        "name": "perc",
+        "label": "Perc",
+        "type": "number",
+        "default": 2.5
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.ENVELOPE(self.data.close, perc={perc})",
+    "output_lines": [
+      "envelope"
+    ]
+  },
+  {
+    "name": "Exponential Moving Average",
+    "slug": "EMA",
+    "aliases": [
+      "EMA",
+      "MovingAverageExponential"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "moving_average",
+    "backtrader_code_template": "bt.indicators.EMA(self.data.close, period={period})",
+    "output_lines": [
+      "ema"
+    ]
+  },
+  {
+    "name": "Exponential Moving Average Envelope",
+    "slug": "EMAENVELOPE",
+    "aliases": [
+      "EMAEnvelope",
+      "MovingAverageExponentialEnvelope"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "perc",
+        "label": "Perc",
+        "type": "number",
+        "default": 2.5
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.EMAENVELOPE(self.data.close, period={period}, perc={perc})",
+    "output_lines": [
+      "emaenvelope"
+    ]
+  },
+  {
+    "name": "Exponential Moving Average Oscillator",
+    "slug": "EXPONENTIALMOVINGAVERAGEOSC",
+    "aliases": [
+      "ExponentialMovingAverageOsc",
+      "EMAOscillator",
+      "EMAOsc",
+      "MovingAverageExponentialOscillator",
+      "MovingAverageExponentialOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.EXPONENTIALMOVINGAVERAGEOSC(self.data.close, period={period})",
+    "output_lines": [
+      "exponentialmovingaverageosc"
+    ]
+  },
+  {
+    "name": "Exponential Smoothing",
+    "slug": "EXPSMOOTHING",
+    "aliases": [
+      "ExpSmoothing"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.EXPSMOOTHING(self.data.close, period={period})",
+    "output_lines": [
+      "expsmoothing"
+    ]
+  },
+  {
+    "name": "Exponential Smoothing Dynamic",
+    "slug": "EXPSMOOTHINGDYNAMIC",
+    "aliases": [
+      "ExpSmoothingDynamic"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.EXPSMOOTHINGDYNAMIC(self.data.close, period={period})",
+    "output_lines": [
+      "expsmoothingdynamic"
+    ]
+  },
+  {
+    "name": "Fibonacci Pivot Point",
+    "slug": "FIBONACCIPIVOTPOINT",
+    "aliases": [
+      "MaxN"
+    ],
+    "params": [
+      {
+        "name": "open",
+        "label": "Open",
+        "type": "string",
+        "default": "False"
+      },
+      {
+        "name": "close",
+        "label": "Close",
+        "type": "string",
+        "default": "False"
+      },
+      {
+        "name": "_autoplot",
+        "label": "Autoplot",
+        "type": "string",
+        "default": "True"
+      },
+      {
+        "name": "level1",
+        "label": "Level1",
+        "type": "number",
+        "default": 0.382
+      },
+      {
+        "name": "level2",
+        "label": "Level2",
+        "type": "number",
+        "default": 0.618
+      },
+      {
+        "name": "level3",
+        "label": "Level3",
+        "type": "number",
+        "default": 1.0
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.FIBONACCIPIVOTPOINT(self.data.close, open={open}, close={close}, _autoplot={_autoplot}, level1={level1}, level2={level2}, level3={level3})",
+    "output_lines": [
+      "fibonaccipivotpoint"
+    ]
+  },
+  {
+    "name": "Find First Index",
+    "slug": "FINDFIRSTINDEX",
+    "aliases": [
+      "MaxN"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "_evalfunc",
+        "label": "Condition",
+        "type": "select",
+        "default": "close_gt_open",
+        "options": [
+          {
+            "value": "close_gt_open",
+            "label": "Green Candle"
+          },
+          {
+            "value": "close_lt_open",
+            "label": "Red Candle"
+          },
+          {
+            "value": "high_gt_prev_high",
+            "label": "Higher High"
+          },
+          {
+            "value": "low_lt_prev_low",
+            "label": "Lower Low"
+          },
+          {
+            "value": "volume_gt_mean",
+            "label": "Volume > 20d Avg"
+          }
+        ]
+      }
+    ],
+    "template_keys": [],
+    "internal_use_only": true,
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": false
+    },
+    "category": "other",
+    "output_lines": [
+      "findfirstindex"
+    ]
+  },
+  {
+    "name": "Find First Index Highest",
+    "slug": "FINDFIRSTINDEXHIGHEST",
+    "aliases": [
+      "MaxN"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "_evalfunc",
+        "label": "Condition",
+        "type": "select",
+        "default": "close_gt_open",
+        "options": [
+          {
+            "value": "close_gt_open",
+            "label": "Green Candle"
+          },
+          {
+            "value": "close_lt_open",
+            "label": "Red Candle"
+          },
+          {
+            "value": "high_gt_prev_high",
+            "label": "Higher High"
+          },
+          {
+            "value": "low_lt_prev_low",
+            "label": "Lower Low"
+          },
+          {
+            "value": "volume_gt_mean",
+            "label": "Volume > 20d Avg"
+          }
+        ]
+      }
+    ],
+    "template_keys": [],
+    "internal_use_only": true,
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": false
+    },
+    "category": "other",
+    "output_lines": [
+      "findfirstindexhighest"
+    ]
+  },
+  {
+    "name": "Find First Index Lowest",
+    "slug": "FINDFIRSTINDEXLOWEST",
+    "aliases": [
+      "MaxN"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "_evalfunc",
+        "label": "Condition",
+        "type": "select",
+        "default": "close_gt_open",
+        "options": [
+          {
+            "value": "close_gt_open",
+            "label": "Green Candle"
+          },
+          {
+            "value": "close_lt_open",
+            "label": "Red Candle"
+          },
+          {
+            "value": "high_gt_prev_high",
+            "label": "Higher High"
+          },
+          {
+            "value": "low_lt_prev_low",
+            "label": "Lower Low"
+          },
+          {
+            "value": "volume_gt_mean",
+            "label": "Volume > 20d Avg"
+          }
+        ]
+      }
+    ],
+    "template_keys": [],
+    "internal_use_only": true,
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": false
+    },
+    "category": "other",
+    "output_lines": [
+      "findfirstindexlowest"
+    ]
+  },
+  {
+    "name": "Find Last Index",
+    "slug": "FINDLASTINDEX",
+    "aliases": [
+      "MaxN"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "_evalfunc",
+        "label": "Condition",
+        "type": "select",
+        "default": "close_gt_open",
+        "options": [
+          {
+            "value": "close_gt_open",
+            "label": "Green Candle"
+          },
+          {
+            "value": "close_lt_open",
+            "label": "Red Candle"
+          },
+          {
+            "value": "high_gt_prev_high",
+            "label": "Higher High"
+          },
+          {
+            "value": "low_lt_prev_low",
+            "label": "Lower Low"
+          },
+          {
+            "value": "volume_gt_mean",
+            "label": "Volume > 20d Avg"
+          }
+        ]
+      }
+    ],
+    "template_keys": [],
+    "internal_use_only": true,
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": false
+    },
+    "category": "other",
+    "output_lines": [
+      "findlastindex"
+    ]
+  },
+  {
+    "name": "Find Last Index Highest",
+    "slug": "FINDLASTINDEXHIGHEST",
+    "aliases": [
+      "MaxN"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "_evalfunc",
+        "label": "Condition",
+        "type": "select",
+        "default": "close_gt_open",
+        "options": [
+          {
+            "value": "close_gt_open",
+            "label": "Green Candle"
+          },
+          {
+            "value": "close_lt_open",
+            "label": "Red Candle"
+          },
+          {
+            "value": "high_gt_prev_high",
+            "label": "Higher High"
+          },
+          {
+            "value": "low_lt_prev_low",
+            "label": "Lower Low"
+          },
+          {
+            "value": "volume_gt_mean",
+            "label": "Volume > 20d Avg"
+          }
+        ]
+      }
+    ],
+    "template_keys": [],
+    "internal_use_only": true,
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": false
+    },
+    "category": "other",
+    "output_lines": [
+      "findlastindexhighest"
+    ]
+  },
+  {
+    "name": "Find Last Index Lowest",
+    "slug": "FINDLASTINDEXLOWEST",
+    "aliases": [
+      "MaxN"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "_evalfunc",
+        "label": "Condition",
+        "type": "select",
+        "default": "close_gt_open",
+        "options": [
+          {
+            "value": "close_gt_open",
+            "label": "Green Candle"
+          },
+          {
+            "value": "close_lt_open",
+            "label": "Red Candle"
+          },
+          {
+            "value": "high_gt_prev_high",
+            "label": "Higher High"
+          },
+          {
+            "value": "low_lt_prev_low",
+            "label": "Lower Low"
+          },
+          {
+            "value": "volume_gt_mean",
+            "label": "Volume > 20d Avg"
+          }
+        ]
+      }
+    ],
+    "template_keys": [],
+    "internal_use_only": true,
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": false
+    },
+    "category": "other",
+    "output_lines": [
+      "findlastindexlowest"
+    ]
+  },
+  {
+    "name": "Fractal",
+    "slug": "FRACTAL",
+    "aliases": [
+      "MaxN"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 5
+      },
+      {
+        "name": "bardist",
+        "label": "Bardist",
+        "type": "number",
+        "default": 0.015
+      },
+      {
+        "name": "shift_to_potential_fractal",
+        "label": "Shift to potential fractal",
+        "type": "number",
+        "default": 2
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.FRACTAL(self.data.close, period={period}, bardist={bardist}, shift_to_potential_fractal={shift_to_potential_fractal})",
+    "output_lines": [
+      "fractal"
+    ]
+  },
+  {
+    "name": "Heikin Ashi",
+    "slug": "HEIKINASHI",
+    "aliases": [
+      "MaxN"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.HEIKINASHI(self.data.close, period={period})",
+    "output_lines": [
+      "heikinashi"
+    ]
+  },
+  {
+    "name": "Highest",
+    "slug": "HIGHEST",
+    "aliases": [
+      "MaxN"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.HIGHEST(self.data.close, period={period})",
+    "output_lines": [
+      "highest"
+    ]
+  },
+  {
+    "name": "Hull Moving Average",
+    "slug": "HMA",
+    "aliases": [
+      "HMA",
+      "HullMA"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "WMA"
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "moving_average",
+    "backtrader_code_template": "bt.indicators.HMA(self.data.close, period={period})",
+    "output_lines": [
+      "hma"
+    ]
+  },
+  {
+    "name": "Hull Moving Average Envelope",
+    "slug": "HMAENVELOPE",
+    "aliases": [
+      "HMAEnvelope",
+      "HullMAEnvelope"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "WMA"
+      },
+      {
+        "name": "perc",
+        "label": "Perc",
+        "type": "number",
+        "default": 2.5
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.HMAENVELOPE(self.data.close, period={period}, _movav={_movav}, perc={perc})",
+    "output_lines": [
+      "hmaenvelope"
+    ]
+  },
+  {
+    "name": "Hull Moving Average Oscillator",
+    "slug": "HULLMOVINGAVERAGEOSC",
+    "aliases": [
+      "HullMovingAverageOsc",
+      "HMAOscillator",
+      "HMAOsc",
+      "HullMAOscillator",
+      "HullMAOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "WMA"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.HULLMOVINGAVERAGEOSC(self.data.close, period={period}, _movav={_movav})",
+    "output_lines": [
+      "hullmovingaverageosc"
+    ]
+  },
+  {
+    "name": "Hurst Exponent",
+    "slug": "HURST",
+    "aliases": [
+      "Hurst"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 40
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.HURST(self.data.close, period={period})",
+    "output_lines": [
+      "hurst"
+    ]
+  },
+  {
+    "name": "Ichimoku",
+    "slug": "ICHIMOKU",
+    "aliases": [
+      "KST"
+    ],
+    "params": [
+      {
+        "name": "tenkan",
+        "label": "Tenkan",
+        "type": "number",
+        "default": 9
+      },
+      {
+        "name": "kijun",
+        "label": "Kijun",
+        "type": "number",
+        "default": 26
+      },
+      {
+        "name": "senkou",
+        "label": "Senkou",
+        "type": "number",
+        "default": 52
+      },
+      {
+        "name": "senkou_lead",
+        "label": "Senkou lead",
+        "type": "number",
+        "default": 26
+      },
+      {
+        "name": "chikou",
+        "label": "Chikou",
+        "type": "number",
+        "default": 26
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator",
+      "crossover_fast_slow_ma"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.ICHIMOKU(self.data.close, tenkan={tenkan}, kijun={kijun}, senkou={senkou}, senkou_lead={senkou_lead}, chikou={chikou})",
+    "output_lines": [
+      "ichimoku"
+    ]
+  },
+  {
+    "name": "Know Sure Thing",
+    "slug": "KST",
+    "aliases": [
+      "KST"
+    ],
+    "params": [
+      {
+        "name": "rp1",
+        "label": "Rp1",
+        "type": "number",
+        "default": 10
+      },
+      {
+        "name": "rp2",
+        "label": "Rp2",
+        "type": "number",
+        "default": 15
+      },
+      {
+        "name": "rp3",
+        "label": "Rp3",
+        "type": "number",
+        "default": 20
+      },
+      {
+        "name": "rp4",
+        "label": "Rp4",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "rma1",
+        "label": "Rma1",
+        "type": "number",
+        "default": 10
+      },
+      {
+        "name": "rma2",
+        "label": "Rma2",
+        "type": "number",
+        "default": 10
+      },
+      {
+        "name": "rma3",
+        "label": "Rma3",
+        "type": "number",
+        "default": 10
+      },
+      {
+        "name": "rma4",
+        "label": "Rma4",
+        "type": "number",
+        "default": 10
+      },
+      {
+        "name": "rsignal",
+        "label": "Rsignal",
+        "type": "number",
+        "default": 9
+      },
+      {
+        "name": "rfactors",
+        "label": "Rfactors",
+        "type": "string",
+        "default": "[1.0,2.0,3.0,4.0]"
+      },
+      {
+        "name": "_rmovav",
+        "label": "Rmovav",
+        "type": "string",
+        "default": "SMA"
+      },
+      {
+        "name": "_smovav",
+        "label": "Smovav",
+        "type": "string",
+        "default": "SMA"
+      }
+    ],
+    "template_keys": [
+      "crossover_fast_slow_ma",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.KST(self.data.close, rp1={rp1}, rp2={rp2}, rp3={rp3}, rp4={rp4}, rma1={rma1}, rma2={rma2}, rma3={rma3}, rma4={rma4}, rsignal={rsignal}, rfactors={rfactors}, _rmovav={_rmovav}, _smovav={_smovav})",
+    "output_lines": [
+      "kst"
+    ]
+  },
+  {
+    "name": "Laguerre Filter",
+    "slug": "LAGF",
+    "aliases": [
+      "LAGF"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "gamma",
+        "label": "Gamma",
+        "type": "number",
+        "default": 0.5
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.LAGF(self.data.close, period={period}, gamma={gamma})",
+    "output_lines": [
+      "lagf"
+    ]
+  },
+  {
+    "name": "Laguerre RSI",
+    "slug": "LRSI",
+    "aliases": [
+      "LRSI"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 6
+      },
+      {
+        "name": "gamma",
+        "label": "Gamma",
+        "type": "number",
+        "default": 0.5
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.LRSI(self.data.close, period={period}, gamma={gamma})",
+    "output_lines": [
+      "lrsi"
+    ]
+  },
+  {
+    "name": "Line Plotter Indicator",
+    "slug": "LINEPLOTTERINDICATOR",
+    "aliases": [
+      "MinN"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "internal_use_only": true,
+    "usage_modes": {
+      "standalone": false,
+      "strategy_template": false
+    },
+    "category": "other",
+    "output_lines": [
+      "lineplotterindicator"
+    ]
+  },
+  {
+    "name": "Lowest",
+    "slug": "LOWEST",
+    "aliases": [
+      "MinN"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.LOWEST(self.data.close, period={period})",
+    "output_lines": [
+      "lowest"
+    ]
+  },
+  {
+    "name": "MACD",
+    "slug": "MACD",
+    "aliases": [],
+    "params": [
+      {
+        "name": "period_me1",
+        "label": "Period me1",
+        "type": "number",
+        "default": 12
+      },
+      {
+        "name": "period_me2",
+        "label": "Period me2",
+        "type": "number",
+        "default": 26
+      },
+      {
+        "name": "period_signal",
+        "label": "Period signal",
+        "type": "number",
+        "default": 9
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "ExponentialMovingAverage"
+      }
+    ],
+    "template_keys": [
+      "crossover_fast_slow_ma",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "trend",
+    "backtrader_code_template": "bt.indicators.MACD(self.data.close, period_me1={fast_period}, period_me2={slow_period}, period_signal={signal_period})",
+    "output_lines": [
+      "macd",
+      "signal",
+      "histo"
+    ]
+  },
+  {
+    "name": "MACD Histo",
+    "slug": "MACDHIST",
+    "aliases": [
+      "MACDHistogram"
+    ],
+    "params": [
+      {
+        "name": "period_me1",
+        "label": "Period me1",
+        "type": "number",
+        "default": 12
+      },
+      {
+        "name": "period_me2",
+        "label": "Period me2",
+        "type": "number",
+        "default": 26
+      },
+      {
+        "name": "period_signal",
+        "label": "Period signal",
+        "type": "number",
+        "default": 9
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "ExponentialMovingAverage"
+      }
+    ],
+    "template_keys": [
+      "crossover_fast_slow_ma",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.MACDHIST(self.data.close, period_me1={period_me1}, period_me2={period_me2}, period_signal={period_signal}, movav={movav})",
+    "output_lines": [
+      "macdhist"
+    ]
+  },
+  {
+    "name": "Mean Deviation",
+    "slug": "MEANDEVIATION",
+    "aliases": [
+      "MeanDev"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 20
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "MovingAverageSimple"
+      }
+    ],
+    "template_keys": [
+      "volatility_threshold"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.MEANDEVIATION(self.data.close, period={period}, movav={movav})",
+    "output_lines": [
+      "meandeviation"
+    ]
+  },
+  {
+    "name": "Minus Directional Indicator",
+    "slug": "MINUS_DI",
+    "aliases": [
+      "MinusDI"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SmoothedMovingAverage"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.MINUS_DI(self.data.close, period={period}, movav={movav})",
+    "output_lines": [
+      "minus_di"
+    ]
+  },
+  {
+    "name": "Momentum",
+    "slug": "MOM",
+    "aliases": [
+      "MomentumOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 12
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.MOM(self.data.close, period={period})",
+    "output_lines": [
+      "mom"
+    ]
+  },
+  {
+    "name": "Momentum Oscillator",
+    "slug": "MOMENTUMOSC",
+    "aliases": [
+      "MomentumOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 12
+      },
+      {
+        "name": "band",
+        "label": "Band",
+        "type": "number",
+        "default": 100.0
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.MOMENTUMOSC(self.data.close, period={period}, band={band})",
+    "output_lines": [
+      "momentumosc"
+    ]
+  },
+  {
+    "name": "Moving Average Base",
+    "slug": "MA",
+    "aliases": [
+      "SMA",
+      "SimpleMovingAverage"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.MA(self.data.close, period={period})",
+    "output_lines": [
+      "ma"
+    ]
+  },
+  {
+    "name": "Moving Average Simple",
+    "slug": "SMA",
+    "aliases": [
+      "SMA",
+      "SimpleMovingAverage"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "moving_average",
+    "backtrader_code_template": "bt.indicators.SMA(self.data.close, period={period})",
+    "output_lines": [
+      "sma"
+    ]
+  },
+  {
+    "name": "Moving Average Simple Envelope",
+    "slug": "SMAENVELOPE",
+    "aliases": [
+      "SMAEnvelope",
+      "SimpleMovingAverageEnvelope"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "perc",
+        "label": "Perc",
+        "type": "number",
+        "default": 2.5
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.SMAENVELOPE(self.data.close, period={period}, perc={perc})",
+    "output_lines": [
+      "smaenvelope"
+    ]
+  },
+  {
+    "name": "Moving Average Simple Oscillator",
+    "slug": "MOVINGAVERAGESIMPLEOSC",
+    "aliases": [
+      "MovingAverageSimpleOsc",
+      "SMAOscillator",
+      "SMAOsc",
+      "SimpleMovingAverageOscillator",
+      "SimpleMovingAverageOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.MOVINGAVERAGESIMPLEOSC(self.data.close, period={period})",
+    "output_lines": [
+      "movingaveragesimpleosc"
+    ]
+  },
+  {
+    "name": "Non Zero Difference",
+    "slug": "NZD",
+    "aliases": [
+      "NZD"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 10
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.NZD(self.data.close, period={period})",
+    "output_lines": [
+      "nzd"
+    ]
+  },
+  {
+    "name": "OLS_ Beta N",
+    "slug": "OLS_BETAN",
+    "aliases": [
+      "PSAR"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 10
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.OLS_BETAN(self.data.close, period={period})",
+    "output_lines": [
+      "ols_betan"
+    ]
+  },
+  {
+    "name": "OLS_ Slope_ Intercept N",
+    "slug": "OLS_SLOPE_INTERCEPTN",
+    "aliases": [
+      "PSAR"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 10
+      },
+      {
+        "name": "prepend_constant",
+        "label": "Prepend constant",
+        "type": "string",
+        "default": "True"
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.OLS_SLOPE_INTERCEPTN(self.data.close, period={period}, prepend_constant={prepend_constant})",
+    "output_lines": [
+      "ols_slope_interceptn"
+    ]
+  },
+  {
+    "name": "OLS_ Transformation N",
+    "slug": "OLS_TRANSFORMATIONN",
+    "aliases": [
+      "PSAR"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 10
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.OLS_TRANSFORMATIONN(self.data.close, period={period})",
+    "output_lines": [
+      "ols_transformationn"
+    ]
+  },
+  {
+    "name": "Operation N",
+    "slug": "OPERATIONN",
+    "aliases": [
+      "PSAR"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.OPERATIONN(self.data.close, period={period})",
+    "output_lines": [
+      "operationn"
+    ]
+  },
+  {
+    "name": "Oscillator",
+    "slug": "OSCILLATOR",
+    "aliases": [
+      "PSAR"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 2
+      },
+      {
+        "name": "af",
+        "label": "Af",
+        "type": "number",
+        "default": 0.02
+      },
+      {
+        "name": "afmax",
+        "label": "Afmax",
+        "type": "number",
+        "default": 0.2
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.OSCILLATOR(self.data.close, period={period}, af={af}, afmax={afmax})",
+    "output_lines": [
+      "oscillator"
+    ]
+  },
+  {
+    "name": "Oscillator Mix In",
+    "slug": "OSCILLATORMIXIN",
+    "aliases": [
+      "PSAR"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 2
+      },
+      {
+        "name": "af",
+        "label": "Af",
+        "type": "number",
+        "default": 0.02
+      },
+      {
+        "name": "afmax",
+        "label": "Afmax",
+        "type": "number",
+        "default": 0.2
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.OSCILLATORMIXIN(self.data.close, period={period}, af={af}, afmax={afmax})",
+    "output_lines": [
+      "oscillatormixin"
+    ]
+  },
+  {
+    "name": "Parabolic SAR",
+    "slug": "PSAR",
+    "aliases": [
+      "PSAR"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 2
+      },
+      {
+        "name": "af",
+        "label": "Af",
+        "type": "number",
+        "default": 0.02
+      },
+      {
+        "name": "afmax",
+        "label": "Afmax",
+        "type": "number",
+        "default": 0.2
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.PSAR(self.data.close, period={period}, af={af}, afmax={afmax})",
+    "output_lines": [
+      "psar"
+    ]
+  },
+  {
+    "name": "Percent Change",
+    "slug": "PCTCHANGE",
+    "aliases": [
+      "PctChange"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.PCTCHANGE(self.data.close, period={period})",
+    "output_lines": [
+      "pctchange"
+    ]
+  },
+  {
+    "name": "Percent Rank",
+    "slug": "PCTRANK",
+    "aliases": [
+      "PctRank"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 50
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.PCTRANK(self.data.close, period={period})",
+    "output_lines": [
+      "pctrank"
+    ]
+  },
+  {
+    "name": "Percentage Price Oscillator",
+    "slug": "PPO",
+    "aliases": [
+      "PPO",
+      "PercPriceOsc"
+    ],
+    "params": [
+      {
+        "name": "period1",
+        "label": "Period1",
+        "type": "number",
+        "default": 12
+      },
+      {
+        "name": "period2",
+        "label": "Period2",
+        "type": "number",
+        "default": 26
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "ExponentialMovingAverage"
+      },
+      {
+        "name": "period_signal",
+        "label": "Period signal",
+        "type": "number",
+        "default": 9
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.PPO(self.data.close, period1={period1}, period2={period2}, _movav={_movav}, period_signal={period_signal})",
+    "output_lines": [
+      "ppo"
+    ]
+  },
+  {
+    "name": "Percentage Price Oscillator Short",
+    "slug": "PPOSHORT",
+    "aliases": [
+      "PPOShort",
+      "PercPriceOscShort"
+    ],
+    "params": [
+      {
+        "name": "period1",
+        "label": "Period1",
+        "type": "number",
+        "default": 12
+      },
+      {
+        "name": "period2",
+        "label": "Period2",
+        "type": "number",
+        "default": 26
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "ExponentialMovingAverage"
+      },
+      {
+        "name": "period_signal",
+        "label": "Period signal",
+        "type": "number",
+        "default": 9
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.PPOSHORT(self.data.close, period1={period1}, period2={period2}, _movav={_movav}, period_signal={period_signal})",
+    "output_lines": [
+      "pposhort"
+    ]
+  },
+  {
+    "name": "Period N",
+    "slug": "PERIODN",
+    "aliases": [
+      "PlusDI"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.PERIODN(self.data.close, period={period})",
+    "output_lines": [
+      "periodn"
+    ]
+  },
+  {
+    "name": "Pivot Point",
+    "slug": "PIVOTPOINT",
+    "aliases": [
+      "PlusDI"
+    ],
+    "params": [
+      {
+        "name": "open",
+        "label": "Open",
+        "type": "string",
+        "default": "False"
+      },
+      {
+        "name": "close",
+        "label": "Close",
+        "type": "string",
+        "default": "False"
+      },
+      {
+        "name": "_autoplot",
+        "label": "Autoplot",
+        "type": "string",
+        "default": "True"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.PIVOTPOINT(self.data.close, open={open}, close={close}, _autoplot={_autoplot})",
+    "output_lines": [
+      "pivotpoint"
+    ]
+  },
+  {
+    "name": "Plus Directional Indicator",
+    "slug": "PLUS_DI",
+    "aliases": [
+      "PlusDI"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SmoothedMovingAverage"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.PLUS_DI(self.data.close, period={period}, movav={movav})",
+    "output_lines": [
+      "plus_di"
+    ]
+  },
+  {
+    "name": "Pretty Good Oscillator",
+    "slug": "PGO",
+    "aliases": [
+      "PGO",
+      "PrettyGoodOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "MovingAverageSimple"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.PGO(self.data.close, period={period}, _movav={_movav})",
+    "output_lines": [
+      "pgo"
+    ]
+  },
+  {
+    "name": "Price Oscillator",
+    "slug": "PRICEOSC",
+    "aliases": [
+      "PriceOsc",
+      "AbsolutePriceOscillator",
+      "APO",
+      "AbsPriceOsc"
+    ],
+    "params": [
+      {
+        "name": "period1",
+        "label": "Period1",
+        "type": "number",
+        "default": 12
+      },
+      {
+        "name": "period2",
+        "label": "Period2",
+        "type": "number",
+        "default": 26
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "ExponentialMovingAverage"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.PRICEOSC(self.data.close, period1={period1}, period2={period2}, _movav={_movav})",
+    "output_lines": [
+      "priceosc"
+    ]
+  },
+  {
+    "name": "RSI_ EMA",
+    "slug": "RSI_EMA",
+    "aliases": [
+      "RSI_Cutler"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "ExponentialMovingAverage"
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 70.0
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 30.0
+      },
+      {
+        "name": "safediv",
+        "label": "Safediv",
+        "type": "string",
+        "default": "False"
+      },
+      {
+        "name": "safehigh",
+        "label": "Safehigh",
+        "type": "number",
+        "default": 100.0
+      },
+      {
+        "name": "safelow",
+        "label": "Safelow",
+        "type": "number",
+        "default": 50.0
+      },
+      {
+        "name": "lookback",
+        "label": "Lookback",
+        "type": "number",
+        "default": 1
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.RSI_EMA(self.data.close, period={period}, movav={movav}, upperband={upperband}, lowerband={lowerband}, safediv={safediv}, safehigh={safehigh}, safelow={safelow}, lookback={lookback})",
+    "output_lines": [
+      "rsi_ema"
+    ]
+  },
+  {
+    "name": "RSI_ SMA",
+    "slug": "RSI_SMA",
+    "aliases": [
+      "RSI_Cutler"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "MovingAverageSimple"
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 70.0
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 30.0
+      },
+      {
+        "name": "safediv",
+        "label": "Safediv",
+        "type": "string",
+        "default": "False"
+      },
+      {
+        "name": "safehigh",
+        "label": "Safehigh",
+        "type": "number",
+        "default": 100.0
+      },
+      {
+        "name": "safelow",
+        "label": "Safelow",
+        "type": "number",
+        "default": 50.0
+      },
+      {
+        "name": "lookback",
+        "label": "Lookback",
+        "type": "number",
+        "default": 1
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.RSI_SMA(self.data.close, period={period}, movav={movav}, upperband={upperband}, lowerband={lowerband}, safediv={safediv}, safehigh={safehigh}, safelow={safelow}, lookback={lookback})",
+    "output_lines": [
+      "rsi_sma"
+    ]
+  },
+  {
+    "name": "RSI_ Safe",
+    "slug": "RSI_SAFE",
+    "aliases": [
+      "ROC"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SmoothedMovingAverage"
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 70.0
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 30.0
+      },
+      {
+        "name": "safediv",
+        "label": "Safediv",
+        "type": "string",
+        "default": "True"
+      },
+      {
+        "name": "safehigh",
+        "label": "Safehigh",
+        "type": "number",
+        "default": 100.0
+      },
+      {
+        "name": "safelow",
+        "label": "Safelow",
+        "type": "number",
+        "default": 50.0
+      },
+      {
+        "name": "lookback",
+        "label": "Lookback",
+        "type": "number",
+        "default": 1
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.RSI_SAFE(self.data.close, period={period}, movav={movav}, upperband={upperband}, lowerband={lowerband}, safediv={safediv}, safehigh={safehigh}, safelow={safelow}, lookback={lookback})",
+    "output_lines": [
+      "rsi_safe"
+    ]
+  },
+  {
+    "name": "Rate Of Change",
+    "slug": "ROC",
+    "aliases": [
+      "ROC"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 12
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "oscillator",
+    "backtrader_code_template": "bt.indicators.ROC(self.data.close, period={period})",
+    "output_lines": [
+      "roc"
+    ]
+  },
+  {
+    "name": "Rate Of Change100",
+    "slug": "ROC100",
+    "aliases": [
+      "ROC100"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 12
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.ROC100(self.data.close, period={period})",
+    "output_lines": [
+      "roc100"
+    ]
+  },
+  {
+    "name": "Reduce N",
+    "slug": "REDUCEN",
+    "aliases": [
+      "RMI"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.REDUCEN(self.data.close, period={period})",
+    "output_lines": [
+      "reducen"
+    ]
+  },
+  {
+    "name": "Relative Momentum Index",
+    "slug": "RMI",
+    "aliases": [
+      "RMI"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 20
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SmoothedMovingAverage"
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 70.0
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 30.0
+      },
+      {
+        "name": "safediv",
+        "label": "Safediv",
+        "type": "string",
+        "default": "False"
+      },
+      {
+        "name": "safehigh",
+        "label": "Safehigh",
+        "type": "number",
+        "default": 100.0
+      },
+      {
+        "name": "safelow",
+        "label": "Safelow",
+        "type": "number",
+        "default": 50.0
+      },
+      {
+        "name": "lookback",
+        "label": "Lookback",
+        "type": "number",
+        "default": 5
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.RMI(self.data.close, period={period}, movav={movav}, upperband={upperband}, lowerband={lowerband}, safediv={safediv}, safehigh={safehigh}, safelow={safelow}, lookback={lookback})",
+    "output_lines": [
+      "rmi"
+    ]
+  },
+  {
+    "name": "Relative Strength Index",
+    "slug": "RSI",
+    "aliases": [
+      "RSI",
+      "RSI_SMMA",
+      "RSI_Wilder"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SmoothedMovingAverage"
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 70.0
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 30.0
+      },
+      {
+        "name": "safediv",
+        "label": "Safediv",
+        "type": "string",
+        "default": "False"
+      },
+      {
+        "name": "safehigh",
+        "label": "Safehigh",
+        "type": "number",
+        "default": 100.0
+      },
+      {
+        "name": "safelow",
+        "label": "Safelow",
+        "type": "number",
+        "default": 50.0
+      },
+      {
+        "name": "lookback",
+        "label": "Lookback",
+        "type": "number",
+        "default": 1
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "oscillator",
+    "backtrader_code_template": "bt.indicators.RSI(self.data.close, period={period})",
+    "output_lines": [
+      "rsi"
+    ]
+  },
+  {
+    "name": "Signal",
+    "slug": "SIGNAL",
+    "aliases": [
+      "SMMA",
+      "WilderMA",
+      "MovingAverageSmoothed",
+      "MovingAverageWilder",
+      "ModifiedMovingAverage"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.SIGNAL(self.data.close, period={period})",
+    "output_lines": [
+      "signal"
+    ]
+  },
+  {
+    "name": "Smoothed Moving Average",
+    "slug": "SMMA",
+    "aliases": [
+      "SMMA",
+      "WilderMA",
+      "MovingAverageSmoothed",
+      "MovingAverageWilder",
+      "ModifiedMovingAverage"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.SMMA(self.data.close, period={period})",
+    "output_lines": [
+      "smma"
+    ]
+  },
+  {
+    "name": "Smoothed Moving Average Envelope",
+    "slug": "SMMAENVELOPE",
+    "aliases": [
+      "SMMAEnvelope",
+      "WilderMAEnvelope",
+      "MovingAverageSmoothedEnvelope",
+      "MovingAverageWilderEnvelope",
+      "ModifiedMovingAverageEnvelope"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "perc",
+        "label": "Perc",
+        "type": "number",
+        "default": 2.5
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.SMMAENVELOPE(self.data.close, period={period}, perc={perc})",
+    "output_lines": [
+      "smmaenvelope"
+    ]
+  },
+  {
+    "name": "Smoothed Moving Average Oscillator",
+    "slug": "SMOOTHEDMOVINGAVERAGEOSC",
+    "aliases": [
+      "SmoothedMovingAverageOsc",
+      "SMMAOscillator",
+      "SMMAOsc",
+      "WilderMAOscillator",
+      "WilderMAOsc",
+      "MovingAverageSmoothedOscillator",
+      "MovingAverageSmoothedOsc",
+      "MovingAverageWilderOscillator",
+      "MovingAverageWilderOsc",
+      "ModifiedMovingAverageOscillator",
+      "ModifiedMovingAverageOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.SMOOTHEDMOVINGAVERAGEOSC(self.data.close, period={period})",
+    "output_lines": [
+      "smoothedmovingaverageosc"
+    ]
+  },
+  {
+    "name": "Standard Deviation",
+    "slug": "STDDEV",
+    "aliases": [
+      "StdDev"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 20
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "MovingAverageSimple"
+      },
+      {
+        "name": "safepow",
+        "label": "Safepow",
+        "type": "string",
+        "default": "True"
+      }
+    ],
+    "template_keys": [
+      "volatility_threshold"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "volatility",
+    "backtrader_code_template": "bt.indicators.StandardDeviation(self.data.close, period={period})",
+    "output_lines": [
+      "stddev"
+    ]
+  },
+  {
+    "name": "Stochastic",
+    "slug": "STOCH",
+    "aliases": [
+      "StochasticSlow"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "period_dfast",
+        "label": "Period dfast",
+        "type": "number",
+        "default": 3
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "MovingAverageSimple"
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 80.0
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 20.0
+      },
+      {
+        "name": "safediv",
+        "label": "Safediv",
+        "type": "string",
+        "default": "False"
+      },
+      {
+        "name": "safezero",
+        "label": "Safezero",
+        "type": "number",
+        "default": 0.0
+      },
+      {
+        "name": "period_dslow",
+        "label": "Period dslow",
+        "type": "number",
+        "default": 3
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.STOCH(self.data.close, period={period}, period_dfast={period_dfast}, movav={movav}, upperband={upperband}, lowerband={lowerband}, safediv={safediv}, safezero={safezero}, period_dslow={period_dslow})",
+    "output_lines": [
+      "stoch"
+    ]
+  },
+  {
+    "name": "Stochastic Fast",
+    "slug": "STOCHF",
+    "aliases": [
+      "STOCHF",
+      "StochasticFast"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "period_dfast",
+        "label": "Period dfast",
+        "type": "number",
+        "default": 3
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "MovingAverageSimple"
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 80.0
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 20.0
+      },
+      {
+        "name": "safediv",
+        "label": "Safediv",
+        "type": "string",
+        "default": "False"
+      },
+      {
+        "name": "safezero",
+        "label": "Safezero",
+        "type": "number",
+        "default": 0.0
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.STOCHF(self.data.close, period={period}, period_dfast={period_dfast}, movav={movav}, upperband={upperband}, lowerband={lowerband}, safediv={safediv}, safezero={safezero})",
+    "output_lines": [
+      "stochf"
+    ]
+  },
+  {
+    "name": "Stochastic Full",
+    "slug": "STOCHFULL",
+    "aliases": [
+      "STOCH",
+      "StochasticFull"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "period_dfast",
+        "label": "Period dfast",
+        "type": "number",
+        "default": 3
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "MovingAverageSimple"
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 80.0
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 20.0
+      },
+      {
+        "name": "safediv",
+        "label": "Safediv",
+        "type": "string",
+        "default": "False"
+      },
+      {
+        "name": "safezero",
+        "label": "Safezero",
+        "type": "number",
+        "default": 0.0
+      },
+      {
+        "name": "period_dslow",
+        "label": "Period dslow",
+        "type": "number",
+        "default": 3
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.STOCHFULL(self.data.close, period={period}, period_dfast={period_dfast}, movav={movav}, upperband={upperband}, lowerband={lowerband}, safediv={safediv}, safezero={safezero}, period_dslow={period_dslow})",
+    "output_lines": [
+      "stochfull"
+    ]
+  },
+  {
+    "name": "Sum N",
+    "slug": "SUM",
+    "aliases": [
+      "TEMA",
+      "MovingAverageTripleExponential"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.SUM(self.data.close, period={period})",
+    "output_lines": [
+      "sum"
+    ]
+  },
+  {
+    "name": "Triple Exponential Moving Average",
+    "slug": "TEMA",
+    "aliases": [
+      "TEMA",
+      "MovingAverageTripleExponential"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "moving_average",
+    "backtrader_code_template": "bt.indicators.TEMA(self.data.close, period={period})",
+    "output_lines": [
+      "tema"
+    ]
+  },
+  {
+    "name": "Triple Exponential Moving Average Envelope",
+    "slug": "TEMAENVELOPE",
+    "aliases": [
+      "TEMAEnvelope",
+      "MovingAverageTripleExponentialEnvelope"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      },
+      {
+        "name": "perc",
+        "label": "Perc",
+        "type": "number",
+        "default": 2.5
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.TEMAENVELOPE(self.data.close, period={period}, _movav={_movav}, perc={perc})",
+    "output_lines": [
+      "temaenvelope"
+    ]
+  },
+  {
+    "name": "Triple Exponential Moving Average Oscillator",
+    "slug": "TRIPLEEXPONENTIALMOVINGAVERAGEOSC",
+    "aliases": [
+      "TripleExponentialMovingAverageOsc",
+      "TEMAOscillator",
+      "TEMAOsc",
+      "MovingAverageTripleExponentialOscillator",
+      "MovingAverageTripleExponentialOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.TRIPLEEXPONENTIALMOVINGAVERAGEOSC(self.data.close, period={period}, _movav={_movav})",
+    "output_lines": [
+      "tripleexponentialmovingaverageosc"
+    ]
+  },
+  {
+    "name": "Trix",
+    "slug": "TRIX",
+    "aliases": [
+      "TRIX"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 15
+      },
+      {
+        "name": "_rocperiod",
+        "label": "Rocperiod",
+        "type": "number",
+        "default": 1
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "trend",
+    "backtrader_code_template": "bt.indicators.Trix(self.data.close, period={period})",
+    "output_lines": [
+      "trix"
+    ]
+  },
+  {
+    "name": "Trix Signal",
+    "slug": "TRIXSIGNAL",
+    "aliases": [
+      "TR"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 15
+      },
+      {
+        "name": "_rocperiod",
+        "label": "Rocperiod",
+        "type": "number",
+        "default": 1
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      },
+      {
+        "name": "sigperiod",
+        "label": "Sigperiod",
+        "type": "number",
+        "default": 9
+      }
+    ],
+    "template_keys": [
+      "crossover_fast_slow_ma",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.TRIXSIGNAL(self.data.close, period={period}, _rocperiod={_rocperiod}, _movav={_movav}, sigperiod={sigperiod})",
+    "output_lines": [
+      "trixsignal"
+    ]
+  },
+  {
+    "name": "True High",
+    "slug": "TRUEHIGH",
+    "aliases": [
+      "TR"
+    ],
+    "params": [
+      {
+        "name": "period1",
+        "label": "Period1",
+        "type": "number",
+        "default": 25
+      },
+      {
+        "name": "period2",
+        "label": "Period2",
+        "type": "number",
+        "default": 13
+      },
+      {
+        "name": "pchange",
+        "label": "Pchange",
+        "type": "number",
+        "default": 1
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.TRUEHIGH(self.data.close, period1={period1}, period2={period2}, pchange={pchange}, _movav={_movav})",
+    "output_lines": [
+      "truehigh"
+    ]
+  },
+  {
+    "name": "True Low",
+    "slug": "TRUELOW",
+    "aliases": [
+      "TR"
+    ],
+    "params": [
+      {
+        "name": "period1",
+        "label": "Period1",
+        "type": "number",
+        "default": 25
+      },
+      {
+        "name": "period2",
+        "label": "Period2",
+        "type": "number",
+        "default": 13
+      },
+      {
+        "name": "pchange",
+        "label": "Pchange",
+        "type": "number",
+        "default": 1
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.TRUELOW(self.data.close, period1={period1}, period2={period2}, pchange={pchange}, _movav={_movav})",
+    "output_lines": [
+      "truelow"
+    ]
+  },
+  {
+    "name": "True Range",
+    "slug": "TRANGE",
+    "aliases": [
+      "TR"
+    ],
+    "params": [
+      {
+        "name": "period1",
+        "label": "Period1",
+        "type": "number",
+        "default": 25
+      },
+      {
+        "name": "period2",
+        "label": "Period2",
+        "type": "number",
+        "default": 13
+      },
+      {
+        "name": "pchange",
+        "label": "Pchange",
+        "type": "number",
+        "default": 1
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      }
+    ],
+    "template_keys": [
+      "volatility_threshold"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.TRANGE(self.data.close, period1={period1}, period2={period2}, pchange={pchange}, _movav={_movav})",
+    "output_lines": [
+      "trange"
+    ]
+  },
+  {
+    "name": "True Strength Indicator",
+    "slug": "TSI",
+    "aliases": [
+      "TSI"
+    ],
+    "params": [
+      {
+        "name": "period1",
+        "label": "Period1",
+        "type": "number",
+        "default": 25
+      },
+      {
+        "name": "period2",
+        "label": "Period2",
+        "type": "number",
+        "default": 13
+      },
+      {
+        "name": "pchange",
+        "label": "Pchange",
+        "type": "number",
+        "default": 1
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.TSI(self.data.close, period1={period1}, period2={period2}, pchange={pchange}, _movav={_movav})",
+    "output_lines": [
+      "tsi"
+    ]
+  },
+  {
+    "name": "Ultimate Oscillator",
+    "slug": "ULTOSC",
+    "aliases": [
+      "AverageWeighted"
+    ],
+    "params": [
+      {
+        "name": "p1",
+        "label": "P1",
+        "type": "number",
+        "default": 7
+      },
+      {
+        "name": "p2",
+        "label": "P2",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "p3",
+        "label": "P3",
+        "type": "number",
+        "default": 28
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": 70.0
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": 30.0
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator",
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.ULTOSC(self.data.close, p1={p1}, p2={p2}, p3={p3}, upperband={upperband}, lowerband={lowerband})",
+    "output_lines": [
+      "ultosc"
+    ]
+  },
+  {
+    "name": "Up Day",
+    "slug": "UPDAY",
+    "aliases": [
+      "AverageWeighted"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.UPDAY(self.data.close, period={period})",
+    "output_lines": [
+      "upday"
+    ]
+  },
+  {
+    "name": "Up Day Bool",
+    "slug": "UPDAYBOOL",
+    "aliases": [
+      "AverageWeighted"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.UPDAYBOOL(self.data.close, period={period})",
+    "output_lines": [
+      "updaybool"
+    ]
+  },
+  {
+    "name": "Up Move",
+    "slug": "UPMOVE",
+    "aliases": [
+      "AverageWeighted"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.UPMOVE(self.data.close, period={period})",
+    "output_lines": [
+      "upmove"
+    ]
+  },
+  {
+    "name": "Vortex",
+    "slug": "VORTEX",
+    "aliases": [
+      "AverageWeighted"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      }
+    ],
+    "template_keys": [
+      "crossover_fast_slow_ma"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.VORTEX(self.data.close, period={period})",
+    "output_lines": [
+      "vortex"
+    ]
+  },
+  {
+    "name": "Weighted Average",
+    "slug": "WEIGHTEDAVERAGE",
+    "aliases": [
+      "AverageWeighted"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "coef",
+        "label": "Coef",
+        "type": "number",
+        "default": 1.0
+      },
+      {
+        "name": "weights",
+        "label": "Weights",
+        "type": "string",
+        "default": "()"
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.WEIGHTEDAVERAGE(self.data.close, period={period}, coef={coef}, weights={weights})",
+    "output_lines": [
+      "weightedaverage"
+    ]
+  },
+  {
+    "name": "Weighted Moving Average",
+    "slug": "WMA",
+    "aliases": [
+      "WMA",
+      "MovingAverageWeighted"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "moving_average",
+    "backtrader_code_template": "bt.indicators.WMA(self.data.close, period={period})",
+    "output_lines": [
+      "wma"
+    ]
+  },
+  {
+    "name": "Weighted Moving Average Envelope",
+    "slug": "WMAENVELOPE",
+    "aliases": [
+      "WMAEnvelope",
+      "MovingAverageWeightedEnvelope"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "perc",
+        "label": "Perc",
+        "type": "number",
+        "default": 2.5
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.WMAENVELOPE(self.data.close, period={period}, perc={perc})",
+    "output_lines": [
+      "wmaenvelope"
+    ]
+  },
+  {
+    "name": "Weighted Moving Average Oscillator",
+    "slug": "WEIGHTEDMOVINGAVERAGEOSC",
+    "aliases": [
+      "WeightedMovingAverageOsc",
+      "WMAOscillator",
+      "WMAOsc",
+      "MovingAverageWeightedOscillator",
+      "MovingAverageWeightedOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.WEIGHTEDMOVINGAVERAGEOSC(self.data.close, period={period})",
+    "output_lines": [
+      "weightedmovingaverageosc"
+    ]
+  },
+  {
+    "name": "Williams AD",
+    "slug": "WILLIAMSAD",
+    "aliases": [
+      "ZLEMA",
+      "ZeroLagEma"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": -20.0
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": -80.0
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.WILLIAMSAD(self.data.close, period={period}, upperband={upperband}, lowerband={lowerband})",
+    "output_lines": [
+      "williamsad"
+    ]
+  },
+  {
+    "name": "Williams R",
+    "slug": "WILLR",
+    "aliases": [
+      "ZLEMA",
+      "ZeroLagEma"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 14
+      },
+      {
+        "name": "upperband",
+        "label": "Upperband",
+        "type": "number",
+        "default": -20.0
+      },
+      {
+        "name": "lowerband",
+        "label": "Lowerband",
+        "type": "number",
+        "default": -80.0
+      }
+    ],
+    "template_keys": [
+      "boundary_comparison_oscillator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.WILLR(self.data.close, period={period}, upperband={upperband}, lowerband={lowerband})",
+    "output_lines": [
+      "willr"
+    ]
+  },
+  {
+    "name": "Zero Lag Exponential Moving Average",
+    "slug": "ZLEMA",
+    "aliases": [
+      "ZLEMA",
+      "ZeroLagEma"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "moving_average",
+    "backtrader_code_template": "bt.indicators.ZLEMA(self.data.close, period={period})",
+    "output_lines": [
+      "zlema"
+    ]
+  },
+  {
+    "name": "Zero Lag Exponential Moving Average Envelope",
+    "slug": "ZLEMAENVELOPE",
+    "aliases": [
+      "ZLEMAEnvelope",
+      "ZeroLagEmaEnvelope"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      },
+      {
+        "name": "perc",
+        "label": "Perc",
+        "type": "number",
+        "default": 2.5
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.ZLEMAENVELOPE(self.data.close, period={period}, _movav={_movav}, perc={perc})",
+    "output_lines": [
+      "zlemaenvelope"
+    ]
+  },
+  {
+    "name": "Zero Lag Exponential Moving Average Oscillator",
+    "slug": "ZEROLAGEXPONENTIALMOVINGAVERAGEOSC",
+    "aliases": [
+      "ZeroLagExponentialMovingAverageOsc",
+      "ZLEMAOscillator",
+      "ZLEMAOsc",
+      "ZeroLagEmaOscillator",
+      "ZeroLagEmaOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.ZEROLAGEXPONENTIALMOVINGAVERAGEOSC(self.data.close, period={period}, _movav={_movav})",
+    "output_lines": [
+      "zerolagexponentialmovingaverageosc"
+    ]
+  },
+  {
+    "name": "Zero Lag Indicator",
+    "slug": "ZLINDICATOR",
+    "aliases": [
+      "ZLIndicator",
+      "ZLInd",
+      "EC",
+      "ErrorCorrecting"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "gainlimit",
+        "label": "Gainlimit",
+        "type": "number",
+        "default": 50
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      }
+    ],
+    "template_keys": [
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.ZLINDICATOR(self.data.close, period={period}, gainlimit={gainlimit}, _movav={_movav})",
+    "output_lines": [
+      "zlindicator"
+    ]
+  },
+  {
+    "name": "Zero Lag Indicator Envelope",
+    "slug": "ZLINDICATORENVELOPE",
+    "aliases": [
+      "ZLIndicatorEnvelope",
+      "ZLIndEnvelope",
+      "ECEnvelope",
+      "ErrorCorrectingEnvelope"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "gainlimit",
+        "label": "Gainlimit",
+        "type": "number",
+        "default": 50
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      },
+      {
+        "name": "perc",
+        "label": "Perc",
+        "type": "number",
+        "default": 2.5
+      }
+    ],
+    "template_keys": [
+      "band_break_bollinger",
+      "crossover_price_indicator"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.ZLINDICATORENVELOPE(self.data.close, period={period}, gainlimit={gainlimit}, _movav={_movav}, perc={perc})",
+    "output_lines": [
+      "zlindicatorenvelope"
+    ]
+  },
+  {
+    "name": "Zero Lag Indicator Oscillator",
+    "slug": "ZEROLAGINDICATOROSC",
+    "aliases": [
+      "ZeroLagIndicatorOsc",
+      "ZLIndicatorOscillator",
+      "ZLIndicatorOsc",
+      "ZLIndOscillator",
+      "ZLIndOsc",
+      "ECOscillator",
+      "ECOsc",
+      "ErrorCorrectingOscillator",
+      "ErrorCorrectingOsc"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "name": "gainlimit",
+        "label": "Gainlimit",
+        "type": "number",
+        "default": 50
+      },
+      {
+        "name": "_movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "EMA"
+      }
+    ],
+    "template_keys": [
+      "threshold_simple"
+    ],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": true
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.ZEROLAGINDICATOROSC(self.data.close, period={period}, gainlimit={gainlimit}, _movav={_movav})",
+    "output_lines": [
+      "zerolagindicatorosc"
+    ]
+  },
+  {
+    "name": "ha Delta",
+    "slug": "HADELTA",
+    "aliases": [
+      "haD"
+    ],
+    "params": [
+      {
+        "name": "period",
+        "label": "Period",
+        "type": "number",
+        "default": 3
+      },
+      {
+        "name": "movav",
+        "label": "Movav",
+        "type": "string",
+        "default": "SMA"
+      },
+      {
+        "name": "autoheikin",
+        "label": "Autoheikin",
+        "type": "string",
+        "default": "True"
+      }
+    ],
+    "template_keys": [],
+    "usage_modes": {
+      "standalone": true,
+      "strategy_template": false
+    },
+    "category": "other",
+    "backtrader_code_template": "bt.indicators.HADELTA(self.data.close, period={period}, movav={movav}, autoheikin={autoheikin})",
+    "output_lines": [
+      "hadelta"
+    ]
+  }
+]

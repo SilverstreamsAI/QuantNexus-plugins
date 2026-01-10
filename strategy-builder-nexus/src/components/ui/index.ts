@@ -14,3 +14,6 @@ export type { StrategyCardProps } from './StrategyCard';
 
 export { RegimeSelector } from './RegimeSelector';
 export type { RegimeSelectorProps, RegimeOption, BespokeData } from './RegimeSelector';
+
+export { IndicatorSelector } from './IndicatorSelector';
+export type { IndicatorSelectorProps, IndicatorBlock, IndicatorDefinition, IndicatorParam, StrategyTemplate } from './IndicatorSelector';
