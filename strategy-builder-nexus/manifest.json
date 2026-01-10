@@ -114,11 +114,20 @@
         "name": "Strategy Groups"
       }]
     },
-    "editors": [{
-      "viewType": "strategy.regimeEditor",
-      "displayName": "Regime Editor",
-      "selector": [{ "resourceScheme": "strategy" }]
-    }],
+    "editors": [
+      {
+        "viewType": "strategy.regimeDetector",
+        "displayName": "Regime Detector",
+        "serviceIds": ["regime_mode"],
+        "selector": [{ "resourceScheme": "strategy" }]
+      },
+      {
+        "viewType": "strategy.entrySignal",
+        "displayName": "Entry Signal Generator",
+        "serviceIds": ["indicator_entry_generator"],
+        "selector": [{ "resourceScheme": "strategy" }]
+      }
+    ],
     "commands": [
       { "id": "strategy.openHub", "title": "Open Strategy Hub" },
       { "id": "strategy.generate", "title": "Generate Strategy Code" },
