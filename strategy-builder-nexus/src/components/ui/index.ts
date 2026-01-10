@@ -19,5 +19,8 @@ export type { RegimeSelectorProps, RegimeOption, BespokeData } from './RegimeSel
 export { IndicatorSelector } from './IndicatorSelector';
 export type { IndicatorSelectorProps, IndicatorBlock, IndicatorDefinition, IndicatorParam, StrategyTemplate } from './IndicatorSelector';
 
+export { DirectionalIndicatorSelector } from './DirectionalIndicatorSelector';
+export type { DirectionalIndicatorSelectorProps, DirectionalIndicatorBlock, TradeDirection } from './DirectionalIndicatorSelector';
+
 export { PortalDropdown } from './PortalDropdown';
 export type { PortalDropdownProps } from './PortalDropdown';

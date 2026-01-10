@@ -5,3 +5,4 @@
  */
 
 export { RegimeDetectorPage } from './RegimeDetectorPage';
+export { EntrySignalPage } from './EntrySignalPage';
