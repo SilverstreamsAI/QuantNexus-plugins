@@ -5,6 +5,7 @@
  * Zones: A (Header), B (Sidebar), C (Content), D (Action Bar)
  *
  * @see TICKET_077 - Silverstream UI Component Library
+ * @see TICKET_078 - Input Theming and Portal Patterns
  * @see TICKET_042 - Strategy Editor Plugin Design
  */
 
@@ -117,7 +118,12 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
               value={strategyName}
               onChange={handleNameChange}
               placeholder="Strategy Name"
-              className="w-full px-3 py-2 text-xs text-black placeholder:text-gray-500 bg-color-terminal-surface border border-color-terminal-border rounded focus:border-color-terminal-accent-gold/50 focus:outline-none"
+              className="w-full px-3 py-2 text-xs border rounded focus:outline-none"
+              style={{
+                backgroundColor: '#112240',
+                borderColor: '#233554',
+                color: '#e6f1ff',
+              }}
             />
             {/* Status Indicator */}
             <div className="flex items-center gap-2 text-[10px]">

@@ -6,13 +6,13 @@
  * Used in Zone C of Strategy Studio pages.
  *
  * @see TICKET_077 - Silverstream UI Component Library
- * @see TICKET_077_1 - Page Hierarchy
+ * @see TICKET_078 - Input Theming and Portal Patterns
  */
 
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { Plus, Trash2, ChevronDown, Info } from 'lucide-react';
-import { createPortal } from 'react-dom';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
+import { Plus, Trash2, ChevronDown } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { PortalDropdown } from './PortalDropdown';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -92,96 +92,6 @@ export interface IndicatorSelectorProps {
 // -----------------------------------------------------------------------------
 
 const DEFAULT_TITLE = 'INDICATOR CONFIGURATION';
-
-// -----------------------------------------------------------------------------
-// Portal Dropdown Component
-// -----------------------------------------------------------------------------
-
-interface PortalDropdownProps {
-  isOpen: boolean;
-  triggerRef: React.RefObject<HTMLButtonElement>;
-  onClose: () => void;
-  children: React.ReactNode;
-}
-
-const PortalDropdown: React.FC<PortalDropdownProps> = ({
-  isOpen,
-  triggerRef,
-  onClose,
-  children,
-}) => {
-  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (isOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      setPosition({
-        top: rect.bottom + 4,
-        left: rect.left,
-        width: rect.width,
-      });
-    }
-  }, [isOpen, triggerRef]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Node;
-      // Check if click is outside both trigger and dropdown
-      const isOutsideTrigger = triggerRef.current && !triggerRef.current.contains(target);
-      const isOutsideDropdown = dropdownRef.current && !dropdownRef.current.contains(target);
-
-      if (isOutsideTrigger && isOutsideDropdown) {
-        onClose();
-      }
-    };
-
-    const handleScroll = () => {
-      if (triggerRef.current) {
-        const rect = triggerRef.current.getBoundingClientRect();
-        setPosition({
-          top: rect.bottom + 4,
-          left: rect.left,
-          width: rect.width,
-        });
-      }
-    };
-
-    // Use setTimeout to avoid immediate close on the same click that opened it
-    const timeoutId = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-    }, 0);
-    window.addEventListener('scroll', handleScroll, true);
-
-    return () => {
-      clearTimeout(timeoutId);
-      document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('scroll', handleScroll, true);
-    };
-  }, [isOpen, onClose, triggerRef]);
-
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div
-      ref={dropdownRef}
-      className="fixed max-h-60 overflow-y-auto rounded shadow-xl"
-      style={{
-        top: position.top,
-        left: position.left,
-        width: position.width,
-        zIndex: 99999,
-        backgroundColor: '#112240',
-        border: '1px solid #233554',
-      }}
-    >
-      {children}
-    </div>,
-    document.body
-  );
-};
 
 // -----------------------------------------------------------------------------
 // Section Title Component
@@ -386,13 +296,12 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
                     <select
                       value={block.paramValues[param.name] ?? param.default}
                       onChange={(e) => handleParamChange(param.name, e.target.value)}
-                      className={cn(
-                        'w-full px-4 py-3 text-xs terminal-mono',
-                        'bg-color-terminal-surface border rounded',
-                        'text-color-terminal-text',
-                        'focus:outline-none focus:border-color-terminal-accent-gold/50',
-                        'border-color-terminal-border'
-                      )}
+                      className="w-full px-4 py-3 text-xs terminal-mono border rounded focus:outline-none"
+                      style={{
+                        backgroundColor: '#112240',
+                        borderColor: '#233554',
+                        color: '#e6f1ff',
+                      }}
                     >
                       {param.options.map((opt) => (
                         <option key={opt.value} value={opt.value}>
@@ -410,13 +319,12 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
                           : e.target.value;
                         handleParamChange(param.name, value);
                       }}
-                      className={cn(
-                        'w-full px-4 py-3 text-xs terminal-mono',
-                        'bg-color-terminal-surface border rounded',
-                        'text-color-terminal-text',
-                        'focus:outline-none focus:border-color-terminal-accent-gold/50',
-                        'border-color-terminal-border'
-                      )}
+                      className="w-full px-4 py-3 text-xs terminal-mono border rounded focus:outline-none"
+                      style={{
+                        backgroundColor: '#112240',
+                        borderColor: '#233554',
+                        color: '#e6f1ff',
+                      }}
                     />
                   )}
                 </div>
@@ -559,13 +467,12 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
                   type="number"
                   value={block.ruleThresholdValue}
                   onChange={(e) => handleThresholdChange(parseFloat(e.target.value) || 0)}
-                  className={cn(
-                    'w-full px-4 py-3 text-xs terminal-mono',
-                    'bg-color-terminal-surface border rounded',
-                    'text-color-terminal-text',
-                    'focus:outline-none focus:border-color-terminal-accent-gold/50',
-                    'border-color-terminal-border'
-                  )}
+                  className="w-full px-4 py-3 text-xs terminal-mono border rounded focus:outline-none"
+                  style={{
+                    backgroundColor: '#112240',
+                    borderColor: '#233554',
+                    color: '#e6f1ff',
+                  }}
                 />
               </div>
             )}

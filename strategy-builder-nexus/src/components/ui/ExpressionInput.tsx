@@ -5,7 +5,7 @@
  * Used in Zone C of Strategy Studio pages.
  *
  * @see TICKET_077 - Silverstream UI Component Library
- * @see TICKET_063 - Silverstream UI Spec
+ * @see TICKET_078 - Input Theming and Portal Patterns
  */
 
 import React, { useState, useCallback, useRef } from 'react';
@@ -110,13 +110,17 @@ export const ExpressionInput: React.FC<ExpressionInputProps> = ({
         placeholder={placeholder}
         className={cn(
           'w-full px-4 py-3 text-xs terminal-mono',
-          'bg-color-terminal-surface border rounded',
-          'text-black placeholder:text-gray-500',
+          'border rounded',
           'focus:outline-none transition-colors duration-200',
           hasError
             ? 'border-red-500 focus:border-red-500'
-            : 'border-color-terminal-border focus:border-color-terminal-accent-gold/50'
+            : 'focus:border-color-terminal-accent-gold/50'
         )}
+        style={{
+          backgroundColor: '#112240',
+          borderColor: hasError ? undefined : '#233554',
+          color: '#e6f1ff',
+        }}
       />
 
       {/* Help Text */}

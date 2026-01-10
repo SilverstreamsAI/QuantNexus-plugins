@@ -6,7 +6,7 @@
  * Used in Zone C of Strategy Studio pages.
  *
  * @see TICKET_077 - Silverstream UI Component Library
- * @see TICKET_077_1 - Page Hierarchy
+ * @see TICKET_078 - Input Theming and Portal Patterns
  */
 
 import React, { useCallback } from 'react';
@@ -166,13 +166,12 @@ export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
               value={bespokeData.name}
               onChange={handleBespokeNameChange}
               placeholder="Enter custom regime name"
-              className={cn(
-                'w-full px-4 py-3 text-xs terminal-mono',
-                'bg-color-terminal-surface border rounded',
-                'text-black placeholder:text-gray-500',
-                'focus:outline-none focus:border-color-terminal-accent-gold/50',
-                'border-color-terminal-border'
-              )}
+              className="w-full px-4 py-3 text-xs terminal-mono border rounded focus:outline-none"
+              style={{
+                backgroundColor: '#112240',
+                borderColor: '#233554',
+                color: '#e6f1ff',
+              }}
             />
           </div>
 
@@ -186,13 +185,12 @@ export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
               value={bespokeData.notes}
               onChange={handleBespokeNotesChange}
               placeholder="Enter notes or description"
-              className={cn(
-                'w-full px-4 py-3 text-xs terminal-mono',
-                'bg-color-terminal-surface border rounded',
-                'text-black placeholder:text-gray-500',
-                'focus:outline-none focus:border-color-terminal-accent-gold/50',
-                'border-color-terminal-border'
-              )}
+              className="w-full px-4 py-3 text-xs terminal-mono border rounded focus:outline-none"
+              style={{
+                backgroundColor: '#112240',
+                borderColor: '#233554',
+                color: '#e6f1ff',
+              }}
             />
           </div>
         </div>
