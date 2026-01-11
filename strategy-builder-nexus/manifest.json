@@ -164,8 +164,9 @@
         },
         "llm.selectedProvider": {
           "type": "string",
-          "enum": ["CLAUDE", "OPENAI", "GEMINI", "DEEPSEEK", "GROK", "QWEN"],
+          "enum": ["NONA", "CLAUDE", "OPENAI", "GEMINI", "DEEPSEEK", "GROK", "QWEN"],
           "enumDescriptions": [
+            "Nona Fast (Default)",
             "Anthropic Claude",
             "OpenAI GPT",
             "Google Gemini",
@@ -173,14 +174,14 @@
             "xAI Grok",
             "Alibaba Qwen"
           ],
-          "default": "CLAUDE",
+          "default": "NONA",
           "description": "Active LLM Provider for code generation",
           "category": "LLM Settings",
           "order": 9
         },
         "llm.selectedModel": {
           "type": "string",
-          "default": "claude-sonnet-4-20250514",
+          "default": "nona-fast",
           "description": "Active LLM Model ID",
           "category": "LLM Settings",
           "order": 9

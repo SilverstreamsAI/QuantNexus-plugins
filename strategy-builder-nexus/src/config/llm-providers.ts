@@ -35,6 +35,15 @@ export interface LLMProvider {
 
 export const LLM_PROVIDERS: LLMProvider[] = [
   {
+    id: 'NONA',
+    name: 'Nona Fast (Default)',
+    secretKey: '', // No API key required - always available
+    apiKeyPlaceholder: '',
+    models: [
+      { id: 'nona-fast', name: 'Nona Fast', description: 'Default fast model - no API key required' },
+    ],
+  },
+  {
     id: 'CLAUDE',
     name: 'Claude (Anthropic)',
     secretKey: 'llm.claude.apiKey',
@@ -117,11 +126,11 @@ export const LLM_PROVIDERS: LLMProvider[] = [
 /** Provider IDs for manifest.json enum */
 export const LLM_PROVIDER_IDS = LLM_PROVIDERS.map(p => p.id) as [string, ...string[]];
 
-/** Default provider */
-export const DEFAULT_PROVIDER_ID = 'CLAUDE';
+/** Default provider (always available, no API key required) */
+export const DEFAULT_PROVIDER_ID = 'NONA';
 
 /** Default model */
-export const DEFAULT_MODEL_ID = 'claude-sonnet-4-20250514';
+export const DEFAULT_MODEL_ID = 'nona-fast';
 
 /** Get provider by ID */
 export function getProvider(id: string): LLMProvider | undefined {

@@ -21,7 +21,7 @@ import {
   KeyRound,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { LLM_PROVIDERS, getDefaultModel } from '../../config/llm-providers';
+import { LLM_PROVIDERS, getDefaultModel, DEFAULT_PROVIDER_ID } from '../../config/llm-providers';
 
 // =============================================================================
 // Types
@@ -275,8 +275,13 @@ export function ConfigTab({ pluginId }: ConfigTabProps): JSX.Element {
       }
 
       // TICKET_090: Check which LLM providers have API keys configured
-      const configured: string[] = [];
+      // NONA (default) is always available - no API key required
+      const configured: string[] = [DEFAULT_PROVIDER_ID];
       for (const provider of LLM_PROVIDERS) {
+        // Skip default provider (already added) and providers without secretKey
+        if (provider.id === DEFAULT_PROVIDER_ID || !provider.secretKey) {
+          continue;
+        }
         const hasResult = await window.electronAPI.credential.has(pluginId, provider.secretKey);
         if (hasResult.exists) {
           configured.push(provider.id);
