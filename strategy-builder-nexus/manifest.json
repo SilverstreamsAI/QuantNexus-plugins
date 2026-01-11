@@ -161,6 +161,77 @@
           "secret": true,
           "category": "Credentials",
           "order": 8
+        },
+        "llm.selectedProvider": {
+          "type": "string",
+          "enum": ["CLAUDE", "OPENAI", "GEMINI", "DEEPSEEK", "GROK", "QWEN"],
+          "enumDescriptions": [
+            "Anthropic Claude",
+            "OpenAI GPT",
+            "Google Gemini",
+            "DeepSeek",
+            "xAI Grok",
+            "Alibaba Qwen"
+          ],
+          "default": "CLAUDE",
+          "description": "Active LLM Provider for code generation",
+          "category": "LLM Settings",
+          "order": 9
+        },
+        "llm.selectedModel": {
+          "type": "string",
+          "default": "claude-sonnet-4-20250514",
+          "description": "Active LLM Model ID",
+          "category": "LLM Settings",
+          "order": 9
+        },
+        "llm.claude.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Anthropic Claude API Key",
+          "secret": true,
+          "category": "LLM Providers",
+          "order": 10
+        },
+        "llm.openai.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API Key",
+          "secret": true,
+          "category": "LLM Providers",
+          "order": 11
+        },
+        "llm.gemini.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Google Gemini API Key",
+          "secret": true,
+          "category": "LLM Providers",
+          "order": 12
+        },
+        "llm.deepseek.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "DeepSeek API Key",
+          "secret": true,
+          "category": "LLM Providers",
+          "order": 13
+        },
+        "llm.grok.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "xAI Grok API Key",
+          "secret": true,
+          "category": "LLM Providers",
+          "order": 14
+        },
+        "llm.qwen.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Alibaba Qwen API Key",
+          "secret": true,
+          "category": "LLM Providers",
+          "order": 15
         }
       }
     },
@@ -185,11 +256,16 @@
       }, {
         "id": "strategy.groupList",
         "name": "Strategy Groups"
+      }],
+      "settings": [{
+        "id": "strategy.llmSettings",
+        "name": "LLM Providers",
+        "component": "LLMSettingsPanel"
       }]
     },
     "editors": [
       {
-        "viewType": "strategy.regimeDetector",
+        "viewType": "strategy.regimeEditor",
         "displayName": "Regime Detector",
         "serviceIds": ["regime_mode"],
         "selector": [{ "resourceScheme": "strategy" }]
@@ -207,7 +283,7 @@
       { "id": "strategy.validate", "title": "Validate Strategy" }
     ]
   },
-  "permissions": ["network:internal", "database"],
+  "permissions": ["network", "database"],
   "isolation": "trusted",
   "activationEvents": ["onView:strategy.tree", "onCommand:strategy.openHub"]
 }

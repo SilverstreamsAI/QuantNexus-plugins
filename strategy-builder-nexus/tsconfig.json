@@ -19,6 +19,6 @@
       "@shared/types": ["../../apps/desktop/src/shared/types/index.ts"]
     }
   },
-  "include": ["src/**/*", "assets/**/*.json", "../../apps/desktop/src/shared/types/**/*"],
+  "include": ["src/**/*", "src/types/**/*.d.ts", "assets/**/*.json", "../../apps/desktop/src/shared/types/**/*"],
   "exclude": ["node_modules", "dist"]
 }

@@ -43,7 +43,7 @@ export interface EditorProvider {
  * viewType must match manifest.contributes.editors[].viewType
  */
 export const EDITOR_PROVIDERS: Record<string, EditorProvider> = {
-  'strategy.regimeDetector': {
+  'strategy.regimeEditor': {
     component: RegimeDetectorPage,
   },
   'strategy.entrySignal': {

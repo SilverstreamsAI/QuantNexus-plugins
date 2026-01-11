@@ -12,6 +12,7 @@ import { StrategyTreeDataProvider } from './providers/StrategyTreeDataProvider';
 import { StrategyHubProvider } from './providers/StrategyHubProvider';
 import { ProviderPortalProvider } from './providers/ProviderPortalProvider';
 import { GroupListProvider } from './providers/GroupListProvider';
+import { LLMSettingsProvider } from './providers/LLMSettingsProvider';
 
 // Store disposables for cleanup
 const disposables: Disposable[] = [];
@@ -67,6 +68,14 @@ export async function activate(context: PluginContext): Promise<PluginApi> {
   const groupListProvider = new GroupListProvider();
   disposables.push(api.registerViewProvider('strategy.groupList', groupListProvider));
   context.log.info('GroupListProvider registered');
+
+  // ---------------------------------------------------------------------------
+  // Register Settings Provider (TICKET_089, TICKET_090)
+  // ---------------------------------------------------------------------------
+
+  const llmSettingsProvider = new LLMSettingsProvider();
+  disposables.push(api.registerViewProvider('strategy.llmSettings', llmSettingsProvider));
+  context.log.info('LLMSettingsProvider registered');
 
   // ---------------------------------------------------------------------------
   // Register Custom Editor Provider
