@@ -258,6 +258,11 @@
         "name": "Strategy Groups"
       }],
       "settings": [{
+        "id": "strategy.settings",
+        "name": "Settings",
+        "component": "PluginSettingsPage",
+        "isMainPage": true
+      }, {
         "id": "strategy.llmSettings",
         "name": "LLM Providers",
         "component": "LLMSettingsPanel"
