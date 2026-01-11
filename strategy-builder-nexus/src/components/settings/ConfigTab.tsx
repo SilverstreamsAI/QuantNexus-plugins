@@ -19,6 +19,8 @@ import {
   AlertTriangle,
   Info,
   KeyRound,
+  HardDrive,
+  Cloud,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { LLM_PROVIDERS, getDefaultModel, DEFAULT_PROVIDER_ID } from '../../config/llm-providers';
@@ -211,14 +213,43 @@ interface SectionProps {
   id: string;
   title: string;
   children: React.ReactNode;
+  /** TICKET_094: Use local configuration */
+  onLocal?: () => void;
+  /** TICKET_094: Use server configuration */
+  onServer?: () => void;
 }
 
-function Section({ id, title, children }: SectionProps): JSX.Element {
+function Section({ id, title, children, onLocal, onServer }: SectionProps): JSX.Element {
   return (
     <div id={id} className="rounded-lg border border-white/10 scroll-mt-4">
-      <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-        <Settings className="h-5 w-5 text-color-terminal-accent-teal" />
-        <h3 className="font-medium">{title}</h3>
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Settings className="h-5 w-5 text-color-terminal-accent-teal" />
+          <h3 className="font-medium">{title}</h3>
+        </div>
+        {/* TICKET_094: Local/Server buttons */}
+        <div className="flex items-center gap-1">
+          {onLocal && (
+            <button
+              onClick={onLocal}
+              title="Use local configuration"
+              className="flex items-center gap-1 px-2 py-1 rounded text-xs hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
+            >
+              <HardDrive className="h-3.5 w-3.5" />
+              <span>Local</span>
+            </button>
+          )}
+          {onServer && (
+            <button
+              onClick={onServer}
+              title="Use server configuration"
+              className="flex items-center gap-1 px-2 py-1 rounded text-xs hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
+            >
+              <Cloud className="h-3.5 w-3.5" />
+              <span>Server</span>
+            </button>
+          )}
+        </div>
       </div>
       <div className="p-4 space-y-4">{children}</div>
     </div>
@@ -348,6 +379,33 @@ export function ConfigTab({ pluginId }: ConfigTabProps): JSX.Element {
     }
   }, []);
 
+  // TICKET_094: Load section from local storage
+  const handleLocalSection = useCallback(async (categoryName: string) => {
+    const category = categories.find(c => c.name === categoryName);
+    if (!category) return;
+
+    try {
+      const configResult = await window.electronAPI.plugin.getConfig(pluginId);
+      if (configResult.success && configResult.config) {
+        const updates: Record<string, unknown> = {};
+        for (const { key } of category.properties) {
+          if (configResult.config[key] !== undefined) {
+            updates[key] = configResult.config[key];
+          }
+        }
+        setValues(prev => ({ ...prev, ...updates }));
+      }
+    } catch (e) {
+      console.error('Failed to load local config:', e);
+    }
+  }, [categories, pluginId]);
+
+  // TICKET_094: Load section from server
+  const handleServerSection = useCallback(async (categoryName: string) => {
+    // TODO: Implement server config fetch
+    console.debug('[ConfigTab] Server config requested for:', categoryName);
+  }, []);
+
   // Set initial active section
   useEffect(() => {
     if (categories.length > 0 && !activeSection) {
@@ -426,35 +484,17 @@ export function ConfigTab({ pluginId }: ConfigTabProps): JSX.Element {
       {/* Right Content */}
       <div className="flex-1 overflow-y-auto p-6">
         <div className="mx-auto max-w-4xl space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-color-terminal-accent-teal/10">
-                <Settings className="h-6 w-6 text-color-terminal-accent-teal" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">{configuration.title || 'Configuration'}</h1>
-                <p className="text-muted-foreground">
-                  Plugin settings
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={loadConfiguration}
-              disabled={loading}
-              className="flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2 text-sm font-medium hover:bg-white/5 disabled:opacity-50"
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              Reload
-            </button>
-          </div>
-
-          {/* Sections */}
+          {/* Sections - TICKET_094: Removed unified header, each section has Local/Server buttons */}
           {categories.map((category) => {
             const sectionId = category.name.toLowerCase().replace(/\s+/g, '-');
             return (
-              <Section key={category.name} id={sectionId} title={category.name}>
+              <Section
+                key={category.name}
+                id={sectionId}
+                title={category.name}
+                onLocal={() => handleLocalSection(category.name)}
+                onServer={() => handleServerSection(category.name)}
+              >
                 <div className="space-y-4">
                   {category.properties.map(({ key, property }) => {
                     // TICKET_090: Special handling for llm.selectedProvider
