@@ -1,0 +1,203 @@
+/**
+ * Plugin API Client (TICKET_091)
+ *
+ * Simplified HTTP client for plugin-layer API calls.
+ * CSP has been relaxed to allow plugins to access external HTTPS endpoints.
+ *
+ * @see TICKET_091 - Desktop CSP Relaxation
+ */
+
+// -----------------------------------------------------------------------------
+// Constants
+// -----------------------------------------------------------------------------
+
+const API_BASE_URL = 'https://desktop-api.silvonastream.com';
+const DEFAULT_TIMEOUT = 120000; // 2 minutes
+const DEFAULT_POLL_INTERVAL = 500; // 500ms
+const DEFAULT_POLL_TIMEOUT = 180000; // 3 minutes
+
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
+
+export interface ApiResponse {
+  success: boolean;
+  data?: {
+    task_id?: string;
+    status?: string;
+    result?: Record<string, unknown>;
+    [key: string]: unknown;
+  };
+}
+
+export interface PollOptions<T> {
+  initialData: unknown;
+  startEndpoint: string;
+  pollEndpoint: string;
+  pollInterval?: number;
+  timeout?: number;
+  handlePollResponse: (response: unknown) => {
+    isComplete: boolean;
+    result?: T;
+    rawResponse: unknown;
+  };
+}
+
+// -----------------------------------------------------------------------------
+// Logger
+// -----------------------------------------------------------------------------
+
+const log = {
+  debug: (msg: string) => console.debug(`[Plugin][API] ${msg}`),
+  info: (msg: string) => console.info(`[Plugin][API] ${msg}`),
+  error: (msg: string) => console.error(`[Plugin][API] ${msg}`),
+};
+
+// -----------------------------------------------------------------------------
+// API Client
+// -----------------------------------------------------------------------------
+
+class PluginApiClient {
+  private baseUrl: string;
+  private timeout: number;
+
+  constructor(baseUrl: string = API_BASE_URL, timeout: number = DEFAULT_TIMEOUT) {
+    this.baseUrl = baseUrl;
+    this.timeout = timeout;
+  }
+
+  /**
+   * Make HTTP request
+   */
+  private async request<T extends ApiResponse>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const url = `${this.baseUrl}${endpoint}`;
+
+    log.info(`Request: ${options.method || 'GET'} ${url}`);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Client-Type': 'desktop',
+          ...options.headers,
+        },
+      });
+
+      clearTimeout(timeoutId);
+
+      const serverResponse = await response.json();
+      log.debug(`Response: ${response.status}`);
+      return serverResponse as T;
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      if (error instanceof Error && error.name === 'AbortError') {
+        log.error(`Request timeout: ${url}`);
+        return {
+          success: false,
+          data: {
+            status: 'failed',
+            result: { error: { code: 'TIMEOUT', message: 'Request timed out' } },
+          },
+        } as unknown as T;
+      }
+
+      log.error(`Request error: ${error instanceof Error ? error.message : 'Unknown'}`);
+      return {
+        success: false,
+        data: {
+          status: 'failed',
+          result: { error: { code: 'NETWORK_ERROR', message: String(error) } },
+        },
+      } as unknown as T;
+    }
+  }
+
+  async post<T extends ApiResponse>(endpoint: string, body?: unknown): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'POST',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  }
+
+  /**
+   * Execute long-running task with polling
+   */
+  async executeWithPolling<T>(options: PollOptions<T>): Promise<T> {
+    const {
+      initialData,
+      startEndpoint,
+      pollEndpoint,
+      pollInterval = DEFAULT_POLL_INTERVAL,
+      timeout = DEFAULT_POLL_TIMEOUT,
+      handlePollResponse,
+    } = options;
+
+    // 1. Start task
+    log.info(`Starting task: ${startEndpoint}`);
+    const startResponse = await this.post<ApiResponse>(startEndpoint, initialData);
+
+    if (!startResponse.success) {
+      const err = startResponse.data?.result as { error?: { message?: string } } | undefined;
+      throw new Error(err?.error?.message || 'Failed to start task');
+    }
+
+    const taskId = startResponse.data?.task_id;
+    if (!taskId) {
+      throw new Error('No task_id returned from server');
+    }
+
+    log.info(`Task started: ${taskId}`);
+
+    // 2. Poll for completion
+    const startTime = Date.now();
+    let pollCount = 0;
+
+    while (Date.now() - startTime < timeout) {
+      pollCount++;
+      log.debug(`Polling (${pollCount}): ${taskId}`);
+
+      const pollResponse = await this.post<ApiResponse>(pollEndpoint, { task_id: taskId });
+
+      if (!pollResponse.success) {
+        const err = pollResponse.data?.result as { error?: { message?: string } } | undefined;
+        throw new Error(err?.error?.message || 'Poll request failed');
+      }
+
+      const status = pollResponse.data?.status;
+
+      if (status === 'failed') {
+        const err = pollResponse.data?.result as { error?: { message?: string } } | undefined;
+        throw new Error(err?.error?.message || 'Task failed');
+      }
+
+      const result = handlePollResponse(pollResponse);
+
+      if (result.isComplete) {
+        if (result.result === undefined) {
+          throw new Error('Task completed but no result returned');
+        }
+        log.info(`Task completed: ${taskId}`);
+        return result.result;
+      }
+
+      await this.delay(pollInterval);
+    }
+
+    throw new Error(`Task timeout after ${timeout}ms`);
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+}
+
+export const pluginApiClient = new PluginApiClient();
