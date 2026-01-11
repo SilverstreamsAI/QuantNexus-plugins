@@ -10,9 +10,9 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { Settings, Play } from 'lucide-react';
+import { Settings, Play, Loader2, Copy, Check, AlertCircle } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { RegimeSelector, BespokeData, ExpressionInput, StrategyCard, IndicatorSelector, IndicatorBlock, IndicatorDefinition, StrategyTemplate } from '../ui';
+import { RegimeSelector, BespokeData, ExpressionInput, StrategyCard, IndicatorSelector, IndicatorBlock, IndicatorDefinition, StrategyTemplate, useValidateBeforeGenerate } from '../ui';
 
 // Import indicator data
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
@@ -27,11 +27,20 @@ interface Strategy {
   expression: string;
 }
 
+interface GenerateResult {
+  code?: string;
+  error?: string;
+}
+
 interface RegimeDetectorPageProps {
   onGenerate?: (config: unknown) => Promise<void>;
   onSettingsClick?: () => void;
   /** Page title from navigation - uses feature name from PluginHub button */
   pageTitle?: string;
+  /** Loading state during generation (TICKET_082) */
+  isGenerating?: boolean;
+  /** Result from generation API (TICKET_082) */
+  generateResult?: GenerateResult | null;
 }
 
 // -----------------------------------------------------------------------------
@@ -42,9 +51,12 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
   onGenerate,
   onSettingsClick,
   pageTitle,
+  isGenerating = false,
+  generateResult,
 }) => {
   // State
   const [strategyName, setStrategyName] = useState('New Strategy');
+  const [codeCopied, setCodeCopied] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [selectedRegime, setSelectedRegime] = useState('trend');
@@ -73,8 +85,31 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
     setIsSaved(false);
   }, []);
 
-  // Handle generate
+  // Combine all rules for validation (TICKET_087)
+  // Rules = indicatorBlocks (template-based) + strategies (custom expressions)
+  const allRules = [
+    ...indicatorBlocks,
+    ...strategies.map(s => ({ type: 'custom_expression', expression: s.expression })),
+  ];
+
+  // Validation hook (TICKET_087)
+  const { validate } = useValidateBeforeGenerate({
+    items: allRules,
+    errorMessage: 'Please add at least one indicator or expression',
+    onValidationFail: (message) => {
+      // TODO: Replace with toast notification when available
+      console.warn('[RegimeDetector] Validation failed:', message);
+      alert(message);
+    },
+  });
+
+  // Handle generate with validation (TICKET_087)
   const handleGenerate = useCallback(async () => {
+    // Validate before proceeding
+    if (!validate()) {
+      return;
+    }
+
     if (onGenerate) {
       await onGenerate({
         name: strategyName,
@@ -84,7 +119,20 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
         strategies: strategies.map(s => s.expression),
       });
     }
-  }, [onGenerate, strategyName, selectedRegime, bespokeData, indicatorBlocks, strategies]);
+  }, [onGenerate, strategyName, selectedRegime, bespokeData, indicatorBlocks, strategies, validate]);
+
+  // Handle copy code to clipboard
+  const handleCopyCode = useCallback(async () => {
+    if (generateResult?.code) {
+      try {
+        await navigator.clipboard.writeText(generateResult.code);
+        setCodeCopied(true);
+        setTimeout(() => setCodeCopied(false), 2000);
+      } catch (err) {
+        console.error('Failed to copy code:', err);
+      }
+    }
+  }, [generateResult?.code]);
 
   return (
     <div className="h-full flex flex-col bg-color-terminal-bg text-color-terminal-text">
@@ -187,6 +235,64 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
                 ))}
               </div>
             )}
+
+            {/* ============================================================ */}
+            {/* Result Display Area (TICKET_082)                              */}
+            {/* ============================================================ */}
+            {(generateResult || isGenerating) && (
+              <div className="mt-8 border border-color-terminal-border rounded-lg overflow-hidden">
+                <div className="px-4 py-3 bg-color-terminal-surface border-b border-color-terminal-border flex items-center justify-between">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-color-terminal-text-secondary">
+                    Generated Strategy Code
+                  </h3>
+                  {generateResult?.code && (
+                    <button
+                      onClick={handleCopyCode}
+                      className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-medium text-color-terminal-text-muted hover:text-color-terminal-text bg-white/5 hover:bg-white/10 rounded transition-all"
+                    >
+                      {codeCopied ? (
+                        <>
+                          <Check className="w-3 h-3 text-color-terminal-accent-teal" />
+                          <span className="text-color-terminal-accent-teal">Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" />
+                          <span>Copy Code</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                <div className="p-4 bg-color-terminal-bg max-h-96 overflow-y-auto">
+                  {isGenerating && (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-color-terminal-accent-gold" />
+                      <span className="ml-3 text-sm text-color-terminal-text-muted">
+                        Generating strategy code...
+                      </span>
+                    </div>
+                  )}
+
+                  {generateResult?.error && (
+                    <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded">
+                      <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-red-400">Generation Failed</p>
+                        <p className="text-xs text-red-400/80 mt-1">{generateResult.error}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {generateResult?.code && (
+                    <pre className="text-xs font-mono text-color-terminal-text whitespace-pre-wrap break-words">
+                      <code>{generateResult.code}</code>
+                    </pre>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ============================================================== */}
@@ -196,10 +302,25 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
             {/* Primary Action */}
             <button
               onClick={handleGenerate}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border border-color-terminal-accent-gold rounded bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20 transition-all"
+              disabled={isGenerating}
+              className={cn(
+                "w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all",
+                isGenerating
+                  ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
+                  : "border-color-terminal-accent-gold bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20"
+              )}
             >
-              <Play className="w-4 h-4" />
-              Start Generate
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" />
+                  Start Generate
+                </>
+              )}
             </button>
           </div>
         </div>

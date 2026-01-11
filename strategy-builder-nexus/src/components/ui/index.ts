@@ -24,3 +24,6 @@ export type { DirectionalIndicatorSelectorProps, DirectionalIndicatorBlock, Trad
 
 export { PortalDropdown } from './PortalDropdown';
 export type { PortalDropdownProps } from './PortalDropdown';
+
+export { ValidateInputBeforeGenerate, useValidateBeforeGenerate } from './ValidateInputBeforeGenerate';
+export type { ValidateInputBeforeGenerateProps, ValidationConfig, UseValidateBeforeGenerateOptions } from './ValidateInputBeforeGenerate';
