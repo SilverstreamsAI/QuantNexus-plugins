@@ -72,121 +72,154 @@ const PYTHON_BUILTINS = [
 const JSON_KEYWORDS = ['true', 'false', 'null'];
 
 // -----------------------------------------------------------------------------
-// Syntax Highlighting Utilities
+// Syntax Highlighting Utilities (following web端 highlight-utils.js pattern)
 // -----------------------------------------------------------------------------
 
 /**
- * Escape HTML characters to prevent XSS
- */
-function escapeHtml(text: string): string {
-  if (!text) return '';
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  };
-  return text.replace(/[&<>"']/g, (m) => map[m]);
-}
-
-/**
- * Wrap text in a span with token class
- */
-function wrapToken(text: string, tokenClass: string): string {
-  return `<span class="${tokenClass}">${text}</span>`;
-}
-
-/**
  * Highlight Python code with syntax highlighting
+ * Uses placeholder technique from web端 to avoid double-highlighting
+ *
+ * @see /var/www/html/wp-content/themes/nonassa/js/utils/highlight-utils.js
  */
-function highlightPython(code: string): string {
-  let result = escapeHtml(code);
+function highlightPythonCode(code: string): string {
+  if (!code) return '';
 
-  // Comments (single line) - must be done first to avoid highlighting inside comments
-  result = result.replace(
-    /(#.*)$/gm,
-    wrapToken('$1', 'token-comment')
+  // Step 1: Escape HTML characters
+  let highlightedCode = code
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Use placeholder array to avoid double-highlighting
+  const replacements: string[] = [];
+  const addReplacement = (match: string, className: string): string => {
+    const replacementHtml = `<span class="token ${className}">${match}</span>`;
+    replacements.push(replacementHtml);
+    return `__REPLACE_${replacements.length - 1}__`;
+  };
+
+  // Step 2: Process comments and strings first (they may contain other keywords)
+  // Comments
+  highlightedCode = highlightedCode.replace(/(#.*)/g, (match) =>
+    addReplacement(match, 'comment')
   );
 
-  // Triple-quoted strings (docstrings)
-  result = result.replace(
+  // Multi-line strings (docstrings)
+  highlightedCode = highlightedCode.replace(
     /("""[\s\S]*?"""|'''[\s\S]*?''')/g,
-    wrapToken('$1', 'token-string')
+    (match) => addReplacement(match, 'triple-quoted-string')
   );
 
-  // Regular strings (double and single quotes)
-  result = result.replace(
-    /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
-    wrapToken('$1', 'token-string')
+  // Regular strings
+  highlightedCode = highlightedCode.replace(
+    /(["'])(?:(?!\1)[^\\\r\n]|\\.)*\1/g,
+    (match) => addReplacement(match, 'string')
   );
 
-  // Numbers (integers, floats, scientific notation)
-  result = result.replace(
-    /\b(\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/g,
-    wrapToken('$1', 'token-number')
+  // Step 3: Process function/class definitions
+  highlightedCode = highlightedCode.replace(
+    /\b(def|class)\s+([a-zA-Z_]\w*)/g,
+    (match, keyword, name) => {
+      const nameClass = keyword === 'def' ? 'function' : 'class-name';
+      const replacementHtml = `<span class="token keyword">${keyword}</span> <span class="token ${nameClass}">${name}</span>`;
+      replacements.push(replacementHtml);
+      return `__REPLACE_${replacements.length - 1}__`;
+    }
   );
 
-  // Decorators
-  result = result.replace(
-    /@([a-zA-Z_][a-zA-Z0-9_]*)/g,
-    wrapToken('@$1', 'token-decorator')
-  );
-
-  // Function definitions
-  result = result.replace(
-    /\b(def)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g,
-    wrapToken('$1', 'token-keyword') + ' ' + wrapToken('$2', 'token-function')
-  );
-
-  // Class definitions
-  result = result.replace(
-    /\b(class)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g,
-    wrapToken('$1', 'token-keyword') + ' ' + wrapToken('$2', 'token-class-name')
-  );
-
-  // Keywords
-  PYTHON_KEYWORDS.forEach((keyword) => {
-    const regex = new RegExp(`\\b(${keyword})\\b`, 'g');
-    result = result.replace(regex, wrapToken('$1', 'token-keyword'));
+  // Step 4: Process keywords
+  const keywords = [
+    'import', 'from', 'return', 'if', 'else', 'elif', 'for', 'while',
+    'in', 'is', 'not', 'and', 'or', 'with', 'as', 'try', 'except',
+    'finally', 'raise', 'assert', 'break', 'continue', 'pass', 'yield',
+    'lambda', 'global', 'nonlocal', 'async', 'await', 'True', 'False', 'None',
+  ];
+  keywords.forEach((keyword) => {
+    const regex = new RegExp(`\\b${keyword}\\b`, 'g');
+    highlightedCode = highlightedCode.replace(regex, (match) =>
+      addReplacement(match, 'keyword')
+    );
   });
 
-  // Built-in functions
-  PYTHON_BUILTINS.forEach((builtin) => {
-    const regex = new RegExp(`\\b(${builtin})\\b(?=\\s*\\()`, 'g');
-    result = result.replace(regex, wrapToken('$1', 'token-builtin'));
+  // Step 5: Process built-in functions
+  const builtins = [
+    'print', 'len', 'range', 'str', 'int', 'float', 'list', 'dict',
+    'set', 'tuple', 'bool', 'type', 'isinstance', 'hasattr', 'getattr',
+    'setattr', 'open', 'enumerate', 'zip', 'map', 'filter', 'sorted',
+    'min', 'max', 'sum', 'any', 'all', 'super', 'self',
+  ];
+  builtins.forEach((builtin) => {
+    const regex = new RegExp(`\\b${builtin}\\b`, 'g');
+    highlightedCode = highlightedCode.replace(regex, (match) =>
+      addReplacement(match, 'builtin')
+    );
   });
 
-  return result;
+  // Step 6: Process numbers
+  highlightedCode = highlightedCode.replace(
+    /\b(\d+\.?\d*|\.\d+)\b/g,
+    (match) => addReplacement(match, 'number')
+  );
+
+  // Step 7: Process decorators
+  highlightedCode = highlightedCode.replace(
+    /(@[a-zA-Z_]\w*\.?\w*)/g,
+    (match) => addReplacement(match, 'decorator')
+  );
+
+  // Step 8: Replace all placeholders with their HTML
+  for (let i = 0; i < replacements.length; i++) {
+    highlightedCode = highlightedCode.replace(`__REPLACE_${i}__`, replacements[i]);
+  }
+
+  return highlightedCode;
 }
 
 /**
  * Highlight JSON code with syntax highlighting
  */
-function highlightJson(code: string): string {
-  let result = escapeHtml(code);
+function highlightJsonCode(code: string): string {
+  if (!code) return '';
 
-  // Strings (property names and values)
-  result = result.replace(
-    /("(?:[^"\\]|\\.)*")\s*:/g,
-    wrapToken('$1', 'token-property') + ':'
-  );
-  result = result.replace(
-    /:\s*("(?:[^"\\]|\\.)*")/g,
-    ': ' + wrapToken('$1', 'token-string')
-  );
+  let result = code
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  const replacements: string[] = [];
+  const addReplacement = (match: string, className: string): string => {
+    const html = `<span class="token ${className}">${match}</span>`;
+    replacements.push(html);
+    return `__REPLACE_${replacements.length - 1}__`;
+  };
+
+  // Property names
+  result = result.replace(/("(?:[^"\\]|\\.)*")\s*:/g, (match, key) => {
+    return addReplacement(key, 'property') + ':';
+  });
+
+  // String values
+  result = result.replace(/:\s*("(?:[^"\\]|\\.)*")/g, (match, value) => {
+    return ': ' + addReplacement(value, 'string');
+  });
 
   // Numbers
-  result = result.replace(
-    /:\s*(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
-    ': ' + wrapToken('$1', 'token-number')
-  );
+  result = result.replace(/:\s*(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g, (match, num) => {
+    return ': ' + addReplacement(num, 'number');
+  });
 
   // Keywords (true, false, null)
-  JSON_KEYWORDS.forEach((keyword) => {
+  ['true', 'false', 'null'].forEach((keyword) => {
     const regex = new RegExp(`:\\s*(${keyword})\\b`, 'g');
-    result = result.replace(regex, ': ' + wrapToken('$1', 'token-keyword'));
+    result = result.replace(regex, (match, kw) => {
+      return ': ' + addReplacement(kw, 'keyword');
+    });
   });
+
+  // Replace placeholders
+  for (let i = 0; i < replacements.length; i++) {
+    result = result.replace(`__REPLACE_${i}__`, replacements[i]);
+  }
 
   return result;
 }
@@ -196,7 +229,16 @@ function highlightJson(code: string): string {
  */
 function highlightCode(code: string, language: 'python' | 'json'): string {
   if (!code) return '';
-  return language === 'json' ? highlightJson(code) : highlightPython(code);
+  return language === 'json' ? highlightJsonCode(code) : highlightPythonCode(code);
+}
+
+/**
+ * Get plain code text (for copy and line counting)
+ * Since server now returns plain text, this is mostly a pass-through
+ */
+function getPlainCode(code: string): string {
+  if (!code) return '';
+  return code;
 }
 
 // -----------------------------------------------------------------------------
@@ -321,12 +363,13 @@ export const CodeDisplay: React.FC<CodeDisplayProps> = ({
     }
   }, [copied]);
 
-  // Handle copy to clipboard
+  // Handle copy to clipboard (copy plain text, not HTML tags)
   const handleCopy = useCallback(async () => {
     if (!code) return;
 
     try {
-      await navigator.clipboard.writeText(code);
+      const textToCopy = getPlainCode(code);
+      await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
     } catch (err) {
       console.error('Failed to copy code:', err);
@@ -339,10 +382,11 @@ export const CodeDisplay: React.FC<CodeDisplayProps> = ({
     return highlightCode(code, language);
   }, [code, language, state]);
 
-  // Count lines for line numbers
+  // Count lines for line numbers (use plain text)
   const lineCount = useMemo(() => {
     if (!code) return 0;
-    return code.split('\n').length;
+    const plainCode = getPlainCode(code);
+    return plainCode.split('\n').length;
   }, [code]);
 
   // Determine what content to render
