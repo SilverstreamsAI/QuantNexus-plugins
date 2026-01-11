@@ -46,31 +46,6 @@ const DEFAULT_MAX_HEIGHT = '400px';
 const COPY_FEEDBACK_DURATION = 2000;
 const SKELETON_LINES = 8;
 
-// Python keywords for syntax highlighting
-const PYTHON_KEYWORDS = [
-  'import', 'from', 'return', 'if', 'else', 'elif', 'for', 'while',
-  'try', 'except', 'finally', 'with', 'as', 'in', 'and', 'or', 'not',
-  'is', 'def', 'class', 'lambda', 'yield', 'global', 'nonlocal',
-  'assert', 'break', 'continue', 'pass', 'raise', 'del',
-  'True', 'False', 'None',
-];
-
-// Python built-in functions
-const PYTHON_BUILTINS = [
-  'print', 'len', 'range', 'str', 'int', 'float', 'bool', 'list',
-  'dict', 'tuple', 'set', 'type', 'isinstance', 'hasattr', 'getattr',
-  'setattr', 'super', 'property', 'staticmethod', 'classmethod',
-  'abs', 'all', 'any', 'bin', 'callable', 'chr', 'compile', 'complex',
-  'delattr', 'dir', 'divmod', 'enumerate', 'eval', 'exec', 'filter',
-  'format', 'frozenset', 'globals', 'hash', 'help', 'hex', 'id',
-  'input', 'iter', 'locals', 'map', 'max', 'memoryview', 'min',
-  'next', 'object', 'oct', 'open', 'ord', 'pow', 'repr', 'reversed',
-  'round', 'slice', 'sorted', 'sum', 'vars', 'zip',
-];
-
-// JSON keywords
-const JSON_KEYWORDS = ['true', 'false', 'null'];
-
 // -----------------------------------------------------------------------------
 // Syntax Highlighting Utilities (following web端 highlight-utils.js pattern)
 // -----------------------------------------------------------------------------
@@ -281,16 +256,23 @@ const LoadingSkeleton: React.FC = () => (
     {Array.from({ length: SKELETON_LINES }).map((_, i) => (
       <div
         key={i}
-        className="h-3 rounded animate-pulse"
+        className="h-3 rounded skeleton-line"
         style={{
           width: `${Math.random() * 40 + 40}%`,
-          background: 'linear-gradient(90deg, #233554 25%, #112240 50%, #233554 75%)',
-          backgroundSize: '200% 100%',
-          animation: 'skeleton-loading 1.5s infinite',
         }}
       />
     ))}
     <style>{`
+      .skeleton-line {
+        background: linear-gradient(
+          90deg,
+          var(--color-terminal-border, #233554) 25%,
+          var(--color-terminal-surface, #112240) 50%,
+          var(--color-terminal-border, #233554) 75%
+        );
+        background-size: 200% 100%;
+        animation: skeleton-loading 1.5s infinite;
+      }
       @keyframes skeleton-loading {
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
@@ -323,13 +305,10 @@ interface LineNumbersProps {
 
 const LineNumbers: React.FC<LineNumbersProps> = ({ count }) => (
   <div
-    className="py-4 px-3 text-right select-none border-r terminal-mono"
+    className="py-4 px-3 text-right select-none border-r terminal-mono text-color-terminal-text-muted bg-black/20 border-color-terminal-border"
     style={{
       fontSize: '12px',
       lineHeight: '1.6',
-      color: '#5c6773',
-      backgroundColor: 'rgba(0, 0, 0, 0.2)',
-      borderColor: '#233554',
     }}
   >
     {Array.from({ length: count }).map((_, i) => (
@@ -423,28 +402,17 @@ export const CodeDisplay: React.FC<CodeDisplayProps> = ({
   return (
     <div
       className={cn(
-        'code-display rounded-lg overflow-hidden',
+        'code-display rounded-lg overflow-hidden border border-color-terminal-border bg-color-terminal-bg',
         className
       )}
-      style={{
-        border: '1px solid #233554',
-        backgroundColor: '#0a192f',
-      }}
     >
       {/* Header */}
-      <div
-        className="flex items-center justify-between px-4 py-3"
-        style={{
-          borderBottom: '1px solid #233554',
-          backgroundColor: 'rgba(17, 34, 64, 0.5)',
-        }}
-      >
+      <div className="flex items-center justify-between px-4 py-3 border-b border-color-terminal-border bg-color-terminal-surface/50">
         <h3
-          className="terminal-mono font-bold uppercase tracking-widest"
+          className="terminal-mono font-bold uppercase tracking-widest text-color-terminal-accent-gold"
           style={{
             fontSize: '14px',
             letterSpacing: '0.1em',
-            color: '#D4AF37',
           }}
         >
           {title}
@@ -459,33 +427,36 @@ export const CodeDisplay: React.FC<CodeDisplayProps> = ({
         {renderContent()}
       </div>
 
-      {/* Token styles */}
+      {/* Token styles using CSS variables from TICKET_078 theme system */}
       <style>{`
         .code-display .token-keyword {
-          color: #64ffda;
+          color: var(--color-terminal-accent-teal, #64ffda);
         }
         .code-display .token-string {
-          color: #98c379;
+          color: var(--color-terminal-accent-green, #98c379);
         }
         .code-display .token-comment {
-          color: #5c6773;
+          color: var(--color-terminal-text-muted, #5c6773);
           font-style: italic;
         }
         .code-display .token-number {
-          color: #d19a66;
+          color: var(--color-terminal-accent-orange, #d19a66);
         }
         .code-display .token-function,
         .code-display .token-class-name {
-          color: #D4AF37;
+          color: var(--color-terminal-accent-gold, #D4AF37);
         }
         .code-display .token-decorator {
-          color: #64ffda;
+          color: var(--color-terminal-accent-teal, #64ffda);
         }
         .code-display .token-builtin {
-          color: #e5c07b;
+          color: var(--color-terminal-accent-yellow, #e5c07b);
         }
         .code-display .token-property {
-          color: #61afef;
+          color: var(--color-terminal-accent-blue, #61afef);
+        }
+        .code-display .token-triple-quoted-string {
+          color: var(--color-terminal-accent-green, #98c379);
         }
       `}</style>
     </div>

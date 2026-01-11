@@ -209,9 +209,14 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
     try {
       console.debug('[RegimeDetector] Calling API directly:', config);
       const result = await executeMarketRegimeAnalysis(config);
-      console.debug('[RegimeDetector] API result:', result);
+
+      // Debug logs for CodeDisplay verification
+      console.log('[RegimeDetector] API result status:', result.status);
+      console.log('[RegimeDetector] strategy_code length:', result.strategy_code?.length);
+      console.log('[RegimeDetector] strategy_code preview:', result.strategy_code?.substring(0, 200));
 
       if (result.status === 'completed' && result.strategy_code) {
+        console.log('[RegimeDetector] Setting generateResult with code');
         setGenerateResult({ code: result.strategy_code });
       } else if (result.status === 'failed') {
         setGenerateResult({ error: result.error?.message || 'Generation failed' });
