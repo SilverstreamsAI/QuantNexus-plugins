@@ -4,7 +4,11 @@
  * TICKET_093: Plugin Settings UI Decoupling
  * Migrated from Host layer to Plugin layer for full plugin autonomy.
  *
+ * TICKET_090: Dynamic provider filtering
+ * Only shows providers with configured API keys in llm.selectedProvider dropdown.
+ *
  * @see TICKET_093 - Plugin Settings Decoupling
+ * @see TICKET_090 - LLM API Key Management
  * @see TICKET_081 - Plugin Settings Architecture
  */
 
@@ -14,8 +18,10 @@ import {
   RefreshCw,
   AlertTriangle,
   Info,
+  KeyRound,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { LLM_PROVIDERS, getDefaultModel } from '../../config/llm-providers';
 
 // =============================================================================
 // Types
@@ -85,9 +91,13 @@ interface ConfigFieldProps {
   property: ConfigurationProperty;
   value: unknown;
   onChange: (key: string, value: unknown) => void;
+  /** TICKET_090: Filtered enum options (for llm.selectedProvider) */
+  filteredEnum?: string[];
+  /** TICKET_090: Message when no options available */
+  emptyMessage?: string;
 }
 
-function ConfigField({ propertyKey, property, value, onChange }: ConfigFieldProps): JSX.Element {
+function ConfigField({ propertyKey, property, value, onChange, filteredEnum, emptyMessage }: ConfigFieldProps): JSX.Element {
   // Extract field label from key (e.g., "strategy.autoSave" -> "Auto Save")
   const label = propertyKey.split('.').pop()?.replace(/([A-Z])/g, ' $1').trim() || propertyKey;
   const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1);
@@ -130,6 +140,21 @@ function ConfigField({ propertyKey, property, value, onChange }: ConfigFieldProp
     case 'string':
       // Check if it's an enum (dropdown)
       if (property.enum && property.enum.length > 0) {
+        // TICKET_090: Use filtered enum if provided
+        const enumOptions = filteredEnum ?? property.enum;
+
+        // Show empty message if no options available
+        if (enumOptions.length === 0 && emptyMessage) {
+          return (
+            <Field label={capitalizedLabel} description={property.description}>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-amber-500/30 bg-amber-500/10">
+                <KeyRound className="h-4 w-4 text-amber-500" />
+                <span className="text-sm text-amber-500">{emptyMessage}</span>
+              </div>
+            </Field>
+          );
+        }
+
         return (
           <Field label={capitalizedLabel} description={property.description}>
             <select
@@ -137,11 +162,15 @@ function ConfigField({ propertyKey, property, value, onChange }: ConfigFieldProp
               onChange={(e) => handleChange(e.target.value)}
               className="w-full rounded-lg border border-white/10 bg-transparent px-3 py-2 text-sm focus:border-color-terminal-accent-teal focus:outline-none"
             >
-              {property.enum.map((option, index) => (
-                <option key={option} value={option} className="bg-color-terminal-panel">
-                  {property.enumDescriptions?.[index] || option}
-                </option>
-              ))}
+              {enumOptions.map((option) => {
+                // Find original index in property.enum for description lookup
+                const originalIndex = property.enum?.indexOf(option) ?? -1;
+                return (
+                  <option key={option} value={option} className="bg-color-terminal-panel">
+                    {originalIndex >= 0 ? property.enumDescriptions?.[originalIndex] || option : option}
+                  </option>
+                );
+              })}
             </select>
           </Field>
         );
@@ -206,6 +235,8 @@ export function ConfigTab({ pluginId }: ConfigTabProps): JSX.Element {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<string>('');
+  // TICKET_090: Track which LLM providers have API keys configured
+  const [configuredProviders, setConfiguredProviders] = useState<string[]>([]);
 
   // Load configuration from manifest via IPC
   const loadConfiguration = useCallback(async () => {
@@ -242,6 +273,17 @@ export function ConfigTab({ pluginId }: ConfigTabProps): JSX.Element {
         }
         setValues(defaults);
       }
+
+      // TICKET_090: Check which LLM providers have API keys configured
+      const configured: string[] = [];
+      for (const provider of LLM_PROVIDERS) {
+        const hasResult = await window.electronAPI.credential.has(pluginId, provider.secretKey);
+        if (hasResult.exists) {
+          configured.push(provider.id);
+        }
+      }
+      setConfiguredProviders(configured);
+
     } catch (e) {
       setError(`Failed to load configuration: ${e}`);
     } finally {
@@ -280,6 +322,13 @@ export function ConfigTab({ pluginId }: ConfigTabProps): JSX.Element {
     // Save to config
     try {
       await window.electronAPI.plugin.setConfig(pluginId, key, value);
+
+      // TICKET_090: When provider changes, auto-select default model
+      if (key === 'llm.selectedProvider' && typeof value === 'string') {
+        const defaultModel = getDefaultModel(value);
+        setValues(prev => ({ ...prev, 'llm.selectedModel': defaultModel }));
+        await window.electronAPI.plugin.setConfig(pluginId, 'llm.selectedModel', defaultModel);
+      }
     } catch (e) {
       console.error('Failed to save config:', e);
     }
@@ -402,15 +451,26 @@ export function ConfigTab({ pluginId }: ConfigTabProps): JSX.Element {
             return (
               <Section key={category.name} id={sectionId} title={category.name}>
                 <div className="space-y-4">
-                  {category.properties.map(({ key, property }) => (
-                    <ConfigField
-                      key={key}
-                      propertyKey={key}
-                      property={property}
-                      value={values[key]}
-                      onChange={handleChange}
-                    />
-                  ))}
+                  {category.properties.map(({ key, property }) => {
+                    // TICKET_090: Special handling for llm.selectedProvider
+                    const isProviderSelector = key === 'llm.selectedProvider';
+                    const filteredEnum = isProviderSelector ? configuredProviders : undefined;
+                    const emptyMessage = isProviderSelector
+                      ? 'No providers configured. Add API keys in the Secrets tab first.'
+                      : undefined;
+
+                    return (
+                      <ConfigField
+                        key={key}
+                        propertyKey={key}
+                        property={property}
+                        value={values[key]}
+                        onChange={handleChange}
+                        filteredEnum={filteredEnum}
+                        emptyMessage={emptyMessage}
+                      />
+                    );
+                  })}
                 </div>
               </Section>
             );
