@@ -123,29 +123,6 @@
           "category": "General",
           "order": 3
         },
-        "strategy.cacheEnabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable local caching for faster performance",
-          "category": "Performance",
-          "order": 4
-        },
-        "strategy.maxCacheSize": {
-          "type": "number",
-          "default": 100,
-          "minimum": 10,
-          "maximum": 1000,
-          "description": "Maximum cache size in MB",
-          "category": "Performance",
-          "order": 5
-        },
-        "strategy.apiEndpoint": {
-          "type": "string",
-          "default": "",
-          "description": "Custom API endpoint (leave empty for default)",
-          "category": "API",
-          "order": 6
-        },
         "strategy.apiKey": {
           "type": "string",
           "default": "",

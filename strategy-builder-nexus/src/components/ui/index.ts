@@ -27,3 +27,6 @@ export type { PortalDropdownProps } from './PortalDropdown';
 
 export { ValidateInputBeforeGenerate, useValidateBeforeGenerate } from './ValidateInputBeforeGenerate';
 export type { ValidateInputBeforeGenerateProps, ValidationConfig, UseValidateBeforeGenerateOptions } from './ValidateInputBeforeGenerate';
+
+export { CodeDisplay } from './CodeDisplay';
+export type { CodeDisplayProps, CodeDisplayState } from './CodeDisplay';
