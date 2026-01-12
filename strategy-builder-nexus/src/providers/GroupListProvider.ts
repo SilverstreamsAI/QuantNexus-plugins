@@ -18,11 +18,14 @@ export class GroupListProvider implements ViewProvider {
    * Resolve view element for the Group List
    */
   resolveView(_viewId: string, options?: ViewOptions): ViewElement {
+    if (!GroupListComponent) {
+      throw new Error('[GroupListProvider] Component not initialized. Call setComponent() first.');
+    }
     const groupId = (options?.groupId as string) || 'unknown';
 
     return {
       type: 'react',
-      content: GroupListComponent || this.getFallbackComponent(),
+      content: GroupListComponent,
       props: {
         groupId,
       },
@@ -60,12 +63,4 @@ export class GroupListProvider implements ViewProvider {
     GroupListComponent = component;
   }
 
-  /**
-   * Fallback component
-   */
-  private getFallbackComponent(): React.ComponentType<{ groupId?: string }> {
-    return function GroupListFallback() {
-      return null;
-    };
-  }
 }

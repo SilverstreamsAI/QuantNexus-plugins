@@ -28,12 +28,14 @@ export class RegimeEditorProvider implements CustomEditorProvider {
    * Resolve custom editor for a resource
    */
   resolveCustomEditor(resourceUri: string, _viewType: string): EditorElement {
-    // Extract strategy info from URI
+    if (!RegimeEditorComponent) {
+      throw new Error('[RegimeEditorProvider] Component not initialized. Call setComponent() first.');
+    }
     const strategyInfo = this.parseResourceUri(resourceUri);
 
     return {
       type: 'react',
-      content: RegimeEditorComponent || this.getFallbackComponent(),
+      content: RegimeEditorComponent,
       props: {
         resourceUri,
         strategyInfo,
@@ -107,15 +109,4 @@ export class RegimeEditorProvider implements CustomEditorProvider {
     // TODO: Implement generation logic via plugin context
   }
 
-  /**
-   * Fallback component
-   */
-  private getFallbackComponent(): React.ComponentType<{
-    resourceUri: string;
-    strategyInfo?: StrategyInfo;
-  }> {
-    return function RegimeEditorFallback() {
-      return null;
-    };
-  }
 }

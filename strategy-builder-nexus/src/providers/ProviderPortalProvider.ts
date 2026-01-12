@@ -18,12 +18,15 @@ export class ProviderPortalProvider implements ViewProvider {
    * Resolve view element for the Provider Portal
    */
   resolveView(_viewId: string, options?: ViewOptions): ViewElement {
+    if (!ProviderPortalComponent) {
+      throw new Error('[ProviderPortalProvider] Component not initialized. Call setComponent() first.');
+    }
     const providerId = (options?.providerId as string) || 'unknown';
     const providerName = this.getProviderName(providerId);
 
     return {
       type: 'react',
-      content: ProviderPortalComponent || this.getFallbackComponent(),
+      content: ProviderPortalComponent,
       props: {
         providerId,
         providerName,
@@ -73,12 +76,4 @@ export class ProviderPortalProvider implements ViewProvider {
     return providerNames[providerId] || providerId.toUpperCase();
   }
 
-  /**
-   * Fallback component
-   */
-  private getFallbackComponent(): React.ComponentType<{ providerId?: string; providerName?: string }> {
-    return function ProviderPortalFallback() {
-      return null;
-    };
-  }
 }

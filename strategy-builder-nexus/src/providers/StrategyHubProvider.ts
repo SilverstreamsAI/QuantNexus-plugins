@@ -19,10 +19,12 @@ export class StrategyHubProvider implements ViewProvider {
    * Resolve view element for the Hub
    */
   resolveView(_viewId: string, _options?: ViewOptions): ViewElement {
-    // Return React component type
+    if (!StrategyHubComponent) {
+      throw new Error('[StrategyHubProvider] Component not initialized. Call setComponent() first.');
+    }
     return {
       type: 'react',
-      content: StrategyHubComponent || this.getFallbackComponent(),
+      content: StrategyHubComponent,
       props: {},
     };
   }
@@ -58,12 +60,4 @@ export class StrategyHubProvider implements ViewProvider {
     StrategyHubComponent = component;
   }
 
-  /**
-   * Fallback component when main component not loaded
-   */
-  private getFallbackComponent(): React.ComponentType {
-    return function StrategyHubFallback() {
-      return null; // Placeholder
-    };
-  }
 }
