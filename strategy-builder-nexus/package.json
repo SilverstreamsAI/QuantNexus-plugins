@@ -89,7 +89,7 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@quantnexus/bridge": "workspace:*"
+    "@quantnexus/bridge": "git+https://github.com/SilverstreamsAI/bridge.git"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",

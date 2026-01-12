@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@clickhouse/client": "^1.0.0",
-    "@quantnexus/bridge": "workspace:*",
+    "@quantnexus/bridge": "git+https://github.com/SilverstreamsAI/bridge.git",
     "better-sqlite3": "^11.0.0"
   },
   "devDependencies": {
