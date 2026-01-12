@@ -1,10 +1,15 @@
 {
   "name": "com.quantnexus.strategy-builder-nexus",
   "displayName": "Strategy Studio",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Strategy management and generation plugin for QuantNexus",
   "main": "./dist/extension.js",
   "type": "strategy",
+  "lifecycle": {
+    "onInstall": "./scripts/install.js",
+    "onUpgrade": "./scripts/upgrade.js",
+    "onUninstall": "./scripts/uninstall.js"
+  },
   "category": "trading",
   "author": "QuantNexus Team",
   "license": "MIT",
@@ -89,7 +94,7 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@quantnexus/bridge": "git+https://github.com/SilverstreamsAI/bridge.git"
+    "@quantnexus/bridge": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",

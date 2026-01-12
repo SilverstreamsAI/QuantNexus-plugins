@@ -1,9 +1,14 @@
 {
   "name": "com.quantnexus.data-source-nexus",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "QuantNexus Data Plugin - Market data provider with Bridge integration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "lifecycle": {
+    "onInstall": "./scripts/install.js",
+    "onUpgrade": "./scripts/upgrade.js",
+    "onUninstall": "./scripts/uninstall.js"
+  },
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
@@ -12,7 +17,7 @@
   },
   "dependencies": {
     "@clickhouse/client": "^1.0.0",
-    "@quantnexus/bridge": "git+https://github.com/SilverstreamsAI/bridge.git",
+    "@quantnexus/bridge": "workspace:*",
     "better-sqlite3": "^11.0.0"
   },
   "devDependencies": {

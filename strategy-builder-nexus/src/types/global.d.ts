@@ -69,6 +69,16 @@ declare global {
   interface Window {
     electronAPI: ElectronAPI;
   }
+
+  // Host-injected nexus API (TICKET_096)
+  // eslint-disable-next-line no-var
+  var nexus: {
+    window?: {
+      showAlert(message: string): void;
+      showConfirm(message: string): Promise<boolean>;
+      showNotification(message: string, type?: 'info' | 'success' | 'warning' | 'error'): void;
+    };
+  } | undefined;
 }
 
 export {};
