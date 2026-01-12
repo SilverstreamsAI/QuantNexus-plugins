@@ -1,6 +1,10 @@
 /**
  * Data Plugin - QuantNexus Market Data Provider
  *
+ * TICKET_097_4: Bridge Integration
+ * - DataChannel for zero-copy tick data
+ * - Bridge.registerDataFeed() for Core registry
+ *
  * Provides market data from multiple sources with caching and local storage.
  */
 
@@ -36,6 +40,10 @@ import type {
   Interval,
 } from '@shared/types';
 
+// TICKET_097_4: Bridge Integration
+import { Bridge, DataChannel } from '@quantnexus/bridge';
+import type { TickData, TickCallback } from '@quantnexus/bridge';
+
 import { DataPluginStorage } from './storage/sqlite';
 import { DataPluginCache } from './storage/cache';
 import { ClickHouseProvider } from './providers/clickhouse';
@@ -54,6 +62,11 @@ class DataPlugin implements DataSourcePlugin {
   private cache: DataPluginCache | null = null;
   private subscriptions: Map<string, SubscriptionHandle> = new Map();
 
+  // TICKET_097_4: Bridge Integration
+  private bridge: Bridge | null = null;
+  private dataChannel: DataChannel | null = null;
+  private tickSubscriptions: Map<string, TickCallback> = new Map();
+
   constructor(context: PluginContext, config: DataSourcePluginConfig) {
     this.context = context;
     this.config = config;
@@ -65,6 +78,34 @@ class DataPlugin implements DataSourcePlugin {
 
   async activate(): Promise<void> {
     this.context.log.info('Data plugin activating...');
+
+    // =========================================================================
+    // TICKET_097_4: Initialize Bridge and DataChannel
+    // =========================================================================
+    try {
+      this.bridge = new Bridge();
+      this.dataChannel = new DataChannel();
+
+      // Register data feeds to Core registry
+      this.bridge.registerDataFeed({
+        id: 'nexus.local-data',
+        pluginId: 'com.quantnexus.data-source-nexus',
+        adapter: 'sqlite',
+        config: JSON.stringify({ dbPath: this.config.storage?.dbPath || 'data/market.db' }),
+      });
+
+      this.bridge.registerDataFeed({
+        id: 'nexus.clickhouse',
+        pluginId: 'com.quantnexus.data-source-nexus',
+        adapter: 'clickhouse',
+        config: JSON.stringify({ baseUrl: this.config.providers?.clickhouse?.baseUrl }),
+      });
+
+      this.context.log.info('Bridge initialized, data feeds registered');
+    } catch (err) {
+      this.context.log.warn(`Bridge initialization failed (fallback mode): ${err}`);
+      // Continue without Bridge - fallback to IPC mode
+    }
 
     // Initialize storage
     if (this.config.storage) {
@@ -98,6 +139,25 @@ class DataPlugin implements DataSourcePlugin {
 
   async deactivate(): Promise<void> {
     this.context.log.info('Data plugin deactivating...');
+
+    // =========================================================================
+    // TICKET_097_4: Cleanup Bridge resources
+    // =========================================================================
+    if (this.dataChannel) {
+      // Unsubscribe all tick subscriptions
+      for (const symbol of this.tickSubscriptions.keys()) {
+        this.dataChannel.unsubscribe(symbol);
+        this.dataChannel.closeTickBuffer(symbol);
+      }
+      this.tickSubscriptions.clear();
+    }
+
+    if (this.bridge) {
+      this.bridge.unregisterDataFeed('nexus.local-data');
+      this.bridge.unregisterDataFeed('nexus.clickhouse');
+      this.bridge.disconnect();
+      this.bridge = null;
+    }
 
     // Unsubscribe all
     await this.unsubscribeAll();
@@ -352,6 +412,73 @@ class DataPlugin implements DataSourcePlugin {
     if (provider) {
       await provider.unsubscribeAll();
     }
+  }
+
+  // ===========================================================================
+  // TICKET_097_4: Zero-Copy Tick Data via DataChannel
+  // ===========================================================================
+
+  /**
+   * Subscribe to tick data via SharedMemory DataChannel (zero-copy)
+   * @param symbol Symbol to subscribe
+   * @param callback Callback for tick updates
+   * @returns Unsubscribe function
+   */
+  subscribeToTicks(symbol: string, callback: TickCallback): () => void {
+    if (!this.dataChannel) {
+      this.context.log.warn('DataChannel not available, tick subscription ignored');
+      return () => {};
+    }
+
+    // Open tick buffer for this symbol
+    if (!this.dataChannel.openTickBuffer(symbol)) {
+      this.context.log.error(`Failed to open tick buffer for ${symbol}`);
+      return () => {};
+    }
+
+    // Subscribe to updates
+    this.dataChannel.subscribe(symbol, callback);
+    this.tickSubscriptions.set(symbol, callback);
+
+    this.context.log.info(`Subscribed to tick data: ${symbol}`);
+
+    // Return unsubscribe function
+    return () => {
+      if (this.dataChannel) {
+        this.dataChannel.unsubscribe(symbol);
+        this.dataChannel.closeTickBuffer(symbol);
+      }
+      this.tickSubscriptions.delete(symbol);
+      this.context.log.info(`Unsubscribed from tick data: ${symbol}`);
+    };
+  }
+
+  /**
+   * Get tick buffer statistics
+   */
+  getTickBufferStats(symbol: string) {
+    return this.dataChannel?.getBufferStats(symbol) || null;
+  }
+
+  /**
+   * Pop ticks from buffer (for manual polling)
+   */
+  popTicks(symbol: string, maxCount = 100): TickData[] {
+    return this.dataChannel?.popTicks(symbol, maxCount) || [];
+  }
+
+  /**
+   * Get Bridge instance for advanced operations
+   */
+  getBridge(): Bridge | null {
+    return this.bridge;
+  }
+
+  /**
+   * Get DataChannel instance for advanced operations
+   */
+  getDataChannel(): DataChannel | null {
+    return this.dataChannel;
   }
 
   // ===========================================================================

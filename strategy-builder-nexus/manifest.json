@@ -91,6 +91,7 @@
     ]
   },
   "contributes": {
+    "strategies": [],
     "configuration": {
       "title": "Strategy Builder Settings",
       "properties": {
@@ -263,7 +264,8 @@
     "commands": [
       { "id": "strategy.openHub", "title": "Open Strategy Hub" },
       { "id": "strategy.generate", "title": "Generate Strategy Code" },
-      { "id": "strategy.validate", "title": "Validate Strategy" }
+      { "id": "strategy.validate", "title": "Validate Strategy" },
+      { "id": "strategy.register", "title": "Register Strategy to Core" }
     ]
   },
   "permissions": ["network", "database"],

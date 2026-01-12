@@ -3,7 +3,7 @@
   "id": "com.quantnexus.back-test-nexus",
   "name": "back-test-nexus",
   "displayName": "Backtest Nexus",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Strategy backtesting with workflow UI, Python engine, and results visualization",
   "type": "nexus",
   "category": "execution",
@@ -18,6 +18,17 @@
     }
   },
   "contributes": {
+    "backtestEngines": [{
+      "id": "nexus.backtrader",
+      "name": "Backtrader Engine",
+      "adapter": "python:backtrader",
+      "description": "Python backtrader integration"
+    }, {
+      "id": "nexus.builtin",
+      "name": "Built-in Engine",
+      "adapter": "typescript",
+      "description": "TypeScript built-in backtest engine"
+    }],
     "viewsContainers": {
       "sidebar": [{
         "id": "backtestExplorer",

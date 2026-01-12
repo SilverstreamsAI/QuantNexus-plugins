@@ -1,7 +1,7 @@
 {
   "name": "com.quantnexus.back-test-nexus-ui",
-  "version": "1.0.0",
-  "description": "QuantNexus Backtest Plugin - Strategy backtesting engine",
+  "version": "1.1.0",
+  "description": "QuantNexus Backtest Plugin - Strategy backtesting with Bridge integration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -10,7 +10,9 @@
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@quantnexus/bridge": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "^5.3.0"
   },

@@ -11,6 +11,17 @@
   "category": "data",
   "protocols": ["data-nexus"],
   "contributes": {
+    "dataFeeds": [{
+      "id": "nexus.local-data",
+      "name": "Local Data Store",
+      "adapter": "sqlite",
+      "description": "SQLite/ClickHouse cached market data"
+    }, {
+      "id": "nexus.clickhouse",
+      "name": "ClickHouse Provider",
+      "adapter": "clickhouse",
+      "description": "Remote ClickHouse data source"
+    }],
     "viewsContainers": {
       "sidebar": [{
         "id": "dataExplorer",

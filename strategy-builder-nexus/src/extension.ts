@@ -1,6 +1,10 @@
 /**
  * Strategy Plugin - Extension Entry Point
  *
+ * TICKET_097_4: Bridge Integration
+ * - Bridge.registerStrategy() for Core registry
+ * - Query available data feeds from Bridge
+ *
  * This is the main entry point for the Strategy Studio plugin.
  * It registers all providers and handles plugin lifecycle.
  *
@@ -14,17 +18,35 @@ import { ProviderPortalProvider } from './providers/ProviderPortalProvider';
 import { GroupListProvider } from './providers/GroupListProvider';
 import { LLMSettingsProvider } from './providers/LLMSettingsProvider';
 
+// TICKET_097_4: Bridge Integration
+import { Bridge } from '@quantnexus/bridge';
+import type { StrategyRegistration, DataFeedInfo } from '@quantnexus/bridge';
+
 // Store disposables for cleanup
 const disposables: Disposable[] = [];
 
 // Store provider instances for inter-provider communication
 let treeProvider: StrategyTreeDataProvider | null = null;
 
+// TICKET_097_4: Bridge instance
+let bridge: Bridge | null = null;
+
 /**
  * Activate the plugin
  */
 export async function activate(context: PluginContext): Promise<PluginApi> {
   context.log.info('Strategy Plugin activating...');
+
+  // ===========================================================================
+  // TICKET_097_4: Initialize Bridge
+  // ===========================================================================
+  try {
+    bridge = new Bridge();
+    context.log.info('Bridge initialized for strategy registration');
+  } catch (err) {
+    context.log.warn(`Bridge initialization failed (fallback mode): ${err}`);
+    // Continue without Bridge - fallback to IPC mode
+  }
 
   // Access windowApi from global (injected by host)
   const windowApi = (globalThis as { nexus?: { window: unknown } }).nexus?.window;
@@ -104,6 +126,57 @@ export async function activate(context: PluginContext): Promise<PluginApi> {
     treeProvider?.refresh();
   });
 
+  // ---------------------------------------------------------------------------
+  // TICKET_097_4: Bridge Commands
+  // ---------------------------------------------------------------------------
+
+  // Command: Register Strategy to Core
+  context.commands.register('strategy.register', (strategyDef: {
+    id: string;
+    name: string;
+    type: 'tick' | 'bar' | 'event';
+  }) => {
+    if (!bridge) {
+      context.log.warn('Bridge not available, strategy registration skipped');
+      return false;
+    }
+
+    const registration: StrategyRegistration = {
+      id: `user.${strategyDef.id}`,
+      pluginId: 'com.quantnexus.strategy-builder-nexus',
+      type: strategyDef.type,
+    };
+
+    const success = bridge.registerStrategy(registration);
+    if (success) {
+      context.log.info(`Strategy registered to Core: ${registration.id}`);
+    } else {
+      context.log.error(`Failed to register strategy: ${registration.id}`);
+    }
+    return success;
+  });
+
+  // Command: Get available data feeds from Bridge
+  context.commands.register('strategy.getDataFeeds', (): DataFeedInfo[] => {
+    if (!bridge) {
+      context.log.warn('Bridge not available, returning empty data feeds');
+      return [];
+    }
+    return bridge.getDataFeeds().map(df => ({
+      id: df.id,
+      name: df.id,
+      description: `Adapter: ${df.adapter}`,
+    }));
+  });
+
+  // Command: Get registered strategies
+  context.commands.register('strategy.getRegistered', () => {
+    if (!bridge) {
+      return [];
+    }
+    return bridge.getStrategies();
+  });
+
   context.log.info('Strategy Plugin activated successfully');
 
   return {
@@ -116,6 +189,21 @@ export async function activate(context: PluginContext): Promise<PluginApi> {
  * Deactivate the plugin
  */
 export async function deactivate(): Promise<void> {
+  // ===========================================================================
+  // TICKET_097_4: Cleanup Bridge resources
+  // ===========================================================================
+  if (bridge) {
+    // Unregister all strategies registered by this plugin
+    const strategies = bridge.getStrategies();
+    for (const strategy of strategies) {
+      if (strategy.pluginId === 'com.quantnexus.strategy-builder-nexus') {
+        bridge.unregisterStrategy(strategy.id);
+      }
+    }
+    bridge.disconnect();
+    bridge = null;
+  }
+
   // Dispose all registered providers
   for (const disposable of disposables) {
     disposable.dispose();

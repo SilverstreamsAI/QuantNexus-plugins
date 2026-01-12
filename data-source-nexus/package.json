@@ -1,7 +1,7 @@
 {
   "name": "com.quantnexus.data-source-nexus",
-  "version": "1.0.0",
-  "description": "QuantNexus Data Plugin - Market data provider",
+  "version": "1.1.0",
+  "description": "QuantNexus Data Plugin - Market data provider with Bridge integration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@clickhouse/client": "^1.0.0",
+    "@quantnexus/bridge": "workspace:*",
     "better-sqlite3": "^11.0.0"
   },
   "devDependencies": {
