@@ -123,16 +123,17 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
   }, []);
 
   // Combine all rules for validation (TICKET_087)
-  // Rules = indicatorBlocks (template-based) + strategies (custom expressions)
+  // Rules = indicatorBlocks (template-based) + factorBlocks + strategies (custom expressions)
   const allRules = [
     ...indicatorBlocks,
+    ...factorBlocks,
     ...strategies.map(s => ({ type: 'custom_expression', expression: s.expression })),
   ];
 
   // Validation hook (TICKET_087)
   const { validate } = useValidateBeforeGenerate({
     items: allRules,
-    errorMessage: 'Please add at least one indicator or expression',
+    errorMessage: 'Please add at least one indicator, factor, or expression',
     onValidationFail: (message) => {
       console.warn('[RegimeDetector] Validation failed:', message);
       // Use Host modal API via nexus.window (TICKET_096)
@@ -203,6 +204,20 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
       rules.push({
         rule_type: 'custom_expression',
         expression: expr.expression,
+      });
+    }
+
+    // Add factor-based rules
+    for (const fac of factorBlocks) {
+      if (!fac.factorName) continue;
+
+      rules.push({
+        rule_type: 'factor_based',
+        factor: {
+          name: fac.factorName,
+          category: fac.category,
+          params: fac.paramValues as Record<string, unknown>,
+        },
       });
     }
 

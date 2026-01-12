@@ -33,7 +33,7 @@ export interface MarketRegimeConfig {
 }
 
 export interface MarketRegimeRule {
-  rule_type: 'template_based' | 'custom_expression';
+  rule_type: 'template_based' | 'custom_expression' | 'factor_based';
   indicator?: {
     slug: string;
     name: string;
@@ -48,6 +48,11 @@ export interface MarketRegimeRule {
     params?: Record<string, unknown>;
   };
   expression?: string;
+  factor?: {
+    name: string;
+    category: string;
+    params?: Record<string, unknown>;
+  };
 }
 
 export interface MarketRegimeResult {
@@ -61,7 +66,7 @@ export interface MarketRegimeResult {
 // -----------------------------------------------------------------------------
 
 interface ServerRule {
-  rule_type: 'template_based' | 'custom_expression';
+  rule_type: 'template_based' | 'custom_expression' | 'factor_based';
   indicator?: {
     slug: string;
     name: string;
@@ -75,6 +80,11 @@ interface ServerRule {
     };
   };
   expression?: string;
+  factor?: {
+    name: string;
+    category: string;
+    params?: Record<string, unknown>;
+  };
 }
 
 interface ServerRequest {
@@ -128,6 +138,13 @@ function transformRules(rules: MarketRegimeRule[]): ServerRule[] {
       };
     }
 
+    if (rule.rule_type === 'factor_based') {
+      return {
+        rule_type: 'factor_based',
+        factor: rule.factor,
+      };
+    }
+
     return {
       rule_type: 'template_based',
       indicator: rule.indicator,
@@ -146,6 +163,14 @@ function buildPrompt(config: MarketRegimeConfig): string {
   const ruleDescriptions = config.rules.map((rule) => {
     if (rule.rule_type === 'custom_expression') {
       return rule.expression || '';
+    }
+
+    if (rule.rule_type === 'factor_based') {
+      const factor = rule.factor;
+      const paramsStr = factor?.params
+        ? Object.entries(factor.params).map(([k, v]) => `${k}=${v}`).join(', ')
+        : '';
+      return paramsStr ? `Factor:${factor?.name}(${paramsStr})` : `Factor:${factor?.name}`;
     }
 
     const indicator = rule.indicator;
@@ -260,6 +285,10 @@ export function validateMarketRegimeConfig(
     } else if (rule.rule_type === 'custom_expression') {
       if (!rule.expression || rule.expression.length < 3) {
         return { valid: false, error: 'Custom expression must be at least 3 characters' };
+      }
+    } else if (rule.rule_type === 'factor_based') {
+      if (!rule.factor?.name) {
+        return { valid: false, error: 'Factor rule requires factor name' };
       }
     }
   }
