@@ -1,7 +1,7 @@
 /**
- * ChartView - 主图表视图组件
+ * ChartView - Main chart view component
  *
- * 使用 Lightweight Charts 渲染 K 线图
+ * Uses Lightweight Charts to render candlestick charts
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
@@ -50,7 +50,7 @@ export function ChartView({ className }: ChartViewProps): JSX.Element {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // 创建图表
+    // Create chart
     const chart = createChart(containerRef.current, {
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
@@ -73,7 +73,7 @@ export function ChartView({ className }: ChartViewProps): JSX.Element {
       },
     });
 
-    // 创建 K 线系列
+    // Create candlestick series
     const candleSeries = chart.addCandlestickSeries({
       upColor: '#22c55e',
       downColor: '#ef4444',
@@ -83,7 +83,7 @@ export function ChartView({ className }: ChartViewProps): JSX.Element {
       wickDownColor: '#ef4444',
     });
 
-    // 创建成交量系列
+    // Create volume series
     const volumeSeries = chart.addHistogramSeries({
       color: '#3b82f6',
       priceFormat: {
@@ -103,7 +103,7 @@ export function ChartView({ className }: ChartViewProps): JSX.Element {
     candleSeriesRef.current = candleSeries;
     volumeSeriesRef.current = volumeSeries;
 
-    // 响应式调整大小
+    // Responsive resize
     const handleResize = () => {
       if (containerRef.current) {
         chart.applyOptions({
@@ -131,7 +131,7 @@ export function ChartView({ className }: ChartViewProps): JSX.Element {
     setError(null);
 
     try {
-      // 通过 electronAPI 获取市场数据
+      // Get market data via electronAPI
       const endDate = new Date();
       const startDate = new Date();
       startDate.setFullYear(startDate.getFullYear() - 1);
@@ -150,7 +150,7 @@ export function ChartView({ className }: ChartViewProps): JSX.Element {
         data = generateMockData(startDate, endDate);
       }
 
-      // 转换为 Lightweight Charts 格式
+      // Convert to Lightweight Charts format
       const candleData: CandlestickData[] = data.map(d => ({
         time: (new Date(d.timestamp).getTime() / 1000) as any,
         open: d.open,

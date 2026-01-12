@@ -1,12 +1,12 @@
 /**
  * Chart Plugin Entry Point
  *
- * 这是插件的主入口，定义了 activate/deactivate 生命周期
+ * This is the plugin's main entry point, defining the activate/deactivate lifecycle
  */
 
 import type { PluginContext, PluginApi } from './types';
 
-// 插件 API 实现
+// Plugin API implementation
 class ChartPluginApi implements PluginApi {
   private context: PluginContext;
   private zoomLevel = 1;
@@ -18,13 +18,13 @@ class ChartPluginApi implements PluginApi {
   async activate(): Promise<void> {
     this.context.log.info('Chart plugin activated');
 
-    // 注册命令
+    // Register commands
     this.context.commands.register('zoomIn', () => this.zoomIn());
     this.context.commands.register('zoomOut', () => this.zoomOut());
     this.context.commands.register('reset', () => this.reset());
     this.context.commands.register('addIndicator', (indicator: unknown) => this.addIndicator(String(indicator)));
 
-    // 恢复状态
+    // Restore state
     const savedZoom = await this.context.storage.get<number>('zoomLevel');
     if (savedZoom) {
       this.zoomLevel = savedZoom;
@@ -32,7 +32,7 @@ class ChartPluginApi implements PluginApi {
   }
 
   async deactivate(): Promise<void> {
-    // 保存状态
+    // Save state
     await this.context.storage.set('zoomLevel', this.zoomLevel);
     this.context.log.info('Chart plugin deactivated');
   }
@@ -74,7 +74,7 @@ class ChartPluginApi implements PluginApi {
   }
 }
 
-// 模块导出
+// Module exports
 export async function activate(context: PluginContext): Promise<PluginApi> {
   const api = new ChartPluginApi(context);
   await api.activate();

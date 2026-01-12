@@ -47,12 +47,12 @@ const COPY_FEEDBACK_DURATION = 2000;
 const SKELETON_LINES = 8;
 
 // -----------------------------------------------------------------------------
-// Syntax Highlighting Utilities (following web端 highlight-utils.js pattern)
+// Syntax Highlighting Utilities (following web-side highlight-utils.js pattern)
 // -----------------------------------------------------------------------------
 
 /**
  * Highlight Python code with syntax highlighting
- * Uses placeholder technique from web端 to avoid double-highlighting
+ * Uses placeholder technique from web-side to avoid double-highlighting
  *
  * @see /var/www/html/wp-content/themes/nonassa/js/utils/highlight-utils.js
  */

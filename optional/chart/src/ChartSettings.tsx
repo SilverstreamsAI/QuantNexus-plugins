@@ -1,7 +1,7 @@
 /**
- * ChartSettings - 图表设置面板
+ * ChartSettings - Chart settings panel
  *
- * 侧边栏组件，用于配置图表参数
+ * Sidebar component for configuring chart parameters
  */
 
 import React, { useState } from 'react';

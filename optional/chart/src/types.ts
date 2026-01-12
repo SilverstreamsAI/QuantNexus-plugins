@@ -1,10 +1,10 @@
 /**
  * Chart Plugin Types
  *
- * 从宿主应用导入的类型定义
+ * Type definitions imported from host application
  */
 
-// PluginContext - 宿主提供给插件的 API
+// PluginContext - API provided by host to plugins
 export interface PluginContext {
   pluginId: string;
   pluginPath: string;
@@ -78,7 +78,7 @@ export interface PluginData {
   subscribe(symbol: string, handler: (data: unknown) => void): () => void;
 }
 
-// PluginApi - 插件提供给宿主的 API
+// PluginApi - API provided by plugin to host
 export interface PluginApi {
   activate(): Promise<void>;
   deactivate(): Promise<void>;
