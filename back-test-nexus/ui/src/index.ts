@@ -10,6 +10,7 @@ import type {
   PluginApi,
   DataSourcePlugin,
   OHLCVSeries,
+  Disposable,
 } from '@shared/types';
 import type {
   BacktestConfig,
