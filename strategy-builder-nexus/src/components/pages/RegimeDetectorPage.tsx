@@ -15,7 +15,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Settings, Play, Loader2, RotateCcw } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { RegimeSelector, BespokeData, ExpressionInput, StrategyCard, IndicatorSelector, IndicatorBlock, IndicatorDefinition, StrategyTemplate, useValidateBeforeGenerate, CodeDisplay, CodeDisplayState } from '../ui';
+import { RegimeSelector, BespokeData, ExpressionInput, StrategyCard, IndicatorSelector, IndicatorBlock, IndicatorDefinition, StrategyTemplate, useValidateBeforeGenerate, CodeDisplay, CodeDisplayState, FactorAddSelector, FactorDefinition, FactorBlock } from '../ui';
 
 // TICKET_091: Plugin directly calls API service
 import { executeMarketRegimeAnalysis, validateMarketRegimeConfig, MarketRegimeRule } from '../../services';
@@ -23,6 +23,32 @@ import { executeMarketRegimeAnalysis, validateMarketRegimeConfig, MarketRegimeRu
 // Import indicator data
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
 import strategyTemplates from '../../../assets/indicators/strategy-templates-library.json';
+
+// Sample factor data (component6)
+const sampleFactors: FactorDefinition[] = [
+  { name: 'KMID', category: 'technical', ic: null, icir: null },
+  { name: 'KLEN', category: 'volatility', ic: null, icir: null },
+  { name: 'KMID2', category: 'technical', ic: null, icir: null },
+  { name: 'KUP', category: 'technical', ic: null, icir: null },
+  { name: 'KUP2', category: 'technical', ic: null, icir: null },
+  { name: 'KLOW', category: 'technical', ic: null, icir: null },
+  { name: 'KLOW2', category: 'technical', ic: null, icir: null },
+  { name: 'KSFT', category: 'technical', ic: null, icir: null },
+  { name: 'KSFT2', category: 'technical', ic: null, icir: null },
+  { name: 'OPEN0', category: 'technical', ic: null, icir: null },
+  { name: 'ROC_5', category: 'momentum', ic: null, icir: null },
+  { name: 'ROC_10', category: 'momentum', ic: null, icir: null },
+  { name: 'ROC_20', category: 'momentum', ic: null, icir: null },
+  { name: 'MA_5', category: 'technical', ic: null, icir: null },
+  { name: 'MA_10', category: 'technical', ic: null, icir: null },
+  { name: 'MA_20', category: 'technical', ic: null, icir: null },
+  { name: 'STD_5', category: 'volatility', ic: null, icir: null },
+  { name: 'STD_10', category: 'volatility', ic: null, icir: null },
+  { name: 'STD_20', category: 'volatility', ic: null, icir: null },
+  { name: 'VOLUME_5', category: 'volume', ic: null, icir: null },
+  { name: 'VOLUME_10', category: 'volume', ic: null, icir: null },
+  { name: 'VOLUME_20', category: 'volume', ic: null, icir: null },
+];
 
 // -----------------------------------------------------------------------------
 // Types
@@ -72,6 +98,7 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
   const [selectedRegime, setSelectedRegime] = useState('trend');
   const [bespokeData, setBespokeData] = useState<BespokeData>({ name: '', notes: '' });
   const [indicatorBlocks, setIndicatorBlocks] = useState<IndicatorBlock[]>([]);
+  const [factorBlocks, setFactorBlocks] = useState<FactorBlock[]>([]);
 
   // Handle strategy name change
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,9 +134,9 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
     items: allRules,
     errorMessage: 'Please add at least one indicator or expression',
     onValidationFail: (message) => {
-      // TODO: Replace with toast notification when available
       console.warn('[RegimeDetector] Validation failed:', message);
-      alert(message);
+      // Use Host modal API via nexus.window (TICKET_096)
+      globalThis.nexus?.window?.showAlert(message);
     },
   });
 
@@ -312,6 +339,15 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
               templates={strategyTemplates as Record<string, StrategyTemplate>}
               blocks={indicatorBlocks}
               onChange={setIndicatorBlocks}
+              className="mb-8"
+            />
+
+            {/* component6: Factor Add Selector */}
+            <FactorAddSelector
+              factors={sampleFactors}
+              blocks={factorBlocks}
+              onChange={setFactorBlocks}
+              maxRecommended={3}
               className="mb-8"
             />
 

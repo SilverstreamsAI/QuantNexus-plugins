@@ -30,3 +30,6 @@ export type { ValidateInputBeforeGenerateProps, ValidationConfig, UseValidateBef
 
 export { CodeDisplay } from './CodeDisplay';
 export type { CodeDisplayProps, CodeDisplayState } from './CodeDisplay';
+
+export { FactorAddSelector } from './FactorAddSelector';
+export type { FactorAddSelectorProps, FactorDefinition, FactorBlock } from './FactorAddSelector';
