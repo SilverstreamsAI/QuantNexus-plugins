@@ -27,14 +27,30 @@ import type {
 import { BacktestEngine, DEFAULT_CONFIG } from './engine/engine';
 import { builtInStrategies } from './engine/executor';
 
-// TICKET_097_4: Bridge Integration
-import { Bridge, SessionApi, DataChannel } from '@quantnexus/bridge';
-import type {
-  SessionConfig,
-  SessionInfo,
-  BacktestResult as BridgeBacktestResult,
-  ProgressCallback,
-} from '@quantnexus/bridge';
+// TICKET_097_5: Bridge Integration via contributions API
+type SessionConfig = {
+  dataFeedId: string;
+  strategyId: string;
+  engineId: string;
+  startTime: number;
+  endTime: number;
+  initialCapital: number;
+  symbols: string[];
+};
+type BridgeBacktestResult = {
+  success: boolean;
+  totalReturn: number;
+  errorMessage?: string;
+};
+type ProgressCallback = (percent: number, message: string) => void;
+
+interface ContributionsApi {
+  registerBacktestEngine?: (reg: { id: string; pluginId: string; adapter: string }) => boolean;
+  unregisterBacktestEngine?: (id: string) => boolean;
+  getDataFeeds?: () => Array<{ id: string; adapter: string }>;
+  getStrategies?: () => Array<{ id: string; pluginId: string }>;
+  getEngines?: () => Array<{ id: string; adapter: string }>;
+}
 
 // =============================================================================
 // Backtest Plugin API
@@ -86,11 +102,8 @@ class BacktestPluginImpl implements BacktestPlugin {
   private results: BacktestResult[] = [];
   private lastResult: BacktestResult | null = null;
 
-  // TICKET_097_4: Bridge Integration
-  private bridge: Bridge | null = null;
-  private sessionApi: SessionApi | null = null;
-  private dataChannel: DataChannel | null = null;
-  private activeSessionId: string | null = null;
+  // TICKET_097_5: Bridge Integration via contributions API
+  private contributions: ContributionsApi | null = null;
 
   constructor(context: PluginContext, config?: Partial<BacktestConfig>) {
     this.context = context;
@@ -105,30 +118,32 @@ class BacktestPluginImpl implements BacktestPlugin {
     this.context.log.info('Backtest plugin (UI) activating...');
 
     // =========================================================================
-    // TICKET_097_4: Initialize Bridge, SessionApi, DataChannel
+    // TICKET_097_5: Access Bridge via contributions API
     // =========================================================================
     try {
-      this.bridge = new Bridge();
-      this.sessionApi = new SessionApi();
-      this.dataChannel = new DataChannel();
+      const nexus = (globalThis as { nexus?: { contributions?: ContributionsApi } }).nexus;
+      this.contributions = nexus?.contributions || null;
 
-      // Register backtest engines to Core registry
-      this.bridge.registerBacktestEngine({
-        id: 'nexus.backtrader',
-        pluginId: 'com.quantnexus.back-test-nexus',
-        adapter: 'python:backtrader',
-      });
+      if (this.contributions?.registerBacktestEngine) {
+        // Register backtest engines to Core registry
+        this.contributions.registerBacktestEngine({
+          id: 'nexus.backtrader',
+          pluginId: 'com.quantnexus.back-test-nexus',
+          adapter: 'python:backtrader',
+        });
 
-      this.bridge.registerBacktestEngine({
-        id: 'nexus.builtin',
-        pluginId: 'com.quantnexus.back-test-nexus',
-        adapter: 'typescript',
-      });
+        this.contributions.registerBacktestEngine({
+          id: 'nexus.builtin',
+          pluginId: 'com.quantnexus.back-test-nexus',
+          adapter: 'typescript',
+        });
 
-      this.context.log.info('Bridge initialized, backtest engines registered');
+        this.context.log.info('Bridge contributions API available, backtest engines registered');
+      } else {
+        this.context.log.warn('Bridge contributions API not available (local engine mode)');
+      }
     } catch (err) {
-      this.context.log.warn(`Bridge initialization failed (fallback mode): ${err}`);
-      // Continue without Bridge - fallback to local engine
+      this.context.log.warn(`Bridge access failed (fallback mode): ${err}`);
     }
 
     // Access windowApi from global (injected by host)
@@ -178,24 +193,13 @@ class BacktestPluginImpl implements BacktestPlugin {
     this.context.log.info('Backtest plugin deactivating...');
 
     // =========================================================================
-    // TICKET_097_4: Cleanup Bridge resources
+    // TICKET_097_5: Cleanup via contributions API
     // =========================================================================
-    // Stop any active session
-    if (this.sessionApi && this.activeSessionId) {
-      this.sessionApi.stopSession(this.activeSessionId);
-      this.sessionApi.removeSession(this.activeSessionId);
-      this.activeSessionId = null;
+    if (this.contributions?.unregisterBacktestEngine) {
+      this.contributions.unregisterBacktestEngine('nexus.backtrader');
+      this.contributions.unregisterBacktestEngine('nexus.builtin');
     }
-
-    if (this.bridge) {
-      this.bridge.unregisterBacktestEngine('nexus.backtrader');
-      this.bridge.unregisterBacktestEngine('nexus.builtin');
-      this.bridge.disconnect();
-      this.bridge = null;
-    }
-
-    this.sessionApi = null;
-    this.dataChannel = null;
+    this.contributions = null;
 
     // Dispose all registered providers
     for (const disposable of disposables) {
@@ -270,117 +274,43 @@ class BacktestPluginImpl implements BacktestPlugin {
   }
 
   // ===========================================================================
-  // TICKET_097_4: SessionApi-based Backtest Execution
+  // TICKET_097_5: Bridge-based queries via contributions API
   // ===========================================================================
 
   /**
-   * Run backtest via SessionApi (C++ Core Engine)
-   * This uses the Bridge's session management for high-performance backtesting
-   */
-  async runViaSession(
-    config: SessionConfig,
-    onProgress?: ProgressCallback
-  ): Promise<BridgeBacktestResult> {
-    if (!this.sessionApi) {
-      throw new Error('SessionApi not available - Bridge not initialized');
-    }
-
-    this.context.log.info(`Starting backtest via SessionApi: ${config.strategyId}`);
-
-    // Create session
-    const session = this.sessionApi.createSession(config);
-    this.activeSessionId = session.sessionId;
-    this.context.log.info(`Session created: ${session.sessionId}`);
-
-    // Open tick buffers for data visualization (if DataChannel available)
-    if (this.dataChannel && config.symbols) {
-      for (const symbol of config.symbols) {
-        this.dataChannel.openTickBuffer(symbol);
-      }
-    }
-
-    try {
-      // Run session with progress callback
-      const result = await this.sessionApi.runSession(
-        session.sessionId,
-        onProgress || ((percent, message) => {
-          this.context.log.debug(`Progress: ${percent}% - ${message}`);
-        })
-      );
-
-      // Notify completion
-      if (result.success) {
-        this.context.ui.showNotification(
-          `Backtest completed: ${(result.totalReturn * 100).toFixed(2)}% return`,
-          result.totalReturn >= 0 ? 'success' : 'warning'
-        );
-      } else {
-        this.context.ui.showNotification(`Backtest failed: ${result.errorMessage}`, 'error');
-      }
-
-      return result;
-    } finally {
-      // Cleanup tick buffers
-      if (this.dataChannel && config.symbols) {
-        for (const symbol of config.symbols) {
-          this.dataChannel.closeTickBuffer(symbol);
-        }
-      }
-      this.activeSessionId = null;
-    }
-  }
-
-  /**
-   * Get available data feeds from Bridge
+   * Get available data feeds from contributions API
    */
   getAvailableDataFeeds() {
-    return this.sessionApi?.getDataFeeds() || [];
+    return this.contributions?.getDataFeeds?.() || [];
   }
 
   /**
-   * Get available strategies from Bridge
+   * Get available strategies from contributions API
    */
   getAvailableStrategies() {
-    return this.sessionApi?.getStrategies() || [];
+    return this.contributions?.getStrategies?.() || [];
   }
 
   /**
-   * Get available backtest engines from Bridge
+   * Get available backtest engines from contributions API
    */
   getAvailableEngines() {
-    return this.sessionApi?.getEngines() || [];
+    return this.contributions?.getEngines?.() || [];
   }
 
   /**
-   * Get Bridge instance for advanced operations
+   * Check if contributions API is available
    */
-  getBridge(): Bridge | null {
-    return this.bridge;
-  }
-
-  /**
-   * Get SessionApi instance for advanced operations
-   */
-  getSessionApi(): SessionApi | null {
-    return this.sessionApi;
+  hasContributionsApi(): boolean {
+    return this.contributions !== null;
   }
 
   stop(): void {
-    // Stop session if running via SessionApi
-    if (this.sessionApi && this.activeSessionId) {
-      this.sessionApi.stopSession(this.activeSessionId);
-      this.context.log.info(`Session stopped: ${this.activeSessionId}`);
-    }
-    // Also stop local engine
     this.engine.stop();
     this.context.log.info('Backtest stopped');
   }
 
   isRunning(): boolean {
-    // Check both SessionApi and local engine
-    if (this.activeSessionId) {
-      return true;
-    }
     return this.engine.isRunning();
   }
 

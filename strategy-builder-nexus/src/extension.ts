@@ -18,9 +18,16 @@ import { ProviderPortalProvider } from './providers/ProviderPortalProvider';
 import { GroupListProvider } from './providers/GroupListProvider';
 import { LLMSettingsProvider } from './providers/LLMSettingsProvider';
 
-// TICKET_097_4: Bridge Integration
-import { Bridge } from '@quantnexus/bridge';
-import type { StrategyRegistration, DataFeedInfo } from '@quantnexus/bridge';
+// TICKET_097_5: Bridge Integration via contributions API
+type StrategyRegistration = { id: string; pluginId: string; type: 'tick' | 'bar' | 'event' };
+type DataFeedInfo = { id: string; name: string; description: string };
+
+interface ContributionsApi {
+  registerStrategy?: (reg: StrategyRegistration) => boolean;
+  unregisterStrategy?: (id: string) => boolean;
+  getStrategies?: () => Array<{ id: string; pluginId: string }>;
+  getDataFeeds?: () => Array<{ id: string; adapter: string }>;
+}
 
 // Store disposables for cleanup
 const disposables: Disposable[] = [];
@@ -28,8 +35,8 @@ const disposables: Disposable[] = [];
 // Store provider instances for inter-provider communication
 let treeProvider: StrategyTreeDataProvider | null = null;
 
-// TICKET_097_4: Bridge instance
-let bridge: Bridge | null = null;
+// TICKET_097_5: Contributions API instance
+let contributions: ContributionsApi | null = null;
 
 /**
  * Activate the plugin
@@ -38,14 +45,19 @@ export async function activate(context: PluginContext): Promise<PluginApi> {
   context.log.info('Strategy Plugin activating...');
 
   // ===========================================================================
-  // TICKET_097_4: Initialize Bridge
+  // TICKET_097_5: Access Bridge via contributions API
   // ===========================================================================
   try {
-    bridge = new Bridge();
-    context.log.info('Bridge initialized for strategy registration');
+    const nexus = (globalThis as { nexus?: { contributions?: ContributionsApi } }).nexus;
+    contributions = nexus?.contributions || null;
+
+    if (contributions?.registerStrategy) {
+      context.log.info('Bridge contributions API available for strategy registration');
+    } else {
+      context.log.warn('Bridge contributions API not available (IPC fallback mode)');
+    }
   } catch (err) {
-    context.log.warn(`Bridge initialization failed (fallback mode): ${err}`);
-    // Continue without Bridge - fallback to IPC mode
+    context.log.warn(`Bridge access failed (fallback mode): ${err}`);
   }
 
   // Access windowApi from global (injected by host)
@@ -127,27 +139,24 @@ export async function activate(context: PluginContext): Promise<PluginApi> {
   });
 
   // ---------------------------------------------------------------------------
-  // TICKET_097_4: Bridge Commands
+  // TICKET_097_5: Bridge Commands via contributions API
   // ---------------------------------------------------------------------------
 
   // Command: Register Strategy to Core
-  context.commands.register('strategy.register', (strategyDef: {
-    id: string;
-    name: string;
-    type: 'tick' | 'bar' | 'event';
-  }) => {
-    if (!bridge) {
-      context.log.warn('Bridge not available, strategy registration skipped');
+  context.commands.register('strategy.register', (strategyDef: unknown) => {
+    if (!contributions?.registerStrategy) {
+      context.log.warn('Bridge contributions not available, strategy registration skipped');
       return false;
     }
 
+    const def = strategyDef as { id: string; name: string; type: 'tick' | 'bar' | 'event' };
     const registration: StrategyRegistration = {
-      id: `user.${strategyDef.id}`,
+      id: `user.${def.id}`,
       pluginId: 'com.quantnexus.strategy-builder-nexus',
-      type: strategyDef.type,
+      type: def.type,
     };
 
-    const success = bridge.registerStrategy(registration);
+    const success = contributions.registerStrategy(registration);
     if (success) {
       context.log.info(`Strategy registered to Core: ${registration.id}`);
     } else {
@@ -156,13 +165,13 @@ export async function activate(context: PluginContext): Promise<PluginApi> {
     return success;
   });
 
-  // Command: Get available data feeds from Bridge
+  // Command: Get available data feeds from contributions API
   context.commands.register('strategy.getDataFeeds', (): DataFeedInfo[] => {
-    if (!bridge) {
-      context.log.warn('Bridge not available, returning empty data feeds');
+    if (!contributions?.getDataFeeds) {
+      context.log.warn('Bridge contributions not available, returning empty data feeds');
       return [];
     }
-    return bridge.getDataFeeds().map(df => ({
+    return contributions.getDataFeeds().map(df => ({
       id: df.id,
       name: df.id,
       description: `Adapter: ${df.adapter}`,
@@ -171,10 +180,10 @@ export async function activate(context: PluginContext): Promise<PluginApi> {
 
   // Command: Get registered strategies
   context.commands.register('strategy.getRegistered', () => {
-    if (!bridge) {
+    if (!contributions?.getStrategies) {
       return [];
     }
-    return bridge.getStrategies();
+    return contributions.getStrategies();
   });
 
   context.log.info('Strategy Plugin activated successfully');
@@ -190,19 +199,18 @@ export async function activate(context: PluginContext): Promise<PluginApi> {
  */
 export async function deactivate(): Promise<void> {
   // ===========================================================================
-  // TICKET_097_4: Cleanup Bridge resources
+  // TICKET_097_5: Cleanup via contributions API
   // ===========================================================================
-  if (bridge) {
+  if (contributions?.getStrategies && contributions?.unregisterStrategy) {
     // Unregister all strategies registered by this plugin
-    const strategies = bridge.getStrategies();
+    const strategies = contributions.getStrategies();
     for (const strategy of strategies) {
       if (strategy.pluginId === 'com.quantnexus.strategy-builder-nexus') {
-        bridge.unregisterStrategy(strategy.id);
+        contributions.unregisterStrategy(strategy.id);
       }
     }
-    bridge.disconnect();
-    bridge = null;
   }
+  contributions = null;
 
   // Dispose all registered providers
   for (const disposable of disposables) {
