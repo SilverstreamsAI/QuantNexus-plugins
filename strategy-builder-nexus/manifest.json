@@ -7,6 +7,11 @@
   "description": "Strategy creation, market regime classification, and AI-powered code generation",
   "main": "./dist/index.js",
   "type": "nexus",
+  "lifecycle": {
+    "onInstall": "./scripts/install.js",
+    "onUpgrade": "./scripts/upgrade.js",
+    "onUninstall": "./scripts/uninstall.js"
+  },
   "category": "strategy",
   "protocols": ["strategy-nexus"],
   "entitlements": {

@@ -12,13 +12,7 @@
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
-
-// Minimal type for this script (full definition in shared/types/plugin-lifecycle.ts)
-interface InstallContext {
-  storagePath: string;
-  log: { debug(msg: string): void; info(msg: string): void; warn(msg: string): void; error(msg: string): void };
-  progress: { report(percent: number, message?: string): void };
-}
+import type { InstallContext } from '../../../apps/desktop/src/shared/types/plugin-lifecycle';
 
 export default async function onInstall(context: InstallContext): Promise<void> {
   const { storagePath, log, progress } = context;
@@ -41,73 +35,92 @@ export default async function onInstall(context: InstallContext): Promise<void> 
   log.info('Strategy directories created');
   progress.report(30, 'Initializing database...');
 
-  // Initialize SQLite database
-  const dbPath = path.join(storagePath, 'strategies.db');
-
+  // Initialize SQLite database using Database Protocol
   try {
-    const Database = (await import('better-sqlite3')).default;
-    const db = new Database(dbPath);
+    const { database } = context;
 
-    db.exec(`
-      -- Strategy definitions
-      CREATE TABLE IF NOT EXISTS strategies (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        description TEXT,
-        type TEXT NOT NULL,
-        regime_id TEXT,
-        code TEXT,
-        parameters TEXT,
-        tags TEXT DEFAULT '[]',
-        version INTEGER DEFAULT 1,
-        created_at INTEGER DEFAULT (unixepoch()),
-        updated_at INTEGER DEFAULT (unixepoch())
-      );
-
-      -- Strategy groups (folders)
-      CREATE TABLE IF NOT EXISTS strategy_groups (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        description TEXT,
-        parent_id TEXT,
-        icon TEXT,
-        created_at INTEGER DEFAULT (unixepoch()),
-        FOREIGN KEY (parent_id) REFERENCES strategy_groups(id)
-      );
-
-      -- Strategy-to-group mapping
-      CREATE TABLE IF NOT EXISTS strategy_group_members (
-        strategy_id TEXT NOT NULL,
-        group_id TEXT NOT NULL,
-        added_at INTEGER DEFAULT (unixepoch()),
-        PRIMARY KEY (strategy_id, group_id),
-        FOREIGN KEY (strategy_id) REFERENCES strategies(id),
-        FOREIGN KEY (group_id) REFERENCES strategy_groups(id)
-      );
-
-      -- Strategy execution history
-      CREATE TABLE IF NOT EXISTS execution_history (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        strategy_id TEXT NOT NULL,
-        execution_type TEXT NOT NULL,
-        started_at INTEGER NOT NULL,
-        completed_at INTEGER,
-        status TEXT NOT NULL,
-        result TEXT,
-        FOREIGN KEY (strategy_id) REFERENCES strategies(id)
-      );
-
-      -- Create indexes
-      CREATE INDEX IF NOT EXISTS idx_strategies_regime ON strategies(regime_id);
-      CREATE INDEX IF NOT EXISTS idx_strategies_type ON strategies(type);
-      CREATE INDEX IF NOT EXISTS idx_groups_parent ON strategy_groups(parent_id);
-      CREATE INDEX IF NOT EXISTS idx_execution_strategy ON execution_history(strategy_id);
+    // Create schema version table
+    await database.execute(`
+      CREATE TABLE IF NOT EXISTS _plugin_schema (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      )
     `);
 
-    db.close();
+    // Initialize schema version
+    await database.execute(
+      "INSERT OR IGNORE INTO _plugin_schema (key, value) VALUES ('version', '1')"
+    );
+
+    // Create tables in a transaction
+    await database.transaction(async (tx) => {
+      // Strategy definitions
+      await tx.execute(`
+        CREATE TABLE IF NOT EXISTS strategies (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          description TEXT,
+          type TEXT NOT NULL,
+          regime_id TEXT,
+          code TEXT,
+          parameters TEXT,
+          tags TEXT DEFAULT '[]',
+          version INTEGER DEFAULT 1,
+          created_at INTEGER DEFAULT (unixepoch()),
+          updated_at INTEGER DEFAULT (unixepoch())
+        )
+      `);
+
+      // Strategy groups (folders)
+      await tx.execute(`
+        CREATE TABLE IF NOT EXISTS strategy_groups (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          description TEXT,
+          parent_id TEXT,
+          icon TEXT,
+          created_at INTEGER DEFAULT (unixepoch()),
+          FOREIGN KEY (parent_id) REFERENCES strategy_groups(id)
+        )
+      `);
+
+      // Strategy-to-group mapping
+      await tx.execute(`
+        CREATE TABLE IF NOT EXISTS strategy_group_members (
+          strategy_id TEXT NOT NULL,
+          group_id TEXT NOT NULL,
+          added_at INTEGER DEFAULT (unixepoch()),
+          PRIMARY KEY (strategy_id, group_id),
+          FOREIGN KEY (strategy_id) REFERENCES strategies(id),
+          FOREIGN KEY (group_id) REFERENCES strategy_groups(id)
+        )
+      `);
+
+      // Strategy execution history
+      await tx.execute(`
+        CREATE TABLE IF NOT EXISTS execution_history (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          strategy_id TEXT NOT NULL,
+          execution_type TEXT NOT NULL,
+          started_at INTEGER NOT NULL,
+          completed_at INTEGER,
+          status TEXT NOT NULL,
+          result TEXT,
+          FOREIGN KEY (strategy_id) REFERENCES strategies(id)
+        )
+      `);
+
+      // Create indexes
+      await tx.execute('CREATE INDEX IF NOT EXISTS idx_strategies_regime ON strategies(regime_id)');
+      await tx.execute('CREATE INDEX IF NOT EXISTS idx_strategies_type ON strategies(type)');
+      await tx.execute('CREATE INDEX IF NOT EXISTS idx_groups_parent ON strategy_groups(parent_id)');
+      await tx.execute('CREATE INDEX IF NOT EXISTS idx_execution_strategy ON execution_history(strategy_id)');
+    });
+
     log.info('Database initialized successfully');
   } catch (error) {
-    log.warn(`Database initialization skipped: ${error}`);
+    log.error(`Database initialization failed: ${error}`);
+    throw error;
   }
 
   progress.report(70, 'Creating default templates...');

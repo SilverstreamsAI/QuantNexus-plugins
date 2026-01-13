@@ -8,6 +8,11 @@
   "main": "./ui/dist/plugins/data-source-nexus/ui/src/index.js",
   "backend": "./backend/dist/plugins/data-source-nexus/backend/src/index.js",
   "type": "nexus",
+  "lifecycle": {
+    "onInstall": "./scripts/install.js",
+    "onUpgrade": "./scripts/upgrade.js",
+    "onUninstall": "./scripts/uninstall.js"
+  },
   "category": "data",
   "protocols": ["data-nexus"],
   "contributes": {

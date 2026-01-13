@@ -12,13 +12,7 @@
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
-
-// Minimal type for this script (full definition in shared/types/plugin-lifecycle.ts)
-interface InstallContext {
-  storagePath: string;
-  log: { debug(msg: string): void; info(msg: string): void; warn(msg: string): void; error(msg: string): void };
-  progress: { report(percent: number, message?: string): void };
-}
+import type { InstallContext } from '../../../apps/desktop/src/shared/types/plugin-lifecycle';
 
 export default async function onInstall(context: InstallContext): Promise<void> {
   const { storagePath, log, progress } = context;
@@ -41,65 +35,80 @@ export default async function onInstall(context: InstallContext): Promise<void> 
   log.info('Data directories created');
   progress.report(30, 'Initializing database...');
 
-  // Initialize SQLite database for metadata
-  const dbPath = path.join(storagePath, 'data-source.db');
-
-  // Use better-sqlite3 for sync operations (simpler for initialization)
+  // Initialize SQLite database using Database Protocol
   try {
-    const Database = (await import('better-sqlite3')).default;
-    const db = new Database(dbPath);
+    const { database } = context;
 
-    db.exec(`
-      -- Data sources configuration
-      CREATE TABLE IF NOT EXISTS data_sources (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        type TEXT NOT NULL,
-        config TEXT,
-        enabled INTEGER DEFAULT 1,
-        created_at INTEGER DEFAULT (unixepoch()),
-        updated_at INTEGER DEFAULT (unixepoch())
-      );
-
-      -- Download history tracking
-      CREATE TABLE IF NOT EXISTS download_history (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        source_id TEXT NOT NULL,
-        symbol TEXT NOT NULL,
-        interval TEXT NOT NULL,
-        start_date TEXT,
-        end_date TEXT,
-        file_path TEXT,
-        file_size INTEGER,
-        row_count INTEGER,
-        downloaded_at INTEGER DEFAULT (unixepoch()),
-        FOREIGN KEY (source_id) REFERENCES data_sources(id)
-      );
-
-      -- Symbol metadata cache
-      CREATE TABLE IF NOT EXISTS symbols (
-        id TEXT PRIMARY KEY,
-        source_id TEXT NOT NULL,
-        symbol TEXT NOT NULL,
-        name TEXT,
-        exchange TEXT,
-        asset_type TEXT,
-        metadata TEXT,
-        last_updated INTEGER DEFAULT (unixepoch()),
-        UNIQUE(source_id, symbol)
-      );
-
-      -- Create indexes
-      CREATE INDEX IF NOT EXISTS idx_download_source ON download_history(source_id);
-      CREATE INDEX IF NOT EXISTS idx_download_symbol ON download_history(symbol);
-      CREATE INDEX IF NOT EXISTS idx_symbols_source ON symbols(source_id);
+    // Create schema version table
+    await database.execute(`
+      CREATE TABLE IF NOT EXISTS _plugin_schema (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      )
     `);
 
-    db.close();
+    // Initialize schema version
+    await database.execute(
+      "INSERT OR IGNORE INTO _plugin_schema (key, value) VALUES ('version', '1')"
+    );
+
+    // Create tables in a transaction
+    await database.transaction(async (tx) => {
+      // Data sources configuration
+      await tx.execute(`
+        CREATE TABLE IF NOT EXISTS data_sources (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          type TEXT NOT NULL,
+          config TEXT,
+          enabled INTEGER DEFAULT 1,
+          created_at INTEGER DEFAULT (unixepoch()),
+          updated_at INTEGER DEFAULT (unixepoch())
+        )
+      `);
+
+      // Download history tracking
+      await tx.execute(`
+        CREATE TABLE IF NOT EXISTS download_history (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          source_id TEXT NOT NULL,
+          symbol TEXT NOT NULL,
+          interval TEXT NOT NULL,
+          start_date TEXT,
+          end_date TEXT,
+          file_path TEXT,
+          file_size INTEGER,
+          row_count INTEGER,
+          downloaded_at INTEGER DEFAULT (unixepoch()),
+          FOREIGN KEY (source_id) REFERENCES data_sources(id)
+        )
+      `);
+
+      // Symbol metadata cache
+      await tx.execute(`
+        CREATE TABLE IF NOT EXISTS symbols (
+          id TEXT PRIMARY KEY,
+          source_id TEXT NOT NULL,
+          symbol TEXT NOT NULL,
+          name TEXT,
+          exchange TEXT,
+          asset_type TEXT,
+          metadata TEXT,
+          last_updated INTEGER DEFAULT (unixepoch()),
+          UNIQUE(source_id, symbol)
+        )
+      `);
+
+      // Create indexes
+      await tx.execute('CREATE INDEX IF NOT EXISTS idx_download_source ON download_history(source_id)');
+      await tx.execute('CREATE INDEX IF NOT EXISTS idx_download_symbol ON download_history(symbol)');
+      await tx.execute('CREATE INDEX IF NOT EXISTS idx_symbols_source ON symbols(source_id)');
+    });
+
     log.info('Database initialized successfully');
   } catch (error) {
-    log.warn(`Database initialization skipped: ${error}`);
-    // Continue without database - will be created on first use
+    log.error(`Database initialization failed: ${error}`);
+    throw error;
   }
 
   progress.report(80, 'Creating default configuration...');

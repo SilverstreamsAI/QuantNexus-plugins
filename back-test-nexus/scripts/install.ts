@@ -15,17 +15,9 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import type { InstallContext } from '../../../apps/desktop/src/shared/types/plugin-lifecycle';
 
 const execAsync = promisify(exec);
-
-// Minimal type for this script (full definition in shared/types/plugin-lifecycle.ts)
-interface InstallContext {
-  pluginPath: string;
-  storagePath: string;
-  platform: NodeJS.Platform;
-  log: { debug(msg: string): void; info(msg: string): void; warn(msg: string): void; error(msg: string): void };
-  progress: { report(percent: number, message?: string): void };
-}
 
 export default async function onInstall(context: InstallContext): Promise<void> {
   const { pluginPath, storagePath, platform, log, progress } = context;
@@ -160,63 +152,81 @@ export default async function onInstall(context: InstallContext): Promise<void> 
   const configPath = path.join(storagePath, 'config.json');
   await fs.writeFile(configPath, JSON.stringify(defaultConfig, null, 2));
 
-  // Initialize results database
-  const dbPath = path.join(storagePath, 'backtest.db');
-
+  // Initialize results database using Database Protocol
   try {
-    const Database = (await import('better-sqlite3')).default;
-    const db = new Database(dbPath);
+    const { database } = context;
 
-    db.exec(`
-      -- Backtest runs
-      CREATE TABLE IF NOT EXISTS backtest_runs (
-        id TEXT PRIMARY KEY,
-        name TEXT,
-        strategy_id TEXT,
-        engine TEXT NOT NULL,
-        config TEXT,
-        started_at INTEGER NOT NULL,
-        completed_at INTEGER,
-        status TEXT NOT NULL,
-        error TEXT
-      );
-
-      -- Backtest results
-      CREATE TABLE IF NOT EXISTS backtest_results (
-        run_id TEXT PRIMARY KEY,
-        total_return REAL,
-        sharpe_ratio REAL,
-        max_drawdown REAL,
-        win_rate REAL,
-        total_trades INTEGER,
-        metrics TEXT,
-        equity_curve TEXT,
-        FOREIGN KEY (run_id) REFERENCES backtest_runs(id)
-      );
-
-      -- Trade history
-      CREATE TABLE IF NOT EXISTS trades (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        run_id TEXT NOT NULL,
-        symbol TEXT,
-        direction TEXT,
-        entry_time INTEGER,
-        exit_time INTEGER,
-        entry_price REAL,
-        exit_price REAL,
-        size REAL,
-        pnl REAL,
-        FOREIGN KEY (run_id) REFERENCES backtest_runs(id)
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_runs_strategy ON backtest_runs(strategy_id);
-      CREATE INDEX IF NOT EXISTS idx_trades_run ON trades(run_id);
+    // Create schema version table
+    await database.execute(`
+      CREATE TABLE IF NOT EXISTS _plugin_schema (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      )
     `);
 
-    db.close();
+    // Initialize schema version
+    await database.execute(
+      "INSERT OR IGNORE INTO _plugin_schema (key, value) VALUES ('version', '1')"
+    );
+
+    // Create tables in a transaction
+    await database.transaction(async (tx) => {
+      // Backtest runs
+      await tx.execute(`
+        CREATE TABLE IF NOT EXISTS backtest_runs (
+          id TEXT PRIMARY KEY,
+          name TEXT,
+          strategy_id TEXT,
+          engine TEXT NOT NULL,
+          config TEXT,
+          started_at INTEGER NOT NULL,
+          completed_at INTEGER,
+          status TEXT NOT NULL,
+          error TEXT
+        )
+      `);
+
+      // Backtest results
+      await tx.execute(`
+        CREATE TABLE IF NOT EXISTS backtest_results (
+          run_id TEXT PRIMARY KEY,
+          total_return REAL,
+          sharpe_ratio REAL,
+          max_drawdown REAL,
+          win_rate REAL,
+          total_trades INTEGER,
+          metrics TEXT,
+          equity_curve TEXT,
+          FOREIGN KEY (run_id) REFERENCES backtest_runs(id)
+        )
+      `);
+
+      // Trade history
+      await tx.execute(`
+        CREATE TABLE IF NOT EXISTS trades (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          run_id TEXT NOT NULL,
+          symbol TEXT,
+          direction TEXT,
+          entry_time INTEGER,
+          exit_time INTEGER,
+          entry_price REAL,
+          exit_price REAL,
+          size REAL,
+          pnl REAL,
+          FOREIGN KEY (run_id) REFERENCES backtest_runs(id)
+        )
+      `);
+
+      // Create indexes
+      await tx.execute('CREATE INDEX IF NOT EXISTS idx_runs_strategy ON backtest_runs(strategy_id)');
+      await tx.execute('CREATE INDEX IF NOT EXISTS idx_trades_run ON trades(run_id)');
+    });
+
     log.info('Results database initialized');
   } catch (error) {
-    log.warn(`Database initialization skipped: ${error}`);
+    log.error(`Database initialization failed: ${error}`);
+    throw error;
   }
 
   progress.report(100, 'Installation complete');
