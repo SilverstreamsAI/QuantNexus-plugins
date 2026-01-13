@@ -1,5 +1,8 @@
 # QuantNexus Backtest Engine Plugin - Dependencies
 
+# Cython (for code protection and performance)
+cython>=3.0
+
 # gRPC
 grpcio>=1.60.0
 grpcio-tools>=1.60.0

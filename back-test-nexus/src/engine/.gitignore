@@ -1,0 +1,35 @@
+# Cython build artifacts
+*.c
+*.so
+*.pyd
+*.html
+
+# Build directories
+build/
+dist/
+*.egg-info/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Data files (local testing)
+data/
+*.db
