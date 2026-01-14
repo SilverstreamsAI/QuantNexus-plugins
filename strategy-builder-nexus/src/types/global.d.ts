@@ -60,9 +60,34 @@ interface ElectronPluginAPI {
   setConfig(pluginId: string, key: string, value: unknown): Promise<CredentialResult>;
 }
 
+interface HubEntityResult {
+  success: boolean;
+  data?: any;
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
+interface ElectronHubAPI {
+  invokeEntity(action: string, entity: string, payload: any, pluginId: string): Promise<HubEntityResult>;
+  transaction(operations: any[], pluginId: string): Promise<HubEntityResult>;
+  setState(key: string, value: any, pluginId: string): void;
+  getState(key: string): Promise<any>;
+  getAllState(): Promise<any>;
+  onStateChanged(callback: (data: any) => void): () => void;
+  emit(type: string, payload: any, pluginId: string): void;
+  replay(type: string): Promise<any>;
+  onEvent(callback: (data: any) => void): () => void;
+  findFiles(query: any, pluginId: string): Promise<any>;
+  resolveFile(fileId: string, pluginId: string): Promise<any>;
+  removeFile(fileId: string, deleteFile: boolean, pluginId: string): Promise<any>;
+}
+
 interface ElectronAPI {
   credential: ElectronCredentialAPI;
   plugin: ElectronPluginAPI;
+  hub: ElectronHubAPI;
 }
 
 declare global {

@@ -7,9 +7,10 @@
  * @see TICKET_077 - Silverstream UI Component Library
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { cn } from '../../lib/utils';
 import { WorkflowRowSelector, type WorkflowRow, type AlgorithmOption } from '../ui';
+import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
 
 // Inline SVG icons
 const HistoryIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -55,39 +56,19 @@ interface BacktestPageProps {
 }
 
 // -----------------------------------------------------------------------------
-// Mock Algorithm Data (will be replaced with SQLite query)
+// Algorithm Data (loaded from SQLite nona_algorithms table)
 // -----------------------------------------------------------------------------
 
-const MOCK_ALGORITHMS: {
+const EMPTY_ALGORITHMS: {
   trendRange: AlgorithmOption[];
   preCondition: AlgorithmOption[];
   selectSteps: AlgorithmOption[];
   postCondition: AlgorithmOption[];
 } = {
-  trendRange: [
-    { id: 1, code: 'TR001', strategyName: 'Trend Following', strategyType: 9, description: 'Follow market trends' },
-    { id: 2, code: 'TR002', strategyName: 'Range Trading', strategyType: 9, description: 'Trade within price ranges' },
-    { id: 3, code: 'TR003', strategyName: 'Momentum Analysis', strategyType: 9, description: 'Analyze momentum indicators' },
-    { id: 4, code: 'TR004', strategyName: 'Mean Reversion', strategyType: 9, description: 'Trade mean reversion patterns' },
-  ],
-  preCondition: [
-    { id: 10, code: 'PRE001', strategyName: 'Volume Filter', strategyType: 4, description: 'Minimum volume requirement' },
-    { id: 11, code: 'PRE002', strategyName: 'Volatility Check', strategyType: 4, description: 'Volatility threshold' },
-    { id: 12, code: 'PRE003', strategyName: 'Trend Confirmation', strategyType: 4, description: 'Confirm trend direction' },
-  ],
-  selectSteps: [
-    { id: 20, code: 'SS001', strategyName: 'MA Crossover', strategyType: 0, description: 'Moving average crossover' },
-    { id: 21, code: 'SS002', strategyName: 'RSI Entry', strategyType: 1, description: 'RSI-based entry signal' },
-    { id: 22, code: 'SS003', strategyName: 'MACD Signal', strategyType: 2, description: 'MACD histogram signal' },
-    { id: 23, code: 'SS004', strategyName: 'Bollinger Breakout', strategyType: 3, description: 'Bollinger band breakout' },
-    { id: 24, code: 'SS005', strategyName: 'Volume Spike', strategyType: 1, description: 'Volume increase detection' },
-    { id: 25, code: 'SS006', strategyName: 'Support/Resistance', strategyType: 2, description: 'S/R level detection' },
-  ],
-  postCondition: [
-    { id: 30, code: 'POST001', strategyName: 'Stop Loss', strategyType: 6, description: 'Fixed stop loss' },
-    { id: 31, code: 'POST002', strategyName: 'Take Profit', strategyType: 6, description: 'Fixed take profit' },
-    { id: 32, code: 'POST003', strategyName: 'Trailing Stop', strategyType: 6, description: 'Trailing stop loss' },
-  ],
+  trendRange: [],
+  preCondition: [],
+  selectSteps: [],
+  postCondition: [],
 };
 
 // Initial empty row
@@ -110,6 +91,44 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   const [isExecuting, setIsExecuting] = useState(false);
   const [historyItems] = useState<HistoryItem[]>([]);
   const [workflowRows, setWorkflowRows] = useState<WorkflowRow[]>([createInitialRow()]);
+  const [algorithms, setAlgorithms] = useState(EMPTY_ALGORITHMS);
+  const [loading, setLoading] = useState(true);
+
+  // Load algorithms from database on mount
+  useEffect(() => {
+    async function loadAlgorithms() {
+      try {
+        setLoading(true);
+
+        const [trendRange, preCondition, selectSteps, postCondition] = await Promise.all([
+          algorithmService.getTrendRangeAlgorithms(),
+          algorithmService.getPreConditionAlgorithms(),
+          algorithmService.getSelectStepsAlgorithms(),
+          algorithmService.getPostConditionAlgorithms(),
+        ]);
+
+        setAlgorithms({
+          trendRange: trendRange.map(toAlgorithmOption),
+          preCondition: preCondition.map(toAlgorithmOption),
+          selectSteps: selectSteps.map(toAlgorithmOption),
+          postCondition: postCondition.map(toAlgorithmOption),
+        });
+
+        console.log('[BacktestPage] Loaded algorithms:', {
+          trendRange: trendRange.length,
+          preCondition: preCondition.length,
+          selectSteps: selectSteps.length,
+          postCondition: postCondition.length,
+        });
+      } catch (error) {
+        console.error('[BacktestPage] Failed to load algorithms:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadAlgorithms();
+  }, []);
 
   const handleExecute = useCallback(async () => {
     if (isExecuting) return;
@@ -169,13 +188,21 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Zone C: WorkflowRowSelector */}
         <div className="flex-1 overflow-y-auto p-6">
-          <WorkflowRowSelector
-            title="WORKFLOW CONFIGURATION"
-            rows={workflowRows}
-            onChange={setWorkflowRows}
-            algorithms={MOCK_ALGORITHMS}
-            maxRows={10}
-          />
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-color-terminal-text-muted">
+                Loading algorithms...
+              </div>
+            </div>
+          ) : (
+            <WorkflowRowSelector
+              title="WORKFLOW CONFIGURATION"
+              rows={workflowRows}
+              onChange={setWorkflowRows}
+              algorithms={algorithms}
+              maxRows={10}
+            />
+          )}
         </div>
 
         {/* Zone D: Action Bar */}

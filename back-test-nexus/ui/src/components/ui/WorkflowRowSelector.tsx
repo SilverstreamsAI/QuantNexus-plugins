@@ -2,13 +2,16 @@
  * WorkflowRowSelector Component (component7)
  *
  * Algorithm workflow builder for Zone C variable content area.
- * Displays a table of workflow rows with algorithm selection dropdowns.
- * Data source: SQLite nona_algorithms table.
+ * Displays a row of 4 algorithm selection buttons:
+ * - Select Algorithm (Trend-Range)
+ * - Pre-condition
+ * - Select Steps
+ * - Post-condition
  *
  * @see TICKET_077 - Silverstream UI Component Library
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { cn } from '../../lib/utils';
 import { WorkflowDropdown, type AlgorithmOption } from './WorkflowDropdown';
 
@@ -42,10 +45,10 @@ export interface WorkflowRowSelectorProps {
   onChange: (rows: WorkflowRow[]) => void;
   /** Available algorithms grouped by type */
   algorithms: {
-    trendRange: AlgorithmOption[];      // type 9
-    preCondition: AlgorithmOption[];    // type 4
-    selectSteps: AlgorithmOption[];     // types 0,1,2,3
-    postCondition: AlgorithmOption[];   // type 6
+    trendRange: AlgorithmOption[];
+    preCondition: AlgorithmOption[];
+    selectSteps: AlgorithmOption[];
+    postCondition: AlgorithmOption[];
   };
   /** Maximum number of rows */
   maxRows?: number;
@@ -58,14 +61,6 @@ export interface WorkflowRowSelectorProps {
 // -----------------------------------------------------------------------------
 
 const DEFAULT_TITLE = 'WORKFLOW CONFIGURATION';
-const DEFAULT_MAX_ROWS = 10;
-
-// Column headers
-const COLUMN_HEADERS = {
-  rowNumber: '#',
-  analysis: 'ANALYSIS',
-  steps: 'STRATEGY STEPS',
-};
 
 // -----------------------------------------------------------------------------
 // Helper Functions
@@ -119,7 +114,7 @@ const SelectionChips: React.FC<SelectionChipsProps> = ({ selections, onRemove, t
             themeClasses[theme]
           )}
         >
-          <span className="truncate max-w-[120px]">{sel.strategyName}</span>
+          <span className="truncate max-w-[100px]">{sel.strategyName}</span>
           <button
             onClick={() => onRemove(sel.id)}
             className="hover:opacity-70 transition-opacity"
@@ -135,6 +130,158 @@ const SelectionChips: React.FC<SelectionChipsProps> = ({ selections, onRemove, t
 };
 
 // -----------------------------------------------------------------------------
+// Single Workflow Row Component
+// -----------------------------------------------------------------------------
+
+interface WorkflowRowItemProps {
+  row: WorkflowRow;
+  algorithms: WorkflowRowSelectorProps['algorithms'];
+  onUpdate: (rowId: string, updates: Partial<WorkflowRow>) => void;
+}
+
+const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUpdate }) => {
+  const toSelection = (opt: AlgorithmOption): AlgorithmSelection => ({
+    id: opt.id,
+    code: opt.code,
+    strategyName: opt.strategyName,
+    strategyType: opt.strategyType,
+    description: opt.description,
+  });
+
+  const handleSelectionChange = (
+    column: 'analysis' | 'preCondition' | 'steps' | 'postCondition',
+    selectedIds: number[],
+    availableOptions: AlgorithmOption[]
+  ) => {
+    const selectedItems = selectedIds
+      .map((id) => availableOptions.find((opt) => opt.id === id))
+      .filter((opt): opt is AlgorithmOption => opt !== undefined)
+      .map(toSelection);
+
+    const updateKey = {
+      analysis: 'analysisSelections',
+      preCondition: 'preConditionSelections',
+      steps: 'stepSelections',
+      postCondition: 'postConditionSelections',
+    }[column] as keyof WorkflowRow;
+
+    onUpdate(row.id, { [updateKey]: selectedItems });
+  };
+
+  const handleRemoveChip = (
+    column: 'analysis' | 'preCondition' | 'steps' | 'postCondition',
+    selectionId: number
+  ) => {
+    const columnKey = {
+      analysis: 'analysisSelections',
+      preCondition: 'preConditionSelections',
+      steps: 'stepSelections',
+      postCondition: 'postConditionSelections',
+    }[column] as keyof WorkflowRow;
+
+    const currentSelections = row[columnKey] as AlgorithmSelection[];
+    const newSelections = currentSelections.filter((s) => s.id !== selectionId);
+    onUpdate(row.id, { [columnKey]: newSelections });
+  };
+
+  // Pre/Post conditions enabled after algorithm selection
+  const conditionEnabled = row.analysisSelections.length > 0;
+
+  return (
+    <div className="border border-color-terminal-border rounded-lg bg-color-terminal-surface/20 p-4 mb-4">
+      {/* Row Number */}
+      <div className="flex items-center gap-2 mb-4">
+        <span className="w-6 h-6 flex items-center justify-center rounded bg-color-terminal-surface text-xs font-bold text-color-terminal-text-muted">
+          {row.rowNumber}
+        </span>
+        <span className="text-[10px] uppercase tracking-wider text-color-terminal-text-muted">
+          Workflow Step
+        </span>
+      </div>
+
+      {/* 4 Buttons in a row - wider for enabled (3), narrower for disabled (2) */}
+      <div className="flex flex-row gap-3 w-full">
+        {/* Select Algorithm - wide (3 units) */}
+        <div className="flex-[3]">
+          <WorkflowDropdown
+            label="Select Algorithm"
+            options={algorithms.trendRange}
+            selectedIds={row.analysisSelections.map((s) => s.id)}
+            onChange={(ids) => handleSelectionChange('analysis', ids, algorithms.trendRange)}
+            theme="teal"
+            multiSelect={true}
+            showSearch={true}
+            searchPlaceholder="Search..."
+          />
+          <SelectionChips
+            selections={row.analysisSelections}
+            onRemove={(id) => handleRemoveChip('analysis', id)}
+            theme="teal"
+          />
+        </div>
+
+        {/* Pre-condition - narrow (2 units) */}
+        <div className="flex-[2]">
+          <WorkflowDropdown
+            label="Pre-condition"
+            options={algorithms.preCondition}
+            selectedIds={row.preConditionSelections.map((s) => s.id)}
+            onChange={(ids) => handleSelectionChange('preCondition', ids, algorithms.preCondition)}
+            theme="purple"
+            disabled={!conditionEnabled}
+            multiSelect={false}
+            showSearch={false}
+          />
+          <SelectionChips
+            selections={row.preConditionSelections}
+            onRemove={(id) => handleRemoveChip('preCondition', id)}
+            theme="purple"
+          />
+        </div>
+
+        {/* Select Steps - wide (3 units) */}
+        <div className="flex-[3]">
+          <WorkflowDropdown
+            label="Select Steps"
+            options={algorithms.selectSteps}
+            selectedIds={row.stepSelections.map((s) => s.id)}
+            onChange={(ids) => handleSelectionChange('steps', ids, algorithms.selectSteps)}
+            theme="blue"
+            multiSelect={true}
+            showSearch={true}
+            searchPlaceholder="Search..."
+          />
+          <SelectionChips
+            selections={row.stepSelections}
+            onRemove={(id) => handleRemoveChip('steps', id)}
+            theme="blue"
+          />
+        </div>
+
+        {/* Post-condition - narrow (2 units) */}
+        <div className="flex-[2]">
+          <WorkflowDropdown
+            label="Post-condition"
+            options={algorithms.postCondition}
+            selectedIds={row.postConditionSelections.map((s) => s.id)}
+            onChange={(ids) => handleSelectionChange('postCondition', ids, algorithms.postCondition)}
+            theme="gold"
+            disabled={!conditionEnabled}
+            multiSelect={false}
+            showSearch={false}
+          />
+          <SelectionChips
+            selections={row.postConditionSelections}
+            onRemove={(id) => handleRemoveChip('postCondition', id)}
+            theme="gold"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// -----------------------------------------------------------------------------
 // WorkflowRowSelector Component
 // -----------------------------------------------------------------------------
 
@@ -143,19 +290,9 @@ export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
   rows,
   onChange,
   algorithms,
-  maxRows = DEFAULT_MAX_ROWS,
+  maxRows = 10,
   className,
 }) => {
-  // Convert AlgorithmOption to AlgorithmSelection
-  const toSelection = useCallback((opt: AlgorithmOption): AlgorithmSelection => ({
-    id: opt.id,
-    code: opt.code,
-    strategyName: opt.strategyName,
-    strategyType: opt.strategyType,
-    description: opt.description,
-  }), []);
-
-  // Update a specific row
   const updateRow = useCallback(
     (rowId: string, updates: Partial<WorkflowRow>) => {
       const newRows = rows.map((row) =>
@@ -183,64 +320,6 @@ export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
     [rows, onChange, maxRows]
   );
 
-  // Handle selection change for a column
-  const handleSelectionChange = useCallback(
-    (
-      rowId: string,
-      column: 'analysis' | 'preCondition' | 'steps' | 'postCondition',
-      selectedIds: number[],
-      availableOptions: AlgorithmOption[]
-    ) => {
-      const selectedItems = selectedIds
-        .map((id) => availableOptions.find((opt) => opt.id === id))
-        .filter((opt): opt is AlgorithmOption => opt !== undefined)
-        .map(toSelection);
-
-      const updateKey = {
-        analysis: 'analysisSelections',
-        preCondition: 'preConditionSelections',
-        steps: 'stepSelections',
-        postCondition: 'postConditionSelections',
-      }[column] as keyof WorkflowRow;
-
-      updateRow(rowId, { [updateKey]: selectedItems });
-    },
-    [updateRow, toSelection]
-  );
-
-  // Handle remove chip
-  const handleRemoveChip = useCallback(
-    (
-      rowId: string,
-      column: 'analysis' | 'preCondition' | 'steps' | 'postCondition',
-      selectionId: number
-    ) => {
-      const row = rows.find((r) => r.id === rowId);
-      if (!row) return;
-
-      const columnKey = {
-        analysis: 'analysisSelections',
-        preCondition: 'preConditionSelections',
-        steps: 'stepSelections',
-        postCondition: 'postConditionSelections',
-      }[column] as keyof WorkflowRow;
-
-      const currentSelections = row[columnKey] as AlgorithmSelection[];
-      const newSelections = currentSelections.filter((s) => s.id !== selectionId);
-
-      updateRow(rowId, { [columnKey]: newSelections });
-    },
-    [rows, updateRow]
-  );
-
-  // Check if Pre/Post conditions should be enabled
-  const isConditionEnabled = useCallback(
-    (row: WorkflowRow): boolean => {
-      return row.analysisSelections.length > 0;
-    },
-    []
-  );
-
   return (
     <div className={cn('workflow-row-selector', className)}>
       {/* Title */}
@@ -248,125 +327,15 @@ export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
         {title}
       </h2>
 
-      {/* Table */}
-      <div className="border border-color-terminal-border rounded-lg overflow-hidden">
-        {/* Header */}
-        <div className="grid grid-cols-[40px_1fr_2fr] bg-color-terminal-surface/50 border-b border-color-terminal-border">
-          <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-muted text-center">
-            {COLUMN_HEADERS.rowNumber}
-          </div>
-          <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-muted border-l border-color-terminal-border">
-            {COLUMN_HEADERS.analysis}
-          </div>
-          <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-muted border-l border-color-terminal-border">
-            {COLUMN_HEADERS.steps}
-          </div>
-        </div>
-
-        {/* Rows */}
-        {rows.map((row) => {
-          const conditionEnabled = isConditionEnabled(row);
-
-          return (
-            <div
-              key={row.id}
-              className="grid grid-cols-[40px_1fr_2fr] border-b border-color-terminal-border last:border-b-0"
-            >
-              {/* Row Number */}
-              <div className="px-3 py-3 flex items-start justify-center text-sm font-bold text-color-terminal-text-muted">
-                {row.rowNumber}
-              </div>
-
-              {/* Column 1: Analysis (Trend-Range) */}
-              <div className="px-3 py-3 border-l border-color-terminal-border">
-                <WorkflowDropdown
-                  label="Trend-Range"
-                  options={algorithms.trendRange}
-                  selectedIds={row.analysisSelections.map((s) => s.id)}
-                  onChange={(ids) =>
-                    handleSelectionChange(row.id, 'analysis', ids, algorithms.trendRange)
-                  }
-                  theme="teal"
-                  multiSelect={true}
-                  showSearch={true}
-                  searchPlaceholder="Search algorithms..."
-                />
-                <SelectionChips
-                  selections={row.analysisSelections}
-                  onRemove={(id) => handleRemoveChip(row.id, 'analysis', id)}
-                  theme="teal"
-                />
-              </div>
-
-              {/* Column 2: Strategy Steps */}
-              <div className="px-3 py-3 border-l border-color-terminal-border">
-                <div className="flex items-start gap-2 flex-wrap">
-                  {/* Pre-condition */}
-                  <WorkflowDropdown
-                    label="Pre"
-                    options={algorithms.preCondition}
-                    selectedIds={row.preConditionSelections.map((s) => s.id)}
-                    onChange={(ids) =>
-                      handleSelectionChange(row.id, 'preCondition', ids, algorithms.preCondition)
-                    }
-                    theme="purple"
-                    disabled={!conditionEnabled}
-                    multiSelect={false}
-                    showSearch={false}
-                  />
-
-                  {/* Select Steps */}
-                  <WorkflowDropdown
-                    label="Select Steps"
-                    options={algorithms.selectSteps}
-                    selectedIds={row.stepSelections.map((s) => s.id)}
-                    onChange={(ids) =>
-                      handleSelectionChange(row.id, 'steps', ids, algorithms.selectSteps)
-                    }
-                    theme="blue"
-                    multiSelect={true}
-                    showSearch={true}
-                    searchPlaceholder="Search steps..."
-                  />
-
-                  {/* Post-condition */}
-                  <WorkflowDropdown
-                    label="Post"
-                    options={algorithms.postCondition}
-                    selectedIds={row.postConditionSelections.map((s) => s.id)}
-                    onChange={(ids) =>
-                      handleSelectionChange(row.id, 'postCondition', ids, algorithms.postCondition)
-                    }
-                    theme="gold"
-                    disabled={!conditionEnabled}
-                    multiSelect={false}
-                    showSearch={false}
-                  />
-                </div>
-
-                {/* Selection chips for Column 2 */}
-                <div className="flex flex-wrap gap-2">
-                  <SelectionChips
-                    selections={row.preConditionSelections}
-                    onRemove={(id) => handleRemoveChip(row.id, 'preCondition', id)}
-                    theme="purple"
-                  />
-                  <SelectionChips
-                    selections={row.stepSelections}
-                    onRemove={(id) => handleRemoveChip(row.id, 'steps', id)}
-                    theme="blue"
-                  />
-                  <SelectionChips
-                    selections={row.postConditionSelections}
-                    onRemove={(id) => handleRemoveChip(row.id, 'postCondition', id)}
-                    theme="gold"
-                  />
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {/* Workflow Rows */}
+      {rows.map((row) => (
+        <WorkflowRowItem
+          key={row.id}
+          row={row}
+          algorithms={algorithms}
+          onUpdate={updateRow}
+        />
+      ))}
     </div>
   );
 };

@@ -12,3 +12,14 @@ export type {
   MarketRegimeRule,
   MarketRegimeResult,
 } from './market-regime-service';
+
+export {
+  saveAlgorithm,
+  saveAlgorithmSilent,
+} from './algorithm-save-service';
+
+export type {
+  AlgorithmSaveData,
+  AlgorithmGenerationConfig,
+  AlgorithmSaveResult,
+} from './algorithm-save-service';

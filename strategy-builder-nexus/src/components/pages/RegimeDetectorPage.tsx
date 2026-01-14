@@ -18,7 +18,7 @@ import { cn } from '../../lib/utils';
 import { RegimeSelector, BespokeData, ExpressionInput, StrategyCard, IndicatorSelector, IndicatorBlock, IndicatorDefinition, StrategyTemplate, useValidateBeforeGenerate, CodeDisplay, CodeDisplayState, FactorAddSelector, FactorDefinition, FactorBlock } from '../ui';
 
 // TICKET_091: Plugin directly calls API service
-import { executeMarketRegimeAnalysis, validateMarketRegimeConfig, MarketRegimeRule } from '../../services';
+import { executeMarketRegimeAnalysis, validateMarketRegimeConfig, MarketRegimeRule, saveAlgorithm } from '../../services';
 
 // Import indicator data
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
@@ -260,6 +260,39 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
       if (result.status === 'completed' && result.strategy_code) {
         console.log('[RegimeDetector] Setting generateResult with code');
         setGenerateResult({ code: result.strategy_code });
+
+        // TICKET_077_COMPONENT7_SAVE_MISSING: Save algorithm to database
+        try {
+          console.log('[RegimeDetector] Saving generated algorithm to database...');
+          const saveResult = await saveAlgorithm({
+            strategy_name: strategyName,
+            strategy_type: 9, // Regime Detector
+            generated_code: result.strategy_code,
+            metadata: {
+              regime: selectedRegime,
+              llm_provider: llmProvider,
+              llm_model: llmModel,
+              indicator_blocks: indicatorBlocks,
+              factor_blocks: factorBlocks,
+              custom_strategies: strategies,
+            },
+            rules: {
+              indicators: indicatorBlocks,
+              factors: factorBlocks,
+              expressions: strategies.map(s => s.expression),
+            },
+            description: `${selectedRegime} regime detection strategy`,
+          });
+
+          if (saveResult.success) {
+            console.log('[RegimeDetector] Algorithm saved successfully:', saveResult.data);
+            setIsSaved(true);
+          } else {
+            console.error('[RegimeDetector] Failed to save algorithm:', saveResult.error);
+          }
+        } catch (saveError) {
+          console.error('[RegimeDetector] Exception while saving algorithm:', saveError);
+        }
       } else if (result.status === 'failed') {
         setGenerateResult({ error: result.error?.message || 'Generation failed' });
       } else {
