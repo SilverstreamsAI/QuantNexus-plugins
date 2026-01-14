@@ -2,13 +2,14 @@
  * BacktestPage Component - Plugin Layer
  *
  * Backtest Nexus page following TICKET_077 layout specification.
- * Zones: B (Sidebar - History), C (Content - Empty), D (Action Bar - Execute)
+ * Zones: B (Sidebar - History), C (WorkflowRowSelector), D (Action Bar - Execute)
  *
  * @see TICKET_077 - Silverstream UI Component Library
  */
 
 import React, { useState, useCallback } from 'react';
 import { cn } from '../../lib/utils';
+import { WorkflowRowSelector, type WorkflowRow, type AlgorithmOption } from '../ui';
 
 // Inline SVG icons
 const HistoryIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -54,6 +55,52 @@ interface BacktestPageProps {
 }
 
 // -----------------------------------------------------------------------------
+// Mock Algorithm Data (will be replaced with SQLite query)
+// -----------------------------------------------------------------------------
+
+const MOCK_ALGORITHMS: {
+  trendRange: AlgorithmOption[];
+  preCondition: AlgorithmOption[];
+  selectSteps: AlgorithmOption[];
+  postCondition: AlgorithmOption[];
+} = {
+  trendRange: [
+    { id: 1, code: 'TR001', strategyName: 'Trend Following', strategyType: 9, description: 'Follow market trends' },
+    { id: 2, code: 'TR002', strategyName: 'Range Trading', strategyType: 9, description: 'Trade within price ranges' },
+    { id: 3, code: 'TR003', strategyName: 'Momentum Analysis', strategyType: 9, description: 'Analyze momentum indicators' },
+    { id: 4, code: 'TR004', strategyName: 'Mean Reversion', strategyType: 9, description: 'Trade mean reversion patterns' },
+  ],
+  preCondition: [
+    { id: 10, code: 'PRE001', strategyName: 'Volume Filter', strategyType: 4, description: 'Minimum volume requirement' },
+    { id: 11, code: 'PRE002', strategyName: 'Volatility Check', strategyType: 4, description: 'Volatility threshold' },
+    { id: 12, code: 'PRE003', strategyName: 'Trend Confirmation', strategyType: 4, description: 'Confirm trend direction' },
+  ],
+  selectSteps: [
+    { id: 20, code: 'SS001', strategyName: 'MA Crossover', strategyType: 0, description: 'Moving average crossover' },
+    { id: 21, code: 'SS002', strategyName: 'RSI Entry', strategyType: 1, description: 'RSI-based entry signal' },
+    { id: 22, code: 'SS003', strategyName: 'MACD Signal', strategyType: 2, description: 'MACD histogram signal' },
+    { id: 23, code: 'SS004', strategyName: 'Bollinger Breakout', strategyType: 3, description: 'Bollinger band breakout' },
+    { id: 24, code: 'SS005', strategyName: 'Volume Spike', strategyType: 1, description: 'Volume increase detection' },
+    { id: 25, code: 'SS006', strategyName: 'Support/Resistance', strategyType: 2, description: 'S/R level detection' },
+  ],
+  postCondition: [
+    { id: 30, code: 'POST001', strategyName: 'Stop Loss', strategyType: 6, description: 'Fixed stop loss' },
+    { id: 31, code: 'POST002', strategyName: 'Take Profit', strategyType: 6, description: 'Fixed take profit' },
+    { id: 32, code: 'POST003', strategyName: 'Trailing Stop', strategyType: 6, description: 'Trailing stop loss' },
+  ],
+};
+
+// Initial empty row
+const createInitialRow = (): WorkflowRow => ({
+  id: `row-${Date.now()}`,
+  rowNumber: 1,
+  analysisSelections: [],
+  preConditionSelections: [],
+  stepSelections: [],
+  postConditionSelections: [],
+});
+
+// -----------------------------------------------------------------------------
 // BacktestPage Component
 // -----------------------------------------------------------------------------
 
@@ -62,6 +109,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 }) => {
   const [isExecuting, setIsExecuting] = useState(false);
   const [historyItems] = useState<HistoryItem[]>([]);
+  const [workflowRows, setWorkflowRows] = useState<WorkflowRow[]>([createInitialRow()]);
 
   const handleExecute = useCallback(async () => {
     if (isExecuting) return;
@@ -119,9 +167,15 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
       {/* Zone C + Zone D */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Zone C: Empty */}
+        {/* Zone C: WorkflowRowSelector */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* Reserved for future components */}
+          <WorkflowRowSelector
+            title="WORKFLOW CONFIGURATION"
+            rows={workflowRows}
+            onChange={setWorkflowRows}
+            algorithms={MOCK_ALGORITHMS}
+            maxRows={10}
+          />
         </div>
 
         {/* Zone D: Action Bar */}
