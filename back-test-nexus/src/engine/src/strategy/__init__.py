@@ -35,6 +35,18 @@ from .group import (
     TestCase,
 )
 
+# Phase 2: Strategy Management (Desktop Implementation)
+from .database_loader import StrategyDatabaseLoader
+from .test_suite_builder import (
+    TestSuiteBuilder,
+    TestCase as BuilderTestCase,
+    create_test_suites_from_request,
+    create_test_suite_from_strategies,
+    validate_test_suite,
+)
+from .executor import StrategyExecutor
+from .strategy_loader import StrategyLoader, create_strategy_from_config
+
 __all__ = [
     # Phases
     "StrategyPhase",
@@ -57,4 +69,14 @@ __all__ = [
     "StrategyGroup",
     "StrategyInfo",
     "TestCase",
+    # Phase 2: Strategy Management
+    "StrategyDatabaseLoader",
+    "TestSuiteBuilder",
+    "BuilderTestCase",
+    "create_test_suites_from_request",
+    "create_test_suite_from_strategies",
+    "validate_test_suite",
+    "StrategyExecutor",
+    "StrategyLoader",
+    "create_strategy_from_config",
 ]
