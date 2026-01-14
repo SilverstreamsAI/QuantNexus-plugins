@@ -95,6 +95,10 @@
       }
     ]
   },
+  "hub": {
+    "contributes": ["nona_algorithm"],
+    "consumes": ["nona_algorithm"]
+  },
   "contributes": {
     "strategies": [],
     "configuration": {

@@ -4,8 +4,16 @@
  * Reusable service for saving generated algorithms to the database.
  * Used across multiple pages (RegimeDetector, EntrySignal, etc.)
  *
+ * Implements unified format standards:
  * @see TICKET_077_COMPONENT7_SAVE_MISSING
  * @see TICKET_117_1 - Unified Data Hub Pattern
+ * @see REGIME_DETECTOR_LLM_TO_DATABASE_PROTOCOL.md - WordPress Database Standard
+ * @see STRATEGY_GENERATION_RESPONSE_FORMAT_STANDARD.md - Unified Response Format
+ *
+ * Key Standards Compliance:
+ * - strategy_code: Direct Python code string (NOT nested JSON)
+ * - classification_metadata: Follows WordPress standard with signal_source, strategy_role, etc.
+ * - strategy_rules: Follows WordPress standard with regime_type, indicators, rules, etc.
  */
 
 // =============================================================================
@@ -14,17 +22,19 @@
 
 /**
  * Algorithm data structure matching nona_algorithms table schema
+ *
+ * @see REGIME_DETECTOR_LLM_TO_DATABASE_PROTOCOL.md Section 6.1
  */
 export interface AlgorithmSaveData {
-  /** Algorithm identifier code (e.g., "REG_001") */
+  /** LLM-generated Python/strategy code (NOT an identifier!) */
   code: string;
   /** Display name of the strategy */
   strategy_name: string;
-  /** Strategy type (9=Regime Detector, 4=Pre-condition, etc.) */
+  /** Strategy type (9=Regime Detector/Analysis, 4=Pre-condition, etc.) */
   strategy_type: number;
-  /** JSON metadata (regime, llm_provider, llm_model, etc.) */
+  /** JSON metadata following WordPress standard format */
   classification_metadata: string;
-  /** Generated code/rules in JSON format */
+  /** JSON strategy rules following WordPress standard format */
   strategy_rules?: string;
   /** Description of the algorithm */
   description?: string;
@@ -75,46 +85,165 @@ export interface AlgorithmSaveResult {
 // =============================================================================
 
 /**
- * Generate unique algorithm code based on strategy type and count
+ * Extract class name from generated Python code
  *
- * @param strategyType - Strategy type number
- * @returns Generated code (e.g., "REG_001", "ENTRY_001")
+ * @param code - Generated Python code
+ * @returns Extracted class name or default value
  */
-function generateAlgorithmCode(strategyType: number): string {
-  const timestamp = Date.now().toString(36).toUpperCase();
-  const random = Math.random().toString(36).substring(2, 5).toUpperCase();
+function extractClassName(code: string): string {
+  const classMatch = code.match(/class\s+(\w+)\s*\(/);
+  return classMatch ? classMatch[1] : 'GeneratedStrategy';
+}
 
-  const prefixMap: Record<number, string> = {
-    9: 'REG',      // Regime Detector
-    10: 'ENTRY',   // Entry Signal
-    4: 'PRE',      // Pre-condition
-    6: 'POST',     // Post-condition
-    0: 'STEP',     // Select Steps
-    1: 'STEP',
-    2: 'STEP',
-    3: 'STEP',
+/**
+ * Generate signal_source based on regime type
+ *
+ * @see REGIME_DETECTOR_LLM_TO_DATABASE_PROTOCOL.md Section 5.2
+ * @param regimeType - Regime type (trend, range, etc.)
+ * @returns Signal source string
+ */
+function generateSignalSource(regimeType: string): string {
+  return `indicator_detector_${regimeType}`;
+}
+
+/**
+ * Build classification_metadata following WordPress standard format
+ *
+ * Implements the standard structure for algorithm classification:
+ * @see REGIME_DETECTOR_LLM_TO_DATABASE_PROTOCOL.md Section 6.2
+ * @see STRATEGY_GENERATION_RESPONSE_FORMAT_STANDARD.md Line 364-369
+ *
+ * Standard fields (REQUIRED):
+ * - signal_source: Generated via generateSignalSource() (e.g., "indicator_detector_trend")
+ * - strategy_role: "market_regime" for Regime Detector
+ * - trading_style: "neutral" for market regime detection
+ *
+ * Extended fields (WordPress standard):
+ * - class_name: Extracted from generated Python code
+ * - strategy_composition: "atomic" (single-purpose strategy)
+ * - components.indicator: Detailed indicator configuration
+ * - tags: Searchable tags array
+ * - created_at: ISO 8601 timestamp
+ *
+ * @param config - Algorithm generation configuration
+ * @param className - Extracted class name from Python code
+ * @returns Standard classification_metadata object
+ */
+function buildClassificationMetadata(
+  config: AlgorithmGenerationConfig,
+  className: string
+): Record<string, any> {
+  const regimeType = config.metadata.regime || 'generic';
+  const llmProvider = config.metadata.llm_provider || 'NONA';
+
+  return {
+    // Core classification fields (STRATEGY_GENERATION_RESPONSE_FORMAT_STANDARD)
+    class_name: className,
+    signal_source: generateSignalSource(regimeType),  // "indicator_detector_{regime}"
+    strategy_role: 'market_regime',
+    trading_style: 'neutral',
+
+    // Extended WordPress fields (REGIME_DETECTOR_LLM_TO_DATABASE_PROTOCOL)
+    strategy_composition: 'atomic',
+    components: {
+      indicator: {
+        regime_type: regimeType,
+        llm_provider: llmProvider,
+        llm_model: config.metadata.llm_model,
+      },
+    },
+    tags: ['indicator', 'regime', 'market-analysis'],
+    created_at: new Date().toISOString(),
   };
+}
 
-  const prefix = prefixMap[strategyType] || 'ALG';
-  return `${prefix}_${timestamp}_${random}`;
+/**
+ * Build strategy_rules following WordPress standard format
+ *
+ * Implements the standard structure for strategy rules blueprint:
+ * @see REGIME_DETECTOR_LLM_TO_DATABASE_PROTOCOL.md Section 6.3
+ *
+ * Standard fields:
+ * - regime_type: Type of market regime (trend, range, consolidation, etc.)
+ * - entry_conditions: Array of entry condition rules (empty for regime detector)
+ * - exit_conditions: Array of exit condition rules (empty for regime detector)
+ * - indicators: Array of indicator names used (e.g., ["EMA", "ATR"])
+ * - rules: Array of template-based rules with indicator/strategy/logic
+ * - factors: Configuration factors (timeframe, sensitivity, etc.)
+ *
+ * @param config - Algorithm generation configuration
+ * @returns Standard strategy_rules object
+ */
+function buildStrategyRules(config: AlgorithmGenerationConfig): Record<string, any> {
+  const regimeType = config.metadata.regime || 'generic';
+
+  return {
+    regime_type: regimeType,
+    entry_conditions: [],
+    exit_conditions: [],
+    indicators: config.rules?.indicators || [],
+    rules: config.rules?.rules || [],
+    factors: config.rules?.factors || {
+      timeframe: '1h',
+      sensitivity: 'medium',
+    },
+  };
 }
 
 /**
  * Map generation config to database save format
  *
- * @param config - Generation configuration
- * @returns Algorithm save data
+ * Implements unified format standards from multiple sources:
+ * @see REGIME_DETECTOR_LLM_TO_DATABASE_PROTOCOL.md Section 6.1 - WordPress Database Standard
+ * @see STRATEGY_GENERATION_RESPONSE_FORMAT_STANDARD.md Line 340-390 - Unified Format
+ *
+ * Key Compliance Points:
+ * 1. code field: Direct Python code string (NOT identifier, NOT nested JSON)
+ * 2. classification_metadata: Standard structure with signal_source, strategy_role, etc.
+ * 3. strategy_rules: Standard structure with regime_type, indicators, rules, etc.
+ * 4. All JSON fields properly stringified for SQLite TEXT storage
+ *
+ * Field Mapping:
+ * - code ← config.generated_code (LLM-generated Python code)
+ * - strategy_name ← config.strategy_name (user input)
+ * - strategy_type ← config.strategy_type (9 for Regime Detector)
+ * - classification_metadata ← buildClassificationMetadata() (standard format)
+ * - strategy_rules ← buildStrategyRules() (standard format)
+ * - description ← config.description (optional)
+ * - user_id ← config.user_id || 'default'
+ * - file_path ← "generated/{strategy_name}.py" (WordPress pattern)
+ *
+ * @param config - Generation configuration from RegimeDetectorPage
+ * @returns Algorithm save data ready for database insertion
  */
 function mapConfigToSaveData(config: AlgorithmGenerationConfig): AlgorithmSaveData {
+  // Extract class name from generated Python code
+  const className = extractClassName(config.generated_code);
+
+  // Build standard classification_metadata (follows WordPress + Unified standard)
+  const classificationMetadata = buildClassificationMetadata(config, className);
+
+  // Build standard strategy_rules (follows WordPress standard)
+  const strategyRules = buildStrategyRules(config);
+
   return {
-    code: generateAlgorithmCode(config.strategy_type),
+    // CRITICAL: Store LLM-generated Python code in 'code' field
+    // NOT an identifier, NOT nested JSON, direct Python code string
+    // Complies with: STRATEGY_GENERATION_RESPONSE_FORMAT_STANDARD Line 403
+    code: config.generated_code,
+
     strategy_name: config.strategy_name,
     strategy_type: config.strategy_type,
-    classification_metadata: JSON.stringify(config.metadata),
-    strategy_rules: config.rules ? JSON.stringify(config.rules) : undefined,
+
+    // JSON fields: Stringify for SQLite TEXT storage
+    classification_metadata: JSON.stringify(classificationMetadata),
+    strategy_rules: JSON.stringify(strategyRules),
+
     description: config.description,
     user_id: config.user_id || 'default',
-    file_path: undefined, // Optional: could be populated later
+
+    // WordPress pattern: generated/{strategy_name}.py
+    file_path: `generated/${config.strategy_name}.py`,
   };
 }
 
