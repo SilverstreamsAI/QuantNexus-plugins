@@ -3,6 +3,11 @@ BacktestConfig - Configuration Management
 
 Based on nona_server's src/backtest/backtest_config.py pattern.
 
+TICKET_118 Phase 7: Config Enhancement
+- Added from_json_data() alias method
+- Added slippage_perc property alias
+- Enhanced server compatibility
+
 Responsibilities:
 1. Encapsulate backtest configuration parameters
 2. Provide type-safe configuration access
@@ -16,12 +21,20 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Default values
+# Default values (Server compatibility)
 DEFAULT_INITIAL_CAPITAL = 100000.0
+DEFAULT_INITIAL_CASH = 100000.0  # Alias for server compatibility
 DEFAULT_ORDER_SIZE = 1000.0
 DEFAULT_ORDER_UNIT = "cash"
 DEFAULT_COMMISSION_RATE = 0.001
 DEFAULT_SLIPPAGE_RATE = 0.0005
+DEFAULT_SLIPPAGE_PERC = 0.0005  # Alias for server compatibility
+DEFAULT_LEVERAGE = 1
+
+# Server constants compatibility
+MIN_INITIAL_CAPITAL = 1000.0
+MAX_INITIAL_CAPITAL = 10000000.0
+MIN_ORDER_SIZE = 1.0
 
 
 @dataclass
@@ -137,24 +150,58 @@ class BacktestConfig:
         """
         Create BacktestConfig from dictionary.
 
+        TICKET_118 Phase 7: Enhanced with server field aliases
+
         Args:
             data: Configuration dictionary
 
         Returns:
             BacktestConfig instance
+
+        Supported field aliases:
+        - initial_cash -> initial_capital
+        - slippage_perc -> slippage_rate
         """
+        # Support server field aliases
+        initial_capital = (
+            data.get("initial_capital") or
+            data.get("initial_cash") or
+            DEFAULT_INITIAL_CAPITAL
+        )
+
+        slippage_rate = (
+            data.get("slippage_rate") or
+            data.get("slippage_perc") or
+            DEFAULT_SLIPPAGE_RATE
+        )
+
         return cls(
-            initial_capital=data.get("initial_capital", DEFAULT_INITIAL_CAPITAL),
+            initial_capital=initial_capital,
             order_size_value=data.get("order_size_value", DEFAULT_ORDER_SIZE),
             order_size_unit=data.get("order_size_unit", DEFAULT_ORDER_UNIT),
             commission_rate=data.get("commission_rate", DEFAULT_COMMISSION_RATE),
-            slippage_rate=data.get("slippage_rate", DEFAULT_SLIPPAGE_RATE),
-            leverage=data.get("leverage", 1),
+            slippage_rate=slippage_rate,
+            leverage=data.get("leverage", DEFAULT_LEVERAGE),
             allow_short=data.get("allow_short", True),
             task_id=data.get("task_id"),
             user_id=data.get("user_id"),
             benchmark=data.get("benchmark"),
         )
+
+    @classmethod
+    def from_json_data(cls, json_data: Dict[str, Any]) -> "BacktestConfig":
+        """
+        Create BacktestConfig from JSON data.
+
+        TICKET_118 Phase 7: Alias for from_dict() for server compatibility
+
+        Args:
+            json_data: JSON configuration data
+
+        Returns:
+            BacktestConfig instance
+        """
+        return cls.from_dict(json_data)
 
     @classmethod
     def create_default(cls) -> "BacktestConfig":
@@ -203,11 +250,53 @@ class BacktestConfig:
             "benchmark": self.benchmark,
         }
 
+    # TICKET_118 Phase 7: Property aliases for server compatibility
+    @property
+    def slippage_perc(self) -> float:
+        """
+        Alias for slippage_rate (server compatibility).
+
+        Returns:
+            Slippage rate percentage
+        """
+        return self.slippage_rate
+
+    @slippage_perc.setter
+    def slippage_perc(self, value: float) -> None:
+        """
+        Set slippage via slippage_perc alias.
+
+        Args:
+            value: Slippage rate percentage
+        """
+        self.slippage_rate = value
+
+    @property
+    def initial_cash(self) -> float:
+        """
+        Alias for initial_capital (server compatibility).
+
+        Returns:
+            Initial capital amount
+        """
+        return self.initial_capital
+
+    @initial_cash.setter
+    def initial_cash(self, value: float) -> None:
+        """
+        Set initial capital via initial_cash alias.
+
+        Args:
+            value: Initial capital amount
+        """
+        self.initial_capital = value
+
     def __repr__(self) -> str:
         return (
             f"BacktestConfig("
             f"initial_capital={self.initial_capital}, "
             f"order_size={self.order_size_value} {self.order_size_unit}, "
             f"commission={self.commission_rate}, "
+            f"slippage={self.slippage_rate}, "
             f"task_id={self.task_id})"
         )

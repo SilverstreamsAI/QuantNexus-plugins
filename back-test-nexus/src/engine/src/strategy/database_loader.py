@@ -42,10 +42,26 @@ class StrategyDatabaseLoader:
         logger.debug(f"StrategyDatabaseLoader initialized with db={self.db_path}")
 
     def _get_default_db_path(self) -> str:
-        """Get default database path."""
-        # TODO: Replace with actual Desktop database path
-        # For now, use a relative path
-        db_path = Path(__file__).parent.parent.parent.parent.parent.parent / "data" / "nexus.db"
+        """
+        Get default database path.
+
+        Order of precedence:
+        1. Environment variable QUANTNEXUS_DB_PATH
+        2. Relative path to framework database (quantnexus.db)
+
+        Note: In production, Host should pass db_path via gRPC.
+        """
+        import os
+
+        # Method 1: Environment variable (set by Host)
+        db_path = os.environ.get('QUANTNEXUS_DB_PATH')
+        if db_path:
+            logger.debug(f"Using database path from environment: {db_path}")
+            return db_path
+
+        # Method 2: Fallback to relative path (correct file name)
+        db_path = Path(__file__).parent.parent.parent.parent.parent.parent / "data" / "quantnexus.db"
+        logger.debug(f"Using default database path: {db_path}")
         return str(db_path)
 
     def _get_connection(self) -> sqlite3.Connection:
