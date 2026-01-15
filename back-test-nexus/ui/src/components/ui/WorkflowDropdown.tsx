@@ -260,7 +260,7 @@ export const WorkflowDropdown: React.FC<WorkflowDropdownProps> = ({
               top: dropdownPosition.top,
               left: dropdownPosition.left,
               width: dropdownPosition.width,
-              maxHeight: 320,
+              maxHeight: 456,
             }}
           >
             {/* Search */}
@@ -288,8 +288,8 @@ export const WorkflowDropdown: React.FC<WorkflowDropdownProps> = ({
               </div>
             )}
 
-            {/* Options List */}
-            <div className="max-h-[240px] overflow-y-auto">
+            {/* Options List - Limited to 8 items visible, scrollable for more */}
+            <div className="max-h-[400px] overflow-y-auto">
               {filteredOptions.length === 0 ? (
                 <div className="px-3 py-4 text-center text-xs text-color-terminal-text-muted">
                   No algorithms found
