@@ -7,7 +7,7 @@ Implements the BacktestPlugin service defined in backtest.proto.
 import time
 import logging
 import json
-from typing import Iterator
+from typing import Iterator, Optional
 from concurrent import futures
 
 from .proto import backtest_pb2
@@ -32,11 +32,67 @@ class BacktestPluginServicer(backtest_pb2_grpc.BacktestPluginServicer):
         self.results: dict = {}
         self.engine = BacktraderEngine()
         self._lifecycle = None  # Set by PluginServer
+
+        # Configuration from Host (set via Initialize RPC - TICKET_118)
+        self.db_path: str = None
+        self.log_path: str = None
+        self.data_dir: str = None
+        self.config_map: dict = {}
+        self.initialized: bool = False
+
         logger.info("BacktestPluginServicer initialized")
 
     def set_lifecycle_manager(self, lifecycle) -> None:
         """Set the lifecycle manager for task tracking."""
         self._lifecycle = lifecycle
+
+    def Initialize(
+        self,
+        request: backtest_pb2.InitializeRequest,
+        context,
+    ) -> backtest_pb2.InitializeResponse:
+        """
+        Initialize plugin with Host configuration (TICKET_118).
+
+        Must be called once before any other RPCs.
+
+        Args:
+            request: InitializeRequest message with db_path, log_path, data_dir
+            context: gRPC context
+
+        Returns:
+            InitializeResponse message
+        """
+        try:
+            logger.info(f"Initialize RPC received: db_path={request.db_path}")
+
+            # Store configuration from Host
+            self.db_path = request.db_path
+            self.log_path = request.log_path
+            self.data_dir = request.data_dir
+            self.config_map = dict(request.config) if request.config else {}
+            self.initialized = True
+
+            logger.info(f"Plugin initialized with config:")
+            logger.info(f"  db_path: {self.db_path}")
+            logger.info(f"  log_path: {self.log_path}")
+            logger.info(f"  data_dir: {self.data_dir}")
+            logger.info(f"  config: {self.config_map}")
+
+            return backtest_pb2.InitializeResponse(
+                success=True,
+                message="Plugin initialized successfully",
+                plugin_version="1.0.0",
+                accepted_config=self.config_map,
+            )
+
+        except Exception as e:
+            logger.error(f"Initialize failed: {e}")
+            return backtest_pb2.InitializeResponse(
+                success=False,
+                message=f"Initialize failed: {str(e)}",
+                plugin_version="1.0.0",
+            )
 
     def _notify_task_started(self) -> None:
         """Notify lifecycle manager that a task started."""
@@ -58,6 +114,62 @@ class BacktestPluginServicer(backtest_pb2_grpc.BacktestPluginServicer):
         if self._lifecycle:
             return self._lifecycle.is_paused()
         return False
+
+    def _get_db_path(self) -> Optional[str]:
+        """
+        Get database path for components.
+
+        Uses initialized db_path from Initialize RPC if available.
+        Returns None if not initialized (components will use fallback).
+
+        Returns:
+            Database path or None
+        """
+        if self.initialized and self.db_path:
+            return self.db_path
+
+        # Not initialized - components will use fallback with warning
+        logger.warning(
+            "Database components will use fallback path - "
+            "Initialize RPC not called or failed"
+        )
+        return None
+
+    def _create_task_store(self) -> "TaskStore":
+        """Create TaskStore with initialized db_path."""
+        from .storage import TaskStore
+
+        db_path = self._get_db_path()
+        if db_path:
+            logger.debug(f"Creating TaskStore with db_path={db_path}")
+            return TaskStore(db_path=db_path)
+        else:
+            logger.debug("Creating TaskStore with fallback path")
+            return TaskStore()
+
+    def _create_result_store(self) -> "ResultStore":
+        """Create ResultStore with initialized db_path."""
+        from .storage import ResultStore
+
+        db_path = self._get_db_path()
+        if db_path:
+            logger.debug(f"Creating ResultStore with db_path={db_path}")
+            return ResultStore(db_path=db_path)
+        else:
+            logger.debug("Creating ResultStore with fallback path")
+            return ResultStore()
+
+    def _create_strategy_loader(self) -> "StrategyDatabaseLoader":
+        """Create StrategyDatabaseLoader with initialized db_path."""
+        from .strategy.database_loader import StrategyDatabaseLoader
+
+        db_path = self._get_db_path()
+        if db_path:
+            logger.debug(f"Creating StrategyDatabaseLoader with db_path={db_path}")
+            return StrategyDatabaseLoader(db_path=db_path)
+        else:
+            logger.debug("Creating StrategyDatabaseLoader with fallback path")
+            return StrategyDatabaseLoader()
 
     def RunBacktest(
         self,

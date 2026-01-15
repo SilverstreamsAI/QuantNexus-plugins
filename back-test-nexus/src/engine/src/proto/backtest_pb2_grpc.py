@@ -28,11 +28,10 @@ if _version_not_supported:
 
 class BacktestPluginStub(object):
     """=============================================================================
-    Backtest Plugin Service (Core -> Plugin)
+    BacktestPlugin Service (Core -> Plugin)
+    Implemented by backtest engine plugins.
     =============================================================================
 
-    BacktestPlugin is implemented by backtest engine plugins.
-    Core calls this service to request backtests.
     """
 
     def __init__(self, channel):
@@ -41,28 +40,33 @@ class BacktestPluginStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.Initialize = channel.unary_unary(
+                '/quantnexus.backtest.BacktestPlugin/Initialize',
+                request_serializer=backtest__pb2.InitializeRequest.SerializeToString,
+                response_deserializer=backtest__pb2.InitializeResponse.FromString,
+                _registered_method=True)
         self.RunBacktest = channel.unary_stream(
-                '/quantnexus.BacktestPlugin/RunBacktest',
+                '/quantnexus.backtest.BacktestPlugin/RunBacktest',
                 request_serializer=backtest__pb2.BacktestRequest.SerializeToString,
                 response_deserializer=backtest__pb2.BacktestProgress.FromString,
                 _registered_method=True)
         self.GetResult = channel.unary_unary(
-                '/quantnexus.BacktestPlugin/GetResult',
+                '/quantnexus.backtest.BacktestPlugin/GetResult',
                 request_serializer=backtest__pb2.ResultRequest.SerializeToString,
                 response_deserializer=backtest__pb2.BacktestResult.FromString,
                 _registered_method=True)
         self.CancelBacktest = channel.unary_unary(
-                '/quantnexus.BacktestPlugin/CancelBacktest',
+                '/quantnexus.backtest.BacktestPlugin/CancelBacktest',
                 request_serializer=backtest__pb2.CancelRequest.SerializeToString,
                 response_deserializer=backtest__pb2.CancelResult.FromString,
                 _registered_method=True)
         self.Ping = channel.unary_unary(
-                '/quantnexus.BacktestPlugin/Ping',
+                '/quantnexus.backtest.BacktestPlugin/Ping',
                 request_serializer=common__pb2.PingRequest.SerializeToString,
                 response_deserializer=common__pb2.PingResponse.FromString,
                 _registered_method=True)
         self.GetCapabilities = channel.unary_unary(
-                '/quantnexus.BacktestPlugin/GetCapabilities',
+                '/quantnexus.backtest.BacktestPlugin/GetCapabilities',
                 request_serializer=common__pb2.Empty.SerializeToString,
                 response_deserializer=backtest__pb2.BacktestCapabilities.FromString,
                 _registered_method=True)
@@ -70,12 +74,19 @@ class BacktestPluginStub(object):
 
 class BacktestPluginServicer(object):
     """=============================================================================
-    Backtest Plugin Service (Core -> Plugin)
+    BacktestPlugin Service (Core -> Plugin)
+    Implemented by backtest engine plugins.
     =============================================================================
 
-    BacktestPlugin is implemented by backtest engine plugins.
-    Core calls this service to request backtests.
     """
+
+    def Initialize(self, request, context):
+        """Initialize plugin with Host configuration (TICKET_118)
+        Must be called once before any other RPCs
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def RunBacktest(self, request, context):
         """Run a backtest (streaming progress updates)
@@ -115,6 +126,11 @@ class BacktestPluginServicer(object):
 
 def add_BacktestPluginServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'Initialize': grpc.unary_unary_rpc_method_handler(
+                    servicer.Initialize,
+                    request_deserializer=backtest__pb2.InitializeRequest.FromString,
+                    response_serializer=backtest__pb2.InitializeResponse.SerializeToString,
+            ),
             'RunBacktest': grpc.unary_stream_rpc_method_handler(
                     servicer.RunBacktest,
                     request_deserializer=backtest__pb2.BacktestRequest.FromString,
@@ -142,20 +158,46 @@ def add_BacktestPluginServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'quantnexus.BacktestPlugin', rpc_method_handlers)
+            'quantnexus.backtest.BacktestPlugin', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('quantnexus.BacktestPlugin', rpc_method_handlers)
+    server.add_registered_method_handlers('quantnexus.backtest.BacktestPlugin', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
 class BacktestPlugin(object):
     """=============================================================================
-    Backtest Plugin Service (Core -> Plugin)
+    BacktestPlugin Service (Core -> Plugin)
+    Implemented by backtest engine plugins.
     =============================================================================
 
-    BacktestPlugin is implemented by backtest engine plugins.
-    Core calls this service to request backtests.
     """
+
+    @staticmethod
+    def Initialize(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/quantnexus.backtest.BacktestPlugin/Initialize',
+            backtest__pb2.InitializeRequest.SerializeToString,
+            backtest__pb2.InitializeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
 
     @staticmethod
     def RunBacktest(request,
@@ -171,7 +213,7 @@ class BacktestPlugin(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/quantnexus.BacktestPlugin/RunBacktest',
+            '/quantnexus.backtest.BacktestPlugin/RunBacktest',
             backtest__pb2.BacktestRequest.SerializeToString,
             backtest__pb2.BacktestProgress.FromString,
             options,
@@ -198,7 +240,7 @@ class BacktestPlugin(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/quantnexus.BacktestPlugin/GetResult',
+            '/quantnexus.backtest.BacktestPlugin/GetResult',
             backtest__pb2.ResultRequest.SerializeToString,
             backtest__pb2.BacktestResult.FromString,
             options,
@@ -225,7 +267,7 @@ class BacktestPlugin(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/quantnexus.BacktestPlugin/CancelBacktest',
+            '/quantnexus.backtest.BacktestPlugin/CancelBacktest',
             backtest__pb2.CancelRequest.SerializeToString,
             backtest__pb2.CancelResult.FromString,
             options,
@@ -252,7 +294,7 @@ class BacktestPlugin(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/quantnexus.BacktestPlugin/Ping',
+            '/quantnexus.backtest.BacktestPlugin/Ping',
             common__pb2.PingRequest.SerializeToString,
             common__pb2.PingResponse.FromString,
             options,
@@ -279,9 +321,361 @@ class BacktestPlugin(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/quantnexus.BacktestPlugin/GetCapabilities',
+            '/quantnexus.backtest.BacktestPlugin/GetCapabilities',
             common__pb2.Empty.SerializeToString,
             backtest__pb2.BacktestCapabilities.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+
+class BacktestRuntimeStub(object):
+    """=============================================================================
+    BacktestRuntime Service (Plugin -> Core)
+    Called by strategy code during backtest execution.
+    [Merged from Intelligence-Nexus - TICKET_031]
+    =============================================================================
+
+    """
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.RegisterSession = channel.unary_unary(
+                '/quantnexus.backtest.BacktestRuntime/RegisterSession',
+                request_serializer=backtest__pb2.SessionInfo.SerializeToString,
+                response_deserializer=backtest__pb2.SessionResult.FromString,
+                _registered_method=True)
+        self.UnregisterSession = channel.unary_unary(
+                '/quantnexus.backtest.BacktestRuntime/UnregisterSession',
+                request_serializer=backtest__pb2.UnregisterRequest.SerializeToString,
+                response_deserializer=common__pb2.Response.FromString,
+                _registered_method=True)
+        self.GetSessionStatus = channel.unary_unary(
+                '/quantnexus.backtest.BacktestRuntime/GetSessionStatus',
+                request_serializer=backtest__pb2.SessionStatusRequest.SerializeToString,
+                response_deserializer=backtest__pb2.SessionStatus.FromString,
+                _registered_method=True)
+        self.Heartbeat = channel.unary_unary(
+                '/quantnexus.backtest.BacktestRuntime/Heartbeat',
+                request_serializer=backtest__pb2.HeartbeatRequest.SerializeToString,
+                response_deserializer=backtest__pb2.HeartbeatResponse.FromString,
+                _registered_method=True)
+        self.RequestData = channel.unary_stream(
+                '/quantnexus.backtest.BacktestRuntime/RequestData',
+                request_serializer=backtest__pb2.RuntimeDataRequest.SerializeToString,
+                response_deserializer=backtest__pb2.DataChunk.FromString,
+                _registered_method=True)
+        self.SubmitSignal = channel.unary_unary(
+                '/quantnexus.backtest.BacktestRuntime/SubmitSignal',
+                request_serializer=backtest__pb2.TradingSignal.SerializeToString,
+                response_deserializer=backtest__pb2.SignalResult.FromString,
+                _registered_method=True)
+        self.SubmitReport = channel.unary_unary(
+                '/quantnexus.backtest.BacktestRuntime/SubmitReport',
+                request_serializer=backtest__pb2.AnalysisReport.SerializeToString,
+                response_deserializer=backtest__pb2.ReportResult.FromString,
+                _registered_method=True)
+
+
+class BacktestRuntimeServicer(object):
+    """=============================================================================
+    BacktestRuntime Service (Plugin -> Core)
+    Called by strategy code during backtest execution.
+    [Merged from Intelligence-Nexus - TICKET_031]
+    =============================================================================
+
+    """
+
+    def RegisterSession(self, request, context):
+        """Session management
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UnregisterSession(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetSessionStatus(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Heartbeat(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RequestData(self, request, context):
+        """Data access (during backtest)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SubmitSignal(self, request, context):
+        """Signal submission (during backtest)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SubmitReport(self, request, context):
+        """Report submission (after backtest)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_BacktestRuntimeServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'RegisterSession': grpc.unary_unary_rpc_method_handler(
+                    servicer.RegisterSession,
+                    request_deserializer=backtest__pb2.SessionInfo.FromString,
+                    response_serializer=backtest__pb2.SessionResult.SerializeToString,
+            ),
+            'UnregisterSession': grpc.unary_unary_rpc_method_handler(
+                    servicer.UnregisterSession,
+                    request_deserializer=backtest__pb2.UnregisterRequest.FromString,
+                    response_serializer=common__pb2.Response.SerializeToString,
+            ),
+            'GetSessionStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSessionStatus,
+                    request_deserializer=backtest__pb2.SessionStatusRequest.FromString,
+                    response_serializer=backtest__pb2.SessionStatus.SerializeToString,
+            ),
+            'Heartbeat': grpc.unary_unary_rpc_method_handler(
+                    servicer.Heartbeat,
+                    request_deserializer=backtest__pb2.HeartbeatRequest.FromString,
+                    response_serializer=backtest__pb2.HeartbeatResponse.SerializeToString,
+            ),
+            'RequestData': grpc.unary_stream_rpc_method_handler(
+                    servicer.RequestData,
+                    request_deserializer=backtest__pb2.RuntimeDataRequest.FromString,
+                    response_serializer=backtest__pb2.DataChunk.SerializeToString,
+            ),
+            'SubmitSignal': grpc.unary_unary_rpc_method_handler(
+                    servicer.SubmitSignal,
+                    request_deserializer=backtest__pb2.TradingSignal.FromString,
+                    response_serializer=backtest__pb2.SignalResult.SerializeToString,
+            ),
+            'SubmitReport': grpc.unary_unary_rpc_method_handler(
+                    servicer.SubmitReport,
+                    request_deserializer=backtest__pb2.AnalysisReport.FromString,
+                    response_serializer=backtest__pb2.ReportResult.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'quantnexus.backtest.BacktestRuntime', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('quantnexus.backtest.BacktestRuntime', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class BacktestRuntime(object):
+    """=============================================================================
+    BacktestRuntime Service (Plugin -> Core)
+    Called by strategy code during backtest execution.
+    [Merged from Intelligence-Nexus - TICKET_031]
+    =============================================================================
+
+    """
+
+    @staticmethod
+    def RegisterSession(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/quantnexus.backtest.BacktestRuntime/RegisterSession',
+            backtest__pb2.SessionInfo.SerializeToString,
+            backtest__pb2.SessionResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UnregisterSession(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/quantnexus.backtest.BacktestRuntime/UnregisterSession',
+            backtest__pb2.UnregisterRequest.SerializeToString,
+            common__pb2.Response.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetSessionStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/quantnexus.backtest.BacktestRuntime/GetSessionStatus',
+            backtest__pb2.SessionStatusRequest.SerializeToString,
+            backtest__pb2.SessionStatus.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Heartbeat(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/quantnexus.backtest.BacktestRuntime/Heartbeat',
+            backtest__pb2.HeartbeatRequest.SerializeToString,
+            backtest__pb2.HeartbeatResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RequestData(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/quantnexus.backtest.BacktestRuntime/RequestData',
+            backtest__pb2.RuntimeDataRequest.SerializeToString,
+            backtest__pb2.DataChunk.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SubmitSignal(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/quantnexus.backtest.BacktestRuntime/SubmitSignal',
+            backtest__pb2.TradingSignal.SerializeToString,
+            backtest__pb2.SignalResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SubmitReport(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/quantnexus.backtest.BacktestRuntime/SubmitReport',
+            backtest__pb2.AnalysisReport.SerializeToString,
+            backtest__pb2.ReportResult.FromString,
             options,
             channel_credentials,
             insecure,

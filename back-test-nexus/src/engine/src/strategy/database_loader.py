@@ -12,6 +12,7 @@ import sqlite3
 from datetime import datetime
 from typing import Optional, Dict, List
 from pathlib import Path
+from ..utils import get_default_db_path
 
 logger = logging.getLogger(__name__)
 
@@ -36,33 +37,10 @@ class StrategyDatabaseLoader:
         Args:
             db_path: Path to SQLite database (optional, uses default if None)
         """
-        self.db_path = db_path or self._get_default_db_path()
+        self.db_path = db_path or get_default_db_path()
         self.strategy_table = "nona_algorithms"
         self._ensure_table_exists()
         logger.debug(f"StrategyDatabaseLoader initialized with db={self.db_path}")
-
-    def _get_default_db_path(self) -> str:
-        """
-        Get default database path.
-
-        Order of precedence:
-        1. Environment variable QUANTNEXUS_DB_PATH
-        2. Relative path to framework database (quantnexus.db)
-
-        Note: In production, Host should pass db_path via gRPC.
-        """
-        import os
-
-        # Method 1: Environment variable (set by Host)
-        db_path = os.environ.get('QUANTNEXUS_DB_PATH')
-        if db_path:
-            logger.debug(f"Using database path from environment: {db_path}")
-            return db_path
-
-        # Method 2: Fallback to relative path (correct file name)
-        db_path = Path(__file__).parent.parent.parent.parent.parent.parent / "data" / "quantnexus.db"
-        logger.debug(f"Using default database path: {db_path}")
-        return str(db_path)
 
     def _get_connection(self) -> sqlite3.Connection:
         """Get database connection."""
