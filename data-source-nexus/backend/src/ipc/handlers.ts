@@ -55,6 +55,35 @@ export interface DataBackendContext {
   cache: DataPluginCache;
   providers: Map<string, ClickHouseProvider | CSVProvider>;
   activeProviderId: string;
+  shmWriter: any | null;  // TICKET_097_6: Shared memory writer for zero-copy data transfer
+}
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+/**
+ * Write OHLCV data to shared memory (TICKET_097_6)
+ */
+function writeToSharedMemory(context: DataBackendContext, series: OHLCVSeries): void {
+  if (!context.shmWriter) {
+    return;
+  }
+
+  try {
+    const candles = series.data.map(candle => ({
+      timestamp: candle.timestamp,
+      open: candle.open,
+      high: candle.high,
+      low: candle.low,
+      close: candle.close,
+      volume: candle.volume,
+    }));
+
+    context.shmWriter.writeCandles(series.symbol, series.interval, candles);
+  } catch (error) {
+    console.error('[DataPlugin Backend] Failed to write to shared memory:', error);
+  }
 }
 
 // =============================================================================
@@ -162,6 +191,9 @@ export function registerDataIPCHandlers(
           context.cache.setOHLCV(series);
         }
 
+        // Write to shared memory (TICKET_097_6)
+        writeToSharedMemory(context, series);
+
         return { success: true, data: series };
       }
     }
@@ -185,6 +217,8 @@ export function registerDataIPCHandlers(
       if (context.cache) {
         context.cache.setOHLCV(response.data);
       }
+      // Write to shared memory (TICKET_097_6)
+      writeToSharedMemory(context, response.data);
     }
 
     return response;

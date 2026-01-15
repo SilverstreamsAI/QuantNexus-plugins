@@ -17,6 +17,7 @@ import {
   unregisterDataIPCHandlers,
   type DataBackendContext,
 } from './ipc/handlers';
+import { SharedMemoryWriter } from '../native';
 
 // =============================================================================
 // Configuration
@@ -31,6 +32,11 @@ export interface DataBackendConfig {
   cache?: {
     maxMemoryMB: number;
     defaultTTL?: number;
+  };
+  sharedMemory?: {
+    enabled: boolean;
+    regionName?: string;
+    regionSize?: number;
   };
   providers?: {
     clickhouse?: {
@@ -55,6 +61,11 @@ const DEFAULT_CONFIG: DataBackendConfig = {
   cache: {
     maxMemoryMB: 256,
     defaultTTL: 300000, // 5 minutes
+  },
+  sharedMemory: {
+    enabled: true,
+    regionName: 'quantnexus_ohlcv',
+    regionSize: 128 * 1024 * 1024, // 128 MB
   },
   providers: {
     clickhouse: {
@@ -122,6 +133,27 @@ export async function initializeDataBackend(
     }
   }
 
+  // Initialize shared memory writer (TICKET_097_6)
+  let shmWriter: SharedMemoryWriter | null = null;
+  if (mergedConfig.sharedMemory?.enabled) {
+    try {
+      shmWriter = new SharedMemoryWriter();
+      const success = shmWriter.create(
+        mergedConfig.sharedMemory.regionName || 'quantnexus_ohlcv',
+        mergedConfig.sharedMemory.regionSize || 128 * 1024 * 1024
+      );
+      if (success) {
+        console.info('[DataPlugin Backend] SharedMemory writer initialized:', mergedConfig.sharedMemory.regionName);
+      } else {
+        console.warn('[DataPlugin Backend] SharedMemory writer creation failed');
+        shmWriter = null;
+      }
+    } catch (error) {
+      console.error('[DataPlugin Backend] Failed to initialize SharedMemory:', error);
+      shmWriter = null;
+    }
+  }
+
   // Initialize providers
   if (mergedConfig.providers?.clickhouse?.enabled) {
     try {
@@ -156,6 +188,7 @@ export async function initializeDataBackend(
     cache: cache!,
     providers,
     activeProviderId: mergedConfig.defaultProvider || 'clickhouse',
+    shmWriter: shmWriter,  // TICKET_097_6: Add shared memory writer
   };
 
   // Register IPC handlers
@@ -194,6 +227,16 @@ export async function shutdownDataBackend(ipcMain: IpcMain): Promise<void> {
       await backendContext.cache.shutdown();
     } catch (error) {
       console.error('[DataPlugin Backend] Error shutting down cache:', error);
+    }
+  }
+
+  // Close shared memory writer (TICKET_097_6)
+  if (backendContext.shmWriter) {
+    try {
+      backendContext.shmWriter.close();
+      console.info('[DataPlugin Backend] SharedMemory writer closed');
+    } catch (error) {
+      console.error('[DataPlugin Backend] Error closing SharedMemory:', error);
     }
   }
 
