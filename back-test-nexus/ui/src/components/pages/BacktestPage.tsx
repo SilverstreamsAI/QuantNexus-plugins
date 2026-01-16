@@ -61,7 +61,7 @@ interface HistoryItem {
 }
 
 interface BacktestPageProps {
-  onExecute?: () => void;
+  onExecute?: (config: BacktestDataConfig, workflows: WorkflowRow[]) => void;
 }
 
 // -----------------------------------------------------------------------------
@@ -176,18 +176,28 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   }, []);
 
   // Symbol search handler
+  // TICKET_121 + TICKET_045: Use real backend API instead of mock data
   const handleSymbolSearch = useCallback(async (query: string): Promise<SymbolSearchResult[]> => {
     try {
-      // TODO: Replace with actual IPC call to data:searchSymbols
-      // const results = await window.api.data.searchSymbols(query);
-      // For now, return mock data
-      return [
-        { symbol: 'AAPL', name: 'Apple Inc.', exchange: 'NASDAQ', type: 'Stock' },
-        { symbol: 'GOOGL', name: 'Alphabet Inc.', exchange: 'NASDAQ', type: 'Stock' },
-        { symbol: 'MSFT', name: 'Microsoft Corporation', exchange: 'NASDAQ', type: 'Stock' },
-      ].filter(s => s.symbol.toLowerCase().includes(query.toLowerCase()));
+      // Call real IPC handler (TICKET_045 implementation)
+      const api = (window as any).electronAPI;
+      if (!api?.data?.searchSymbols) {
+        console.warn('[BacktestPage] Data API not available, using fallback');
+        return [];
+      }
+
+      const results = await api.data.searchSymbols(query);
+
+      // Transform backend response to SymbolSearchResult format
+      return results.map((r: any) => ({
+        symbol: r.symbol || query,
+        name: r.name || r.symbol || query,
+        exchange: r.exchange || 'Unknown',
+        type: r.type || 'Unknown',
+      }));
     } catch (error) {
       console.error('[BacktestPage] Symbol search failed:', error);
+      // Return empty array on error
       return [];
     }
   }, []);
@@ -240,11 +250,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setIsExecuting(true);
     try {
       console.log('[BacktestPage] Executing backtest with config:', dataConfig);
-      onExecute?.();
+      console.log('[BacktestPage] Workflow rows:', workflowRows);
+
+      // TICKET_121: Pass data config and workflows to Host layer
+      onExecute?.(dataConfig, workflowRows);
     } finally {
       setIsExecuting(false);
     }
-  }, [isExecuting, dataConfig, validateDataConfig, onExecute]);
+  }, [isExecuting, dataConfig, workflowRows, validateDataConfig, onExecute]);
 
   return (
     <div className="h-full flex bg-color-terminal-bg text-color-terminal-text">
