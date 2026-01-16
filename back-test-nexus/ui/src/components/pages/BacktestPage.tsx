@@ -2,14 +2,23 @@
  * BacktestPage Component - Plugin Layer
  *
  * Backtest Nexus page following TICKET_077 layout specification.
- * Zones: B (Sidebar - History), C (WorkflowRowSelector), D (Action Bar - Execute)
+ * Zones: B (Sidebar - History), C (BacktestDataConfigPanel + WorkflowRowSelector), D (Action Bar - Execute)
  *
  * @see TICKET_077 - Silverstream UI Component Library
+ * @see TICKET_077_COMPONENT8 - BacktestDataConfigPanel Design
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { cn } from '../../lib/utils';
-import { WorkflowRowSelector, type WorkflowRow, type AlgorithmOption } from '../ui';
+import {
+  WorkflowRowSelector,
+  type WorkflowRow,
+  type AlgorithmOption,
+  BacktestDataConfigPanel,
+  type BacktestDataConfig,
+  type DataSourceOption,
+  type SymbolSearchResult,
+} from '../ui';
 import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
 
 // Inline SVG icons
@@ -81,6 +90,18 @@ const createInitialRow = (): WorkflowRow => ({
   postConditionSelections: [],
 });
 
+// Default data configuration
+const createDefaultDataConfig = (): BacktestDataConfig => ({
+  symbol: '',
+  dataSource: 'clickhouse',
+  startDate: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+  endDate: new Date().toISOString().split('T')[0],
+  timeframe: '1d',
+  initialCapital: 10000,
+  orderSize: 100,
+  orderSizeUnit: 'percent',
+});
+
 // -----------------------------------------------------------------------------
 // BacktestPage Component
 // -----------------------------------------------------------------------------
@@ -93,6 +114,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   const [workflowRows, setWorkflowRows] = useState<WorkflowRow[]>([createInitialRow()]);
   const [algorithms, setAlgorithms] = useState(EMPTY_ALGORITHMS);
   const [loading, setLoading] = useState(true);
+
+  // Component 8: Data configuration state
+  const [dataConfig, setDataConfig] = useState<BacktestDataConfig>(createDefaultDataConfig());
+  const [dataSources, setDataSources] = useState<DataSourceOption[]>([]);
+  const [dataConfigErrors, setDataConfigErrors] = useState<Partial<Record<keyof BacktestDataConfig, string>>>({});
 
   // Load algorithms from database on mount
   useEffect(() => {
@@ -130,15 +156,95 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     loadAlgorithms();
   }, []);
 
+  // Load data sources on mount
+  useEffect(() => {
+    async function loadDataSources() {
+      try {
+        // TODO: Replace with actual IPC call to data:getProviders
+        // const providers = await window.api.data.getProviders();
+        const providers: DataSourceOption[] = [
+          { id: 'clickhouse', name: 'ClickHouse', status: 'connected' },
+          { id: 'csv', name: 'CSV Files', status: 'connected' },
+        ];
+        setDataSources(providers);
+      } catch (error) {
+        console.error('[BacktestPage] Failed to load data sources:', error);
+      }
+    }
+
+    loadDataSources();
+  }, []);
+
+  // Symbol search handler
+  const handleSymbolSearch = useCallback(async (query: string): Promise<SymbolSearchResult[]> => {
+    try {
+      // TODO: Replace with actual IPC call to data:searchSymbols
+      // const results = await window.api.data.searchSymbols(query);
+      // For now, return mock data
+      return [
+        { symbol: 'AAPL', name: 'Apple Inc.', exchange: 'NASDAQ', type: 'Stock' },
+        { symbol: 'GOOGL', name: 'Alphabet Inc.', exchange: 'NASDAQ', type: 'Stock' },
+        { symbol: 'MSFT', name: 'Microsoft Corporation', exchange: 'NASDAQ', type: 'Stock' },
+      ].filter(s => s.symbol.toLowerCase().includes(query.toLowerCase()));
+    } catch (error) {
+      console.error('[BacktestPage] Symbol search failed:', error);
+      return [];
+    }
+  }, []);
+
+  // Validate data configuration
+  const validateDataConfig = useCallback((config: BacktestDataConfig): boolean => {
+    const errors: Partial<Record<keyof BacktestDataConfig, string>> = {};
+
+    if (!config.symbol) {
+      errors.symbol = 'Symbol is required';
+    }
+
+    if (!config.dataSource) {
+      errors.dataSource = 'Data source is required';
+    }
+
+    if (!config.startDate) {
+      errors.startDate = 'Start date is required';
+    }
+
+    if (!config.endDate) {
+      errors.endDate = 'End date is required';
+    }
+
+    if (config.startDate && config.endDate && config.startDate >= config.endDate) {
+      errors.endDate = 'End date must be after start date';
+    }
+
+    if (config.initialCapital <= 0) {
+      errors.initialCapital = 'Initial capital must be positive';
+    }
+
+    if (config.orderSize <= 0) {
+      errors.orderSize = 'Order size must be positive';
+    }
+
+    setDataConfigErrors(errors);
+    return Object.keys(errors).length === 0;
+  }, []);
+
   const handleExecute = useCallback(async () => {
     if (isExecuting) return;
+
+    // Validate data configuration first
+    if (!validateDataConfig(dataConfig)) {
+      console.error('[BacktestPage] Data configuration validation failed');
+      return;
+    }
+
     setIsExecuting(true);
     try {
+      console.log('[BacktestPage] Executing backtest with config:', dataConfig);
       onExecute?.();
     } finally {
       setIsExecuting(false);
     }
-  }, [isExecuting, onExecute]);
+  }, [isExecuting, dataConfig, validateDataConfig, onExecute]);
 
   return (
     <div className="h-full flex bg-color-terminal-bg text-color-terminal-text">
@@ -186,7 +292,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
       {/* Zone C + Zone D */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Zone C: WorkflowRowSelector */}
+        {/* Zone C: BacktestDataConfigPanel + WorkflowRowSelector */}
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="flex items-center justify-center h-64">
@@ -195,13 +301,26 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               </div>
             </div>
           ) : (
-            <WorkflowRowSelector
-              title="WORKFLOW CONFIGURATION"
-              rows={workflowRows}
-              onChange={setWorkflowRows}
-              algorithms={algorithms}
-              maxRows={10}
-            />
+            <div className="space-y-6">
+              {/* Component 8: Data Configuration Panel */}
+              <BacktestDataConfigPanel
+                value={dataConfig}
+                onChange={setDataConfig}
+                dataSources={dataSources}
+                onSymbolSearch={handleSymbolSearch}
+                errors={dataConfigErrors}
+                disabled={isExecuting}
+              />
+
+              {/* Component 7: Workflow Row Selector */}
+              <WorkflowRowSelector
+                title="WORKFLOW CONFIGURATION"
+                rows={workflowRows}
+                onChange={setWorkflowRows}
+                algorithms={algorithms}
+                maxRows={10}
+              />
+            </div>
           )}
         </div>
 

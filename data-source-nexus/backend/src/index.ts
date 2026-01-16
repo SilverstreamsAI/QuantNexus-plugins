@@ -17,7 +17,15 @@ import {
   unregisterDataIPCHandlers,
   type DataBackendContext,
 } from './ipc/handlers';
-import { SharedMemoryWriter } from '../native';
+
+// TICKET_097_6: Dynamic import to avoid build-time dependency on native addon
+let SharedMemoryWriter: any = null;
+try {
+  const nativeModule = require('../native');
+  SharedMemoryWriter = nativeModule.SharedMemoryWriter;
+} catch (err) {
+  console.warn('[DataPlugin Backend] Native SharedMemoryWriter not available:', (err as Error).message);
+}
 
 // =============================================================================
 // Configuration
@@ -134,8 +142,8 @@ export async function initializeDataBackend(
   }
 
   // Initialize shared memory writer (TICKET_097_6)
-  let shmWriter: SharedMemoryWriter | null = null;
-  if (mergedConfig.sharedMemory?.enabled) {
+  let shmWriter: any | null = null;
+  if (mergedConfig.sharedMemory?.enabled && SharedMemoryWriter) {
     try {
       shmWriter = new SharedMemoryWriter();
       const success = shmWriter.create(
@@ -152,6 +160,8 @@ export async function initializeDataBackend(
       console.error('[DataPlugin Backend] Failed to initialize SharedMemory:', error);
       shmWriter = null;
     }
+  } else if (mergedConfig.sharedMemory?.enabled && !SharedMemoryWriter) {
+    console.warn('[DataPlugin Backend] SharedMemory enabled but native addon not available');
   }
 
   // Initialize providers
