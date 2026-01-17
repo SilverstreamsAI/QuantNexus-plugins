@@ -262,7 +262,8 @@ export class ClickHouseProvider implements DataProvider {
 
       return rows.map(row => this.mapRowToSymbolInfo(row));
     } catch (error) {
-      console.error('ClickHouse search error:', error);
+      console.error('[ClickHouse] searchSymbols failed:', error);
+      console.error('[ClickHouse] Client initialized:', !!this.client, 'Ready:', this.ready);
       return [];
     }
   }

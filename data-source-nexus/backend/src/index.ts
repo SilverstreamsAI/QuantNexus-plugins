@@ -101,15 +101,17 @@ let initialized = false;
 /**
  * Initialize the Data Source Nexus backend
  *
+ * TICKET_127: Now returns DataBackendContext for Host Layer registry.
+ *
  * This should be called from the Electron main process during app startup.
  */
 export async function initializeDataBackend(
   ipcMain: IpcMain,
   config: DataBackendConfig = DEFAULT_CONFIG
-): Promise<void> {
+): Promise<DataBackendContext> {
   if (initialized) {
     console.warn('[DataPlugin Backend] Already initialized');
-    return;
+    return backendContext!;
   }
 
   console.info('[DataPlugin Backend] Initializing...');
@@ -141,7 +143,7 @@ export async function initializeDataBackend(
     }
   }
 
-  // Initialize shared memory writer (TICKET_097_6)
+  // Initialize shared memory writer (TICKET_097_6, TICKET_128)
   let shmWriter: any | null = null;
   if (mergedConfig.sharedMemory?.enabled && SharedMemoryWriter) {
     try {
@@ -162,6 +164,8 @@ export async function initializeDataBackend(
     }
   } else if (mergedConfig.sharedMemory?.enabled && !SharedMemoryWriter) {
     console.warn('[DataPlugin Backend] SharedMemory enabled but native addon not available');
+  } else if (mergedConfig.sharedMemory?.enabled === false) {
+    console.info('[DataPlugin Backend] SharedMemory deferred (TICKET_128: will enable after C++ Core ready)');
   }
 
   // Initialize providers
@@ -201,11 +205,15 @@ export async function initializeDataBackend(
     shmWriter: shmWriter,  // TICKET_097_6: Add shared memory writer
   };
 
-  // Register IPC handlers
-  registerDataIPCHandlers(ipcMain, backendContext);
+  // TICKET_127: DON'T register IPC handlers
+  // Host Layer will proxy calls to exported functions
+  // registerDataIPCHandlers(ipcMain, backendContext);
 
   initialized = true;
-  console.info('[DataPlugin Backend] Initialized successfully');
+  console.info('[DataPlugin Backend] Initialized successfully (proxy mode)');
+
+  // Return context for Host Layer registry
+  return backendContext;
 }
 
 /**
@@ -276,6 +284,283 @@ export function getDataBackendContext(): DataBackendContext | null {
  */
 export function isDataBackendInitialized(): boolean {
   return initialized;
+}
+
+// =============================================================================
+// TICKET_127: Exported Operations (for Host Layer proxy)
+// =============================================================================
+
+/**
+ * Search symbols by query
+ * Called by Host Layer data-handlers.ts
+ */
+export async function searchSymbols(query: string): Promise<any[]> {
+  if (!backendContext) {
+    throw new Error('[DataPlugin Backend] Not initialized');
+  }
+
+  // Check cache
+  if (backendContext.cache) {
+    const cached = backendContext.cache.getSearchResults(query);
+    if (cached) {
+      return cached;
+    }
+  }
+
+  // Fetch from active provider
+  const provider = backendContext.providers.get(backendContext.activeProviderId);
+  if (!provider) {
+    return [];
+  }
+
+  const results = await (provider as any).searchSymbols(query);
+
+  // Cache results
+  if (backendContext.cache && results.length > 0) {
+    backendContext.cache.setSearchResults(query, results);
+  }
+
+  return results;
+}
+
+/**
+ * Fetch historical OHLCV data
+ */
+export async function fetchHistoricalData(request: any): Promise<any> {
+  if (!backendContext) {
+    throw new Error('[DataPlugin Backend] Not initialized');
+  }
+
+  const { symbol, interval, start, end } = request;
+
+  // Check cache first
+  if (backendContext.cache && start && end) {
+    const startTs = typeof start === 'string' ? new Date(start).getTime() : start;
+    const endTs = typeof end === 'string' ? new Date(end).getTime() : end;
+    const cached = backendContext.cache.getOHLCV(symbol, interval, startTs, endTs);
+    if (cached) {
+      return { success: true, data: cached, cached: true };
+    }
+  }
+
+  // Check storage
+  if (backendContext.storage && start && end) {
+    const startTs = typeof start === 'string' ? new Date(start).getTime() : start;
+    const endTs = typeof end === 'string' ? new Date(end).getTime() : end;
+
+    const hasData = await backendContext.storage.hasData(symbol, interval, startTs, endTs);
+    if (hasData) {
+      const result = await backendContext.storage.queryOHLCV({
+        symbol,
+        interval,
+        start: startTs,
+        end: endTs,
+      });
+
+      const series = {
+        symbol,
+        interval,
+        data: result.data,
+        start: startTs,
+        end: endTs,
+      };
+
+      // Update cache
+      if (backendContext.cache) {
+        backendContext.cache.setOHLCV(series);
+      }
+
+      return { success: true, data: series };
+    }
+  }
+
+  // Fetch from active provider
+  const provider = backendContext.providers.get(backendContext.activeProviderId);
+  if (!provider) {
+    return {
+      success: false,
+      error: { code: 'PROVIDER_ERROR', message: 'No active provider' },
+    };
+  }
+
+  const response = await (provider as any).getHistoricalData(request);
+
+  // Store and cache on success
+  if (response.success && response.data) {
+    if (backendContext.storage) {
+      await backendContext.storage.storeOHLCV(response.data);
+    }
+    if (backendContext.cache) {
+      backendContext.cache.setOHLCV(response.data);
+    }
+  }
+
+  return response;
+}
+
+/**
+ * Check data coverage for a symbol/interval/date range
+ */
+export async function checkCoverage(request: {
+  symbol: string;
+  interval: string;
+  start: string | number;
+  end: string | number;
+}): Promise<any> {
+  if (!backendContext || !backendContext.storage) {
+    return {
+      symbol: request.symbol,
+      interval: request.interval,
+      completeness: 0,
+      totalBars: 0,
+    };
+  }
+
+  const startTs = typeof request.start === 'string' ? new Date(request.start).getTime() : request.start;
+  const endTs = typeof request.end === 'string' ? new Date(request.end).getTime() : request.end;
+
+  // Cast interval to Interval type (validated by caller)
+  const interval = request.interval as any;
+
+  const hasData = await backendContext.storage.hasData(request.symbol, interval, startTs, endTs);
+
+  if (hasData) {
+    const result = await backendContext.storage.queryOHLCV({
+      symbol: request.symbol,
+      interval: interval,
+      start: startTs,
+      end: endTs,
+    });
+
+    return {
+      symbol: request.symbol,
+      interval: request.interval,
+      startDate: new Date(startTs).toISOString(),
+      endDate: new Date(endTs).toISOString(),
+      totalBars: result.data.length,
+      completeness: 1.0,
+    };
+  }
+
+  return {
+    symbol: request.symbol,
+    interval: request.interval,
+    startDate: new Date(startTs).toISOString(),
+    endDate: new Date(endTs).toISOString(),
+    totalBars: 0,
+    completeness: 0,
+    missingRanges: [{ start: new Date(startTs).toISOString(), end: new Date(endTs).toISOString() }],
+  };
+}
+
+/**
+ * Get provider status
+ */
+export async function getProviderStatus(providerId?: string): Promise<any> {
+  if (!backendContext) {
+    return { connected: false, error: 'Backend not initialized' };
+  }
+
+  const targetId = providerId || backendContext.activeProviderId;
+  const provider = backendContext.providers.get(targetId);
+
+  if (!provider) {
+    return { connected: false, error: 'Provider not found' };
+  }
+
+  try {
+    return await (provider as any).getStatus?.() || { connected: true };
+  } catch (error) {
+    return {
+      connected: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+// =============================================================================
+// Extension Host Compatibility (TICKET_097)
+// =============================================================================
+
+/**
+ * Plugin Context from Extension Host
+ */
+interface PluginContext {
+  pluginId: string;
+  pluginPath: string;
+  log: {
+    debug: (message: string, ...args: unknown[]) => void;
+    info: (message: string, ...args: unknown[]) => void;
+    warn: (message: string, ...args: unknown[]) => void;
+    error: (message: string, ...args: unknown[]) => void;
+  };
+  storage: any;
+  subscriptions: { dispose: () => void }[];
+}
+
+/**
+ * Plugin API returned by activate
+ */
+interface PluginApi {
+  searchSymbols?: (query: string) => Promise<any[]>;
+  fetchHistoricalData?: (request: any) => Promise<any>;
+  checkCoverage?: (request: any) => Promise<any>;
+  getProviderStatus?: (providerId?: string) => Promise<any>;
+}
+
+/**
+ * Extension Host activate function
+ * Called when plugin is loaded by Extension Host
+ */
+export async function activate(context: PluginContext): Promise<PluginApi> {
+  context.log.info('Data Source Nexus backend activating...');
+
+  try {
+    // Initialize backend (no IPC registration in Extension Host mode)
+    await initializeDataBackend(null as any, {
+      storage: {
+        dbPath: 'data/market.db',
+      },
+      cache: {
+        maxMemoryMB: 256,
+      },
+      sharedMemory: {
+        enabled: false, // Will be enabled after C++ Core ready
+      },
+      providers: {
+        clickhouse: {
+          enabled: true,
+          baseUrl: 'https://clickhouse.silvonastream.com',
+        },
+        csv: {
+          enabled: true,
+        },
+      },
+      defaultProvider: 'clickhouse',
+    });
+
+    context.log.info('Data Source Nexus backend activated successfully');
+
+    // Return plugin API (exported functions)
+    return {
+      searchSymbols,
+      fetchHistoricalData,
+      checkCoverage,
+      getProviderStatus,
+    };
+  } catch (error) {
+    context.log.error('Failed to activate Data Source Nexus backend:', error);
+    throw error;
+  }
+}
+
+/**
+ * Extension Host deactivate function
+ * Called when plugin is unloaded
+ */
+export async function deactivate(): Promise<void> {
+  console.info('[DataPlugin Backend] Deactivating...');
+  await shutdownDataBackend(null as any);
 }
 
 // =============================================================================
