@@ -71,8 +71,5 @@
   },
   "permissions": ["network:internal", "database", "filesystem"],
   "isolation": "trusted",
-  "activationEvents": ["onCommand:backtest.*", "onStartup"],
-  "dependencies": {
-    "com.quantnexus.data-source-nexus": "^1.0.0"
-  }
+  "activationEvents": ["onCommand:backtest.*", "onStartup"]
 }

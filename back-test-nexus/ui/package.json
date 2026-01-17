@@ -21,7 +21,6 @@
     "typescript": "^5.3.0"
   },
   "peerDependencies": {
-    "@quantnexus/types": "workspace:*",
-    "com.quantnexus.data-source-nexus": "workspace:*"
+    "@quantnexus/types": "workspace:*"
   }
 }

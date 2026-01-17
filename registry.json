@@ -3,14 +3,6 @@
   "version": "2.0.0",
   "nexusPlugins": [
     {
-      "id": "com.quantnexus.data-source-nexus",
-      "name": "Data Source Nexus",
-      "path": "data-source-nexus",
-      "category": "data",
-      "bundled": true,
-      "description": "Market data management with multi-source support, caching, and local storage"
-    },
-    {
       "id": "com.quantnexus.strategy-builder-nexus",
       "name": "Strategy Builder Nexus",
       "path": "strategy-builder-nexus",
