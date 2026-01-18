@@ -30,6 +30,10 @@ export interface SymbolSearchResult {
   name: string;
   exchange?: string;
   type?: string;
+  /** Data availability start time from backend */
+  startTime?: string;
+  /** Data availability end time from backend */
+  endTime?: string;
 }
 
 export type TimeframeOption = '1m' | '5m' | '15m' | '30m' | '1h' | '4h' | '1d' | '1w' | '1M';
@@ -226,6 +230,8 @@ interface SymbolSearchFieldProps {
   value: string;
   onChange: (value: string) => void;
   onSearch?: (query: string) => Promise<SymbolSearchResult[]>;
+  /** Callback when a symbol is selected from search results */
+  onSelect?: (result: SymbolSearchResult) => void;
   error?: string;
   disabled?: boolean;
   className?: string;
@@ -236,6 +242,7 @@ const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
   value,
   onChange,
   onSearch,
+  onSelect,
   error,
   disabled,
   className,
@@ -278,6 +285,7 @@ const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
     onChange(result.symbol);
     setQuery(result.symbol);
     setShowResults(false);
+    onSelect?.(result);
   };
 
   return (
@@ -464,6 +472,35 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
     onChange({ ...value, [field]: newValue });
   };
 
+  /**
+   * Handle symbol selection from search results.
+   * Auto-populate startDate and endDate from backend data availability.
+   */
+  const handleSymbolSelect = useCallback((result: SymbolSearchResult) => {
+    const updates: Partial<BacktestDataConfig> = {};
+
+    // Parse startTime: "2005-02-13 13:00:00" -> "2005-02-13"
+    if (result.startTime) {
+      const startDate = result.startTime.split(' ')[0];
+      if (startDate && /^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
+        updates.startDate = startDate;
+      }
+    }
+
+    // Parse endTime: "2024-10-08 13:00:00" -> "2024-10-08"
+    if (result.endTime) {
+      const endDate = result.endTime.split(' ')[0];
+      if (endDate && /^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+        updates.endDate = endDate;
+      }
+    }
+
+    // Only update if we have date changes
+    if (Object.keys(updates).length > 0) {
+      onChange({ ...value, ...updates });
+    }
+  }, [value, onChange]);
+
   return (
     <div className={cn('backtest-data-config-panel', className)}>
       {/* Title */}
@@ -487,6 +524,7 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
             value={value.symbol}
             onChange={(v) => handleChange('symbol', v)}
             onSearch={onSymbolSearch}
+            onSelect={handleSymbolSelect}
             error={errors.symbol}
             disabled={disabled}
           />

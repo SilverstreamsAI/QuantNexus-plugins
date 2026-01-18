@@ -239,6 +239,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         name: r.name || r.symbol || query,
         exchange: r.exchange || 'Unknown',
         type: r.type || 'Unknown',
+        startTime: r.startTime,
+        endTime: r.endTime,
       }));
     } catch (error) {
       console.error('[BacktestPage] Symbol search failed:', error);
