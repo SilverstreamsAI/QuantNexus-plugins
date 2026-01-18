@@ -160,15 +160,31 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   useEffect(() => {
     async function loadDataSources() {
       try {
-        // TODO: Replace with actual IPC call to data:getProviders
-        // const providers = await window.api.data.getProviders();
+        const api = (window as any).electronAPI;
+        if (!api?.data?.checkConnection) {
+          console.warn('[BacktestPage] Data API not available, using defaults');
+          setDataSources([
+            { id: 'clickhouse', name: 'ClickHouse', status: 'disconnected' },
+          ]);
+          return;
+        }
+
+        // Check ClickHouse connection status
+        const clickhouseStatus = await api.data.checkConnection('clickhouse');
+
         const providers: DataSourceOption[] = [
-          { id: 'clickhouse', name: 'ClickHouse', status: 'connected' },
-          { id: 'csv', name: 'CSV Files', status: 'connected' },
+          {
+            id: 'clickhouse',
+            name: 'ClickHouse',
+            status: clickhouseStatus.connected ? 'connected' : 'disconnected',
+          },
         ];
         setDataSources(providers);
       } catch (error) {
         console.error('[BacktestPage] Failed to load data sources:', error);
+        setDataSources([
+          { id: 'clickhouse', name: 'ClickHouse', status: 'error' },
+        ]);
       }
     }
 
@@ -252,8 +268,33 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       console.log('[BacktestPage] Executing backtest with config:', dataConfig);
       console.log('[BacktestPage] Workflow rows:', workflowRows);
 
+      // TICKET_136: Ensure data is available before execution
+      const api = (window as any).electronAPI;
+      if (api?.data?.ensure) {
+        console.log('[BacktestPage] Ensuring data availability...');
+        const ensureResult = await api.data.ensure({
+          symbol: dataConfig.symbol,
+          startDate: dataConfig.startDate,
+          endDate: dataConfig.endDate,
+          interval: dataConfig.timeframe,
+        });
+
+        if (!ensureResult.success) {
+          console.error('[BacktestPage] Data ensure failed:', ensureResult.error);
+          setDataConfigErrors({ symbol: ensureResult.error || 'Failed to fetch data' });
+          return;
+        }
+
+        console.log('[BacktestPage] Data ready:', ensureResult);
+      }
+
       // TICKET_121: Pass data config and workflows to Host layer
       onExecute?.(dataConfig, workflowRows);
+    } catch (error) {
+      console.error('[BacktestPage] Execute failed:', error);
+      setDataConfigErrors({
+        symbol: error instanceof Error ? error.message : 'Execution failed',
+      });
     } finally {
       setIsExecuting(false);
     }

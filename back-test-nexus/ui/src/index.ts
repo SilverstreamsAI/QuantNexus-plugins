@@ -386,22 +386,60 @@ class BacktestPluginImpl implements BacktestPlugin {
   // ===========================================================================
 
   private async fetchData(request: BacktestRequest): Promise<OHLCVSeries | null> {
-    // Try to get data plugin
-    if (!this.dataPlugin) {
-      // In real implementation, would get from plugin manager
-      // For now, create mock data
-      this.context.log.warn('Data plugin not available, using mock data');
-      return this.generateMockData(request);
+    // TICKET_136: Use IPC to ensure data is available
+    const api = (globalThis as any).window?.electronAPI;
+
+    if (api?.data?.ensure) {
+      try {
+        this.context.log.info(`Fetching data via IPC: ${request.symbol}`);
+
+        const ensureResult = await api.data.ensure({
+          symbol: request.symbol,
+          startDate: request.startDate,
+          endDate: request.endDate,
+          interval: request.interval,
+        });
+
+        if (!ensureResult.success) {
+          this.context.log.error(`Data ensure failed: ${ensureResult.error}`);
+          throw new Error(ensureResult.error || 'Failed to fetch data');
+        }
+
+        this.context.log.info(`Data ready: ${ensureResult.coverage?.totalBars || 0} bars`);
+
+        // For V3 architecture: return data path for Executor
+        // The actual data loading will be done by the Executor process
+        // For now, return a placeholder that indicates data is ready
+        return {
+          symbol: request.symbol,
+          interval: request.interval,
+          data: [],
+          start: new Date(request.startDate).getTime(),
+          end: new Date(request.endDate).getTime(),
+          source: ensureResult.source || 'ipc',
+          // V3: dataPath would be used by Executor
+          dataPath: ensureResult.dataPath,
+        } as OHLCVSeries;
+      } catch (error) {
+        this.context.log.error(`Data fetch failed: ${error}`);
+        throw error;
+      }
     }
 
-    const response = await this.dataPlugin.fetchHistoricalData({
-      symbol: request.symbol,
-      interval: request.interval,
-      start: request.startDate,
-      end: request.endDate,
-    });
+    // Fallback to data plugin if available
+    if (this.dataPlugin) {
+      const response = await this.dataPlugin.fetchHistoricalData({
+        symbol: request.symbol,
+        interval: request.interval,
+        start: request.startDate,
+        end: request.endDate,
+      });
+      return response.success ? response.data ?? null : null;
+    }
 
-    return response.success ? response.data ?? null : null;
+    // No data source available
+    this.context.log.error('No data source available (IPC or plugin)');
+    throw new Error('No data source available. Please configure a data provider.');
   }
 
   private generateMockData(request: BacktestRequest): OHLCVSeries {
