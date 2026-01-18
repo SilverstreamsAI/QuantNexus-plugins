@@ -62,6 +62,19 @@ interface ConnectionCheckResult {
   error?: string;
 }
 
+interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  avatar?: string;
+  plan: 'FREE' | 'PRO' | 'ENT';
+}
+
+interface AuthStateData {
+  isAuthenticated: boolean;
+  user: AuthUser | null;
+}
+
 declare global {
   interface Window {
     electronAPI: {
@@ -82,6 +95,14 @@ declare global {
         checkConnection: (provider: string) => Promise<ConnectionCheckResult>;
         onProgress: (callback: (event: unknown, data: unknown) => void) => () => void;
         cancelDownload: () => void;
+      };
+      auth: {
+        getState: () => Promise<{
+          success: boolean;
+          data?: AuthStateData;
+          error?: string;
+        }>;
+        onStateChanged: (callback: (data: AuthStateData) => void) => () => void;
       };
     };
   }

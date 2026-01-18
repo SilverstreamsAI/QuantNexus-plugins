@@ -120,6 +120,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   const [dataSources, setDataSources] = useState<DataSourceOption[]>([]);
   const [dataConfigErrors, setDataConfigErrors] = useState<Partial<Record<keyof BacktestDataConfig, string>>>({});
 
+  // TICKET_139: Track auth state to refresh ClickHouse connection on login
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   // Load algorithms from database on mount
   useEffect(() => {
     async function loadAlgorithms() {
@@ -156,7 +159,31 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     loadAlgorithms();
   }, []);
 
-  // Load data sources on mount
+  // TICKET_139: Subscribe to auth state changes
+  useEffect(() => {
+    const api = (window as any).electronAPI;
+    if (!api?.auth) {
+      console.warn('[BacktestPage] Auth API not available');
+      return;
+    }
+
+    // Get initial auth state
+    api.auth.getState().then((result: any) => {
+      if (result.success && result.data) {
+        setIsAuthenticated(result.data.isAuthenticated);
+      }
+    });
+
+    // Subscribe to auth state changes
+    const unsubscribe = api.auth.onStateChanged((data: any) => {
+      console.log('[BacktestPage] Auth state changed:', data.isAuthenticated);
+      setIsAuthenticated(data.isAuthenticated);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // TICKET_139: Load data sources when auth state changes
   useEffect(() => {
     async function loadDataSources() {
       try {
@@ -180,6 +207,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           },
         ];
         setDataSources(providers);
+        console.log('[BacktestPage] Data sources loaded, ClickHouse:', clickhouseStatus.connected ? 'connected' : 'disconnected');
       } catch (error) {
         console.error('[BacktestPage] Failed to load data sources:', error);
         setDataSources([
@@ -188,8 +216,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       }
     }
 
+    // Always load on mount, and reload when isAuthenticated changes to true
     loadDataSources();
-  }, []);
+  }, [isAuthenticated]);
 
   // Symbol search handler
   // TICKET_121 + TICKET_045: Use real backend API instead of mock data
