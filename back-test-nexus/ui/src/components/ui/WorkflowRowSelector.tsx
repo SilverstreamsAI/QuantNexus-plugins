@@ -52,6 +52,8 @@ export interface WorkflowRowSelectorProps {
   };
   /** Maximum number of rows */
   maxRows?: number;
+  /** Permanently disable Pre-condition and Post-condition buttons */
+  disableConditions?: boolean;
   /** Additional class names */
   className?: string;
 }
@@ -137,9 +139,10 @@ interface WorkflowRowItemProps {
   row: WorkflowRow;
   algorithms: WorkflowRowSelectorProps['algorithms'];
   onUpdate: (rowId: string, updates: Partial<WorkflowRow>) => void;
+  disableConditions?: boolean;
 }
 
-const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUpdate }) => {
+const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUpdate, disableConditions }) => {
   const toSelection = (opt: AlgorithmOption): AlgorithmSelection => ({
     id: opt.id,
     code: opt.code,
@@ -184,8 +187,8 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
     onUpdate(row.id, { [columnKey]: newSelections });
   };
 
-  // Pre/Post conditions enabled after algorithm selection
-  const conditionEnabled = row.analysisSelections.length > 0;
+  // Pre/Post conditions: permanently disabled if disableConditions is true
+  const conditionEnabled = disableConditions ? false : row.analysisSelections.length > 0;
 
   return (
     <div className="border border-color-terminal-border rounded-lg bg-color-terminal-surface/20 p-4 mb-4">
@@ -291,6 +294,7 @@ export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
   onChange,
   algorithms,
   maxRows = 10,
+  disableConditions = false,
   className,
 }) => {
   const updateRow = useCallback(
@@ -334,6 +338,7 @@ export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
           row={row}
           algorithms={algorithms}
           onUpdate={updateRow}
+          disableConditions={disableConditions}
         />
       ))}
     </div>

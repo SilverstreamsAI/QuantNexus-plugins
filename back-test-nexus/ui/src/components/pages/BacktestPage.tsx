@@ -404,6 +404,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 onChange={setWorkflowRows}
                 algorithms={algorithms}
                 maxRows={10}
+                disableConditions={true}
               />
             </div>
           )}
