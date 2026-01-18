@@ -237,7 +237,7 @@ export const WorkflowDropdown: React.FC<WorkflowDropdownProps> = ({
         onClick={handleToggle}
         disabled={disabled}
         className={cn(
-          'flex items-center justify-between gap-2 px-3 py-2 text-xs font-medium rounded border transition-all',
+          'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-medium rounded border transition-all',
           disabled
             ? 'border-color-terminal-border/50 bg-color-terminal-surface/30 text-color-terminal-text-muted cursor-not-allowed opacity-50'
             : cn(themeColors.border, themeColors.bg, themeColors.text, themeColors.hover),

@@ -321,7 +321,7 @@ export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
   );
 
   return (
-    <div className={cn('workflow-row-selector', className)}>
+    <div className={cn('workflow-row-selector w-full', className)}>
       {/* Title */}
       <h2 className="text-sm font-bold terminal-mono uppercase tracking-widest text-color-terminal-accent-gold mb-4">
         {title}
