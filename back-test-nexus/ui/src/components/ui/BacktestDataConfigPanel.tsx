@@ -475,9 +475,12 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
   /**
    * Handle symbol selection from search results.
    * Auto-populate startDate and endDate from backend data availability.
+   * TICKET_143: Include symbol in updates to avoid race condition with stale closure.
    */
   const handleSymbolSelect = useCallback((result: SymbolSearchResult) => {
-    const updates: Partial<BacktestDataConfig> = {};
+    const updates: Partial<BacktestDataConfig> = {
+      symbol: result.symbol,
+    };
 
     // Parse startTime: "2005-02-13 13:00:00" -> "2005-02-13"
     if (result.startTime) {
@@ -495,10 +498,7 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
       }
     }
 
-    // Only update if we have date changes
-    if (Object.keys(updates).length > 0) {
-      onChange({ ...value, ...updates });
-    }
+    onChange({ ...value, ...updates });
   }, [value, onChange]);
 
   return (

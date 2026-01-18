@@ -119,6 +119,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   const [dataConfig, setDataConfig] = useState<BacktestDataConfig>(createDefaultDataConfig());
   const [dataSources, setDataSources] = useState<DataSourceOption[]>([]);
   const [dataConfigErrors, setDataConfigErrors] = useState<Partial<Record<keyof BacktestDataConfig, string>>>({});
+  // TICKET_143: Separate execution error from field errors
+  const [executeError, setExecuteError] = useState<string | null>(null);
 
   // TICKET_139: Track auth state to refresh ClickHouse connection on login
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -295,6 +297,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     }
 
     setIsExecuting(true);
+    setExecuteError(null); // TICKET_143: Clear previous error
     try {
       console.log('[BacktestPage] Executing backtest with config:', dataConfig);
       console.log('[BacktestPage] Workflow rows:', workflowRows);
@@ -312,7 +315,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
         if (!ensureResult.success) {
           console.error('[BacktestPage] Data ensure failed:', ensureResult.error);
-          setDataConfigErrors({ symbol: ensureResult.error || 'Failed to fetch data' });
+          // TICKET_143: Use dedicated execute error instead of field error
+          setExecuteError(ensureResult.error || 'Failed to fetch data');
           return;
         }
 
@@ -323,9 +327,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       onExecute?.(dataConfig, workflowRows);
     } catch (error) {
       console.error('[BacktestPage] Execute failed:', error);
-      setDataConfigErrors({
-        symbol: error instanceof Error ? error.message : 'Execution failed',
-      });
+      // TICKET_143: Use dedicated execute error instead of field error
+      setExecuteError(error instanceof Error ? error.message : 'Execution failed');
     } finally {
       setIsExecuting(false);
     }
@@ -412,6 +415,12 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
         {/* Zone D: Action Bar */}
         <div className="flex-shrink-0 border-t border-color-terminal-border bg-color-terminal-surface/50 p-4">
+          {/* TICKET_143: Execute error display */}
+          {executeError && (
+            <div className="mb-3 p-3 rounded border border-red-500/50 bg-red-500/10 text-red-400 text-sm terminal-mono">
+              {executeError}
+            </div>
+          )}
           <button
             onClick={handleExecute}
             disabled={isExecuting}

@@ -265,17 +265,14 @@ export async function checkCoverage(config: CoverageCheckConfig): Promise<Covera
   try {
     const backendUrl = await getBackendUrl();
 
-    const response = await fetch(`${backendUrl}/api/get_data_source`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        symbol: config.symbol,
-        start_date: config.startDate,
-        end_date: config.endDate,
-        interval: config.interval,
-        check_only: true,
-      }),
+    // TICKET_143: Updated to GET method per backend implementation
+    const params = new URLSearchParams({
+      symbol: config.symbol,
+      start_date: config.startDate,
+      end_date: config.endDate,
+      interval: config.interval,
     });
+    const response = await fetch(`${backendUrl}/api/data_source/check?${params}`);
 
     if (!response.ok) {
       throw new Error(`Coverage check failed: ${response.status}`);
@@ -358,18 +355,14 @@ export async function ensureData(config: EnsureDataConfig): Promise<EnsureDataRe
       message: 'Checking data availability...',
     });
 
-    // First check if data exists
-    const checkResponse = await fetch(`${backendUrl}/api/get_data_source`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        symbol: config.symbol,
-        start_date: config.startDate,
-        end_date: config.endDate,
-        interval: config.interval,
-        check_only: true,
-      }),
+    // First check if data exists (TICKET_143: Updated to GET method per backend implementation)
+    const checkParams = new URLSearchParams({
+      symbol: config.symbol,
+      start_date: config.startDate,
+      end_date: config.endDate,
+      interval: config.interval,
     });
+    const checkResponse = await fetch(`${backendUrl}/api/data_source/check?${checkParams}`);
 
     if (!checkResponse.ok) {
       throw new Error(`Data check failed: ${checkResponse.status}`);
@@ -493,14 +486,11 @@ export async function ensureData(config: EnsureDataConfig): Promise<EnsureDataRe
 // Internal Helpers
 // =============================================================================
 
-const DATA_PLUGIN_ID = 'com.quantnexus.data';
+// TICKET_143: Use Desktop API Tunnel for data APIs (per TICKET_141 API Routing Architecture)
+// OAuth uses ai.silvonastream.com, all other APIs use desktop-api.silvonastream.com
+const DESKTOP_API_TUNNEL_URL = 'https://desktop-api.silvonastream.com';
 
 async function getBackendUrl(): Promise<string> {
   if (!deps) throw new Error('DataService not initialized');
-
-  const url = await deps.getAuthServerUrl(DATA_PLUGIN_ID);
-  if (!url) {
-    throw new Error(`No auth server URL configured for plugin: ${DATA_PLUGIN_ID}. Please install from market.`);
-  }
-  return url;
+  return DESKTOP_API_TUNNEL_URL;
 }
