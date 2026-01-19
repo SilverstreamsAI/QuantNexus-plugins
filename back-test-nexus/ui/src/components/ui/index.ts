@@ -21,3 +21,18 @@ export {
   type OrderSizeUnit,
   type BacktestDataConfigPanelProps,
 } from './BacktestDataConfigPanel';
+
+export {
+  BacktestResultPanel,
+  type BacktestResultPanelProps,
+  type ExecutorResult,
+  type ExecutorMetrics,
+  type ExecutorTrade,
+  type EquityPoint,
+} from './BacktestResultPanel';
+
+export {
+  ExecutorStatusPanel,
+  type ExecutorStatusPanelProps,
+  type ExecutorStatus,
+} from './ExecutorStatusPanel';

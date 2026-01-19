@@ -18,6 +18,9 @@ import {
   type BacktestDataConfig,
   type DataSourceOption,
   type SymbolSearchResult,
+  BacktestResultPanel,
+  ExecutorStatusPanel,
+  type ExecutorResult,
 } from '../ui';
 import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
 
@@ -62,6 +65,9 @@ interface HistoryItem {
 
 interface BacktestPageProps {
   onExecute?: (config: BacktestDataConfig, workflows: WorkflowRow[]) => void;
+  result?: ExecutorResult | null;
+  isExecuting?: boolean;
+  onNewBacktest?: () => void;
 }
 
 // -----------------------------------------------------------------------------
@@ -108,8 +114,13 @@ const createDefaultDataConfig = (): BacktestDataConfig => ({
 
 export const BacktestPage: React.FC<BacktestPageProps> = ({
   onExecute,
+  result,
+  isExecuting: isExecutingProp = false,
+  onNewBacktest,
 }) => {
-  const [isExecuting, setIsExecuting] = useState(false);
+  const [localExecuting, setLocalExecuting] = useState(false);
+  // Use prop if provided, otherwise use local state
+  const isExecuting = isExecutingProp || localExecuting;
   const [historyItems] = useState<HistoryItem[]>([]);
   const [workflowRows, setWorkflowRows] = useState<WorkflowRow[]>([createInitialRow()]);
   const [algorithms, setAlgorithms] = useState(EMPTY_ALGORITHMS);
@@ -296,7 +307,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       return;
     }
 
-    setIsExecuting(true);
+    setLocalExecuting(true);
     setExecuteError(null); // TICKET_143: Clear previous error
     try {
       console.log('[BacktestPage] Executing backtest with config:', dataConfig);
@@ -330,7 +341,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       // TICKET_143: Use dedicated execute error instead of field error
       setExecuteError(error instanceof Error ? error.message : 'Execution failed');
     } finally {
-      setIsExecuting(false);
+      setLocalExecuting(false);
     }
   }, [isExecuting, dataConfig, workflowRows, validateDataConfig, onExecute]);
 
@@ -380,9 +391,12 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
       {/* Zone C + Zone D */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Zone C: BacktestDataConfigPanel + WorkflowRowSelector */}
+        {/* Zone C: Config or Result based on state */}
         <div className="flex-1 overflow-y-auto p-6">
-          {loading ? (
+          {result ? (
+            /* Component 9: Backtest Result Panel */
+            <BacktestResultPanel result={result} className="h-full" />
+          ) : loading ? (
             <div className="flex items-center justify-center h-64">
               <div className="text-color-terminal-text-muted">
                 Loading algorithms...
@@ -390,7 +404,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Component 8: Data Configuration Panel */}
+              {/* Component 8: Executor Status Panel (shown when executing) */}
+              {isExecuting && (
+                <ExecutorStatusPanel
+                  status="running"
+                  progress={0}
+                  message="Running backtest..."
+                />
+              )}
+
+              {/* Data Configuration Panel */}
               <BacktestDataConfigPanel
                 value={dataConfig}
                 onChange={setDataConfig}
@@ -421,28 +444,39 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               {executeError}
             </div>
           )}
-          <button
-            onClick={handleExecute}
-            disabled={isExecuting}
-            className={cn(
-              "w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all",
-              isExecuting
-                ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
-                : "border-color-terminal-accent-gold bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20"
-            )}
-          >
-            {isExecuting ? (
-              <>
-                <LoaderIcon className="w-4 h-4 animate-spin" />
-                Executing...
-              </>
-            ) : (
-              <>
-                <PlayIcon className="w-4 h-4" />
-                Execute
-              </>
-            )}
-          </button>
+          {result ? (
+            /* Show "New Backtest" button when result is displayed */
+            <button
+              onClick={onNewBacktest}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all border-color-terminal-accent-teal bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal hover:bg-color-terminal-accent-teal/20"
+            >
+              <PlayIcon className="w-4 h-4" />
+              New Backtest
+            </button>
+          ) : (
+            <button
+              onClick={handleExecute}
+              disabled={isExecuting}
+              className={cn(
+                "w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all",
+                isExecuting
+                  ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
+                  : "border-color-terminal-accent-gold bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20"
+              )}
+            >
+              {isExecuting ? (
+                <>
+                  <LoaderIcon className="w-4 h-4 animate-spin" />
+                  Executing...
+                </>
+              ) : (
+                <>
+                  <PlayIcon className="w-4 h-4" />
+                  Execute
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>
