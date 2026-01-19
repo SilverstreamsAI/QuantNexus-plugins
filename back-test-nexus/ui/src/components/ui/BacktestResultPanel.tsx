@@ -46,6 +46,15 @@ export interface EquityPoint {
   drawdown: number;
 }
 
+export interface Candle {
+  timestamp: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
 export interface ExecutorResult {
   success: boolean;
   errorMessage?: string;
@@ -55,6 +64,7 @@ export interface ExecutorResult {
   metrics: ExecutorMetrics;
   equityCurve: EquityPoint[];
   trades: ExecutorTrade[];
+  candles: Candle[];
 }
 
 // -----------------------------------------------------------------------------
@@ -84,6 +94,15 @@ const TrendingUpIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
     <polyline points="17 6 23 6 23 12" />
+  </svg>
+);
+
+const CandleChartIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 5v14" />
+    <rect x="5" y="8" width="8" height="8" rx="1" />
+    <path d="M15 3v18" />
+    <rect x="11" y="6" width="8" height="6" rx="1" />
   </svg>
 );
 
@@ -291,79 +310,215 @@ const TradesTab: React.FC<TradesTabProps> = ({ trades }) => (
 );
 
 // -----------------------------------------------------------------------------
-// Equity Curve Tab (Simple)
+// Charts Tab (Dual-Chart: Equity + K-Line)
 // -----------------------------------------------------------------------------
 
-interface EquityCurveTabProps {
+interface ChartsTabProps {
   equityCurve: EquityPoint[];
+  candles: Candle[];
+  trades: ExecutorTrade[];
 }
 
-const EquityCurveTab: React.FC<EquityCurveTabProps> = ({ equityCurve }) => {
-  if (!equityCurve || equityCurve.length === 0) {
+const ChartsTab: React.FC<ChartsTabProps> = ({ equityCurve, candles, trades }) => {
+  // Equity curve chart dimensions
+  const equityHeight = 180;
+  const klineHeight = 220;
+
+  // Equity curve rendering
+  const renderEquityCurve = () => {
+    if (!equityCurve || equityCurve.length === 0) {
+      return (
+        <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
+          No equity data
+        </div>
+      );
+    }
+
+    const minEquity = Math.min(...equityCurve.map(p => p.equity)) * 0.98;
+    const maxEquity = Math.max(...equityCurve.map(p => p.equity)) * 1.02;
+    const range = maxEquity - minEquity || 1;
+
+    const width = 100;
+    const height = 100;
+
+    // Equity line
+    const equityPoints = equityCurve.map((point, index) => {
+      const x = (index / (equityCurve.length - 1)) * width;
+      const y = height - ((point.equity - minEquity) / range) * height;
+      return `${x},${y}`;
+    }).join(' ');
+
+    // Area fill
+    const areaPath = `M 0,${height} ` + equityCurve.map((point, index) => {
+      const x = (index / (equityCurve.length - 1)) * width;
+      const y = height - ((point.equity - minEquity) / range) * height;
+      return `L ${x},${y}`;
+    }).join(' ') + ` L ${width},${height} Z`;
+
+    const startEquity = equityCurve[0]?.equity || 0;
+    const endEquity = equityCurve[equityCurve.length - 1]?.equity || 0;
+    const pnl = endEquity - startEquity;
+    const color = pnl >= 0 ? '#4ade80' : '#f87171';
+
     return (
-      <div className="p-4 flex items-center justify-center h-64 text-color-terminal-text-muted">
-        No equity curve data available
-      </div>
+      <>
+        <div className="flex items-center justify-between px-3 py-1.5 border-b border-color-terminal-border/50">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-color-terminal-text-muted">
+            Equity Curve
+          </span>
+          <span className={cn('text-xs tabular-nums font-medium', pnl >= 0 ? 'text-green-400' : 'text-red-400')}>
+            {formatCurrency(endEquity)} ({formatPercent((pnl / startEquity) * 100)})
+          </span>
+        </div>
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ height: equityHeight - 32 }} preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="equityGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+              <stop offset="100%" stopColor={color} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <path d={areaPath} fill="url(#equityGrad)" />
+          <polyline fill="none" stroke={color} strokeWidth="0.3" points={equityPoints} />
+        </svg>
+      </>
     );
-  }
+  };
 
-  const minEquity = Math.min(...equityCurve.map(p => p.equity));
-  const maxEquity = Math.max(...equityCurve.map(p => p.equity));
-  const range = maxEquity - minEquity || 1;
+  // K-line chart rendering
+  const renderKLineChart = () => {
+    if (!candles || candles.length === 0) {
+      return (
+        <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
+          No K-line data
+        </div>
+      );
+    }
 
-  // Simple SVG line chart
-  const width = 100;
-  const height = 40;
-  const points = equityCurve.map((point, index) => {
-    const x = (index / (equityCurve.length - 1)) * width;
-    const y = height - ((point.equity - minEquity) / range) * height;
-    return `${x},${y}`;
-  }).join(' ');
+    const viewWidth = 100;
+    const viewHeight = 100;
+    const margin = { top: 5, bottom: 15 };
+    const chartHeight = viewHeight - margin.top - margin.bottom;
 
-  const startEquity = equityCurve[0]?.equity || 0;
-  const endEquity = equityCurve[equityCurve.length - 1]?.equity || 0;
-  const pnl = endEquity - startEquity;
+    const minPrice = Math.min(...candles.map(c => c.low)) * 0.998;
+    const maxPrice = Math.max(...candles.map(c => c.high)) * 1.002;
+    const priceRange = maxPrice - minPrice || 1;
+
+    const candleWidth = viewWidth / candles.length;
+    const bodyWidth = candleWidth * 0.7;
+
+    const priceToY = (price: number) => margin.top + chartHeight - ((price - minPrice) / priceRange) * chartHeight;
+
+    return (
+      <>
+        <div className="flex items-center justify-between px-3 py-1.5 border-b border-color-terminal-border/50">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-color-terminal-text-muted">
+            K-Line Chart
+          </span>
+          <span className="text-[10px] text-color-terminal-text-muted tabular-nums">
+            {candles.length} bars
+          </span>
+        </div>
+        <svg viewBox={`0 0 ${viewWidth} ${viewHeight}`} className="w-full" style={{ height: klineHeight - 32 }} preserveAspectRatio="none">
+          {/* Grid lines */}
+          {[0.25, 0.5, 0.75].map((ratio, i) => (
+            <line
+              key={i}
+              x1={0}
+              x2={viewWidth}
+              y1={margin.top + chartHeight * ratio}
+              y2={margin.top + chartHeight * ratio}
+              stroke="#374151"
+              strokeOpacity={0.3}
+              strokeDasharray="0.5,1"
+            />
+          ))}
+
+          {/* Candles */}
+          {candles.map((candle, i) => {
+            const x = i * candleWidth + candleWidth / 2;
+            const isUp = candle.close >= candle.open;
+            const color = isUp ? '#22C55E' : '#EF4444';
+            const bodyTop = priceToY(Math.max(candle.open, candle.close));
+            const bodyBottom = priceToY(Math.min(candle.open, candle.close));
+            const bodyH = Math.max(0.3, bodyBottom - bodyTop);
+
+            return (
+              <g key={i}>
+                {/* Wick */}
+                <line
+                  x1={x}
+                  x2={x}
+                  y1={priceToY(candle.high)}
+                  y2={priceToY(candle.low)}
+                  stroke={color}
+                  strokeWidth={0.1}
+                />
+                {/* Body */}
+                <rect
+                  x={x - bodyWidth / 2}
+                  y={bodyTop}
+                  width={bodyWidth}
+                  height={bodyH}
+                  fill={color}
+                />
+              </g>
+            );
+          })}
+
+          {/* Trade markers */}
+          {trades.slice(0, 50).map((trade, i) => {
+            const tradeTime = trade.entryTime * 1000;
+            const candleIndex = candles.findIndex((c, idx) =>
+              c.timestamp <= tradeTime && (idx === candles.length - 1 || candles[idx + 1].timestamp > tradeTime)
+            );
+            if (candleIndex < 0) return null;
+
+            const x = candleIndex * candleWidth + candleWidth / 2;
+            const y = priceToY(trade.entryPrice);
+            const isBuy = trade.side.toLowerCase().includes('buy');
+
+            return (
+              <circle
+                key={i}
+                cx={x}
+                cy={y}
+                r={0.8}
+                fill={isBuy ? '#22C55E' : '#EF4444'}
+                stroke="#fff"
+                strokeWidth={0.15}
+              />
+            );
+          })}
+
+          {/* Price labels */}
+          <text x={viewWidth - 1} y={margin.top + 2} className="text-[2px] fill-color-terminal-text-muted" textAnchor="end">
+            {maxPrice.toFixed(0)}
+          </text>
+          <text x={viewWidth - 1} y={viewHeight - margin.bottom - 1} className="text-[2px] fill-color-terminal-text-muted" textAnchor="end">
+            {minPrice.toFixed(0)}
+          </text>
+        </svg>
+      </>
+    );
+  };
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-3 space-y-3 overflow-y-auto h-full">
+      {/* Equity Curve */}
+      <div className="border border-color-terminal-border rounded bg-color-terminal-panel/30" style={{ height: equityHeight }}>
+        {renderEquityCurve()}
+      </div>
+
+      {/* K-Line Chart */}
+      <div className="border border-color-terminal-border rounded bg-color-terminal-panel/30" style={{ height: klineHeight }}>
+        {renderKLineChart()}
+      </div>
+
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-3">
-        <MetricCard
-          label="Starting Equity"
-          value={`$${startEquity.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-        />
-        <MetricCard
-          label="Ending Equity"
-          value={`$${endEquity.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-          colorClass={getColorClass(pnl)}
-        />
-        <MetricCard
-          label="Net Change"
-          value={formatCurrency(pnl)}
-          colorClass={getColorClass(pnl)}
-          highlighted
-        />
-      </div>
-
-      {/* Simple Chart */}
-      <div className="border border-color-terminal-border rounded p-4 bg-color-terminal-panel/30">
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-48" preserveAspectRatio="none">
-          <polyline
-            fill="none"
-            stroke={pnl >= 0 ? '#4ade80' : '#f87171'}
-            strokeWidth="0.5"
-            points={points}
-          />
-        </svg>
-        <div className="flex justify-between text-[10px] text-color-terminal-text-muted mt-2">
-          <span>{formatDate(equityCurve[0]?.timestamp || 0)}</span>
-          <span>{formatDate(equityCurve[equityCurve.length - 1]?.timestamp || 0)}</span>
-        </div>
-      </div>
-
-      {/* Data Points */}
-      <div className="text-xs text-color-terminal-text-muted">
-        {equityCurve.length} data points
+      <div className="text-[10px] text-color-terminal-text-muted flex justify-between">
+        <span>Equity: {equityCurve?.length || 0} points</span>
+        <span>Candles: {candles?.length || 0} bars</span>
+        <span>Trades: {trades?.length || 0}</span>
       </div>
     </div>
   );
@@ -373,7 +528,7 @@ const EquityCurveTab: React.FC<EquityCurveTabProps> = ({ equityCurve }) => {
 // Main Component
 // -----------------------------------------------------------------------------
 
-type TabId = 'performance' | 'trades' | 'equity';
+type TabId = 'performance' | 'trades' | 'charts';
 
 interface Tab {
   id: TabId;
@@ -384,7 +539,7 @@ interface Tab {
 const tabs: Tab[] = [
   { id: 'performance', label: 'PERFORMANCE', icon: <BarChartIcon className="w-4 h-4" /> },
   { id: 'trades', label: 'TRADES', icon: <ListIcon className="w-4 h-4" /> },
-  { id: 'equity', label: 'EQUITY CURVE', icon: <TrendingUpIcon className="w-4 h-4" /> },
+  { id: 'charts', label: 'CHARTS', icon: <CandleChartIcon className="w-4 h-4" /> },
 ];
 
 export interface BacktestResultPanelProps {
@@ -427,8 +582,12 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
         {activeTab === 'trades' && (
           <TradesTab trades={result.trades} />
         )}
-        {activeTab === 'equity' && (
-          <EquityCurveTab equityCurve={result.equityCurve} />
+        {activeTab === 'charts' && (
+          <ChartsTab
+            equityCurve={result.equityCurve}
+            candles={result.candles || []}
+            trades={result.trades}
+          />
         )}
       </div>
     </div>
