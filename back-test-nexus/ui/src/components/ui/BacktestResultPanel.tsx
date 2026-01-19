@@ -136,15 +136,19 @@ const MetricCard: React.FC<MetricCardProps> = ({ label, value, colorClass = 'tex
 // -----------------------------------------------------------------------------
 
 const formatCurrency = (value: number | null | undefined): string => {
-  if (value == null) return '$0.00';
-  const sign = value >= 0 ? '+' : '';
-  return `${sign}$${Math.abs(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (value == null || !Number.isFinite(value)) return '$0.00';
+  // Cap display at reasonable range
+  const capped = Math.max(-1e12, Math.min(1e12, value));
+  const sign = capped >= 0 ? '+' : '';
+  return `${sign}$${Math.abs(capped).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
 const formatPercent = (value: number | null | undefined): string => {
-  if (value == null) return '0.00%';
-  const sign = value >= 0 ? '+' : '';
-  return `${sign}${value.toFixed(2)}%`;
+  if (value == null || !Number.isFinite(value)) return '0.00%';
+  // Cap display at reasonable range
+  const capped = Math.max(-9999, Math.min(9999, value));
+  const sign = capped >= 0 ? '+' : '';
+  return `${sign}${capped.toFixed(2)}%`;
 };
 
 const formatRatio = (value: number | null | undefined): string => {
@@ -334,29 +338,44 @@ const ChartsTab: React.FC<ChartsTabProps> = ({ equityCurve, candles, trades }) =
       );
     }
 
-    const minEquity = Math.min(...equityCurve.map(p => p.equity)) * 0.98;
-    const maxEquity = Math.max(...equityCurve.map(p => p.equity)) * 1.02;
+    // TICKET_154: Filter out invalid equity values (NaN, Infinity, overflow)
+    const validEquityCurve = equityCurve.filter(p =>
+      Number.isFinite(p.equity) && Math.abs(p.equity) < 1e15
+    );
+
+    // TICKET_155: Need at least 2 points to render a line (avoid division by zero)
+    if (validEquityCurve.length < 2) {
+      return (
+        <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
+          Processing... ({validEquityCurve.length} points)
+        </div>
+      );
+    }
+
+    const minEquity = Math.min(...validEquityCurve.map(p => p.equity)) * 0.98;
+    const maxEquity = Math.max(...validEquityCurve.map(p => p.equity)) * 1.02;
     const range = maxEquity - minEquity || 1;
 
     const width = 100;
     const height = 100;
+    const pointCount = validEquityCurve.length;
 
-    // Equity line
-    const equityPoints = equityCurve.map((point, index) => {
-      const x = (index / (equityCurve.length - 1)) * width;
+    // Equity line (using filtered valid data)
+    const equityPoints = validEquityCurve.map((point, index) => {
+      const x = (index / (pointCount - 1)) * width;
       const y = height - ((point.equity - minEquity) / range) * height;
       return `${x},${y}`;
     }).join(' ');
 
     // Area fill
-    const areaPath = `M 0,${height} ` + equityCurve.map((point, index) => {
-      const x = (index / (equityCurve.length - 1)) * width;
+    const areaPath = `M 0,${height} ` + validEquityCurve.map((point, index) => {
+      const x = (index / (pointCount - 1)) * width;
       const y = height - ((point.equity - minEquity) / range) * height;
       return `L ${x},${y}`;
     }).join(' ') + ` L ${width},${height} Z`;
 
-    const startEquity = equityCurve[0]?.equity || 0;
-    const endEquity = equityCurve[equityCurve.length - 1]?.equity || 0;
+    const startEquity = validEquityCurve[0]?.equity || 0;
+    const endEquity = validEquityCurve[validEquityCurve.length - 1]?.equity || 0;
     const pnl = endEquity - startEquity;
     const color = pnl >= 0 ? '#4ade80' : '#f87171';
 
@@ -367,7 +386,7 @@ const ChartsTab: React.FC<ChartsTabProps> = ({ equityCurve, candles, trades }) =
             Equity Curve
           </span>
           <span className={cn('text-xs tabular-nums font-medium', pnl >= 0 ? 'text-green-400' : 'text-red-400')}>
-            {formatCurrency(endEquity)} ({formatPercent((pnl / startEquity) * 100)})
+            {formatCurrency(endEquity)} ({formatPercent(startEquity > 0 ? (pnl / startEquity) * 100 : 0)})
           </span>
         </div>
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ height: equityHeight - 32 }} preserveAspectRatio="none">
@@ -551,7 +570,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   result,
   className,
 }) => {
-  const [activeTab, setActiveTab] = useState<TabId>('performance');
+  const [activeTab, setActiveTab] = useState<TabId>('charts');
 
   return (
     <div className={cn('flex flex-col h-full border border-color-terminal-border rounded-lg bg-color-terminal-panel/30', className)}>
