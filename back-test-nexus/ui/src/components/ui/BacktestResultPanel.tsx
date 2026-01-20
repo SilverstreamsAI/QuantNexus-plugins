@@ -890,10 +890,14 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   const [activeTab, setActiveTab] = useState<TabId>('charts');
   // TICKET_151_1: Ref for scrolling to specific case in Charts tab
   const scrollToCaseRef = React.useRef<((index: number) => void) | null>(null);
+  // TICKET_151_1: Track last processed scrollToCase to avoid duplicate triggers
+  const lastScrollToCaseRef = useRef<number | undefined>(undefined);
 
   // TICKET_151_1: Scroll to case when scrollToCase prop changes (from History panel click)
   useEffect(() => {
-    if (scrollToCase !== undefined && scrollToCase >= 0) {
+    // Only process if scrollToCase changed and is valid
+    if (scrollToCase !== undefined && scrollToCase >= 0 && scrollToCase !== lastScrollToCaseRef.current) {
+      lastScrollToCaseRef.current = scrollToCase;
       setActiveTab('charts');
       setTimeout(() => {
         scrollToCaseRef.current?.(scrollToCase);
