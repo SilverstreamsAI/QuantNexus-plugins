@@ -52,6 +52,13 @@ const LoaderIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+// TICKET_151_1: ChevronDown icon for BACKTESTING tree
+const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+);
+
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
@@ -74,6 +81,8 @@ interface BacktestPageProps {
   /** TICKET_151: Progress tracking for sequential execution */
   currentCaseIndex?: number;
   totalCases?: number;
+  /** TICKET_151_1: Callback when user clicks a case in history */
+  onCaseSelect?: (index: number) => void;
 }
 
 // -----------------------------------------------------------------------------
@@ -126,6 +135,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   onNewBacktest,
   currentCaseIndex = 0,
   totalCases = 0,
+  onCaseSelect,
 }) => {
   const [localExecuting, setLocalExecuting] = useState(false);
   // Use prop if provided, otherwise use local state
@@ -144,6 +154,15 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
   // TICKET_139: Track auth state to refresh ClickHouse connection on login
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // TICKET_151_1: Track which case to scroll to in Charts tab
+  const [scrollToCaseIndex, setScrollToCaseIndex] = useState<number | undefined>(undefined);
+
+  // TICKET_151_1: Handle case selection from History panel
+  const handleCaseClick = useCallback((index: number) => {
+    setScrollToCaseIndex(index);
+    onCaseSelect?.(index);
+  }, [onCaseSelect]);
 
   // Load algorithms from database on mount
   useEffect(() => {
@@ -368,7 +387,41 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         </div>
 
         <div className="flex-1 overflow-y-auto p-2">
-          {historyItems.length === 0 ? (
+          {/* TICKET_151_1: Show BACKTESTING tree during execution or when results exist */}
+          {(isExecuting || results.length > 0) ? (
+            <div className="space-y-1">
+              {/* L1: BACKTESTING header */}
+              <div className="w-full px-3 py-2 text-left">
+                <ChevronDownIcon className="w-3 h-3 inline mr-1 text-color-terminal-text-muted" />
+                <span className="text-xs font-bold uppercase text-color-terminal-text-secondary">
+                  BACKTESTING
+                </span>
+              </div>
+
+              {/* L2: Case list */}
+              {Array.from({ length: totalCases || results.length }).map((_, i) => {
+                const caseNum = i + 1;
+                const isCompleted = caseNum < currentCaseIndex || !isExecuting;
+                const isRunning = isExecuting && caseNum === currentCaseIndex;
+                // isPending = isExecuting && caseNum > currentCaseIndex (gray color)
+
+                return (
+                  <button
+                    key={i}
+                    onClick={() => handleCaseClick(i)}
+                    className={cn(
+                      "w-full px-6 py-1.5 text-left text-xs rounded transition-colors",
+                      "hover:bg-white/5"
+                    )}
+                  >
+                    <span style={{ color: isCompleted ? '#4ade80' : isRunning ? '#fbbf24' : '#6b7280' }}>
+                      {caseNum}{isRunning ? ' testing...' : ''}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : historyItems.length === 0 ? (
             <div className="px-2 py-8 text-center">
               <HistoryIcon className="w-8 h-8 mx-auto mb-3 text-color-terminal-text-muted opacity-50" />
               <p className="text-[11px] text-color-terminal-text-muted">
@@ -405,7 +458,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           {/* TICKET_151: Show results if we have completed results */}
           {results.length > 0 ? (
             /* Component 9: Backtest Result Panel - pass all results for comparison */
-            <BacktestResultPanel results={results} className="h-full" />
+            /* TICKET_151_1: Pass execution state for Charts stacking and Compare tab behavior */
+            <BacktestResultPanel
+              results={results}
+              className="h-full"
+              isExecuting={isExecuting}
+              currentCaseIndex={currentCaseIndex}
+              totalCases={totalCases}
+              onCaseSelect={onCaseSelect}
+              scrollToCase={scrollToCaseIndex}
+            />
           ) : loading ? (
             <div className="flex items-center justify-center h-64">
               <div className="text-color-terminal-text-muted">

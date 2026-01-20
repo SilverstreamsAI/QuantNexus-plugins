@@ -8,7 +8,7 @@
  * Uses ExecutorResult from V3 architecture.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '../../lib/utils';
 
 // -----------------------------------------------------------------------------
@@ -314,16 +314,16 @@ const TradesTab: React.FC<TradesTabProps> = ({ trades }) => (
 );
 
 // -----------------------------------------------------------------------------
-// Charts Tab (Dual-Chart: Equity + K-Line)
+// Single Case Charts (Dual-Chart: Equity + K-Line) - TICKET_151_1
 // -----------------------------------------------------------------------------
 
-interface ChartsTabProps {
+interface SingleCaseChartsProps {
   equityCurve: EquityPoint[];
   candles: Candle[];
   trades: ExecutorTrade[];
 }
 
-const ChartsTab: React.FC<ChartsTabProps> = ({ equityCurve, candles, trades }) => {
+const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({ equityCurve, candles, trades }) => {
   // Equity curve chart dimensions
   const equityHeight = 180;
   const klineHeight = 220;
@@ -547,6 +547,116 @@ const ChartsTab: React.FC<ChartsTabProps> = ({ equityCurve, candles, trades }) =
 };
 
 // -----------------------------------------------------------------------------
+// TICKET_151_1: Charts Tab with Multi-Case Vertical Stacking
+// -----------------------------------------------------------------------------
+
+interface ChartsTabProps {
+  results: ExecutorResult[];
+  currentCaseIndex?: number;
+  isExecuting?: boolean;
+  totalCases?: number;
+  scrollToCaseRef?: React.MutableRefObject<((index: number) => void) | null>;
+}
+
+const ChartsTab: React.FC<ChartsTabProps> = ({ results, currentCaseIndex, isExecuting, totalCases = 0, scrollToCaseRef }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const caseRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Determine how many case sections to render
+  // Use totalCases during execution, otherwise use results.length
+  const casesToRender = isExecuting && totalCases > 0 ? totalCases : results.length;
+
+  // Auto-scroll to current case during execution
+  useEffect(() => {
+    if (currentCaseIndex && currentCaseIndex > 0 && isExecuting) {
+      const targetRef = caseRefs.current[currentCaseIndex - 1];
+      targetRef?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [currentCaseIndex, isExecuting]);
+
+  // Expose scroll function to parent for case selection from History panel
+  useEffect(() => {
+    if (scrollToCaseRef) {
+      scrollToCaseRef.current = (index: number) => {
+        caseRefs.current[index]?.scrollIntoView({ behavior: 'smooth' });
+      };
+    }
+  }, [scrollToCaseRef]);
+
+  if (casesToRender === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
+        No results available
+      </div>
+    );
+  }
+
+  // Single case and not executing multi-case: render without case header
+  if (casesToRender === 1 && !isExecuting) {
+    return (
+      <SingleCaseCharts
+        equityCurve={results[0]?.equityCurve || []}
+        candles={results[0]?.candles || []}
+        trades={results[0]?.trades || []}
+      />
+    );
+  }
+
+  // Multiple cases: vertical stacking with case headers
+  return (
+    <div ref={containerRef} className="h-full overflow-y-auto">
+      {Array.from({ length: casesToRender }).map((_, index) => {
+        const result = results[index];
+        const hasResult = !!result;
+        const isCurrentCase = isExecuting && currentCaseIndex === index + 1;
+        const isPending = isExecuting && currentCaseIndex !== undefined && index + 1 > currentCaseIndex;
+
+        return (
+          <div
+            key={index}
+            ref={el => caseRefs.current[index] = el}
+            className="min-h-full border-b border-color-terminal-border last:border-b-0"
+          >
+            {/* Case Header */}
+            <div className="px-4 py-2 bg-color-terminal-panel/50 border-b border-color-terminal-border sticky top-0 z-10">
+              <span className={cn(
+                'text-xs font-bold uppercase',
+                hasResult ? 'text-green-400' : isCurrentCase ? 'text-yellow-400' : 'text-color-terminal-text-secondary'
+              )}>
+                Case {index + 1}
+                {isCurrentCase && ' - Testing...'}
+                {isPending && ' - Pending'}
+              </span>
+              {hasResult && result.metrics && (
+                <span className={cn(
+                  'ml-3 text-xs tabular-nums',
+                  result.metrics.totalPnl >= 0 ? 'text-green-400' : 'text-red-400'
+                )}>
+                  {result.metrics.totalPnl >= 0 ? '+' : ''}{result.metrics.totalPnl?.toFixed(2) || '0.00'}
+                </span>
+              )}
+            </div>
+
+            {/* Charts for this case */}
+            {hasResult ? (
+              <SingleCaseCharts
+                equityCurve={result.equityCurve}
+                candles={result.candles || []}
+                trades={result.trades}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-96 text-color-terminal-text-muted text-xs">
+                {isCurrentCase ? 'Collecting data...' : 'Waiting...'}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+// -----------------------------------------------------------------------------
 // TICKET_151: Comparison Tab for Multiple Results
 // -----------------------------------------------------------------------------
 
@@ -758,14 +868,38 @@ export interface BacktestResultPanelProps {
   result?: ExecutorResult;
   results?: ExecutorResult[];
   className?: string;
+  /** TICKET_151_1: Execution state for Charts stacking and Compare tab behavior */
+  isExecuting?: boolean;
+  currentCaseIndex?: number;
+  totalCases?: number;
+  onCaseSelect?: (index: number) => void;
+  /** TICKET_151_1: Index to scroll to when user clicks case in History panel */
+  scrollToCase?: number;
 }
 
 export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   result,
   results = [],
   className,
+  isExecuting = false,
+  currentCaseIndex = 0,
+  totalCases = 0,
+  onCaseSelect,
+  scrollToCase,
 }) => {
   const [activeTab, setActiveTab] = useState<TabId>('charts');
+  // TICKET_151_1: Ref for scrolling to specific case in Charts tab
+  const scrollToCaseRef = React.useRef<((index: number) => void) | null>(null);
+
+  // TICKET_151_1: Scroll to case when scrollToCase prop changes (from History panel click)
+  useEffect(() => {
+    if (scrollToCase !== undefined && scrollToCase >= 0) {
+      setActiveTab('charts');
+      setTimeout(() => {
+        scrollToCaseRef.current?.(scrollToCase);
+      }, 100);
+    }
+  }, [scrollToCase]);
 
   // TICKET_151: Support both single result and results array
   // If results array is provided, use it; otherwise wrap single result in array
@@ -789,28 +923,34 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   // TICKET_151: Dynamic tabs - add comparison tab when multiple results
   const tabs = hasMultipleResults ? [comparisonTab, ...baseTabs] : baseTabs;
 
-  // TICKET_151: Default to comparison tab when multiple results
-  const effectiveActiveTab = hasMultipleResults && activeTab === 'charts' ? 'comparison' : activeTab;
+  // TICKET_151_1: Compare tab disabled during execution, no auto-switch
+  const isCompareEnabled = !isExecuting && hasMultipleResults;
+  const effectiveActiveTab = activeTab;
 
   return (
     <div className={cn('flex flex-col h-full border border-color-terminal-border rounded-lg bg-color-terminal-panel/30', className)}>
       {/* Tab Header */}
       <div className="flex border-b border-color-terminal-border">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              'flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium uppercase tracking-wider transition-colors border-b-2',
-              effectiveActiveTab === tab.id
-                ? 'border-color-terminal-accent-gold text-color-terminal-accent-gold'
-                : 'border-transparent text-color-terminal-text-muted hover:text-color-terminal-text'
-            )}
-          >
-            {tab.icon}
-            {tab.label}
-          </button>
-        ))}
+        {tabs.map((tab) => {
+          const isDisabled = tab.id === 'comparison' && !isCompareEnabled;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => !isDisabled && setActiveTab(tab.id)}
+              disabled={isDisabled}
+              className={cn(
+                'flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium uppercase tracking-wider transition-colors border-b-2',
+                effectiveActiveTab === tab.id
+                  ? 'border-color-terminal-accent-gold text-color-terminal-accent-gold'
+                  : 'border-transparent text-color-terminal-text-muted hover:text-color-terminal-text',
+                isDisabled && 'opacity-50 cursor-not-allowed hover:text-color-terminal-text-muted'
+              )}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Tab Content */}
@@ -827,9 +967,11 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
         )}
         {effectiveActiveTab === 'charts' && (
           <ChartsTab
-            equityCurve={primaryResult.equityCurve}
-            candles={primaryResult.candles || []}
-            trades={primaryResult.trades}
+            results={allResults}
+            currentCaseIndex={currentCaseIndex}
+            isExecuting={isExecuting}
+            totalCases={totalCases}
+            scrollToCaseRef={scrollToCaseRef}
           />
         )}
       </div>
