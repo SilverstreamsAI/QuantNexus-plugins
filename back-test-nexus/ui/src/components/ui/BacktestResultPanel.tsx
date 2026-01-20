@@ -271,7 +271,7 @@ const TradesTab: React.FC<TradesTabProps> = ({ results, currentCaseIndex, isExec
           <div
             key={index}
             ref={el => caseRefs.current[index] = el}
-            className="min-h-[300px] border-b border-color-terminal-border last:border-b-0"
+            className="min-h-full border-b border-color-terminal-border last:border-b-0"
           >
             {/* Case Header */}
             <div className="px-4 py-2 bg-color-terminal-panel/50 border-b border-color-terminal-border sticky top-0 z-10">
