@@ -65,9 +65,15 @@ interface HistoryItem {
 
 interface BacktestPageProps {
   onExecute?: (config: BacktestDataConfig, workflows: WorkflowRow[]) => void;
-  result?: ExecutorResult | null;
+  /** TICKET_151: Multiple results for comparison */
+  results?: ExecutorResult[];
+  /** TICKET_151: Current result being built during execution */
+  currentResult?: ExecutorResult | null;
   isExecuting?: boolean;
   onNewBacktest?: () => void;
+  /** TICKET_151: Progress tracking for sequential execution */
+  currentCaseIndex?: number;
+  totalCases?: number;
 }
 
 // -----------------------------------------------------------------------------
@@ -114,9 +120,12 @@ const createDefaultDataConfig = (): BacktestDataConfig => ({
 
 export const BacktestPage: React.FC<BacktestPageProps> = ({
   onExecute,
-  result,
+  results = [],
+  currentResult,
   isExecuting: isExecutingProp = false,
   onNewBacktest,
+  currentCaseIndex = 0,
+  totalCases = 0,
 }) => {
   const [localExecuting, setLocalExecuting] = useState(false);
   // Use prop if provided, otherwise use local state
@@ -393,9 +402,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Zone C: Config or Result based on state */}
         <div className="flex-1 overflow-y-auto p-6">
-          {result ? (
-            /* Component 9: Backtest Result Panel */
-            <BacktestResultPanel result={result} className="h-full" />
+          {/* TICKET_151: Show results if we have completed results */}
+          {results.length > 0 ? (
+            /* Component 9: Backtest Result Panel - pass all results for comparison */
+            <BacktestResultPanel results={results} className="h-full" />
           ) : loading ? (
             <div className="flex items-center justify-center h-64">
               <div className="text-color-terminal-text-muted">
@@ -405,11 +415,15 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           ) : (
             <div className="space-y-6">
               {/* Component 8: Executor Status Panel (shown when executing) */}
+              {/* TICKET_151: Show progress for sequential execution */}
               {isExecuting && (
                 <ExecutorStatusPanel
                   status="running"
-                  progress={0}
-                  message="Running backtest..."
+                  progress={totalCases > 0 ? Math.round((currentCaseIndex / totalCases) * 100) : 0}
+                  message={totalCases > 1
+                    ? `Running backtest ${currentCaseIndex}/${totalCases}...`
+                    : 'Running backtest...'
+                  }
                 />
               )}
 
@@ -444,8 +458,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               {executeError}
             </div>
           )}
-          {result ? (
-            /* Show "New Backtest" button when result is displayed */
+          {/* TICKET_151: Check results array instead of single result */}
+          {results.length > 0 ? (
+            /* Show "New Backtest" button when results are displayed */
             <button
               onClick={onNewBacktest}
               className="w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all border-color-terminal-accent-teal bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal hover:bg-color-terminal-accent-teal/20"

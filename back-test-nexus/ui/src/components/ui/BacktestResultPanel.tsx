@@ -386,7 +386,7 @@ const ChartsTab: React.FC<ChartsTabProps> = ({ equityCurve, candles, trades }) =
             Equity Curve
           </span>
           <span className={cn('text-xs tabular-nums font-medium', pnl >= 0 ? 'text-green-400' : 'text-red-400')}>
-            {formatCurrency(endEquity)} ({formatPercent(startEquity > 0 ? (pnl / startEquity) * 100 : 0)})
+            ${endEquity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({formatPercent(startEquity > 0 ? (pnl / startEquity) * 100 : 0)})
           </span>
         </div>
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ height: equityHeight - 32 }} preserveAspectRatio="none">
@@ -484,9 +484,12 @@ const ChartsTab: React.FC<ChartsTabProps> = ({ equityCurve, candles, trades }) =
             );
           })}
 
-          {/* Trade markers */}
-          {trades.slice(0, 50).map((trade, i) => {
-            const tradeTime = trade.entryTime * 1000;
+          {/* Trade markers - evenly sampled across all trades */}
+          {trades
+            .filter((_, idx) => idx % Math.max(1, Math.ceil(trades.length / 50)) === 0)
+            .slice(0, 50)
+            .map((trade, i) => {
+            const tradeTime = trade.entryTime;
             const candleIndex = candles.findIndex((c, idx) =>
               c.timestamp <= tradeTime && (idx === candles.length - 1 || candles[idx + 1].timestamp > tradeTime)
             );
@@ -544,10 +547,187 @@ const ChartsTab: React.FC<ChartsTabProps> = ({ equityCurve, candles, trades }) =
 };
 
 // -----------------------------------------------------------------------------
+// TICKET_151: Comparison Tab for Multiple Results
+// -----------------------------------------------------------------------------
+
+interface ComparisonTabProps {
+  results: ExecutorResult[];
+}
+
+// Color palette for multiple strategies
+const STRATEGY_COLORS = ['#4ade80', '#60a5fa', '#f472b6', '#fbbf24', '#a78bfa', '#2dd4bf'];
+
+const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
+  if (results.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
+        No results to compare
+      </div>
+    );
+  }
+
+  // Comparison metrics table
+  const renderComparisonTable = () => (
+    <div className="p-4">
+      <div className="text-[10px] font-medium uppercase tracking-wider text-color-terminal-text-muted mb-3">
+        Performance Comparison
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-color-terminal-border text-left">
+              <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted">Metric</th>
+              {results.map((_, i) => (
+                <th key={i} className="pb-2 pr-4 font-medium" style={{ color: STRATEGY_COLORS[i % STRATEGY_COLORS.length] }}>
+                  Strategy {i + 1}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b border-color-terminal-border/50">
+              <td className="py-2 pr-4 text-color-terminal-text-muted">Total P&L</td>
+              {results.map((r, i) => (
+                <td key={i} className={cn('py-2 pr-4 tabular-nums font-medium', getColorClass(r.metrics.totalPnl))}>
+                  {formatCurrency(r.metrics.totalPnl)}
+                </td>
+              ))}
+            </tr>
+            <tr className="border-b border-color-terminal-border/50">
+              <td className="py-2 pr-4 text-color-terminal-text-muted">Total Return</td>
+              {results.map((r, i) => (
+                <td key={i} className={cn('py-2 pr-4 tabular-nums font-medium', getColorClass(r.metrics.totalReturn))}>
+                  {formatPercent(r.metrics.totalReturn)}
+                </td>
+              ))}
+            </tr>
+            <tr className="border-b border-color-terminal-border/50">
+              <td className="py-2 pr-4 text-color-terminal-text-muted">Sharpe Ratio</td>
+              {results.map((r, i) => (
+                <td key={i} className="py-2 pr-4 tabular-nums">
+                  {formatRatio(r.metrics.sharpeRatio)}
+                </td>
+              ))}
+            </tr>
+            <tr className="border-b border-color-terminal-border/50">
+              <td className="py-2 pr-4 text-color-terminal-text-muted">Max Drawdown</td>
+              {results.map((r, i) => (
+                <td key={i} className="py-2 pr-4 tabular-nums text-red-400">
+                  {formatPercent(-Math.abs(safeNum(r.metrics.maxDrawdown)))}
+                </td>
+              ))}
+            </tr>
+            <tr className="border-b border-color-terminal-border/50">
+              <td className="py-2 pr-4 text-color-terminal-text-muted">Win Rate</td>
+              {results.map((r, i) => (
+                <td key={i} className={cn('py-2 pr-4 tabular-nums', safeNum(r.metrics.winRate) >= 50 ? 'text-green-400' : 'text-yellow-400')}>
+                  {formatPercent(r.metrics.winRate)}
+                </td>
+              ))}
+            </tr>
+            <tr className="border-b border-color-terminal-border/50">
+              <td className="py-2 pr-4 text-color-terminal-text-muted">Total Trades</td>
+              {results.map((r, i) => (
+                <td key={i} className="py-2 pr-4 tabular-nums">
+                  {safeNum(r.metrics.totalTrades)}
+                </td>
+              ))}
+            </tr>
+            <tr className="border-b border-color-terminal-border/50">
+              <td className="py-2 pr-4 text-color-terminal-text-muted">Profit Factor</td>
+              {results.map((r, i) => (
+                <td key={i} className={cn('py-2 pr-4 tabular-nums', safeNum(r.metrics.profitFactor) >= 1.5 ? 'text-green-400' : safeNum(r.metrics.profitFactor) >= 1 ? 'text-yellow-400' : 'text-red-400')}>
+                  {formatRatio(r.metrics.profitFactor)}
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  // Overlay equity curves
+  const renderOverlayEquityCurves = () => {
+    const height = 200;
+    const width = 100;
+
+    // Find global min/max equity across all results
+    let allEquities: number[] = [];
+    results.forEach(r => {
+      if (r.equityCurve) {
+        allEquities = allEquities.concat(r.equityCurve.filter(p => Number.isFinite(p.equity)).map(p => p.equity));
+      }
+    });
+
+    if (allEquities.length === 0) {
+      return (
+        <div className="flex items-center justify-center h-40 text-color-terminal-text-muted text-xs">
+          No equity data
+        </div>
+      );
+    }
+
+    const minEquity = Math.min(...allEquities) * 0.98;
+    const maxEquity = Math.max(...allEquities) * 1.02;
+    const range = maxEquity - minEquity || 1;
+
+    return (
+      <div className="p-4">
+        <div className="text-[10px] font-medium uppercase tracking-wider text-color-terminal-text-muted mb-3">
+          Equity Curves Overlay
+        </div>
+        <div className="border border-color-terminal-border rounded bg-color-terminal-panel/30" style={{ height }}>
+          <svg viewBox={`0 0 ${width} 100`} className="w-full h-full" preserveAspectRatio="none">
+            {results.map((r, resultIdx) => {
+              const validCurve = (r.equityCurve || []).filter(p => Number.isFinite(p.equity));
+              if (validCurve.length < 2) return null;
+
+              const points = validCurve.map((point, idx) => {
+                const x = (idx / (validCurve.length - 1)) * width;
+                const y = 100 - ((point.equity - minEquity) / range) * 100;
+                return `${x},${y}`;
+              }).join(' ');
+
+              return (
+                <polyline
+                  key={resultIdx}
+                  fill="none"
+                  stroke={STRATEGY_COLORS[resultIdx % STRATEGY_COLORS.length]}
+                  strokeWidth="0.4"
+                  points={points}
+                />
+              );
+            })}
+          </svg>
+        </div>
+        {/* Legend */}
+        <div className="flex gap-4 mt-2">
+          {results.map((_, i) => (
+            <div key={i} className="flex items-center gap-1 text-[10px]">
+              <div className="w-3 h-0.5" style={{ backgroundColor: STRATEGY_COLORS[i % STRATEGY_COLORS.length] }} />
+              <span className="text-color-terminal-text-muted">Strategy {i + 1}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="overflow-y-auto h-full">
+      {renderComparisonTable()}
+      {renderOverlayEquityCurves()}
+    </div>
+  );
+};
+
+// -----------------------------------------------------------------------------
 // Main Component
 // -----------------------------------------------------------------------------
 
-type TabId = 'performance' | 'trades' | 'charts';
+// TICKET_151: Add comparison tab for multiple results
+type TabId = 'performance' | 'trades' | 'charts' | 'comparison';
 
 interface Tab {
   id: TabId;
@@ -555,22 +735,62 @@ interface Tab {
   icon: React.ReactNode;
 }
 
-const tabs: Tab[] = [
+// TICKET_151: Icon for comparison view
+const CompareIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7" />
+    <rect x="14" y="3" width="7" height="7" />
+    <rect x="14" y="14" width="7" height="7" />
+    <rect x="3" y="14" width="7" height="7" />
+  </svg>
+);
+
+const baseTabs: Tab[] = [
   { id: 'performance', label: 'PERFORMANCE', icon: <BarChartIcon className="w-4 h-4" /> },
   { id: 'trades', label: 'TRADES', icon: <ListIcon className="w-4 h-4" /> },
   { id: 'charts', label: 'CHARTS', icon: <CandleChartIcon className="w-4 h-4" /> },
 ];
 
+const comparisonTab: Tab = { id: 'comparison', label: 'COMPARE', icon: <CompareIcon className="w-4 h-4" /> };
+
 export interface BacktestResultPanelProps {
-  result: ExecutorResult;
+  /** TICKET_151: Support single result (legacy) or array of results for comparison */
+  result?: ExecutorResult;
+  results?: ExecutorResult[];
   className?: string;
 }
 
 export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   result,
+  results = [],
   className,
 }) => {
   const [activeTab, setActiveTab] = useState<TabId>('charts');
+
+  // TICKET_151: Support both single result and results array
+  // If results array is provided, use it; otherwise wrap single result in array
+  const allResults: ExecutorResult[] = results.length > 0
+    ? results
+    : (result ? [result] : []);
+
+  // If no results, show empty state
+  if (allResults.length === 0) {
+    return (
+      <div className={cn('flex items-center justify-center h-full', className)}>
+        <div className="text-color-terminal-text-muted">No results available</div>
+      </div>
+    );
+  }
+
+  // For single result, use the original behavior
+  const primaryResult = allResults[0];
+  const hasMultipleResults = allResults.length > 1;
+
+  // TICKET_151: Dynamic tabs - add comparison tab when multiple results
+  const tabs = hasMultipleResults ? [comparisonTab, ...baseTabs] : baseTabs;
+
+  // TICKET_151: Default to comparison tab when multiple results
+  const effectiveActiveTab = hasMultipleResults && activeTab === 'charts' ? 'comparison' : activeTab;
 
   return (
     <div className={cn('flex flex-col h-full border border-color-terminal-border rounded-lg bg-color-terminal-panel/30', className)}>
@@ -582,7 +802,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
             onClick={() => setActiveTab(tab.id)}
             className={cn(
               'flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium uppercase tracking-wider transition-colors border-b-2',
-              activeTab === tab.id
+              effectiveActiveTab === tab.id
                 ? 'border-color-terminal-accent-gold text-color-terminal-accent-gold'
                 : 'border-transparent text-color-terminal-text-muted hover:text-color-terminal-text'
             )}
@@ -595,17 +815,21 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
 
       {/* Tab Content */}
       <div className="flex-1 overflow-hidden">
-        {activeTab === 'performance' && (
-          <PerformanceTab metrics={result.metrics} executionTimeMs={result.executionTimeMs} />
+        {/* TICKET_151: Comparison tab for multiple results */}
+        {effectiveActiveTab === 'comparison' && hasMultipleResults && (
+          <ComparisonTab results={allResults} />
         )}
-        {activeTab === 'trades' && (
-          <TradesTab trades={result.trades} />
+        {effectiveActiveTab === 'performance' && (
+          <PerformanceTab metrics={primaryResult.metrics} executionTimeMs={primaryResult.executionTimeMs} />
         )}
-        {activeTab === 'charts' && (
+        {effectiveActiveTab === 'trades' && (
+          <TradesTab trades={primaryResult.trades} />
+        )}
+        {effectiveActiveTab === 'charts' && (
           <ChartsTab
-            equityCurve={result.equityCurve}
-            candles={result.candles || []}
-            trades={result.trades}
+            equityCurve={primaryResult.equityCurve}
+            candles={primaryResult.candles || []}
+            trades={primaryResult.trades}
           />
         )}
       </div>
