@@ -1,6 +1,10 @@
 """
 BacktestPlugin gRPC Service Implementation
 
+DEPRECATED: TICKET_156 - This module is deprecated in V3 architecture.
+V3 uses ExecutorService (TypeScript) -> C++ Executor -> embedded Python.
+gRPC plugin layer has been replaced. See DEPRECATED_V1_COMPONENTS.md.
+
 Implements the BacktestPlugin service defined in backtest.proto.
 """
 

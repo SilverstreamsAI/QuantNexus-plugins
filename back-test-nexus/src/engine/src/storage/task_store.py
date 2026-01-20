@@ -1,6 +1,10 @@
 """
 Task Store
 
+DEPRECATED: TICKET_156 - This module is deprecated in V3 architecture.
+V3 uses ExecutorService (TypeScript) with desktop_backtest_results table.
+The backtest_tasks table has been removed in migration v7.
+
 Ported from: nona_server/src/db/models/backtest_task.py
 
 Manages backtest task lifecycle and status tracking using SQLite.

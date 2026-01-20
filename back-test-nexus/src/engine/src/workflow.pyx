@@ -1,6 +1,10 @@
 """
 Backtest Workflow Execution
 
+DEPRECATED: TICKET_156 - This module is deprecated in V3 architecture.
+V3 uses ExecutorService (TypeScript) -> C++ Executor -> embedded Python.
+The gRPC plugin layer and associated storage tables have been removed.
+
 Orchestrates the backtest execution process.
 Based on nona_server's backtest_workflow.py pattern.
 

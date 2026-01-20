@@ -66,6 +66,9 @@ const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (
 interface HistoryItem {
   id: string;
   name: string;
+  symbol: string;
+  timeframe: string;
+  totalReturn: number | null;
   date: string;
   status: 'completed' | 'failed' | 'running';
 }
@@ -140,7 +143,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   const [localExecuting, setLocalExecuting] = useState(false);
   // Use prop if provided, otherwise use local state
   const isExecuting = isExecutingProp || localExecuting;
-  const [historyItems] = useState<HistoryItem[]>([]);
+  // TICKET_153_1: History from SQLite
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [workflowRows, setWorkflowRows] = useState<WorkflowRow[]>([createInitialRow()]);
   const [algorithms, setAlgorithms] = useState(EMPTY_ALGORITHMS);
   const [loading, setLoading] = useState(true);
@@ -163,6 +168,41 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setScrollToCaseIndex(index);
     onCaseSelect?.(index);
   }, [onCaseSelect]);
+
+  // TICKET_153_1: Load history from SQLite
+  const loadHistory = useCallback(async () => {
+    const api = (window as any).electronAPI;
+    if (!api?.executor?.getHistory) {
+      console.warn('[BacktestPage] History API not available');
+      return;
+    }
+
+    setHistoryLoading(true);
+    try {
+      const result = await api.executor.getHistory({ limit: 20 });
+      if (result.success && result.data) {
+        const items: HistoryItem[] = result.data.map((record: any) => ({
+          id: record.task_id,
+          name: record.strategy_name,
+          symbol: record.symbol,
+          timeframe: record.timeframe,
+          totalReturn: record.total_return,
+          date: new Date(record.created_at).toLocaleDateString(),
+          status: 'completed' as const,
+        }));
+        setHistoryItems(items);
+      }
+    } catch (error) {
+      console.error('[BacktestPage] Failed to load history:', error);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
+  // Load history on mount and when results change
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory, results.length]);
 
   // Load algorithms from database on mount
   useEffect(() => {
@@ -421,6 +461,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 );
               })}
             </div>
+          ) : historyLoading ? (
+            <div className="px-2 py-8 text-center">
+              <LoaderIcon className="w-6 h-6 mx-auto mb-2 text-color-terminal-text-muted animate-spin" />
+              <p className="text-[11px] text-color-terminal-text-muted">Loading...</p>
+            </div>
           ) : historyItems.length === 0 ? (
             <div className="px-2 py-8 text-center">
               <HistoryIcon className="w-8 h-8 mx-auto mb-3 text-color-terminal-text-muted opacity-50" />
@@ -430,22 +475,38 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             </div>
           ) : (
             <div className="space-y-1">
-              {historyItems.map((item) => (
-                <button
-                  key={item.id}
-                  className={cn(
-                    "w-full px-3 py-2 text-left rounded transition-colors",
-                    "hover:bg-white/5"
-                  )}
-                >
-                  <div className="text-xs font-medium text-color-terminal-text truncate">
-                    {item.name}
-                  </div>
-                  <div className="text-[10px] text-color-terminal-text-muted">
-                    {item.date}
-                  </div>
-                </button>
-              ))}
+              {historyItems.map((item) => {
+                const isProfit = (item.totalReturn ?? 0) >= 0;
+                const returnStr = item.totalReturn !== null
+                  ? `${isProfit ? '+' : ''}${(item.totalReturn * 100).toFixed(1)}%`
+                  : '-';
+                return (
+                  <button
+                    key={item.id}
+                    className={cn(
+                      "w-full px-3 py-2 text-left rounded transition-colors",
+                      "hover:bg-white/5"
+                    )}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-color-terminal-text truncate flex-1">
+                        {item.name}
+                      </span>
+                      <span className={cn(
+                        "text-xs font-bold ml-2",
+                        isProfit ? "text-green-400" : "text-red-400"
+                      )}>
+                        {returnStr}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-color-terminal-text-muted">
+                      <span className="text-color-terminal-accent-teal">{item.symbol}</span>
+                      <span>{item.timeframe}</span>
+                      <span className="ml-auto">{item.date}</span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

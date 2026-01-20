@@ -1,6 +1,10 @@
 """
 Result Store
 
+DEPRECATED: TICKET_156 - This module is deprecated in V3 architecture.
+V3 uses BacktestResultService (TypeScript) with desktop_backtest_results table.
+The strategy_runs and trade_records tables have been removed in migration v7.
+
 Ported from: nona_server/src/backtest/backtest_workflow.py (store_strategy_results)
              and src/redis_lifecycle/data_access_manager.py (TradingDataManager)
 
