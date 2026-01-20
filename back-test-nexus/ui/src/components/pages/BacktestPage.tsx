@@ -69,7 +69,14 @@ interface HistoryItem {
   symbol: string;
   timeframe: string;
   totalReturn: number | null;
-  date: string;
+  // Backtest parameters
+  startDate: string;
+  endDate: string;
+  initialCapital: number;
+  orderSize: number | null;
+  orderSizeUnit: string | null;
+  // Timestamp with seconds
+  createdAt: string;
   status: 'completed' | 'failed' | 'running';
 }
 
@@ -187,7 +194,20 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           symbol: record.symbol,
           timeframe: record.timeframe,
           totalReturn: record.total_return,
-          date: new Date(record.created_at).toLocaleDateString(),
+          // Backtest parameters
+          startDate: record.start_date?.split('T')[0] || '',
+          endDate: record.end_date?.split('T')[0] || '',
+          initialCapital: record.initial_capital || 0,
+          orderSize: record.order_size,
+          orderSizeUnit: record.order_size_unit,
+          // Timestamp with time
+          createdAt: new Date(record.created_at).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          }),
           status: 'completed' as const,
         }));
         setHistoryItems(items);
@@ -474,20 +494,32 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               </p>
             </div>
           ) : (
-            <div className="space-y-1">
+            <div className="space-y-2">
               {historyItems.map((item) => {
                 const isProfit = (item.totalReturn ?? 0) >= 0;
                 const returnStr = item.totalReturn !== null
                   ? `${isProfit ? '+' : ''}${(item.totalReturn * 100).toFixed(1)}%`
                   : '-';
+                const capitalStr = item.initialCapital >= 1000
+                  ? `$${(item.initialCapital / 1000).toFixed(0)}K`
+                  : `$${item.initialCapital}`;
+                // Format order size display
+                const orderSizeStr = item.orderSize !== null && item.orderSizeUnit
+                  ? item.orderSizeUnit === 'percent'
+                    ? `${item.orderSize}%`
+                    : item.orderSizeUnit === 'cash'
+                      ? `$${item.orderSize}`
+                      : `${item.orderSize}sh`
+                  : null;
                 return (
                   <button
                     key={item.id}
                     className={cn(
                       "w-full px-3 py-2 text-left rounded transition-colors",
-                      "hover:bg-white/5"
+                      "hover:bg-white/5 border border-transparent hover:border-white/10"
                     )}
                   >
+                    {/* Row 1: Strategy name + Return */}
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-medium text-color-terminal-text truncate flex-1">
                         {item.name}
@@ -499,10 +531,23 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                         {returnStr}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] text-color-terminal-text-muted">
+                    {/* Row 2: Symbol + Timeframe */}
+                    <div className="flex items-center gap-2 text-[10px] text-color-terminal-text-muted mb-1">
                       <span className="text-color-terminal-accent-teal">{item.symbol}</span>
                       <span>{item.timeframe}</span>
-                      <span className="ml-auto">{item.date}</span>
+                    </div>
+                    {/* Row 3: Capital + OrderSize with labels */}
+                    <div className="flex items-center gap-3 text-[9px] text-color-terminal-text-muted/80 mb-1">
+                      <span>Cap: <span className="text-color-terminal-text-secondary">{capitalStr}</span></span>
+                      {orderSizeStr && <span>Size: <span className="text-color-terminal-text-secondary">{orderSizeStr}</span></span>}
+                    </div>
+                    {/* Row 4: Date range */}
+                    <div className="text-[9px] text-color-terminal-text-muted/70 mb-1">
+                      {item.startDate} ~ {item.endDate}
+                    </div>
+                    {/* Row 5: Created timestamp */}
+                    <div className="text-[9px] text-color-terminal-text-muted/50">
+                      {item.createdAt}
                     </div>
                   </button>
                 );
