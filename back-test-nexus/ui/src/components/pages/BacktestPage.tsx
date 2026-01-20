@@ -52,6 +52,16 @@ const LoaderIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 6h18" />
+    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+    <line x1="10" y1="11" x2="10" y2="17" />
+    <line x1="14" y1="11" x2="14" y2="17" />
+  </svg>
+);
+
 // TICKET_151_1: ChevronDown icon for BACKTESTING tree
 const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -170,6 +180,12 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   // TICKET_151_1: Track which case to scroll to in Charts tab
   const [scrollToCaseIndex, setScrollToCaseIndex] = useState<number | undefined>(undefined);
 
+  // TICKET_160: Delete confirmation dialog state
+  const [deleteConfirm, setDeleteConfirm] = useState<{ visible: boolean; itemId: string | null }>({
+    visible: false,
+    itemId: null,
+  });
+
   // TICKET_151_1: Handle case selection from History panel
   const handleCaseClick = useCallback((index: number) => {
     setScrollToCaseIndex(index);
@@ -217,6 +233,46 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     } finally {
       setHistoryLoading(false);
     }
+  }, []);
+
+  // TICKET_160: Delete history record
+  const handleDeleteHistory = useCallback(async (itemId: string) => {
+    const api = (window as any).electronAPI;
+    if (!api?.executor?.deleteHistoryResult) {
+      console.warn('[BacktestPage] Delete API not available');
+      return;
+    }
+
+    try {
+      const result = await api.executor.deleteHistoryResult(itemId);
+      if (result.success) {
+        // Remove from local state
+        setHistoryItems((prev) => prev.filter((item) => item.id !== itemId));
+      } else {
+        console.error('[BacktestPage] Failed to delete history:', result.error);
+      }
+    } catch (error) {
+      console.error('[BacktestPage] Delete error:', error);
+    }
+  }, []);
+
+  // TICKET_160: Show delete confirmation
+  const handleDeleteClick = useCallback((e: React.MouseEvent, itemId: string) => {
+    e.stopPropagation();
+    setDeleteConfirm({ visible: true, itemId });
+  }, []);
+
+  // TICKET_160: Confirm delete
+  const handleConfirmDelete = useCallback(() => {
+    if (deleteConfirm.itemId) {
+      handleDeleteHistory(deleteConfirm.itemId);
+    }
+    setDeleteConfirm({ visible: false, itemId: null });
+  }, [deleteConfirm.itemId, handleDeleteHistory]);
+
+  // TICKET_160: Cancel delete
+  const handleCancelDelete = useCallback(() => {
+    setDeleteConfirm({ visible: false, itemId: null });
   }, []);
 
   // Load history on mount and when results change
@@ -512,10 +568,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                       : `${item.orderSize}sh`
                   : null;
                 return (
-                  <button
+                  <div
                     key={item.id}
                     className={cn(
-                      "w-full px-3 py-2 text-left rounded transition-colors",
+                      "group w-full px-3 py-2 text-left rounded transition-colors cursor-pointer",
                       "hover:bg-white/5 border border-transparent hover:border-white/10"
                     )}
                   >
@@ -545,11 +601,24 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                     <div className="text-[9px] text-color-terminal-text-muted/70 mb-1">
                       {item.startDate} ~ {item.endDate}
                     </div>
-                    {/* Row 5: Created timestamp */}
-                    <div className="text-[9px] text-color-terminal-text-muted/50">
-                      {item.createdAt}
+                    {/* Row 5: Created timestamp + Delete button */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] text-color-terminal-text-muted/50">
+                        {item.createdAt}
+                      </span>
+                      {/* TICKET_160: Delete button - always visible, highlight on hover */}
+                      <button
+                        onClick={(e) => handleDeleteClick(e, item.id)}
+                        className={cn(
+                          "p-0.5 rounded transition-all",
+                          "text-color-terminal-text-muted opacity-50 hover:opacity-100 hover:text-red-400 hover:bg-red-400/10"
+                        )}
+                        title="Delete"
+                      >
+                        <TrashIcon className="w-2.5 h-2.5" />
+                      </button>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -662,6 +731,49 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           )}
         </div>
       </div>
+
+      {/* TICKET_160: Delete confirmation dialog */}
+      {deleteConfirm.visible && (
+        <div
+          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-[4px]"
+          onClick={handleCancelDelete}
+        >
+          <div
+            className="min-w-[320px] max-w-[400px] rounded-lg border border-color-terminal-border bg-color-terminal-surface shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-color-terminal-border border-l-[3px] border-l-red-500 bg-color-terminal-panel rounded-t-lg">
+              <TrashIcon className="w-[18px] h-[18px] text-red-500" />
+              <span className="flex-1 font-mono text-xs font-semibold text-color-terminal-text uppercase tracking-wider">
+                Delete History Record
+              </span>
+            </div>
+            {/* Body */}
+            <div className="px-4 py-6">
+              <p className="font-mono text-xs leading-relaxed text-color-terminal-text text-center">
+                This will permanently delete the backtest result, including all trade records and equity curve data.
+              </p>
+            </div>
+            {/* Footer */}
+            <div className="flex justify-center gap-3 px-4 py-4 border-t border-color-terminal-border">
+              <button
+                onClick={handleCancelDelete}
+                className="min-w-[80px] px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider rounded border border-color-terminal-border bg-transparent text-color-terminal-text-secondary hover:border-color-terminal-text-muted hover:text-color-terminal-text transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="min-w-[80px] px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider rounded border border-red-500 bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all"
+                autoFocus
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
