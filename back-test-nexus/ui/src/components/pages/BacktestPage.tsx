@@ -21,6 +21,7 @@ import {
   BacktestResultPanel,
   ExecutorStatusPanel,
   type ExecutorResult,
+  NamingDialog,
 } from '../ui';
 import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
 
@@ -91,7 +92,8 @@ interface HistoryItem {
 }
 
 interface BacktestPageProps {
-  onExecute?: (config: BacktestDataConfig, workflows: WorkflowRow[]) => void;
+  /** TICKET_163: Added strategyName parameter for naming dialog */
+  onExecute?: (config: BacktestDataConfig, workflows: WorkflowRow[], strategyName: string) => void;
   /** TICKET_151: Multiple results for comparison */
   results?: ExecutorResult[];
   /** TICKET_151: Current result being built during execution */
@@ -103,6 +105,10 @@ interface BacktestPageProps {
   totalCases?: number;
   /** TICKET_151_1: Callback when user clicks a case in history */
   onCaseSelect?: (index: number) => void;
+  /** TICKET_164: Notify Host when history result is selected/cleared */
+  onHistoryResultChange?: (hasResult: boolean) => void;
+  /** TICKET_164: Reset key - when changed, clear all result states */
+  resetKey?: number;
 }
 
 // -----------------------------------------------------------------------------
@@ -156,6 +162,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   currentCaseIndex = 0,
   totalCases = 0,
   onCaseSelect,
+  onHistoryResultChange,
+  resetKey = 0,
 }) => {
   const [localExecuting, setLocalExecuting] = useState(false);
   // Use prop if provided, otherwise use local state
@@ -185,6 +193,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     visible: false,
     itemId: null,
   });
+
+  // TICKET_162: Selected history result for page41 display
+  const [selectedHistoryResult, setSelectedHistoryResult] = useState<ExecutorResult | null>(null);
+  // TICKET_162: Selected history item metadata for title display
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<HistoryItem | null>(null);
+
+  // TICKET_163: Naming dialog state
+  const [namingDialogVisible, setNamingDialogVisible] = useState(false);
 
   // TICKET_151_1: Handle case selection from History panel
   const handleCaseClick = useCallback((index: number) => {
@@ -275,10 +291,79 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setDeleteConfirm({ visible: false, itemId: null });
   }, []);
 
+  // TICKET_162: Handle history item click - load full result and switch to page41
+  // TICKET_164: Notify Host for breadcrumb update
+  const handleHistoryItemClick = useCallback(async (taskId: string) => {
+    const api = (window as any).electronAPI;
+    if (!api?.executor?.getHistoryResult) {
+      console.warn('[BacktestPage] getHistoryResult API not available');
+      return;
+    }
+
+    // Find the history item to get metadata
+    const historyItem = historyItems.find(item => item.id === taskId);
+    if (historyItem) {
+      setSelectedHistoryItem(historyItem);
+    }
+
+    try {
+      const response = await api.executor.getHistoryResult(taskId);
+      if (response.success && response.data) {
+        const record = response.data;
+        // Transform database record to ExecutorResult format
+        const result: ExecutorResult = {
+          success: true,
+          startTime: record.start_date ? new Date(record.start_date).getTime() : 0,
+          endTime: record.end_date ? new Date(record.end_date).getTime() : 0,
+          executionTimeMs: record.execution_time_ms ?? 0,
+          metrics: {
+            totalPnl: record.total_pnl ?? 0,
+            totalReturn: record.total_return ?? 0,
+            sharpeRatio: record.sharpe_ratio ?? 0,
+            maxDrawdown: record.max_drawdown ?? 0,
+            winRate: record.win_rate ?? 0,
+            profitFactor: record.profit_factor ?? 0,
+            totalTrades: record.total_trades ?? 0,
+            winningTrades: record.winning_trades ?? 0,
+            losingTrades: record.losing_trades ?? 0,
+          },
+          trades: record.trades_json ? JSON.parse(record.trades_json) : [],
+          equityCurve: record.equity_curve_json ? JSON.parse(record.equity_curve_json) : [],
+          candles: [], // Candles not stored in database, use empty array
+        };
+        setSelectedHistoryResult(result);
+        // TICKET_164: Notify Host for breadcrumb update
+        onHistoryResultChange?.(true);
+        console.log('[BacktestPage] Loaded history result for:', taskId);
+      } else {
+        console.error('[BacktestPage] Failed to load history result:', response.error);
+      }
+    } catch (error) {
+      console.error('[BacktestPage] Error loading history result:', error);
+    }
+  }, [historyItems, onHistoryResultChange]);
+
+  // TICKET_162: Clear selected history result and return to config page
+  // TICKET_164: Notify Host for breadcrumb update
+  const handleClearHistoryResult = useCallback(() => {
+    setSelectedHistoryResult(null);
+    setSelectedHistoryItem(null);
+    onHistoryResultChange?.(false);
+  }, [onHistoryResultChange]);
+
   // Load history on mount and when results change
   useEffect(() => {
     loadHistory();
   }, [loadHistory, results.length]);
+
+  // TICKET_164: Clear history result when resetKey changes (breadcrumb back navigation)
+  useEffect(() => {
+    if (resetKey > 0) {
+      console.debug('[BacktestPage] Reset triggered, clearing history result');
+      setSelectedHistoryResult(null);
+      setSelectedHistoryItem(null);
+    }
+  }, [resetKey]);
 
   // Load algorithms from database on mount
   useEffect(() => {
@@ -442,7 +527,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     return Object.keys(errors).length === 0;
   }, []);
 
-  const handleExecute = useCallback(async () => {
+  // TICKET_163: Show naming dialog instead of direct execute
+  const handleShowNamingDialog = useCallback(() => {
     if (isExecuting) return;
 
     // Validate data configuration first
@@ -451,10 +537,19 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       return;
     }
 
+    // Show naming dialog
+    setNamingDialogVisible(true);
+  }, [isExecuting, dataConfig, validateDataConfig]);
+
+  // TICKET_163: Handle naming dialog confirm - execute with strategy name
+  const handleConfirmNaming = useCallback(async (strategyName: string) => {
+    setNamingDialogVisible(false);
     setLocalExecuting(true);
     setExecuteError(null); // TICKET_143: Clear previous error
+
     try {
-      console.log('[BacktestPage] Executing backtest with config:', dataConfig);
+      console.log('[BacktestPage] Executing backtest with name:', strategyName);
+      console.log('[BacktestPage] Config:', dataConfig);
       console.log('[BacktestPage] Workflow rows:', workflowRows);
 
       // TICKET_136: Ensure data is available before execution
@@ -478,8 +573,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         console.log('[BacktestPage] Data ready:', ensureResult);
       }
 
-      // TICKET_121: Pass data config and workflows to Host layer
-      onExecute?.(dataConfig, workflowRows);
+      // TICKET_163: Pass data config, workflows, and strategyName to Host layer
+      onExecute?.(dataConfig, workflowRows, strategyName);
     } catch (error) {
       console.error('[BacktestPage] Execute failed:', error);
       // TICKET_143: Use dedicated execute error instead of field error
@@ -487,7 +582,12 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     } finally {
       setLocalExecuting(false);
     }
-  }, [isExecuting, dataConfig, workflowRows, validateDataConfig, onExecute]);
+  }, [dataConfig, workflowRows, onExecute]);
+
+  // TICKET_163: Handle naming dialog cancel
+  const handleCancelNaming = useCallback(() => {
+    setNamingDialogVisible(false);
+  }, []);
 
   return (
     <div className="h-full flex bg-color-terminal-bg text-color-terminal-text">
@@ -570,6 +670,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 return (
                   <div
                     key={item.id}
+                    onClick={() => handleHistoryItemClick(item.id)}
                     className={cn(
                       "group w-full px-3 py-2 text-left rounded transition-colors cursor-pointer",
                       "hover:bg-white/5 border border-transparent hover:border-white/10"
@@ -630,8 +731,70 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Zone C: Config or Result based on state */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* TICKET_151: Show results if we have completed results */}
-          {results.length > 0 ? (
+          {/* TICKET_162: Show selected history result (page41) */}
+          {selectedHistoryResult ? (
+            <div className="h-full flex flex-col">
+              {/* TICKET_162: History result title header - two rows */}
+              {selectedHistoryItem && (
+                <div className="flex-shrink-0 mb-4 px-4 py-3 rounded border border-color-terminal-border bg-color-terminal-panel/50 space-y-2">
+                  {/* Row 1: Strategy, Symbol, Timeframe, Data Range, Return */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-bold text-color-terminal-text">
+                        {selectedHistoryItem.name}
+                      </span>
+                      <span className="text-xs text-color-terminal-text-muted">|</span>
+                      <span className="text-sm font-bold text-color-terminal-accent-teal">
+                        {selectedHistoryItem.symbol}
+                      </span>
+                      <span className="text-xs text-color-terminal-text-secondary">
+                        {selectedHistoryItem.timeframe}
+                      </span>
+                      <span className="text-xs text-color-terminal-text-muted">
+                        {selectedHistoryItem.startDate} ~ {selectedHistoryItem.endDate}
+                      </span>
+                    </div>
+                    <span className={cn(
+                      "text-sm font-bold",
+                      (selectedHistoryItem.totalReturn ?? 0) >= 0 ? "text-green-400" : "text-red-400"
+                    )}>
+                      {selectedHistoryItem.totalReturn !== null
+                        ? `${(selectedHistoryItem.totalReturn >= 0 ? '+' : '')}${(selectedHistoryItem.totalReturn * 100).toFixed(2)}%`
+                        : '-'}
+                    </span>
+                  </div>
+                  {/* Row 2: Cap, Size, Test Time */}
+                  <div className="flex items-center justify-between text-[11px] text-color-terminal-text-muted">
+                    <div className="flex items-center gap-4">
+                      <span>Cap: <span className="text-color-terminal-text-secondary">
+                        ${selectedHistoryItem.initialCapital >= 1000
+                          ? `${(selectedHistoryItem.initialCapital / 1000).toFixed(0)}K`
+                          : selectedHistoryItem.initialCapital}
+                      </span></span>
+                      {selectedHistoryItem.orderSize !== null && selectedHistoryItem.orderSizeUnit && (
+                        <span>Size: <span className="text-color-terminal-text-secondary">
+                          {selectedHistoryItem.orderSizeUnit === 'percent'
+                            ? `${selectedHistoryItem.orderSize}%`
+                            : selectedHistoryItem.orderSizeUnit === 'cash'
+                              ? `$${selectedHistoryItem.orderSize}`
+                              : `${selectedHistoryItem.orderSize}sh`}
+                        </span></span>
+                      )}
+                    </div>
+                    <span>Tested: <span className="text-color-terminal-text-secondary">{selectedHistoryItem.createdAt}</span></span>
+                  </div>
+                </div>
+              )}
+              <BacktestResultPanel
+                results={[selectedHistoryResult]}
+                className="flex-1"
+                isExecuting={false}
+                currentCaseIndex={1}
+                totalCases={1}
+              />
+            </div>
+          ) : /* TICKET_151: Show results if we have completed results */
+          results.length > 0 ? (
             /* Component 9: Backtest Result Panel - pass all results for comparison */
             /* TICKET_151_1: Pass execution state for Charts stacking and Compare tab behavior */
             <BacktestResultPanel
@@ -695,8 +858,20 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               {executeError}
             </div>
           )}
-          {/* TICKET_151: Check results array instead of single result */}
-          {results.length > 0 ? (
+          {/* TICKET_162: Check selectedHistoryResult or results array */}
+          {selectedHistoryResult ? (
+            /* Show "New Backtest" button when history result is displayed - smaller, right-aligned */
+            <div className="flex justify-end">
+              <button
+                onClick={handleClearHistoryResult}
+                className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all border-color-terminal-accent-teal bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal hover:bg-color-terminal-accent-teal/20"
+              >
+                <PlayIcon className="w-3 h-3" />
+                New Backtest
+              </button>
+            </div>
+          ) : /* TICKET_151: Check results array instead of single result */
+          results.length > 0 ? (
             /* Show "New Backtest" button when results are displayed */
             <button
               onClick={onNewBacktest}
@@ -707,7 +882,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             </button>
           ) : (
             <button
-              onClick={handleExecute}
+              onClick={handleShowNamingDialog}
               disabled={isExecuting}
               className={cn(
                 "w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all",
@@ -774,6 +949,18 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           </div>
         </div>
       )}
+
+      {/* TICKET_163: Naming dialog (component10) */}
+      <NamingDialog
+        visible={namingDialogVisible}
+        context="backtest"
+        contextData={{
+          symbol: dataConfig.symbol,
+          timeframe: dataConfig.timeframe,
+        }}
+        onConfirm={handleConfirmNaming}
+        onCancel={handleCancelNaming}
+      />
     </div>
   );
 };

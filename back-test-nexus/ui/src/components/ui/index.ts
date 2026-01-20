@@ -36,3 +36,12 @@ export {
   type ExecutorStatusPanelProps,
   type ExecutorStatus,
 } from './ExecutorStatusPanel';
+
+export {
+  NamingDialog,
+  generateSuggestedName,
+  generateFinalName,
+  type NamingDialogProps,
+  type NamingDialogContext,
+  type NamingDialogContextData,
+} from './NamingDialog';
