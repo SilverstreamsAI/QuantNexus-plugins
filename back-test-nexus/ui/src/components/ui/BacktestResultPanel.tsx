@@ -71,13 +71,7 @@ export interface ExecutorResult {
 // Icons
 // -----------------------------------------------------------------------------
 
-const BarChartIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="20" x2="12" y2="10" />
-    <line x1="18" y1="20" x2="18" y2="4" />
-    <line x1="6" y1="20" x2="6" y2="16" />
-  </svg>
-);
+// TICKET_151_2: BarChartIcon removed - Performance tab removed
 
 const ListIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -106,30 +100,7 @@ const CandleChartIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-// -----------------------------------------------------------------------------
-// Metric Card Component
-// -----------------------------------------------------------------------------
-
-interface MetricCardProps {
-  label: string;
-  value: string;
-  colorClass?: string;
-  highlighted?: boolean;
-}
-
-const MetricCard: React.FC<MetricCardProps> = ({ label, value, colorClass = 'text-color-terminal-text', highlighted = false }) => (
-  <div className={cn(
-    'p-3 rounded border border-color-terminal-border',
-    highlighted ? 'bg-color-terminal-surface' : 'bg-color-terminal-panel/30'
-  )}>
-    <div className="text-[10px] font-medium uppercase tracking-wider text-color-terminal-text-muted mb-1">
-      {label}
-    </div>
-    <div className={cn('text-lg font-bold tabular-nums', colorClass)}>
-      {value}
-    </div>
-  </div>
-);
+// TICKET_151_2: MetricCard removed - Performance tab removed, metrics now in Compare tab only
 
 // -----------------------------------------------------------------------------
 // Format Utilities
@@ -179,92 +150,24 @@ const safeNum = (value: number | null | undefined, defaultVal = 0): number => {
 };
 
 // -----------------------------------------------------------------------------
-// Performance Tab
+// TICKET_151_2: Performance Tab removed - metrics now in Compare tab only
 // -----------------------------------------------------------------------------
 
-interface PerformanceTabProps {
-  metrics: ExecutorMetrics;
-  executionTimeMs: number;
-}
-
-const PerformanceTab: React.FC<PerformanceTabProps> = ({ metrics, executionTimeMs }) => (
-  <div className="p-4 space-y-4 overflow-y-auto">
-    {/* Key Metrics */}
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-      <MetricCard
-        label="Total P&L"
-        value={formatCurrency(metrics.totalPnl)}
-        colorClass={getColorClass(metrics.totalPnl)}
-        highlighted
-      />
-      <MetricCard
-        label="Total Return"
-        value={formatPercent(metrics.totalReturn)}
-        colorClass={getColorClass(metrics.totalReturn)}
-        highlighted
-      />
-      <MetricCard
-        label="Sharpe Ratio"
-        value={formatRatio(metrics.sharpeRatio)}
-        colorClass={safeNum(metrics.sharpeRatio) >= 1 ? 'text-green-400' : safeNum(metrics.sharpeRatio) >= 0 ? 'text-yellow-400' : 'text-red-400'}
-        highlighted
-      />
-    </div>
-
-    {/* Risk Metrics */}
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-      <MetricCard
-        label="Max Drawdown"
-        value={formatPercent(-Math.abs(safeNum(metrics.maxDrawdown)))}
-        colorClass="text-red-400"
-      />
-      <MetricCard
-        label="Win Rate"
-        value={formatPercent(metrics.winRate)}
-        colorClass={safeNum(metrics.winRate) >= 50 ? 'text-green-400' : 'text-yellow-400'}
-      />
-      <MetricCard
-        label="Profit Factor"
-        value={formatRatio(metrics.profitFactor)}
-        colorClass={safeNum(metrics.profitFactor) >= 1.5 ? 'text-green-400' : safeNum(metrics.profitFactor) >= 1 ? 'text-yellow-400' : 'text-red-400'}
-      />
-    </div>
-
-    {/* Trade Statistics */}
-    <div className="grid grid-cols-3 gap-3">
-      <MetricCard
-        label="Total Trades"
-        value={safeNum(metrics.totalTrades).toString()}
-      />
-      <MetricCard
-        label="Winning Trades"
-        value={safeNum(metrics.winningTrades).toString()}
-        colorClass="text-green-400"
-      />
-      <MetricCard
-        label="Losing Trades"
-        value={safeNum(metrics.losingTrades).toString()}
-        colorClass="text-red-400"
-      />
-    </div>
-
-    {/* Execution Info */}
-    <div className="text-xs text-color-terminal-text-muted">
-      Execution time: {(safeNum(executionTimeMs) / 1000).toFixed(2)}s
-    </div>
-  </div>
-);
-
 // -----------------------------------------------------------------------------
-// Trades Tab
+// Trades Tab (TICKET_151_2: Vertical stacking like Charts tab)
 // -----------------------------------------------------------------------------
 
 interface TradesTabProps {
-  trades: ExecutorTrade[];
+  results: ExecutorResult[];
+  currentCaseIndex?: number;
+  isExecuting?: boolean;
+  totalCases?: number;
+  scrollToCaseRef?: React.MutableRefObject<((index: number) => void) | null>;
 }
 
-const TradesTab: React.FC<TradesTabProps> = ({ trades }) => (
-  <div className="p-4 overflow-auto">
+// Single case trades table
+const SingleCaseTrades: React.FC<{ trades: ExecutorTrade[] }> = ({ trades }) => (
+  <div className="p-4">
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
@@ -280,7 +183,7 @@ const TradesTab: React.FC<TradesTabProps> = ({ trades }) => (
           </tr>
         </thead>
         <tbody>
-          {(trades || []).slice(0, 100).map((trade, index) => (
+          {trades.slice(0, 100).map((trade, index) => (
             <tr key={index} className="border-b border-color-terminal-border/50 hover:bg-color-terminal-surface/30">
               <td className="py-2 pr-4 text-color-terminal-text-muted">{index + 1}</td>
               <td className="py-2 pr-4 text-color-terminal-text tabular-nums">{formatDate(safeNum(trade.entryTime))}</td>
@@ -304,14 +207,111 @@ const TradesTab: React.FC<TradesTabProps> = ({ trades }) => (
           ))}
         </tbody>
       </table>
-      {(trades?.length || 0) > 100 && (
+      {trades.length > 100 && (
         <div className="mt-2 text-xs text-color-terminal-text-muted">
-          Showing 100 of {trades?.length || 0} trades
+          Showing 100 of {trades.length} trades
+        </div>
+      )}
+      {trades.length === 0 && (
+        <div className="py-8 text-center text-xs text-color-terminal-text-muted">
+          No trades
         </div>
       )}
     </div>
   </div>
 );
+
+const TradesTab: React.FC<TradesTabProps> = ({ results, currentCaseIndex, isExecuting, totalCases = 0, scrollToCaseRef }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const caseRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Determine how many case sections to render (same logic as ChartsTab)
+  const casesToRender = isExecuting && totalCases > 0 ? totalCases : results.length;
+
+  // Auto-scroll to current case during execution
+  useEffect(() => {
+    if (currentCaseIndex && currentCaseIndex > 0 && isExecuting) {
+      const targetRef = caseRefs.current[currentCaseIndex - 1];
+      targetRef?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [currentCaseIndex, isExecuting]);
+
+  // Expose scroll function to parent for case selection from History panel
+  useEffect(() => {
+    if (scrollToCaseRef) {
+      scrollToCaseRef.current = (index: number) => {
+        caseRefs.current[index]?.scrollIntoView({ behavior: 'smooth' });
+      };
+    }
+  }, [scrollToCaseRef]);
+
+  if (casesToRender === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
+        No results available
+      </div>
+    );
+  }
+
+  // Single case and not executing multi-case: render without case header
+  if (casesToRender === 1 && !isExecuting) {
+    return <SingleCaseTrades trades={results[0]?.trades || []} />;
+  }
+
+  // Multiple cases: vertical stacking with case headers
+  return (
+    <div ref={containerRef} className="h-full overflow-y-auto">
+      {Array.from({ length: casesToRender }).map((_, index) => {
+        const result = results[index];
+        const hasResult = !!result;
+        const isCurrentCase = isExecuting && currentCaseIndex === index + 1;
+        const isPending = isExecuting && currentCaseIndex !== undefined && index + 1 > currentCaseIndex;
+
+        return (
+          <div
+            key={index}
+            ref={el => caseRefs.current[index] = el}
+            className="min-h-[300px] border-b border-color-terminal-border last:border-b-0"
+          >
+            {/* Case Header */}
+            <div className="px-4 py-2 bg-color-terminal-panel/50 border-b border-color-terminal-border sticky top-0 z-10">
+              <span className={cn(
+                'text-xs font-bold uppercase',
+                hasResult ? 'text-green-400' : isCurrentCase ? 'text-yellow-400' : 'text-color-terminal-text-secondary'
+              )}>
+                Case {index + 1}
+                {isCurrentCase && ' - Testing...'}
+                {isPending && ' - Pending'}
+              </span>
+              {hasResult && result.metrics && (
+                <span className={cn(
+                  'ml-3 text-xs tabular-nums',
+                  result.metrics.totalPnl >= 0 ? 'text-green-400' : 'text-red-400'
+                )}>
+                  {result.metrics.totalPnl >= 0 ? '+' : ''}{result.metrics.totalPnl?.toFixed(2) || '0.00'}
+                </span>
+              )}
+              {hasResult && (
+                <span className="ml-3 text-xs text-color-terminal-text-muted">
+                  ({result.trades?.length || 0} trades)
+                </span>
+              )}
+            </div>
+
+            {/* Trades for this case */}
+            {hasResult ? (
+              <SingleCaseTrades trades={result.trades} />
+            ) : (
+              <div className="flex items-center justify-center h-48 text-color-terminal-text-muted text-xs">
+                {isCurrentCase ? 'Collecting data...' : 'Waiting...'}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 // -----------------------------------------------------------------------------
 // Single Case Charts (Dual-Chart: Equity + K-Line) - TICKET_151_1
@@ -836,8 +836,8 @@ const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
 // Main Component
 // -----------------------------------------------------------------------------
 
-// TICKET_151: Add comparison tab for multiple results
-type TabId = 'performance' | 'trades' | 'charts' | 'comparison';
+// TICKET_151_2: Simplified tabs - removed Performance (now in Compare only)
+type TabId = 'charts' | 'trades' | 'comparison';
 
 interface Tab {
   id: TabId;
@@ -855,10 +855,10 @@ const CompareIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+// TICKET_151_2: Tab order - Charts first, then Trades
 const baseTabs: Tab[] = [
-  { id: 'performance', label: 'PERFORMANCE', icon: <BarChartIcon className="w-4 h-4" /> },
-  { id: 'trades', label: 'TRADES', icon: <ListIcon className="w-4 h-4" /> },
   { id: 'charts', label: 'CHARTS', icon: <CandleChartIcon className="w-4 h-4" /> },
+  { id: 'trades', label: 'TRADES', icon: <ListIcon className="w-4 h-4" /> },
 ];
 
 const comparisonTab: Tab = { id: 'comparison', label: 'COMPARE', icon: <CompareIcon className="w-4 h-4" /> };
@@ -888,22 +888,27 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   scrollToCase,
 }) => {
   const [activeTab, setActiveTab] = useState<TabId>('charts');
-  // TICKET_151_1: Ref for scrolling to specific case in Charts tab
-  const scrollToCaseRef = React.useRef<((index: number) => void) | null>(null);
+  // TICKET_151_2: Refs for scrolling in both Charts and Trades tabs
+  const scrollToChartsCaseRef = React.useRef<((index: number) => void) | null>(null);
+  const scrollToTradesCaseRef = React.useRef<((index: number) => void) | null>(null);
   // TICKET_151_1: Track last processed scrollToCase to avoid duplicate triggers
   const lastScrollToCaseRef = useRef<number | undefined>(undefined);
 
-  // TICKET_151_1: Scroll to case when scrollToCase prop changes (from History panel click)
+  // TICKET_151_2: Scroll to case in active tab when scrollToCase prop changes (from History panel click)
   useEffect(() => {
     // Only process if scrollToCase changed and is valid
     if (scrollToCase !== undefined && scrollToCase >= 0 && scrollToCase !== lastScrollToCaseRef.current) {
       lastScrollToCaseRef.current = scrollToCase;
-      setActiveTab('charts');
+      // Scroll in the currently active tab
       setTimeout(() => {
-        scrollToCaseRef.current?.(scrollToCase);
+        if (activeTab === 'charts') {
+          scrollToChartsCaseRef.current?.(scrollToCase);
+        } else if (activeTab === 'trades') {
+          scrollToTradesCaseRef.current?.(scrollToCase);
+        }
       }, 100);
     }
-  }, [scrollToCase]);
+  }, [scrollToCase, activeTab]);
 
   // TICKET_151: Support both single result and results array
   // If results array is provided, use it; otherwise wrap single result in array
@@ -963,11 +968,15 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
         {effectiveActiveTab === 'comparison' && hasMultipleResults && (
           <ComparisonTab results={allResults} />
         )}
-        {effectiveActiveTab === 'performance' && (
-          <PerformanceTab metrics={primaryResult.metrics} executionTimeMs={primaryResult.executionTimeMs} />
-        )}
+        {/* TICKET_151_2: Trades tab with vertical stacking (same as Charts) */}
         {effectiveActiveTab === 'trades' && (
-          <TradesTab trades={primaryResult.trades} />
+          <TradesTab
+            results={allResults}
+            currentCaseIndex={currentCaseIndex}
+            isExecuting={isExecuting}
+            totalCases={totalCases}
+            scrollToCaseRef={scrollToTradesCaseRef}
+          />
         )}
         {effectiveActiveTab === 'charts' && (
           <ChartsTab
@@ -975,7 +984,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
             currentCaseIndex={currentCaseIndex}
             isExecuting={isExecuting}
             totalCases={totalCases}
-            scrollToCaseRef={scrollToCaseRef}
+            scrollToCaseRef={scrollToChartsCaseRef}
           />
         )}
       </div>
