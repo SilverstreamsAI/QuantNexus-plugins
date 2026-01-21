@@ -78,6 +78,7 @@ class CheckpointData:
     Complete checkpoint data structure.
 
     Contains all state needed to resume a backtest.
+    TICKET_176_1: Added intermediate_results for UI display.
     """
     task_id: str
     bar_index: int
@@ -88,7 +89,7 @@ class CheckpointData:
     positions: List[Dict[str, Any]] = field(default_factory=list)
     open_orders: List[Dict[str, Any]] = field(default_factory=list)
 
-    # Data info
+    # Data info (TICKET_176: for partial loading optimization)
     data_info: Optional[Dict[str, Any]] = None
 
     # Strategy state (custom per strategy)
@@ -96,6 +97,9 @@ class CheckpointData:
 
     # Account metrics at checkpoint
     metrics: Optional[Dict[str, Any]] = None
+
+    # TICKET_176_1: Intermediate results for UI display
+    intermediate_results: Optional[Dict[str, Any]] = None
 
     # Metadata
     warmup_period: int = 50
@@ -332,6 +336,8 @@ class CheckpointManager:
         positions: Optional[List[PositionState]] = None,
         strategy_state: Optional[Dict[str, Any]] = None,
         metrics: Optional[Dict[str, Any]] = None,
+        intermediate_results: Optional[Dict[str, Any]] = None,
+        data_info: Optional[Dict[str, Any]] = None,
     ) -> CheckpointData:
         """
         Create a CheckpointData instance with common fields.
@@ -343,6 +349,8 @@ class CheckpointManager:
             positions: List of position states
             strategy_state: Strategy-specific state
             metrics: Performance metrics at checkpoint
+            intermediate_results: TICKET_176_1 - Partial results for UI display
+            data_info: TICKET_176 - Data source info for partial loading
 
         Returns:
             CheckpointData instance
@@ -354,6 +362,8 @@ class CheckpointManager:
             positions=[p.to_dict() for p in positions] if positions else [],
             strategy_state=strategy_state,
             metrics=metrics,
+            intermediate_results=intermediate_results,
+            data_info=data_info,
             warmup_period=self.config.warmup_period,
         )
 

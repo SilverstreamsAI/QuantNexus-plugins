@@ -23,6 +23,7 @@ import {
   ExecutorStatusPanel,
   type ExecutorResult,
   NamingDialog,
+  CheckpointResumePanel,
 } from '../ui';
 import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
 
@@ -86,6 +87,14 @@ const XIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+// TICKET_176_1: Pause icon for checkpoint badge
+const PauseIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="6" y="4" width="4" height="16" />
+    <rect x="14" y="4" width="4" height="16" />
+  </svg>
+);
+
 // TICKET_171: Reset icon for config page
 const RotateCcwIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -113,6 +122,33 @@ interface HistoryItem {
   // Timestamp with seconds
   createdAt: string;
   status: 'completed' | 'failed' | 'running';
+}
+
+// TICKET_176_1: Checkpoint types
+interface CheckpointMetrics {
+  totalPnl?: number;
+  totalReturn?: number;
+  totalTrades?: number;
+  winRate?: number;
+}
+
+interface OpenPosition {
+  symbol: string;
+  size: number;
+  price: number;
+}
+
+interface CheckpointInfo {
+  taskId: string;
+  barIndex: number;
+  totalBars: number;
+  createdAt: string;
+  progressPercent: number;
+  intermediateResults?: {
+    metrics?: CheckpointMetrics;
+    openPositions?: OpenPosition[];
+  };
+  dataValidation: 'valid' | 'file_missing' | 'hash_mismatch' | 'pending';
 }
 
 // TICKET_173: Message API type for notifications
@@ -235,6 +271,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
   // TICKET_163: Naming dialog state
   const [namingDialogVisible, setNamingDialogVisible] = useState(false);
+
+  // TICKET_176_1: Checkpoint state
+  const [checkpointInfo, setCheckpointInfo] = useState<CheckpointInfo | null>(null);
+  const [isResuming, setIsResuming] = useState(false);
+  const [showCheckpointPanel, setShowCheckpointPanel] = useState(false);
 
   // TICKET_173: Track if viewing history result (for breadcrumb)
   const [hasHistoryResult, setHasHistoryResult] = useState(false);
@@ -416,10 +457,103 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setExecuteError(null);
   }, []);
 
+  // TICKET_176_1: Check for checkpoint on mount
+  const checkForCheckpoint = useCallback(async () => {
+    const api = (window as any).electronAPI;
+    if (!api?.backtest?.listCheckpoints) {
+      console.warn('[BacktestPage] Checkpoint API not available');
+      return;
+    }
+
+    try {
+      const result = await api.backtest.listCheckpoints();
+      if (result.success && result.data && result.data.length > 0) {
+        // Get the most recent checkpoint
+        const latestCheckpoint = result.data[0];
+        const infoResult = await api.backtest.getCheckpointInfo(latestCheckpoint.task_id);
+        if (infoResult.success && infoResult.data) {
+          setCheckpointInfo(infoResult.data);
+          setShowCheckpointPanel(true);
+          console.log('[BacktestPage] Found checkpoint:', infoResult.data);
+        }
+      }
+    } catch (error) {
+      console.error('[BacktestPage] Failed to check for checkpoint:', error);
+    }
+  }, []);
+
+  // TICKET_176_1: Handle checkpoint resume
+  const handleCheckpointResume = useCallback(async () => {
+    if (!checkpointInfo) return;
+
+    const api = (window as any).electronAPI;
+    if (!api?.backtest?.resumeBacktest) {
+      messageAPI?.error('Resume API not available');
+      return;
+    }
+
+    setIsResuming(true);
+    setShowCheckpointPanel(false);
+    setIsExecuting(true);
+    setTotalCases(1);
+    setCurrentCaseIndex(1);
+
+    try {
+      messageAPI?.info('Resuming backtest from checkpoint...');
+      const result = await api.backtest.resumeBacktest({
+        taskId: checkpointInfo.taskId,
+        originalConfig: dataConfig,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Resume failed');
+      }
+
+      console.log('[BacktestPage] Resume started, taskId:', result.taskId);
+      setCurrentTaskId(result.taskId);
+      setCheckpointInfo(null);
+    } catch (error) {
+      console.error('[BacktestPage] Resume failed:', error);
+      messageAPI?.error(`Resume failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setIsExecuting(false);
+      setShowCheckpointPanel(true);
+    } finally {
+      setIsResuming(false);
+    }
+  }, [checkpointInfo, dataConfig, messageAPI]);
+
+  // TICKET_176_1: Handle checkpoint discard
+  const handleCheckpointDiscard = useCallback(async () => {
+    if (!checkpointInfo) return;
+
+    const api = (window as any).electronAPI;
+    if (!api?.backtest?.deleteCheckpoint) {
+      console.warn('[BacktestPage] Delete checkpoint API not available');
+      setCheckpointInfo(null);
+      setShowCheckpointPanel(false);
+      return;
+    }
+
+    try {
+      await api.backtest.deleteCheckpoint(checkpointInfo.taskId);
+      console.log('[BacktestPage] Checkpoint discarded');
+      setCheckpointInfo(null);
+      setShowCheckpointPanel(false);
+    } catch (error) {
+      console.error('[BacktestPage] Failed to delete checkpoint:', error);
+      messageAPI?.error('Failed to delete checkpoint');
+    }
+  }, [checkpointInfo, messageAPI]);
+
   // Load history on mount and when results change
   useEffect(() => {
     loadHistory();
   }, [loadHistory, backtestResults.length]);
+
+  // TICKET_176_1: Check for checkpoint on mount
+  useEffect(() => {
+    checkForCheckpoint();
+  }, [checkForCheckpoint]);
 
   // TICKET_164: Clear history result when resetKey changes (breadcrumb back navigation)
   // TICKET_170: Also reset config to initial state for true "New Backtest"
@@ -569,7 +703,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setSelectedHistoryItem(null);
     setDataConfig(createDefaultDataConfig());
     setWorkflowRows([createInitialRow()]);
-  }, [clearResultState]);
+    // TICKET_176_1: Show checkpoint panel if checkpoint exists
+    if (checkpointInfo) {
+      setShowCheckpointPanel(true);
+    }
+  }, [clearResultState, checkpointInfo]);
 
   const handleKeepResult = useCallback(() => {
     clearResultState();
@@ -995,11 +1133,24 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       {/* Zone B: History Sidebar */}
       <div className="w-56 flex-shrink-0 border-r border-color-terminal-border bg-color-terminal-panel/30 flex flex-col">
         <div className="px-4 py-3 border-b border-color-terminal-border">
-          <div className="flex items-center gap-2">
-            <HistoryIcon className="w-4 h-4 text-color-terminal-text-muted" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              {t('sidebar.history')}
-            </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <HistoryIcon className="w-4 h-4 text-color-terminal-text-muted" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
+                {t('sidebar.history')}
+              </span>
+            </div>
+            {/* TICKET_176_1: Checkpoint badge indicator */}
+            {checkpointInfo && !showCheckpointPanel && (
+              <button
+                onClick={() => setShowCheckpointPanel(true)}
+                className="flex items-center gap-1 px-2 py-1 text-[10px] rounded bg-amber-500/15 border border-amber-500/50 text-amber-400 hover:bg-amber-500/25 transition-colors"
+                title={`Checkpoint: ${checkpointInfo.progressPercent}% completed`}
+              >
+                <PauseIcon className="w-3 h-3" />
+                <span>{checkpointInfo.progressPercent}%</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -1225,6 +1376,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                     ? `Running backtest ${currentCaseIndex}/${totalCases}...`
                     : 'Running backtest...'
                   }
+                />
+              )}
+
+              {/* TICKET_176_1: Checkpoint Resume Panel */}
+              {showCheckpointPanel && checkpointInfo && (
+                <CheckpointResumePanel
+                  checkpoint={checkpointInfo}
+                  onResume={handleCheckpointResume}
+                  onDiscard={handleCheckpointDiscard}
+                  isResuming={isResuming}
                 />
               )}
 
