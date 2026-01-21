@@ -213,7 +213,12 @@ const SelectField: React.FC<SelectFieldProps> = ({
         }}
       >
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value} disabled={opt.disabled}>
+          <option
+            key={opt.value}
+            value={opt.value}
+            disabled={opt.disabled}
+            style={{ color: opt.disabled ? '#6b7280' : '#e6f1ff' }}
+          >
             {opt.label}
           </option>
         ))}
@@ -461,9 +466,10 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
   className,
 }) => {
   // Prepare data source options
+  // TICKET_166: Show name only, use gray color for disconnected
   const dataSourceOptions = dataSources.map((ds) => ({
     value: ds.id,
-    label: `${ds.name} (${ds.status})`,
+    label: ds.name,
     disabled: ds.status !== 'connected',
   }));
 

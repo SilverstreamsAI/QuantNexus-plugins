@@ -187,8 +187,10 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
     onUpdate(row.id, { [columnKey]: newSelections });
   };
 
-  // Pre/Post conditions: permanently disabled if disableConditions is true
-  const conditionEnabled = disableConditions ? false : row.analysisSelections.length > 0;
+  // Pre-condition: enabled when algorithm is selected (respects disableConditions)
+  const preConditionEnabled = disableConditions ? false : row.analysisSelections.length > 0;
+  // Post-condition: enabled when step is selected (independent of disableConditions)
+  const postConditionEnabled = row.stepSelections.length > 0;
 
   return (
     <div className="border border-color-terminal-border rounded-lg bg-color-terminal-surface/20 p-4 mb-4">
@@ -231,7 +233,7 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
             selectedIds={row.preConditionSelections.map((s) => s.id)}
             onChange={(ids) => handleSelectionChange('preCondition', ids, algorithms.preCondition)}
             theme="purple"
-            disabled={!conditionEnabled}
+            disabled={!preConditionEnabled}
             multiSelect={false}
             showSearch={false}
           />
@@ -269,7 +271,7 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
             selectedIds={row.postConditionSelections.map((s) => s.id)}
             onChange={(ids) => handleSelectionChange('postCondition', ids, algorithms.postCondition)}
             theme="gold"
-            disabled={!conditionEnabled}
+            disabled={!postConditionEnabled}
             multiSelect={false}
             showSearch={false}
           />
