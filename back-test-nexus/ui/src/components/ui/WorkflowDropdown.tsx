@@ -129,7 +129,7 @@ export const WorkflowDropdown: React.FC<WorkflowDropdownProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 456 });
 
   const themeColors = THEME_COLORS[theme];
 
@@ -144,14 +144,27 @@ export const WorkflowDropdown: React.FC<WorkflowDropdownProps> = ({
     );
   }, [options, searchQuery]);
 
-  // Update dropdown position
+  // Update dropdown position with boundary detection and flip
   const updatePosition = useCallback(() => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
+      const preferredMaxHeight = 456;
+      const gap = 4;
+      const spaceBelow = window.innerHeight - rect.bottom - gap;
+      const spaceAbove = rect.top - gap;
+
+      // Flip upward if insufficient space below and more space above
+      const openUpward = spaceBelow < preferredMaxHeight && spaceAbove > spaceBelow;
+
+      // Dynamic maxHeight based on available space
+      const availableSpace = openUpward ? spaceAbove : spaceBelow;
+      const maxHeight = Math.min(preferredMaxHeight, availableSpace);
+
       setDropdownPosition({
-        top: rect.bottom + 4,
+        top: openUpward ? rect.top - maxHeight - gap : rect.bottom + gap,
         left: rect.left,
         width: Math.max(rect.width, 280),
+        maxHeight,
       });
     }
   }, []);
@@ -260,7 +273,7 @@ export const WorkflowDropdown: React.FC<WorkflowDropdownProps> = ({
               top: dropdownPosition.top,
               left: dropdownPosition.left,
               width: dropdownPosition.width,
-              maxHeight: 456,
+              maxHeight: dropdownPosition.maxHeight,
             }}
           >
             {/* Search */}

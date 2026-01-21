@@ -70,6 +70,29 @@ const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+// TICKET_171: Check icon for Keep button
+const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+// TICKET_171: X icon for Discard button
+const XIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+// TICKET_171: Reset icon for config page
+const RotateCcwIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+    <path d="M3 3v5h5" />
+  </svg>
+);
+
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
@@ -100,6 +123,10 @@ interface BacktestPageProps {
   currentResult?: ExecutorResult | null;
   isExecuting?: boolean;
   onNewBacktest?: () => void;
+  /** TICKET_171: Keep result, return to config, preserve config */
+  onKeepResult?: () => void;
+  /** TICKET_171: Discard result (delete from DB), return to config, preserve config */
+  onDiscardResult?: () => void;
   /** TICKET_151: Progress tracking for sequential execution */
   currentCaseIndex?: number;
   totalCases?: number;
@@ -109,6 +136,8 @@ interface BacktestPageProps {
   onHistoryResultChange?: (hasResult: boolean) => void;
   /** TICKET_164: Reset key - when changed, clear all result states */
   resetKey?: number;
+  /** TICKET_171: Current task ID for discard functionality */
+  currentTaskId?: string | null;
 }
 
 // -----------------------------------------------------------------------------
@@ -159,11 +188,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   currentResult,
   isExecuting: isExecutingProp = false,
   onNewBacktest,
+  onKeepResult,
+  onDiscardResult,
   currentCaseIndex = 0,
   totalCases = 0,
   onCaseSelect,
   onHistoryResultChange,
   resetKey = 0,
+  currentTaskId,
 }) => {
   const [localExecuting, setLocalExecuting] = useState(false);
   // Use prop if provided, otherwise use local state
@@ -345,11 +377,22 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
   // TICKET_162: Clear selected history result and return to config page
   // TICKET_164: Notify Host for breadcrumb update
+  // TICKET_170: Reset config to initial state for true "New Backtest"
   const handleClearHistoryResult = useCallback(() => {
     setSelectedHistoryResult(null);
     setSelectedHistoryItem(null);
+    setDataConfig(createDefaultDataConfig());
+    setWorkflowRows([createInitialRow()]);
     onHistoryResultChange?.(false);
   }, [onHistoryResultChange]);
+
+  // TICKET_171: Reset config on Page 4 (config page)
+  const handleReset = useCallback(() => {
+    setDataConfig(createDefaultDataConfig());
+    setWorkflowRows([createInitialRow()]);
+    setDataConfigErrors({});
+    setExecuteError(null);
+  }, []);
 
   // Load history on mount and when results change
   useEffect(() => {
@@ -357,11 +400,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   }, [loadHistory, results.length]);
 
   // TICKET_164: Clear history result when resetKey changes (breadcrumb back navigation)
+  // TICKET_170: Also reset config to initial state for true "New Backtest"
   useEffect(() => {
     if (resetKey > 0) {
-      console.debug('[BacktestPage] Reset triggered, clearing history result');
+      console.debug('[BacktestPage] Reset triggered, clearing history result and config');
       setSelectedHistoryResult(null);
       setSelectedHistoryItem(null);
+      setDataConfig(createDefaultDataConfig());
+      setWorkflowRows([createInitialRow()]);
     }
   }, [resetKey]);
 
@@ -872,37 +918,66 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             </div>
           ) : /* TICKET_151: Check results array instead of single result */
           results.length > 0 ? (
-            /* Show "New Backtest" button when results are displayed */
-            <button
-              onClick={onNewBacktest}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all border-color-terminal-accent-teal bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal hover:bg-color-terminal-accent-teal/20"
-            >
-              <PlayIcon className="w-4 h-4" />
-              New Backtest
-            </button>
+            /* TICKET_171: Two action buttons - Keep, Discard (left-aligned) */
+            <div className="flex justify-start gap-3">
+              {/* Keep: preserve result, return to config, preserve config */}
+              <button
+                onClick={onKeepResult}
+                className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all border-color-terminal-accent-teal bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal hover:bg-color-terminal-accent-teal/20"
+              >
+                <CheckIcon className="w-3 h-3" />
+                Keep
+              </button>
+              {/* Discard: delete from DB, return to config, reset config */}
+              <button
+                onClick={onDiscardResult}
+                className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all border-red-500 bg-red-500/10 text-red-400 hover:bg-red-500/20"
+              >
+                <XIcon className="w-3 h-3" />
+                Discard
+              </button>
+            </div>
           ) : (
-            <button
-              onClick={handleShowNamingDialog}
-              disabled={isExecuting}
-              className={cn(
-                "w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all",
-                isExecuting
-                  ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
-                  : "border-color-terminal-accent-gold bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20"
-              )}
-            >
-              {isExecuting ? (
-                <>
-                  <LoaderIcon className="w-4 h-4 animate-spin" />
-                  Executing...
-                </>
-              ) : (
-                <>
-                  <PlayIcon className="w-4 h-4" />
-                  Execute
-                </>
-              )}
-            </button>
+            /* TICKET_171: Reset left, Execute right */
+            <div className="flex justify-between items-center">
+              {/* Reset button - left */}
+              <button
+                onClick={handleReset}
+                disabled={isExecuting}
+                className={cn(
+                  "flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all",
+                  isExecuting
+                    ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
+                    : "border-color-terminal-text-muted bg-transparent text-color-terminal-text-secondary hover:border-color-terminal-text-secondary hover:text-color-terminal-text"
+                )}
+              >
+                <RotateCcwIcon className="w-3 h-3" />
+                Reset
+              </button>
+              {/* Execute button - right (same height as Reset) */}
+              <button
+                onClick={handleShowNamingDialog}
+                disabled={isExecuting}
+                className={cn(
+                  "flex items-center justify-center gap-2 px-6 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all",
+                  isExecuting
+                    ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
+                    : "border-color-terminal-accent-gold bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20"
+                )}
+              >
+                {isExecuting ? (
+                  <>
+                    <LoaderIcon className="w-3 h-3 animate-spin" />
+                    Executing...
+                  </>
+                ) : (
+                  <>
+                    <PlayIcon className="w-3 h-3" />
+                    Execute
+                  </>
+                )}
+              </button>
+            </div>
           )}
         </div>
       </div>
