@@ -1,52 +1,116 @@
 {
   "workflow": {
-    "title": "Backtest Workflow",
-    "selectStrategy": "Select Strategy",
-    "configureData": "Configure Data",
-    "setParameters": "Set Parameters",
-    "runBacktest": "Run Backtest",
-    "viewResults": "View Results"
+    "title": "回测工作流",
+    "selectStrategy": "选择策略",
+    "configureData": "配置数据",
+    "setParameters": "设置参数",
+    "runBacktest": "运行回测",
+    "viewResults": "查看结果"
   },
   "panel": {
-    "history": "Backtest History",
-    "trades": "Trades",
-    "logs": "Logs",
-    "results": "Results"
+    "history": "回测历史",
+    "trades": "交易记录",
+    "logs": "日志",
+    "results": "结果"
   },
   "actions": {
-    "run": "Run Backtest",
-    "stop": "Stop Backtest",
-    "export": "Export Results",
-    "compare": "Compare Results",
-    "clear": "Clear History"
+    "run": "运行回测",
+    "stop": "停止回测",
+    "export": "导出结果",
+    "compare": "对比结果",
+    "clear": "清除历史"
   },
   "status": {
-    "idle": "Ready",
-    "running": "Running...",
-    "completed": "Completed",
-    "failed": "Failed",
-    "cancelled": "Cancelled"
+    "idle": "就绪",
+    "running": "运行中...",
+    "completed": "已完成",
+    "failed": "失败",
+    "cancelled": "已取消"
   },
   "results": {
-    "summary": "Summary",
-    "performance": "Performance",
-    "trades": "Trade List",
-    "equity": "Equity Curve",
-    "drawdown": "Drawdown",
-    "statistics": "Statistics"
+    "summary": "摘要",
+    "performance": "性能",
+    "trades": "交易列表",
+    "equity": "权益曲线",
+    "drawdown": "回撤",
+    "statistics": "统计"
   },
   "metrics": {
-    "totalReturn": "Total Return",
-    "sharpeRatio": "Sharpe Ratio",
-    "maxDrawdown": "Max Drawdown",
-    "winRate": "Win Rate",
-    "profitFactor": "Profit Factor",
-    "totalTrades": "Total Trades"
+    "totalReturn": "总收益",
+    "sharpeRatio": "夏普比率",
+    "maxDrawdown": "最大回撤",
+    "winRate": "胜率",
+    "profitFactor": "盈亏比",
+    "totalTrades": "总交易数"
   },
   "errors": {
-    "noStrategy": "No strategy selected",
-    "noData": "No data available",
-    "runFailed": "Backtest execution failed",
-    "exportFailed": "Failed to export results"
+    "noStrategy": "未选择策略",
+    "noData": "无可用数据",
+    "runFailed": "回测执行失败",
+    "exportFailed": "导出结果失败"
+  },
+  "config": {
+    "title": "数据配置",
+    "dataSource": "数据源",
+    "symbol": "交易品种",
+    "searchSymbol": "搜索品种...",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "timeframe": "时间周期",
+    "initialCapital": "初始资金",
+    "orderSize": "订单大小"
+  },
+  "timeframes": {
+    "1m": "1分钟",
+    "5m": "5分钟",
+    "15m": "15分钟",
+    "30m": "30分钟",
+    "1h": "1小时",
+    "4h": "4小时",
+    "1d": "1天",
+    "1w": "1周",
+    "1M": "1月"
+  },
+  "orderUnits": {
+    "cash": "$",
+    "percent": "%",
+    "shares": "股"
+  },
+  "sidebar": {
+    "history": "历史",
+    "backtesting": "回测中",
+    "loading": "加载中...",
+    "noHistory": "暂无回测历史",
+    "testing": "测试中..."
+  },
+  "page": {
+    "loadingAlgorithms": "加载算法中...",
+    "workflowTitle": "工作流配置",
+    "workflowStep": "工作流步骤"
+  },
+  "buttons": {
+    "newBacktest": "新建回测",
+    "keep": "保留",
+    "discard": "丢弃",
+    "reset": "重置",
+    "execute": "执行",
+    "executing": "执行中...",
+    "cancel": "取消",
+    "delete": "删除"
+  },
+  "dialog": {
+    "deleteTitle": "删除历史记录",
+    "deleteMessage": "这将永久删除回测结果，包括所有交易记录和权益曲线数据。"
+  },
+  "workflowSelector": {
+    "selectAlgorithm": "选择算法",
+    "preCondition": "前置条件",
+    "selectSteps": "选择步骤",
+    "postCondition": "后置条件",
+    "search": "搜索..."
+  },
+  "breadcrumb": {
+    "backtestNexus": "回测系统",
+    "result": "结果"
   }
 }

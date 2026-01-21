@@ -12,7 +12,8 @@
  * @see TICKET_077_COMPONENT8 - BacktestDataConfigPanel Design
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 // =============================================================================
@@ -82,23 +83,7 @@ export interface BacktestDataConfigPanelProps {
 // Constants
 // =============================================================================
 
-const TIMEFRAME_OPTIONS: { value: TimeframeOption; label: string }[] = [
-  { value: '1m', label: '1 Minute' },
-  { value: '5m', label: '5 Minutes' },
-  { value: '15m', label: '15 Minutes' },
-  { value: '30m', label: '30 Minutes' },
-  { value: '1h', label: '1 Hour' },
-  { value: '4h', label: '4 Hours' },
-  { value: '1d', label: '1 Day' },
-  { value: '1w', label: '1 Week' },
-  { value: '1M', label: '1 Month' },
-];
-
-const ORDER_SIZE_UNITS: { value: OrderSizeUnit; label: string }[] = [
-  { value: 'cash', label: '$' },
-  { value: 'percent', label: '%' },
-  { value: 'shares', label: 'Shares' },
-];
+// Timeframe and order unit options are generated with translations in the component
 
 const DEFAULT_DATA_SOURCE = 'clickhouse';
 const DEFAULT_TIMEFRAME: TimeframeOption = '1d';
@@ -240,6 +225,7 @@ interface SymbolSearchFieldProps {
   error?: string;
   disabled?: boolean;
   className?: string;
+  placeholder?: string;
 }
 
 const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
@@ -251,6 +237,7 @@ const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
   error,
   disabled,
   className,
+  placeholder = 'Search symbol...',
 }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<SymbolSearchResult[]>([]);
@@ -305,7 +292,7 @@ const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
           onChange={(e) => handleSearch(e.target.value)}
           onBlur={() => setTimeout(() => setShowResults(false), 200)}
           onFocus={() => query.length >= 2 && searchResults.length > 0 && setShowResults(true)}
-          placeholder="Search symbol..."
+          placeholder={placeholder}
           disabled={disabled}
           className={cn(
             'w-full h-9 px-3 pr-8 rounded border text-sm terminal-mono placeholder-[#495670]',
@@ -465,6 +452,28 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
   disabled = false,
   className,
 }) => {
+  const { t } = useTranslation('backtest');
+
+  // Generate timeframe options with translations
+  const timeframeOptions = useMemo(() => [
+    { value: '1m' as TimeframeOption, label: t('timeframes.1m') },
+    { value: '5m' as TimeframeOption, label: t('timeframes.5m') },
+    { value: '15m' as TimeframeOption, label: t('timeframes.15m') },
+    { value: '30m' as TimeframeOption, label: t('timeframes.30m') },
+    { value: '1h' as TimeframeOption, label: t('timeframes.1h') },
+    { value: '4h' as TimeframeOption, label: t('timeframes.4h') },
+    { value: '1d' as TimeframeOption, label: t('timeframes.1d') },
+    { value: '1w' as TimeframeOption, label: t('timeframes.1w') },
+    { value: '1M' as TimeframeOption, label: t('timeframes.1M') },
+  ], [t]);
+
+  // Generate order size unit options with translations
+  const orderSizeUnits = useMemo(() => [
+    { value: 'cash' as OrderSizeUnit, label: t('orderUnits.cash') },
+    { value: 'percent' as OrderSizeUnit, label: t('orderUnits.percent') },
+    { value: 'shares' as OrderSizeUnit, label: t('orderUnits.shares') },
+  ], [t]);
+
   // Prepare data source options
   // TICKET_166: Show name only, use gray color for disconnected
   const dataSourceOptions = dataSources.map((ds) => ({
@@ -511,14 +520,14 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
     <div className={cn('backtest-data-config-panel', className)}>
       {/* Title */}
       <h2 className="text-sm font-bold terminal-mono uppercase tracking-widest text-color-terminal-accent-gold mb-4">
-        DATA CONFIGURATION
+        {t('config.title')}
       </h2>
 
       <div className="space-y-4">
         {/* Row 1: Data Source + Symbol Search */}
         <div className="grid grid-cols-2 gap-4">
           <SelectField
-            label="Data Source"
+            label={t('config.dataSource')}
             value={value.dataSource || DEFAULT_DATA_SOURCE}
             onChange={(v) => handleChange('dataSource', v)}
             options={dataSourceOptions}
@@ -526,20 +535,21 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
             disabled={disabled}
           />
           <SymbolSearchField
-            label="Symbol"
+            label={t('config.symbol')}
             value={value.symbol}
             onChange={(v) => handleChange('symbol', v)}
             onSearch={onSymbolSearch}
             onSelect={handleSymbolSelect}
             error={errors.symbol}
             disabled={disabled}
+            placeholder={t('config.searchSymbol')}
           />
         </div>
 
         {/* Row 2: Start Date + End Date + Timeframe */}
         <div className="grid grid-cols-3 gap-4">
           <InputField
-            label="Start Date"
+            label={t('config.startDate')}
             type="date"
             value={value.startDate}
             onChange={(v) => handleChange('startDate', v)}
@@ -547,7 +557,7 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
             disabled={disabled}
           />
           <InputField
-            label="End Date"
+            label={t('config.endDate')}
             type="date"
             value={value.endDate}
             onChange={(v) => handleChange('endDate', v)}
@@ -555,10 +565,10 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
             disabled={disabled}
           />
           <SelectField
-            label="Timeframe"
+            label={t('config.timeframe')}
             value={value.timeframe || DEFAULT_TIMEFRAME}
             onChange={(v) => handleChange('timeframe', v as TimeframeOption)}
-            options={TIMEFRAME_OPTIONS}
+            options={timeframeOptions}
             error={errors.timeframe}
             disabled={disabled}
           />
@@ -567,7 +577,7 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
         {/* Row 3: Initial Capital + Order Size */}
         <div className="grid grid-cols-2 gap-4">
           <InputField
-            label="Initial Capital"
+            label={t('config.initialCapital')}
             type="number"
             value={value.initialCapital}
             onChange={(v) => handleChange('initialCapital', parseFloat(v) || 0)}
@@ -578,12 +588,12 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
             step={100}
           />
           <CompoundInput
-            label="Order Size"
+            label={t('config.orderSize')}
             value={value.orderSize}
             unit={value.orderSizeUnit || DEFAULT_ORDER_SIZE_UNIT}
             onValueChange={(v) => handleChange('orderSize', v)}
             onUnitChange={(u) => handleChange('orderSizeUnit', u)}
-            units={ORDER_SIZE_UNITS}
+            units={orderSizeUnits}
             error={errors.orderSize}
             disabled={disabled}
           />

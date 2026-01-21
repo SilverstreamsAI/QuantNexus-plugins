@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import {
   WorkflowRowSelector,
@@ -191,6 +192,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   onResultViewChange,
   resetKey = 0,
 }) => {
+  const { t } = useTranslation('backtest');
+
   // TICKET_173: State moved from Host Shell
   const [backtestResults, setBacktestResults] = useState<ExecutorResult[]>([]);
   const [currentResult, setCurrentResult] = useState<ExecutorResult | null>(null);
@@ -995,7 +998,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           <div className="flex items-center gap-2">
             <HistoryIcon className="w-4 h-4 text-color-terminal-text-muted" />
             <span className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              History
+              {t('sidebar.history')}
             </span>
           </div>
         </div>
@@ -1008,7 +1011,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               <div className="w-full px-3 py-2 text-left">
                 <ChevronDownIcon className="w-3 h-3 inline mr-1 text-color-terminal-text-muted" />
                 <span className="text-xs font-bold uppercase text-color-terminal-text-secondary">
-                  BACKTESTING
+                  {t('sidebar.backtesting')}
                 </span>
               </div>
 
@@ -1029,7 +1032,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                     )}
                   >
                     <span style={{ color: isCompleted ? '#4ade80' : isRunning ? '#fbbf24' : '#6b7280' }}>
-                      {caseNum}{isRunning ? ' testing...' : ''}
+                      {caseNum}{isRunning ? ` ${t('sidebar.testing')}` : ''}
                     </span>
                   </button>
                 );
@@ -1038,13 +1041,13 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           ) : historyLoading ? (
             <div className="px-2 py-8 text-center">
               <LoaderIcon className="w-6 h-6 mx-auto mb-2 text-color-terminal-text-muted animate-spin" />
-              <p className="text-[11px] text-color-terminal-text-muted">Loading...</p>
+              <p className="text-[11px] text-color-terminal-text-muted">{t('sidebar.loading')}</p>
             </div>
           ) : historyItems.length === 0 ? (
             <div className="px-2 py-8 text-center">
               <HistoryIcon className="w-8 h-8 mx-auto mb-3 text-color-terminal-text-muted opacity-50" />
               <p className="text-[11px] text-color-terminal-text-muted">
-                No backtest history
+                {t('sidebar.noHistory')}
               </p>
             </div>
           ) : (
@@ -1207,7 +1210,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           ) : loading ? (
             <div className="flex items-center justify-center h-64">
               <div className="text-color-terminal-text-muted">
-                Loading algorithms...
+                {t('page.loadingAlgorithms')}
               </div>
             </div>
           ) : (
@@ -1237,7 +1240,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
               {/* Component 7: Workflow Row Selector */}
               <WorkflowRowSelector
-                title="WORKFLOW CONFIGURATION"
+                title={t('page.workflowTitle')}
                 rows={workflowRows}
                 onChange={setWorkflowRows}
                 algorithms={algorithms}
@@ -1265,7 +1268,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all border-color-terminal-accent-teal bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal hover:bg-color-terminal-accent-teal/20"
               >
                 <PlayIcon className="w-3 h-3" />
-                New Backtest
+                {t('buttons.newBacktest')}
               </button>
             </div>
           ) : /* TICKET_151: Check backtestResults array instead of single result */
@@ -1278,7 +1281,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all border-color-terminal-accent-teal bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal hover:bg-color-terminal-accent-teal/20"
               >
                 <CheckIcon className="w-3 h-3" />
-                Keep
+                {t('buttons.keep')}
               </button>
               {/* Discard: delete from DB, return to config, reset config */}
               <button
@@ -1286,7 +1289,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all border-red-500 bg-red-500/10 text-red-400 hover:bg-red-500/20"
               >
                 <XIcon className="w-3 h-3" />
-                Discard
+                {t('buttons.discard')}
               </button>
             </div>
           ) : (
@@ -1304,7 +1307,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 )}
               >
                 <RotateCcwIcon className="w-3 h-3" />
-                Reset
+                {t('buttons.reset')}
               </button>
               {/* Execute button - right (same height as Reset) */}
               <button
@@ -1320,12 +1323,12 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 {isExecuting ? (
                   <>
                     <LoaderIcon className="w-3 h-3 animate-spin" />
-                    Executing...
+                    {t('buttons.executing')}
                   </>
                 ) : (
                   <>
                     <PlayIcon className="w-3 h-3" />
-                    Execute
+                    {t('buttons.execute')}
                   </>
                 )}
               </button>
@@ -1348,13 +1351,13 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             <div className="flex items-center gap-2 px-4 py-3 border-b border-color-terminal-border border-l-[3px] border-l-red-500 bg-color-terminal-panel rounded-t-lg">
               <TrashIcon className="w-[18px] h-[18px] text-red-500" />
               <span className="flex-1 font-mono text-xs font-semibold text-color-terminal-text uppercase tracking-wider">
-                Delete History Record
+                {t('dialog.deleteTitle')}
               </span>
             </div>
             {/* Body */}
             <div className="px-4 py-6">
               <p className="font-mono text-xs leading-relaxed text-color-terminal-text text-center">
-                This will permanently delete the backtest result, including all trade records and equity curve data.
+                {t('dialog.deleteMessage')}
               </p>
             </div>
             {/* Footer */}
@@ -1363,14 +1366,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 onClick={handleCancelDelete}
                 className="min-w-[80px] px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider rounded border border-color-terminal-border bg-transparent text-color-terminal-text-secondary hover:border-color-terminal-text-muted hover:text-color-terminal-text transition-all"
               >
-                Cancel
+                {t('buttons.cancel')}
               </button>
               <button
                 onClick={handleConfirmDelete}
                 className="min-w-[80px] px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider rounded border border-red-500 bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all"
                 autoFocus
               >
-                Delete
+                {t('buttons.delete')}
               </button>
             </div>
           </div>

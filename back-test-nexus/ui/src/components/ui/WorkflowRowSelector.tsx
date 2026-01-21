@@ -12,6 +12,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import { WorkflowDropdown, type AlgorithmOption } from './WorkflowDropdown';
 
@@ -61,8 +62,6 @@ export interface WorkflowRowSelectorProps {
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
-
-const DEFAULT_TITLE = 'WORKFLOW CONFIGURATION';
 
 // -----------------------------------------------------------------------------
 // Helper Functions
@@ -140,9 +139,10 @@ interface WorkflowRowItemProps {
   algorithms: WorkflowRowSelectorProps['algorithms'];
   onUpdate: (rowId: string, updates: Partial<WorkflowRow>) => void;
   disableConditions?: boolean;
+  t: (key: string) => string;
 }
 
-const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUpdate, disableConditions }) => {
+const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUpdate, disableConditions, t }) => {
   const toSelection = (opt: AlgorithmOption): AlgorithmSelection => ({
     id: opt.id,
     code: opt.code,
@@ -200,7 +200,7 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
           {row.rowNumber}
         </span>
         <span className="text-[10px] uppercase tracking-wider text-color-terminal-text-muted">
-          Workflow Step
+          {t('page.workflowStep')}
         </span>
       </div>
 
@@ -209,14 +209,14 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
         {/* Select Algorithm - wide (3 units) */}
         <div className="flex-[3]">
           <WorkflowDropdown
-            label="Select Algorithm"
+            label={t('workflowSelector.selectAlgorithm')}
             options={algorithms.trendRange}
             selectedIds={row.analysisSelections.map((s) => s.id)}
             onChange={(ids) => handleSelectionChange('analysis', ids, algorithms.trendRange)}
             theme="teal"
             multiSelect={true}
             showSearch={true}
-            searchPlaceholder="Search..."
+            searchPlaceholder={t('workflowSelector.search')}
           />
           <SelectionChips
             selections={row.analysisSelections}
@@ -228,7 +228,7 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
         {/* Pre-condition - narrow (2 units) */}
         <div className="flex-[2]">
           <WorkflowDropdown
-            label="Pre-condition"
+            label={t('workflowSelector.preCondition')}
             options={algorithms.preCondition}
             selectedIds={row.preConditionSelections.map((s) => s.id)}
             onChange={(ids) => handleSelectionChange('preCondition', ids, algorithms.preCondition)}
@@ -247,14 +247,14 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
         {/* Select Steps - wide (3 units) */}
         <div className="flex-[3]">
           <WorkflowDropdown
-            label="Select Steps"
+            label={t('workflowSelector.selectSteps')}
             options={algorithms.selectSteps}
             selectedIds={row.stepSelections.map((s) => s.id)}
             onChange={(ids) => handleSelectionChange('steps', ids, algorithms.selectSteps)}
             theme="blue"
             multiSelect={true}
             showSearch={true}
-            searchPlaceholder="Search..."
+            searchPlaceholder={t('workflowSelector.search')}
           />
           <SelectionChips
             selections={row.stepSelections}
@@ -266,7 +266,7 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
         {/* Post-condition - narrow (2 units) */}
         <div className="flex-[2]">
           <WorkflowDropdown
-            label="Post-condition"
+            label={t('workflowSelector.postCondition')}
             options={algorithms.postCondition}
             selectedIds={row.postConditionSelections.map((s) => s.id)}
             onChange={(ids) => handleSelectionChange('postCondition', ids, algorithms.postCondition)}
@@ -291,7 +291,7 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
 // -----------------------------------------------------------------------------
 
 export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
-  title = DEFAULT_TITLE,
+  title,
   rows,
   onChange,
   algorithms,
@@ -299,6 +299,9 @@ export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
   disableConditions = false,
   className,
 }) => {
+  const { t } = useTranslation('backtest');
+  const displayTitle = title || t('page.workflowTitle');
+
   const updateRow = useCallback(
     (rowId: string, updates: Partial<WorkflowRow>) => {
       const newRows = rows.map((row) =>
@@ -330,7 +333,7 @@ export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
     <div className={cn('workflow-row-selector w-full', className)}>
       {/* Title */}
       <h2 className="text-sm font-bold terminal-mono uppercase tracking-widest text-color-terminal-accent-gold mb-4">
-        {title}
+        {displayTitle}
       </h2>
 
       {/* Workflow Rows */}
@@ -341,6 +344,7 @@ export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
           algorithms={algorithms}
           onUpdate={updateRow}
           disableConditions={disableConditions}
+          t={t}
         />
       ))}
     </div>
