@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 // -----------------------------------------------------------------------------
@@ -166,62 +167,66 @@ interface TradesTabProps {
 }
 
 // Single case trades table
-const SingleCaseTrades: React.FC<{ trades: ExecutorTrade[] }> = ({ trades }) => (
-  <div className="p-4">
-    <div className="overflow-x-auto">
-      <table className="w-full text-xs">
-        <thead>
-          <tr className="border-b border-color-terminal-border text-left">
-            <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted">#</th>
-            <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted">Entry Time</th>
-            <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted">Exit Time</th>
-            <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted">Side</th>
-            <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted text-right">Entry</th>
-            <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted text-right">Exit</th>
-            <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted text-right">Qty</th>
-            <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted text-right">P&L</th>
-          </tr>
-        </thead>
-        <tbody>
-          {trades.slice(0, 100).map((trade, index) => (
-            <tr key={index} className="border-b border-color-terminal-border/50 hover:bg-color-terminal-surface/30">
-              <td className="py-2 pr-4 text-color-terminal-text-muted">{index + 1}</td>
-              <td className="py-2 pr-4 text-color-terminal-text tabular-nums">{formatDate(safeNum(trade.entryTime))}</td>
-              <td className="py-2 pr-4 text-color-terminal-text tabular-nums">{formatDate(safeNum(trade.exitTime))}</td>
-              <td className={cn('py-2 pr-4 font-medium', trade.side === 'BUY' ? 'text-green-400' : 'text-red-400')}>
-                {trade.side || '-'}
-              </td>
-              <td className="py-2 pr-4 text-right text-color-terminal-text tabular-nums">
-                ${safeNum(trade.entryPrice).toFixed(2)}
-              </td>
-              <td className="py-2 pr-4 text-right text-color-terminal-text tabular-nums">
-                ${safeNum(trade.exitPrice).toFixed(2)}
-              </td>
-              <td className="py-2 pr-4 text-right text-color-terminal-text tabular-nums">
-                {safeNum(trade.quantity).toFixed(4)}
-              </td>
-              <td className={cn('py-2 pr-4 text-right font-medium tabular-nums', getColorClass(trade.pnl))}>
-                {formatCurrency(trade.pnl)}
-              </td>
+const SingleCaseTrades: React.FC<{ trades: ExecutorTrade[] }> = ({ trades }) => {
+  const { t } = useTranslation('backtest');
+  return (
+    <div className="p-4">
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-color-terminal-border text-left">
+              <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted">{t('resultPanel.tradesTable.index')}</th>
+              <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted">{t('resultPanel.tradesTable.entryTime')}</th>
+              <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted">{t('resultPanel.tradesTable.exitTime')}</th>
+              <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted">{t('resultPanel.tradesTable.side')}</th>
+              <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted text-right">{t('resultPanel.tradesTable.entry')}</th>
+              <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted text-right">{t('resultPanel.tradesTable.exit')}</th>
+              <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted text-right">{t('resultPanel.tradesTable.qty')}</th>
+              <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted text-right">{t('resultPanel.tradesTable.pnl')}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-      {trades.length > 100 && (
-        <div className="mt-2 text-xs text-color-terminal-text-muted">
-          Showing 100 of {trades.length} trades
-        </div>
-      )}
-      {trades.length === 0 && (
-        <div className="py-8 text-center text-xs text-color-terminal-text-muted">
-          No trades
-        </div>
-      )}
+          </thead>
+          <tbody>
+            {trades.slice(0, 100).map((trade, index) => (
+              <tr key={index} className="border-b border-color-terminal-border/50 hover:bg-color-terminal-surface/30">
+                <td className="py-2 pr-4 text-color-terminal-text-muted">{index + 1}</td>
+                <td className="py-2 pr-4 text-color-terminal-text tabular-nums">{formatDate(safeNum(trade.entryTime))}</td>
+                <td className="py-2 pr-4 text-color-terminal-text tabular-nums">{formatDate(safeNum(trade.exitTime))}</td>
+                <td className={cn('py-2 pr-4 font-medium', trade.side === 'BUY' ? 'text-green-400' : 'text-red-400')}>
+                  {trade.side || '-'}
+                </td>
+                <td className="py-2 pr-4 text-right text-color-terminal-text tabular-nums">
+                  ${safeNum(trade.entryPrice).toFixed(2)}
+                </td>
+                <td className="py-2 pr-4 text-right text-color-terminal-text tabular-nums">
+                  ${safeNum(trade.exitPrice).toFixed(2)}
+                </td>
+                <td className="py-2 pr-4 text-right text-color-terminal-text tabular-nums">
+                  {safeNum(trade.quantity).toFixed(4)}
+                </td>
+                <td className={cn('py-2 pr-4 text-right font-medium tabular-nums', getColorClass(trade.pnl))}>
+                  {formatCurrency(trade.pnl)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {trades.length > 100 && (
+          <div className="mt-2 text-xs text-color-terminal-text-muted">
+            {t('resultPanel.tradesTable.showingOf', { shown: 100, total: trades.length })}
+          </div>
+        )}
+        {trades.length === 0 && (
+          <div className="py-8 text-center text-xs text-color-terminal-text-muted">
+            {t('resultPanel.tradesTable.noTrades')}
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const TradesTab: React.FC<TradesTabProps> = ({ results, currentCaseIndex, isExecuting, totalCases = 0, scrollToCaseRef }) => {
+  const { t } = useTranslation('backtest');
   const containerRef = useRef<HTMLDivElement>(null);
   const caseRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -248,7 +253,7 @@ const TradesTab: React.FC<TradesTabProps> = ({ results, currentCaseIndex, isExec
   if (casesToRender === 0) {
     return (
       <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
-        No results available
+        {t('resultPanel.status.noResults')}
       </div>
     );
   }
@@ -279,9 +284,9 @@ const TradesTab: React.FC<TradesTabProps> = ({ results, currentCaseIndex, isExec
                 'text-xs font-bold uppercase',
                 hasResult ? 'text-green-400' : isCurrentCase ? 'text-yellow-400' : 'text-color-terminal-text-secondary'
               )}>
-                Case {index + 1}
-                {isCurrentCase && ' - Testing...'}
-                {isPending && ' - Pending'}
+                {t('resultPanel.status.case', { index: index + 1 })}
+                {isCurrentCase && t('resultPanel.status.testing')}
+                {isPending && t('resultPanel.status.pending')}
               </span>
               {hasResult && result.metrics && (
                 <span className={cn(
@@ -293,7 +298,7 @@ const TradesTab: React.FC<TradesTabProps> = ({ results, currentCaseIndex, isExec
               )}
               {hasResult && (
                 <span className="ml-3 text-xs text-color-terminal-text-muted">
-                  ({result.trades?.length || 0} trades)
+                  {t('resultPanel.status.tradesCount', { count: result.trades?.length || 0 })}
                 </span>
               )}
             </div>
@@ -303,7 +308,7 @@ const TradesTab: React.FC<TradesTabProps> = ({ results, currentCaseIndex, isExec
               <SingleCaseTrades trades={result.trades} />
             ) : (
               <div className="flex items-center justify-center h-48 text-color-terminal-text-muted text-xs">
-                {isCurrentCase ? 'Collecting data...' : 'Waiting...'}
+                {isCurrentCase ? t('resultPanel.status.collectingData') : t('resultPanel.status.waiting')}
               </div>
             )}
           </div>
@@ -324,6 +329,7 @@ interface SingleCaseChartsProps {
 }
 
 const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({ equityCurve, candles, trades }) => {
+  const { t } = useTranslation('backtest');
   // Equity curve chart dimensions
   const equityHeight = 180;
   const klineHeight = 220;
@@ -333,7 +339,7 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({ equityCurve, candle
     if (!equityCurve || equityCurve.length === 0) {
       return (
         <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
-          No equity data
+          {t('resultPanel.charts.noEquityData')}
         </div>
       );
     }
@@ -347,7 +353,7 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({ equityCurve, candle
     if (validEquityCurve.length < 2) {
       return (
         <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
-          Processing... ({validEquityCurve.length} points)
+          {t('resultPanel.charts.processing', { count: validEquityCurve.length })}
         </div>
       );
     }
@@ -383,7 +389,7 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({ equityCurve, candle
       <>
         <div className="flex items-center justify-between px-3 py-1.5 border-b border-color-terminal-border/50">
           <span className="text-[10px] font-medium uppercase tracking-wider text-color-terminal-text-muted">
-            Equity Curve
+            {t('resultPanel.charts.equityCurve')}
           </span>
           <span className={cn('text-xs tabular-nums font-medium', pnl >= 0 ? 'text-green-400' : 'text-red-400')}>
             ${endEquity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({formatPercent(startEquity > 0 ? (pnl / startEquity) * 100 : 0)})
@@ -408,7 +414,7 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({ equityCurve, candle
     if (!candles || candles.length === 0) {
       return (
         <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
-          No K-line data
+          {t('resultPanel.charts.noKlineData')}
         </div>
       );
     }
@@ -431,10 +437,10 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({ equityCurve, candle
       <>
         <div className="flex items-center justify-between px-3 py-1.5 border-b border-color-terminal-border/50">
           <span className="text-[10px] font-medium uppercase tracking-wider text-color-terminal-text-muted">
-            K-Line Chart
+            {t('resultPanel.charts.klineChart')}
           </span>
           <span className="text-[10px] text-color-terminal-text-muted tabular-nums">
-            {candles.length} bars
+            {t('resultPanel.charts.bars', { count: candles.length })}
           </span>
         </div>
         <svg viewBox={`0 0 ${viewWidth} ${viewHeight}`} className="w-full" style={{ height: klineHeight - 32 }} preserveAspectRatio="none">
@@ -538,9 +544,9 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({ equityCurve, candle
 
       {/* Summary */}
       <div className="text-[10px] text-color-terminal-text-muted flex justify-between">
-        <span>Equity: {equityCurve?.length || 0} points</span>
-        <span>Candles: {candles?.length || 0} bars</span>
-        <span>Trades: {trades?.length || 0}</span>
+        <span>{t('resultPanel.summary.equity', { count: equityCurve?.length || 0 })}</span>
+        <span>{t('resultPanel.summary.candles', { count: candles?.length || 0 })}</span>
+        <span>{t('resultPanel.summary.trades', { count: trades?.length || 0 })}</span>
       </div>
     </div>
   );
@@ -559,6 +565,7 @@ interface ChartsTabProps {
 }
 
 const ChartsTab: React.FC<ChartsTabProps> = ({ results, currentCaseIndex, isExecuting, totalCases = 0, scrollToCaseRef }) => {
+  const { t } = useTranslation('backtest');
   const containerRef = useRef<HTMLDivElement>(null);
   const caseRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -586,7 +593,7 @@ const ChartsTab: React.FC<ChartsTabProps> = ({ results, currentCaseIndex, isExec
   if (casesToRender === 0) {
     return (
       <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
-        No results available
+        {t('resultPanel.status.noResults')}
       </div>
     );
   }
@@ -623,9 +630,9 @@ const ChartsTab: React.FC<ChartsTabProps> = ({ results, currentCaseIndex, isExec
                 'text-xs font-bold uppercase',
                 hasResult ? 'text-green-400' : isCurrentCase ? 'text-yellow-400' : 'text-color-terminal-text-secondary'
               )}>
-                Case {index + 1}
-                {isCurrentCase && ' - Testing...'}
-                {isPending && ' - Pending'}
+                {t('resultPanel.status.case', { index: index + 1 })}
+                {isCurrentCase && t('resultPanel.status.testing')}
+                {isPending && t('resultPanel.status.pending')}
               </span>
               {hasResult && result.metrics && (
                 <span className={cn(
@@ -646,7 +653,7 @@ const ChartsTab: React.FC<ChartsTabProps> = ({ results, currentCaseIndex, isExec
               />
             ) : (
               <div className="flex items-center justify-center h-96 text-color-terminal-text-muted text-xs">
-                {isCurrentCase ? 'Collecting data...' : 'Waiting...'}
+                {isCurrentCase ? t('resultPanel.status.collectingData') : t('resultPanel.status.waiting')}
               </div>
             )}
           </div>
@@ -668,10 +675,12 @@ interface ComparisonTabProps {
 const STRATEGY_COLORS = ['#4ade80', '#60a5fa', '#f472b6', '#fbbf24', '#a78bfa', '#2dd4bf'];
 
 const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
+  const { t } = useTranslation('backtest');
+
   if (results.length === 0) {
     return (
       <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
-        No results to compare
+        {t('resultPanel.comparison.noResults')}
       </div>
     );
   }
@@ -680,23 +689,23 @@ const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
   const renderComparisonTable = () => (
     <div className="p-4">
       <div className="text-[10px] font-medium uppercase tracking-wider text-color-terminal-text-muted mb-3">
-        Performance Comparison
+        {t('resultPanel.comparison.title')}
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-color-terminal-border text-left">
-              <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted">Metric</th>
+              <th className="pb-2 pr-4 font-medium text-color-terminal-text-muted">{t('resultPanel.comparison.metric')}</th>
               {results.map((_, i) => (
                 <th key={i} className="pb-2 pr-4 font-medium" style={{ color: STRATEGY_COLORS[i % STRATEGY_COLORS.length] }}>
-                  Strategy {i + 1}
+                  {t('resultPanel.comparison.strategy', { index: i + 1 })}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             <tr className="border-b border-color-terminal-border/50">
-              <td className="py-2 pr-4 text-color-terminal-text-muted">Total P&L</td>
+              <td className="py-2 pr-4 text-color-terminal-text-muted">{t('resultPanel.comparison.totalPnl')}</td>
               {results.map((r, i) => (
                 <td key={i} className={cn('py-2 pr-4 tabular-nums font-medium', getColorClass(r.metrics.totalPnl))}>
                   {formatCurrency(r.metrics.totalPnl)}
@@ -704,7 +713,7 @@ const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
               ))}
             </tr>
             <tr className="border-b border-color-terminal-border/50">
-              <td className="py-2 pr-4 text-color-terminal-text-muted">Total Return</td>
+              <td className="py-2 pr-4 text-color-terminal-text-muted">{t('resultPanel.comparison.totalReturn')}</td>
               {results.map((r, i) => (
                 <td key={i} className={cn('py-2 pr-4 tabular-nums font-medium', getColorClass(r.metrics.totalReturn))}>
                   {formatPercent(r.metrics.totalReturn)}
@@ -712,7 +721,7 @@ const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
               ))}
             </tr>
             <tr className="border-b border-color-terminal-border/50">
-              <td className="py-2 pr-4 text-color-terminal-text-muted">Sharpe Ratio</td>
+              <td className="py-2 pr-4 text-color-terminal-text-muted">{t('resultPanel.comparison.sharpeRatio')}</td>
               {results.map((r, i) => (
                 <td key={i} className="py-2 pr-4 tabular-nums">
                   {formatRatio(r.metrics.sharpeRatio)}
@@ -720,7 +729,7 @@ const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
               ))}
             </tr>
             <tr className="border-b border-color-terminal-border/50">
-              <td className="py-2 pr-4 text-color-terminal-text-muted">Max Drawdown</td>
+              <td className="py-2 pr-4 text-color-terminal-text-muted">{t('resultPanel.comparison.maxDrawdown')}</td>
               {results.map((r, i) => (
                 <td key={i} className="py-2 pr-4 tabular-nums text-red-400">
                   {formatPercent(-Math.abs(safeNum(r.metrics.maxDrawdown)))}
@@ -728,7 +737,7 @@ const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
               ))}
             </tr>
             <tr className="border-b border-color-terminal-border/50">
-              <td className="py-2 pr-4 text-color-terminal-text-muted">Win Rate</td>
+              <td className="py-2 pr-4 text-color-terminal-text-muted">{t('resultPanel.comparison.winRate')}</td>
               {results.map((r, i) => (
                 <td key={i} className={cn('py-2 pr-4 tabular-nums', safeNum(r.metrics.winRate) >= 50 ? 'text-green-400' : 'text-yellow-400')}>
                   {formatPercent(r.metrics.winRate)}
@@ -736,7 +745,7 @@ const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
               ))}
             </tr>
             <tr className="border-b border-color-terminal-border/50">
-              <td className="py-2 pr-4 text-color-terminal-text-muted">Total Trades</td>
+              <td className="py-2 pr-4 text-color-terminal-text-muted">{t('resultPanel.comparison.totalTrades')}</td>
               {results.map((r, i) => (
                 <td key={i} className="py-2 pr-4 tabular-nums">
                   {safeNum(r.metrics.totalTrades)}
@@ -744,7 +753,7 @@ const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
               ))}
             </tr>
             <tr className="border-b border-color-terminal-border/50">
-              <td className="py-2 pr-4 text-color-terminal-text-muted">Profit Factor</td>
+              <td className="py-2 pr-4 text-color-terminal-text-muted">{t('resultPanel.comparison.profitFactor')}</td>
               {results.map((r, i) => (
                 <td key={i} className={cn('py-2 pr-4 tabular-nums', safeNum(r.metrics.profitFactor) >= 1.5 ? 'text-green-400' : safeNum(r.metrics.profitFactor) >= 1 ? 'text-yellow-400' : 'text-red-400')}>
                   {formatRatio(r.metrics.profitFactor)}
@@ -773,7 +782,7 @@ const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
     if (allEquities.length === 0) {
       return (
         <div className="flex items-center justify-center h-40 text-color-terminal-text-muted text-xs">
-          No equity data
+          {t('resultPanel.charts.noEquityData')}
         </div>
       );
     }
@@ -785,7 +794,7 @@ const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
     return (
       <div className="p-4">
         <div className="text-[10px] font-medium uppercase tracking-wider text-color-terminal-text-muted mb-3">
-          Equity Curves Overlay
+          {t('resultPanel.comparison.equityOverlay')}
         </div>
         <div className="border border-color-terminal-border rounded bg-color-terminal-panel/30" style={{ height }}>
           <svg viewBox={`0 0 ${width} 100`} className="w-full h-full" preserveAspectRatio="none">
@@ -816,7 +825,7 @@ const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
           {results.map((_, i) => (
             <div key={i} className="flex items-center gap-1 text-[10px]">
               <div className="w-3 h-0.5" style={{ backgroundColor: STRATEGY_COLORS[i % STRATEGY_COLORS.length] }} />
-              <span className="text-color-terminal-text-muted">Strategy {i + 1}</span>
+              <span className="text-color-terminal-text-muted">{t('resultPanel.comparison.strategy', { index: i + 1 })}</span>
             </div>
           ))}
         </div>
@@ -856,12 +865,13 @@ const CompareIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 // TICKET_151_2: Tab order - Charts first, then Trades
+// Labels are translation keys, resolved in component
 const baseTabs: Tab[] = [
-  { id: 'charts', label: 'CHARTS', icon: <CandleChartIcon className="w-4 h-4" /> },
-  { id: 'trades', label: 'TRADES', icon: <ListIcon className="w-4 h-4" /> },
+  { id: 'charts', label: 'resultPanel.tabs.charts', icon: <CandleChartIcon className="w-4 h-4" /> },
+  { id: 'trades', label: 'resultPanel.tabs.trades', icon: <ListIcon className="w-4 h-4" /> },
 ];
 
-const comparisonTab: Tab = { id: 'comparison', label: 'COMPARE', icon: <CompareIcon className="w-4 h-4" /> };
+const comparisonTab: Tab = { id: 'comparison', label: 'resultPanel.tabs.compare', icon: <CompareIcon className="w-4 h-4" /> };
 
 export interface BacktestResultPanelProps {
   /** TICKET_151: Support single result (legacy) or array of results for comparison */
@@ -887,6 +897,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   onCaseSelect,
   scrollToCase,
 }) => {
+  const { t } = useTranslation('backtest');
   const [activeTab, setActiveTab] = useState<TabId>('charts');
   // TICKET_151_2: Refs for scrolling in both Charts and Trades tabs
   const scrollToChartsCaseRef = React.useRef<((index: number) => void) | null>(null);
@@ -920,7 +931,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   if (allResults.length === 0) {
     return (
       <div className={cn('flex items-center justify-center h-full', className)}>
-        <div className="text-color-terminal-text-muted">No results available</div>
+        <div className="text-color-terminal-text-muted">{t('resultPanel.status.noResults')}</div>
       </div>
     );
   }
@@ -956,7 +967,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
               )}
             >
               {tab.icon}
-              {tab.label}
+              {t(tab.label)}
             </button>
           );
         })}

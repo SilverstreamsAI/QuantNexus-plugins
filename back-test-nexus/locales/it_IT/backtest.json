@@ -112,5 +112,60 @@
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
     "result": "Result"
+  },
+  "resultPanel": {
+    "tabs": {
+      "charts": "GRAFICI",
+      "trades": "OPERAZIONI",
+      "compare": "CONFRONTA"
+    },
+    "charts": {
+      "equityCurve": "Curva di Equity",
+      "klineChart": "Grafico K-Line",
+      "bars": "{{count}} barre",
+      "noEquityData": "Nessun dato equity",
+      "noKlineData": "Nessun dato K-Line",
+      "processing": "Elaborazione... ({{count}} punti)"
+    },
+    "summary": {
+      "equity": "Equity: {{count}} punti",
+      "candles": "Candele: {{count}} barre",
+      "trades": "Operazioni: {{count}}"
+    },
+    "tradesTable": {
+      "index": "#",
+      "entryTime": "Ora Ingresso",
+      "exitTime": "Ora Uscita",
+      "side": "Lato",
+      "entry": "Ingresso",
+      "exit": "Uscita",
+      "qty": "Qta",
+      "pnl": "P&L",
+      "showingOf": "Mostrando {{shown}} di {{total}} operazioni",
+      "noTrades": "Nessuna operazione"
+    },
+    "status": {
+      "noResults": "Nessun risultato disponibile",
+      "case": "Caso {{index}}",
+      "testing": " - Test in corso...",
+      "pending": " - In attesa",
+      "tradesCount": "({{count}} operazioni)",
+      "collectingData": "Raccolta dati...",
+      "waiting": "In attesa..."
+    },
+    "comparison": {
+      "title": "Confronto Prestazioni",
+      "metric": "Metrica",
+      "strategy": "Strategia {{index}}",
+      "totalPnl": "P&L Totale",
+      "totalReturn": "Rendimento Totale",
+      "sharpeRatio": "Rapporto di Sharpe",
+      "maxDrawdown": "Drawdown Max",
+      "winRate": "Tasso di Successo",
+      "totalTrades": "Totale Operazioni",
+      "profitFactor": "Fattore di Profitto",
+      "equityOverlay": "Sovrapposizione Curve",
+      "noResults": "Nessun risultato da confrontare"
+    }
   }
 }

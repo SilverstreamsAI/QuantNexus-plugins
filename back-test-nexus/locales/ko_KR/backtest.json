@@ -112,5 +112,60 @@
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
     "result": "Result"
+  },
+  "resultPanel": {
+    "tabs": {
+      "charts": "차트",
+      "trades": "거래",
+      "compare": "비교"
+    },
+    "charts": {
+      "equityCurve": "자산 곡선",
+      "klineChart": "K선 차트",
+      "bars": "{{count}} 봉",
+      "noEquityData": "자산 데이터 없음",
+      "noKlineData": "K선 데이터 없음",
+      "processing": "처리 중... ({{count}} 포인트)"
+    },
+    "summary": {
+      "equity": "자산: {{count}} 포인트",
+      "candles": "캔들: {{count}} 봉",
+      "trades": "거래: {{count}} 건"
+    },
+    "tradesTable": {
+      "index": "#",
+      "entryTime": "진입 시간",
+      "exitTime": "청산 시간",
+      "side": "방향",
+      "entry": "진입",
+      "exit": "청산",
+      "qty": "수량",
+      "pnl": "손익",
+      "showingOf": "{{total}} 건 중 {{shown}} 건 표시",
+      "noTrades": "거래 없음"
+    },
+    "status": {
+      "noResults": "결과 없음",
+      "case": "케이스 {{index}}",
+      "testing": " - 테스트 중...",
+      "pending": " - 대기 중",
+      "tradesCount": "({{count}} 건)",
+      "collectingData": "데이터 수집 중...",
+      "waiting": "대기 중..."
+    },
+    "comparison": {
+      "title": "성과 비교",
+      "metric": "지표",
+      "strategy": "전략 {{index}}",
+      "totalPnl": "총 손익",
+      "totalReturn": "총 수익률",
+      "sharpeRatio": "샤프 비율",
+      "maxDrawdown": "최대 낙폭",
+      "winRate": "승률",
+      "totalTrades": "총 거래 수",
+      "profitFactor": "수익 비율",
+      "equityOverlay": "자산 곡선 오버레이",
+      "noResults": "비교할 결과 없음"
+    }
   }
 }

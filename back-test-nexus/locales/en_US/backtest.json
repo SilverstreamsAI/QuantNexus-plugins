@@ -112,5 +112,60 @@
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
     "result": "Result"
+  },
+  "resultPanel": {
+    "tabs": {
+      "charts": "CHARTS",
+      "trades": "TRADES",
+      "compare": "COMPARE"
+    },
+    "charts": {
+      "equityCurve": "Equity Curve",
+      "klineChart": "K-Line Chart",
+      "bars": "{{count}} bars",
+      "noEquityData": "No equity data",
+      "noKlineData": "No K-line data",
+      "processing": "Processing... ({{count}} points)"
+    },
+    "summary": {
+      "equity": "Equity: {{count}} points",
+      "candles": "Candles: {{count}} bars",
+      "trades": "Trades: {{count}}"
+    },
+    "tradesTable": {
+      "index": "#",
+      "entryTime": "Entry Time",
+      "exitTime": "Exit Time",
+      "side": "Side",
+      "entry": "Entry",
+      "exit": "Exit",
+      "qty": "Qty",
+      "pnl": "P&L",
+      "showingOf": "Showing {{shown}} of {{total}} trades",
+      "noTrades": "No trades"
+    },
+    "status": {
+      "noResults": "No results available",
+      "case": "Case {{index}}",
+      "testing": " - Testing...",
+      "pending": " - Pending",
+      "tradesCount": "({{count}} trades)",
+      "collectingData": "Collecting data...",
+      "waiting": "Waiting..."
+    },
+    "comparison": {
+      "title": "Performance Comparison",
+      "metric": "Metric",
+      "strategy": "Strategy {{index}}",
+      "totalPnl": "Total P&L",
+      "totalReturn": "Total Return",
+      "sharpeRatio": "Sharpe Ratio",
+      "maxDrawdown": "Max Drawdown",
+      "winRate": "Win Rate",
+      "totalTrades": "Total Trades",
+      "profitFactor": "Profit Factor",
+      "equityOverlay": "Equity Curves Overlay",
+      "noResults": "No results to compare"
+    }
   }
 }

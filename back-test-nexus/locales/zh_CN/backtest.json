@@ -112,5 +112,60 @@
   "breadcrumb": {
     "backtestNexus": "回测系统",
     "result": "结果"
+  },
+  "resultPanel": {
+    "tabs": {
+      "charts": "图表",
+      "trades": "交易",
+      "compare": "对比"
+    },
+    "charts": {
+      "equityCurve": "权益曲线",
+      "klineChart": "K线图",
+      "bars": "{{count}} 根K线",
+      "noEquityData": "无权益数据",
+      "noKlineData": "无K线数据",
+      "processing": "处理中... ({{count}} 点)"
+    },
+    "summary": {
+      "equity": "权益: {{count}} 点",
+      "candles": "K线: {{count}} 根",
+      "trades": "交易: {{count}} 笔"
+    },
+    "tradesTable": {
+      "index": "#",
+      "entryTime": "入场时间",
+      "exitTime": "出场时间",
+      "side": "方向",
+      "entry": "入场价",
+      "exit": "出场价",
+      "qty": "数量",
+      "pnl": "盈亏",
+      "showingOf": "显示 {{shown}} / {{total}} 笔交易",
+      "noTrades": "无交易记录"
+    },
+    "status": {
+      "noResults": "暂无结果",
+      "case": "案例 {{index}}",
+      "testing": " - 测试中...",
+      "pending": " - 等待中",
+      "tradesCount": "({{count}} 笔交易)",
+      "collectingData": "收集数据中...",
+      "waiting": "等待中..."
+    },
+    "comparison": {
+      "title": "性能对比",
+      "metric": "指标",
+      "strategy": "策略 {{index}}",
+      "totalPnl": "总盈亏",
+      "totalReturn": "总收益率",
+      "sharpeRatio": "夏普比率",
+      "maxDrawdown": "最大回撤",
+      "winRate": "胜率",
+      "totalTrades": "总交易数",
+      "profitFactor": "盈亏比",
+      "equityOverlay": "权益曲线叠加",
+      "noResults": "无可对比结果"
+    }
   }
 }

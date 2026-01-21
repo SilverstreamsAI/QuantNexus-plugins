@@ -112,5 +112,60 @@
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
     "result": "Result"
+  },
+  "resultPanel": {
+    "tabs": {
+      "charts": "GRAPHIQUES",
+      "trades": "TRANSACTIONS",
+      "compare": "COMPARER"
+    },
+    "charts": {
+      "equityCurve": "Courbe d'Equite",
+      "klineChart": "Graphique K-Line",
+      "bars": "{{count}} barres",
+      "noEquityData": "Pas de donnees d'equite",
+      "noKlineData": "Pas de donnees K-Line",
+      "processing": "Traitement... ({{count}} points)"
+    },
+    "summary": {
+      "equity": "Equite: {{count}} points",
+      "candles": "Bougies: {{count}} barres",
+      "trades": "Transactions: {{count}}"
+    },
+    "tradesTable": {
+      "index": "#",
+      "entryTime": "Heure Entree",
+      "exitTime": "Heure Sortie",
+      "side": "Cote",
+      "entry": "Entree",
+      "exit": "Sortie",
+      "qty": "Qte",
+      "pnl": "P&L",
+      "showingOf": "Affichage {{shown}} sur {{total}} transactions",
+      "noTrades": "Pas de transactions"
+    },
+    "status": {
+      "noResults": "Aucun resultat disponible",
+      "case": "Cas {{index}}",
+      "testing": " - Test en cours...",
+      "pending": " - En attente",
+      "tradesCount": "({{count}} transactions)",
+      "collectingData": "Collecte des donnees...",
+      "waiting": "En attente..."
+    },
+    "comparison": {
+      "title": "Comparaison des Performances",
+      "metric": "Metrique",
+      "strategy": "Strategie {{index}}",
+      "totalPnl": "P&L Total",
+      "totalReturn": "Rendement Total",
+      "sharpeRatio": "Ratio de Sharpe",
+      "maxDrawdown": "Drawdown Max",
+      "winRate": "Taux de Reussite",
+      "totalTrades": "Total Transactions",
+      "profitFactor": "Facteur de Profit",
+      "equityOverlay": "Superposition des Courbes",
+      "noResults": "Aucun resultat a comparer"
+    }
   }
 }

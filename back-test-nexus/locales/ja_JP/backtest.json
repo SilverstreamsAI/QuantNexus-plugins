@@ -112,5 +112,60 @@
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
     "result": "Result"
+  },
+  "resultPanel": {
+    "tabs": {
+      "charts": "チャート",
+      "trades": "取引",
+      "compare": "比較"
+    },
+    "charts": {
+      "equityCurve": "資産曲線",
+      "klineChart": "K線チャート",
+      "bars": "{{count}} 本",
+      "noEquityData": "資産データなし",
+      "noKlineData": "K線データなし",
+      "processing": "処理中... ({{count}} ポイント)"
+    },
+    "summary": {
+      "equity": "資産: {{count}} ポイント",
+      "candles": "ローソク足: {{count}} 本",
+      "trades": "取引: {{count}} 件"
+    },
+    "tradesTable": {
+      "index": "#",
+      "entryTime": "エントリー時間",
+      "exitTime": "エグジット時間",
+      "side": "売買",
+      "entry": "エントリー",
+      "exit": "エグジット",
+      "qty": "数量",
+      "pnl": "損益",
+      "showingOf": "{{total}} 件中 {{shown}} 件を表示",
+      "noTrades": "取引なし"
+    },
+    "status": {
+      "noResults": "結果がありません",
+      "case": "ケース {{index}}",
+      "testing": " - テスト中...",
+      "pending": " - 待機中",
+      "tradesCount": "({{count}} 件)",
+      "collectingData": "データ収集中...",
+      "waiting": "待機中..."
+    },
+    "comparison": {
+      "title": "パフォーマンス比較",
+      "metric": "指標",
+      "strategy": "戦略 {{index}}",
+      "totalPnl": "合計損益",
+      "totalReturn": "合計リターン",
+      "sharpeRatio": "シャープレシオ",
+      "maxDrawdown": "最大ドローダウン",
+      "winRate": "勝率",
+      "totalTrades": "取引総数",
+      "profitFactor": "プロフィットファクター",
+      "equityOverlay": "資産曲線オーバーレイ",
+      "noResults": "比較する結果がありません"
+    }
   }
 }

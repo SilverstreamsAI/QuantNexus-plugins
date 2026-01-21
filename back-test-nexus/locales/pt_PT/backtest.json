@@ -112,5 +112,60 @@
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
     "result": "Result"
+  },
+  "resultPanel": {
+    "tabs": {
+      "charts": "GRAFICOS",
+      "trades": "OPERACOES",
+      "compare": "COMPARAR"
+    },
+    "charts": {
+      "equityCurve": "Curva de Capital",
+      "klineChart": "Grafico K-Line",
+      "bars": "{{count}} barras",
+      "noEquityData": "Sem dados de capital",
+      "noKlineData": "Sem dados K-Line",
+      "processing": "Processando... ({{count}} pontos)"
+    },
+    "summary": {
+      "equity": "Capital: {{count}} pontos",
+      "candles": "Velas: {{count}} barras",
+      "trades": "Operacoes: {{count}}"
+    },
+    "tradesTable": {
+      "index": "#",
+      "entryTime": "Hora Entrada",
+      "exitTime": "Hora Saida",
+      "side": "Lado",
+      "entry": "Entrada",
+      "exit": "Saida",
+      "qty": "Qtd",
+      "pnl": "L&P",
+      "showingOf": "Mostrando {{shown}} de {{total}} operacoes",
+      "noTrades": "Sem operacoes"
+    },
+    "status": {
+      "noResults": "Sem resultados disponiveis",
+      "case": "Caso {{index}}",
+      "testing": " - Testando...",
+      "pending": " - Pendente",
+      "tradesCount": "({{count}} operacoes)",
+      "collectingData": "Coletando dados...",
+      "waiting": "Aguardando..."
+    },
+    "comparison": {
+      "title": "Comparacao de Desempenho",
+      "metric": "Metrica",
+      "strategy": "Estrategia {{index}}",
+      "totalPnl": "L&P Total",
+      "totalReturn": "Retorno Total",
+      "sharpeRatio": "Indice Sharpe",
+      "maxDrawdown": "Drawdown Max",
+      "winRate": "Taxa de Acerto",
+      "totalTrades": "Total Operacoes",
+      "profitFactor": "Fator de Lucro",
+      "equityOverlay": "Sobreposicao de Curvas",
+      "noResults": "Sem resultados para comparar"
+    }
   }
 }

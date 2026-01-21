@@ -112,5 +112,60 @@
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
     "result": "Result"
+  },
+  "resultPanel": {
+    "tabs": {
+      "charts": "DIAGRAMME",
+      "trades": "TRADES",
+      "compare": "VERGLEICH"
+    },
+    "charts": {
+      "equityCurve": "Eigenkapitalkurve",
+      "klineChart": "K-Linien-Chart",
+      "bars": "{{count}} Balken",
+      "noEquityData": "Keine Eigenkapitaldaten",
+      "noKlineData": "Keine K-Linien-Daten",
+      "processing": "Verarbeitung... ({{count}} Punkte)"
+    },
+    "summary": {
+      "equity": "Eigenkapital: {{count}} Punkte",
+      "candles": "Kerzen: {{count}} Balken",
+      "trades": "Trades: {{count}}"
+    },
+    "tradesTable": {
+      "index": "#",
+      "entryTime": "Einstiegszeit",
+      "exitTime": "Ausstiegszeit",
+      "side": "Seite",
+      "entry": "Einstieg",
+      "exit": "Ausstieg",
+      "qty": "Menge",
+      "pnl": "G&V",
+      "showingOf": "Zeige {{shown}} von {{total}} Trades",
+      "noTrades": "Keine Trades"
+    },
+    "status": {
+      "noResults": "Keine Ergebnisse verfuegbar",
+      "case": "Fall {{index}}",
+      "testing": " - Testen...",
+      "pending": " - Ausstehend",
+      "tradesCount": "({{count}} Trades)",
+      "collectingData": "Daten sammeln...",
+      "waiting": "Warten..."
+    },
+    "comparison": {
+      "title": "Leistungsvergleich",
+      "metric": "Metrik",
+      "strategy": "Strategie {{index}}",
+      "totalPnl": "Gesamt G&V",
+      "totalReturn": "Gesamtrendite",
+      "sharpeRatio": "Sharpe Ratio",
+      "maxDrawdown": "Max Drawdown",
+      "winRate": "Gewinnrate",
+      "totalTrades": "Gesamte Trades",
+      "profitFactor": "Gewinnfaktor",
+      "equityOverlay": "Eigenkapitalkurven Overlay",
+      "noResults": "Keine Ergebnisse zum Vergleichen"
+    }
   }
 }

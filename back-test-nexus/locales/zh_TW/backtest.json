@@ -112,5 +112,60 @@
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
     "result": "Result"
+  },
+  "resultPanel": {
+    "tabs": {
+      "charts": "圖表",
+      "trades": "交易",
+      "compare": "對比"
+    },
+    "charts": {
+      "equityCurve": "權益曲線",
+      "klineChart": "K線圖",
+      "bars": "{{count}} 根K線",
+      "noEquityData": "無權益數據",
+      "noKlineData": "無K線數據",
+      "processing": "處理中... ({{count}} 點)"
+    },
+    "summary": {
+      "equity": "權益: {{count}} 點",
+      "candles": "K線: {{count}} 根",
+      "trades": "交易: {{count}} 筆"
+    },
+    "tradesTable": {
+      "index": "#",
+      "entryTime": "入場時間",
+      "exitTime": "出場時間",
+      "side": "方向",
+      "entry": "入場價",
+      "exit": "出場價",
+      "qty": "數量",
+      "pnl": "盈虧",
+      "showingOf": "顯示 {{shown}} / {{total}} 筆交易",
+      "noTrades": "無交易記錄"
+    },
+    "status": {
+      "noResults": "暫無結果",
+      "case": "案例 {{index}}",
+      "testing": " - 測試中...",
+      "pending": " - 等待中",
+      "tradesCount": "({{count}} 筆交易)",
+      "collectingData": "收集數據中...",
+      "waiting": "等待中..."
+    },
+    "comparison": {
+      "title": "績效對比",
+      "metric": "指標",
+      "strategy": "策略 {{index}}",
+      "totalPnl": "總盈虧",
+      "totalReturn": "總收益率",
+      "sharpeRatio": "夏普比率",
+      "maxDrawdown": "最大回撤",
+      "winRate": "勝率",
+      "totalTrades": "總交易數",
+      "profitFactor": "盈虧比",
+      "equityOverlay": "權益曲線疊加",
+      "noResults": "無可對比結果"
+    }
   }
 }
