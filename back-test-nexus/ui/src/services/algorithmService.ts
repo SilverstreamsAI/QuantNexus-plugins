@@ -4,8 +4,13 @@
  * Provides typed access to nona_algorithms table via IPC.
  * Follows plugin architecture pattern - all data access through electronAPI.
  *
+ * TICKET_168: Uses algorithmCodeRegistry to validate and supplement code fields
+ *
  * @see TICKET_077_COMPONENT7 - Data Integration
+ * @see TICKET_168 - Centralized Algorithm Code Registry
  */
+
+import { algorithmCodeRegistry } from './algorithmCodeRegistry';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -119,6 +124,7 @@ export const algorithmService = {
 
 /**
  * Convert database record to Algorithm
+ * TICKET_168: Validates and supplements code using algorithmCodeRegistry
  */
 function toAlgorithm(record: {
   id: number;
@@ -127,9 +133,12 @@ function toAlgorithm(record: {
   strategy_type: number;
   description: string | null;
 }): Algorithm {
+  // TICKET_168: Use registry to get valid code
+  const validCode = algorithmCodeRegistry.getValidCode(record.strategy_name, record.code);
+
   return {
     id: record.id,
-    code: record.code,
+    code: validCode || record.code, // Fallback to db code if registry has nothing
     strategyName: record.strategy_name,
     strategyType: record.strategy_type,
     description: record.description || undefined,
