@@ -1,0 +1,53 @@
+{
+  "hub": {
+    "title": "Strategy Hub",
+    "newStrategy": "New Strategy",
+    "importStrategy": "Import Strategy",
+    "exportStrategy": "Export Strategy",
+    "deleteStrategy": "Delete Strategy",
+    "duplicateStrategy": "Duplicate Strategy",
+    "noStrategies": "No strategies found",
+    "createFirst": "Create your first strategy"
+  },
+  "editor": {
+    "save": "Save Strategy",
+    "validate": "Validate",
+    "generate": "Generate with AI",
+    "preview": "Preview",
+    "configure": "Configure"
+  },
+  "services": {
+    "regimeMode": "Regime Detector",
+    "indicatorEntry": "Indicator Entry Generator",
+    "kronosPredictor": "KRONOS Predictor",
+    "aiEntry": "AI Entry",
+    "marketObserver": "Market Observer",
+    "aiEntryGenerator": "AI Entry Generator",
+    "indicatorExit": "Indicator Exit Generator",
+    "aiLibero": "AI Libero"
+  },
+  "modes": {
+    "regime": "REGIME MODE",
+    "kronos": "KRONOS MODE",
+    "trader": "TRADER MODE",
+    "riskManager": "RISK MANAGER",
+    "aiCommand": "AI COMMAND CENTER"
+  },
+  "validation": {
+    "success": "Strategy validation passed",
+    "failed": "Strategy validation failed",
+    "missingField": "Missing required field: {{field}}",
+    "invalidValue": "Invalid value for {{field}}"
+  },
+  "generation": {
+    "generating": "Generating strategy code...",
+    "success": "Strategy code generated successfully",
+    "failed": "Failed to generate strategy code"
+  },
+  "errors": {
+    "loadFailed": "Failed to load strategy",
+    "saveFailed": "Failed to save strategy",
+    "deleteFailed": "Failed to delete strategy",
+    "validationFailed": "Strategy validation failed: {{reason}}"
+  }
+}

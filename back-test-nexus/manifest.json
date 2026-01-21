@@ -23,6 +23,10 @@
     }
   },
   "contributes": {
+    "i18n": {
+      "path": "./locales",
+      "namespaces": ["backtest"]
+    },
     "backtestEngines": [{
       "id": "nexus.backtrader",
       "name": "Backtrader Engine",
