@@ -8,7 +8,7 @@
  * @see TICKET_077_COMPONENT8 - BacktestDataConfigPanel Design
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { cn } from '../../lib/utils';
 import {
   WorkflowRowSelector,
@@ -114,30 +114,32 @@ interface HistoryItem {
   status: 'completed' | 'failed' | 'running';
 }
 
+// TICKET_173: Message API type for notifications
+interface MessageAPI {
+  info: (msg: string) => void;
+  success: (msg: string) => void;
+  error: (msg: string) => void;
+  confirm: (msg: string, options?: { title?: string; okText?: string; cancelText?: string }) => Promise<boolean>;
+}
+
+// TICKET_173: Backtest resolver for pending promises
+type BacktestResolver = {
+  resolve: (result: ExecutorResult) => void;
+  reject: (error: Error) => void;
+};
+
+// TICKET_173: API types from Host (use any to avoid type dependency on Host types)
 interface BacktestPageProps {
-  /** TICKET_163: Added strategyName parameter for naming dialog */
-  onExecute?: (config: BacktestDataConfig, workflows: WorkflowRow[], strategyName: string) => void;
-  /** TICKET_151: Multiple results for comparison */
-  results?: ExecutorResult[];
-  /** TICKET_151: Current result being built during execution */
-  currentResult?: ExecutorResult | null;
-  isExecuting?: boolean;
-  onNewBacktest?: () => void;
-  /** TICKET_171: Keep result, return to config, preserve config */
-  onKeepResult?: () => void;
-  /** TICKET_171: Discard result (delete from DB), return to config, preserve config */
-  onDiscardResult?: () => void;
-  /** TICKET_151: Progress tracking for sequential execution */
-  currentCaseIndex?: number;
-  totalCases?: number;
-  /** TICKET_151_1: Callback when user clicks a case in history */
-  onCaseSelect?: (index: number) => void;
-  /** TICKET_164: Notify Host when history result is selected/cleared */
-  onHistoryResultChange?: (hasResult: boolean) => void;
+  /** TICKET_173: Executor API from Host */
+  executorAPI?: any;
+  /** TICKET_173: Data API from Host */
+  dataAPI?: any;
+  /** TICKET_173: Message API from Host */
+  messageAPI?: MessageAPI;
+  /** TICKET_173: Notify Host when result view state changes (for breadcrumb) */
+  onResultViewChange?: (isResultView: boolean) => void;
   /** TICKET_164: Reset key - when changed, clear all result states */
   resetKey?: number;
-  /** TICKET_171: Current task ID for discard functionality */
-  currentTaskId?: string | null;
 }
 
 // -----------------------------------------------------------------------------
@@ -183,23 +185,20 @@ const createDefaultDataConfig = (): BacktestDataConfig => ({
 // -----------------------------------------------------------------------------
 
 export const BacktestPage: React.FC<BacktestPageProps> = ({
-  onExecute,
-  results = [],
-  currentResult,
-  isExecuting: isExecutingProp = false,
-  onNewBacktest,
-  onKeepResult,
-  onDiscardResult,
-  currentCaseIndex = 0,
-  totalCases = 0,
-  onCaseSelect,
-  onHistoryResultChange,
+  executorAPI,
+  dataAPI,
+  messageAPI,
+  onResultViewChange,
   resetKey = 0,
-  currentTaskId,
 }) => {
-  const [localExecuting, setLocalExecuting] = useState(false);
-  // Use prop if provided, otherwise use local state
-  const isExecuting = isExecutingProp || localExecuting;
+  // TICKET_173: State moved from Host Shell
+  const [backtestResults, setBacktestResults] = useState<ExecutorResult[]>([]);
+  const [currentResult, setCurrentResult] = useState<ExecutorResult | null>(null);
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [currentCaseIndex, setCurrentCaseIndex] = useState(0);
+  const [totalCases, setTotalCases] = useState(0);
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
+  const pendingBacktestRef = useRef<BacktestResolver | null>(null);
   // TICKET_153_1: History from SQLite
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -234,11 +233,31 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   // TICKET_163: Naming dialog state
   const [namingDialogVisible, setNamingDialogVisible] = useState(false);
 
+  // TICKET_173: Track if viewing history result (for breadcrumb)
+  const [hasHistoryResult, setHasHistoryResult] = useState(false);
+
+  // TICKET_173: Determine if viewing results (execution or history)
+  const isResultView = backtestResults.length > 0 || hasHistoryResult;
+
+  // TICKET_173: Centralized state reset helper
+  const clearResultState = useCallback(() => {
+    setBacktestResults([]);
+    setCurrentResult(null);
+    setCurrentCaseIndex(0);
+    setTotalCases(0);
+    setHasHistoryResult(false);
+    setCurrentTaskId(null);
+  }, []);
+
+  // TICKET_173: Notify Host when result view state changes
+  useEffect(() => {
+    onResultViewChange?.(isResultView);
+  }, [isResultView, onResultViewChange]);
+
   // TICKET_151_1: Handle case selection from History panel
   const handleCaseClick = useCallback((index: number) => {
     setScrollToCaseIndex(index);
-    onCaseSelect?.(index);
-  }, [onCaseSelect]);
+  }, []);
 
   // TICKET_153_1: Load history from SQLite
   const loadHistory = useCallback(async () => {
@@ -364,8 +383,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           candles: [], // Candles not stored in database, use empty array
         };
         setSelectedHistoryResult(result);
-        // TICKET_164: Notify Host for breadcrumb update
-        onHistoryResultChange?.(true);
+        // TICKET_173: Update local state (Host notified via isResultView effect)
+        setHasHistoryResult(true);
         console.log('[BacktestPage] Loaded history result for:', taskId);
       } else {
         console.error('[BacktestPage] Failed to load history result:', response.error);
@@ -373,18 +392,18 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     } catch (error) {
       console.error('[BacktestPage] Error loading history result:', error);
     }
-  }, [historyItems, onHistoryResultChange]);
+  }, [historyItems]);
 
   // TICKET_162: Clear selected history result and return to config page
-  // TICKET_164: Notify Host for breadcrumb update
   // TICKET_170: Reset config to initial state for true "New Backtest"
+  // TICKET_173: Use clearResultState (Host notified via isResultView effect)
   const handleClearHistoryResult = useCallback(() => {
     setSelectedHistoryResult(null);
     setSelectedHistoryItem(null);
     setDataConfig(createDefaultDataConfig());
     setWorkflowRows([createInitialRow()]);
-    onHistoryResultChange?.(false);
-  }, [onHistoryResultChange]);
+    clearResultState();
+  }, [clearResultState]);
 
   // TICKET_171: Reset config on Page 4 (config page)
   const handleReset = useCallback(() => {
@@ -397,7 +416,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   // Load history on mount and when results change
   useEffect(() => {
     loadHistory();
-  }, [loadHistory, results.length]);
+  }, [loadHistory, backtestResults.length]);
 
   // TICKET_164: Clear history result when resetKey changes (breadcrumb back navigation)
   // TICKET_170: Also reset config to initial state for true "New Backtest"
@@ -408,8 +427,173 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       setSelectedHistoryItem(null);
       setDataConfig(createDefaultDataConfig());
       setWorkflowRows([createInitialRow()]);
+      clearResultState();
     }
-  }, [resetKey]);
+  }, [resetKey, clearResultState]);
+
+  // TICKET_173: Subscribe to executor events (moved from Host Shell)
+  useEffect(() => {
+    const api = executorAPI || (window as any).electronAPI?.executor;
+    if (!api) return;
+
+    // Track completion to prevent incremental updates from overwriting final result
+    let isCompleted = false;
+
+    const unsubCompleted = api.onCompleted((data: any) => {
+      console.debug('[BacktestPage] Backtest completed:', data);
+      isCompleted = true;
+      if (throttleTimer) {
+        clearTimeout(throttleTimer);
+        throttleTimer = null;
+      }
+      pendingBuffer.length = 0;
+      if (pendingBacktestRef.current) {
+        pendingBacktestRef.current.resolve(data.result as ExecutorResult);
+        pendingBacktestRef.current = null;
+      }
+      setCurrentResult(data.result as ExecutorResult);
+    });
+
+    const unsubError = api.onError((data: any) => {
+      console.error('[BacktestPage] Backtest error:', data);
+      if (pendingBacktestRef.current) {
+        pendingBacktestRef.current.reject(new Error(data.error));
+        pendingBacktestRef.current = null;
+      }
+      setIsExecuting(false);
+      messageAPI?.error(`Backtest failed: ${data.error}`);
+    });
+
+    const unsubProgress = api.onProgress((data: any) => {
+      console.debug('[BacktestPage] Backtest progress:', data);
+    });
+
+    // Throttled buffer for incremental updates
+    type IncrementData = any;
+    const pendingBuffer: IncrementData[] = [];
+    let throttleTimer: ReturnType<typeof setTimeout> | null = null;
+    const THROTTLE_MS = 100;
+
+    const flushBuffer = () => {
+      if (isCompleted || pendingBuffer.length === 0) return;
+
+      const merged = pendingBuffer.reduce((acc, inc) => ({
+        newCandles: acc.newCandles.concat(inc.newCandles || []),
+        newEquityPoints: acc.newEquityPoints.concat(inc.newEquityPoints || []),
+        newTrades: acc.newTrades.concat(inc.newTrades || []),
+        currentMetrics: inc.currentMetrics,
+      }), {
+        newCandles: [] as any[],
+        newEquityPoints: [] as any[],
+        newTrades: [] as any[],
+        currentMetrics: pendingBuffer[0].currentMetrics,
+      });
+
+      pendingBuffer.length = 0;
+
+      setCurrentResult(prev => {
+        if (!prev) {
+          return {
+            success: true,
+            startTime: 0,
+            endTime: 0,
+            executionTimeMs: 0,
+            metrics: {
+              totalPnl: merged.currentMetrics.totalPnl || 0,
+              totalReturn: merged.currentMetrics.totalReturn || 0,
+              sharpeRatio: 0,
+              maxDrawdown: 0,
+              totalTrades: merged.currentMetrics.totalTrades || 0,
+              winningTrades: merged.currentMetrics.winningTrades || 0,
+              losingTrades: merged.currentMetrics.losingTrades || 0,
+              winRate: merged.currentMetrics.winRate || 0,
+              profitFactor: 0,
+            },
+            equityCurve: merged.newEquityPoints,
+            trades: merged.newTrades,
+            candles: merged.newCandles,
+          } as ExecutorResult;
+        }
+
+        return {
+          ...prev,
+          metrics: {
+            ...prev.metrics,
+            totalPnl: merged.currentMetrics.totalPnl ?? prev.metrics.totalPnl,
+            totalReturn: merged.currentMetrics.totalReturn ?? prev.metrics.totalReturn,
+            totalTrades: merged.currentMetrics.totalTrades ?? prev.metrics.totalTrades,
+            winningTrades: merged.currentMetrics.winningTrades ?? prev.metrics.winningTrades,
+            losingTrades: merged.currentMetrics.losingTrades ?? prev.metrics.losingTrades,
+            winRate: merged.currentMetrics.winRate ?? prev.metrics.winRate,
+          },
+          equityCurve: [...prev.equityCurve, ...merged.newEquityPoints],
+          trades: [...prev.trades, ...merged.newTrades],
+          candles: merged.newCandles.length > 0 ? [...prev.candles, ...merged.newCandles] : prev.candles,
+        };
+      });
+    };
+
+    const unsubIncrement = api.onIncrement((data: any) => {
+      pendingBuffer.push(data.increment);
+      if (!throttleTimer) {
+        throttleTimer = setTimeout(() => {
+          throttleTimer = null;
+          flushBuffer();
+        }, THROTTLE_MS);
+      }
+    });
+
+    const cleanupTimer = () => {
+      if (throttleTimer) {
+        clearTimeout(throttleTimer);
+        flushBuffer();
+      }
+    };
+
+    return () => {
+      cleanupTimer();
+      unsubCompleted();
+      unsubError();
+      unsubProgress();
+      unsubIncrement();
+    };
+  }, [executorAPI, messageAPI]);
+
+  // TICKET_173: Action button handlers (moved from Host Shell)
+  const handleNewBacktest = useCallback(() => {
+    clearResultState();
+    setSelectedHistoryResult(null);
+    setSelectedHistoryItem(null);
+    setDataConfig(createDefaultDataConfig());
+    setWorkflowRows([createInitialRow()]);
+  }, [clearResultState]);
+
+  const handleKeepResult = useCallback(() => {
+    clearResultState();
+  }, [clearResultState]);
+
+  const handleDiscardResult = useCallback(async () => {
+    if (currentTaskId) {
+      try {
+        const api = executorAPI || (window as any).electronAPI?.executor;
+        const result = await api?.deleteHistoryResult(currentTaskId);
+        if (result?.success) {
+          console.debug('[BacktestPage] Deleted backtest result:', currentTaskId);
+        } else {
+          console.error('[BacktestPage] Failed to delete result:', result?.error);
+          messageAPI?.error('Failed to delete backtest result');
+        }
+      } catch (error) {
+        console.error('[BacktestPage] Error deleting result:', error);
+        messageAPI?.error('Failed to delete backtest result');
+      }
+    }
+    clearResultState();
+    setSelectedHistoryResult(null);
+    setSelectedHistoryItem(null);
+    setDataConfig(createDefaultDataConfig());
+    setWorkflowRows([createInitialRow()]);
+  }, [currentTaskId, executorAPI, messageAPI, clearResultState]);
 
   // Load algorithms from database on mount
   useEffect(() => {
@@ -537,6 +721,104 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     }
   }, []);
 
+  // TICKET_173: Helper to check if a workflow has content (moved from Host Shell)
+  const hasWorkflowContent = useCallback((workflow: WorkflowRow): boolean => {
+    return (
+      (workflow.analysisSelections?.length > 0) ||
+      (workflow.stepSelections?.length > 0)
+    );
+  }, []);
+
+  // TICKET_173: Helper to check if two workflows are identical (moved from Host Shell)
+  const isWorkflowEqual = useCallback((a: WorkflowRow, b: WorkflowRow): boolean => {
+    return (
+      JSON.stringify(a.analysisSelections || []) === JSON.stringify(b.analysisSelections || []) &&
+      JSON.stringify(a.preConditionSelections || []) === JSON.stringify(b.preConditionSelections || []) &&
+      JSON.stringify(a.stepSelections || []) === JSON.stringify(b.stepSelections || []) &&
+      JSON.stringify(a.postConditionSelections || []) === JSON.stringify(b.postConditionSelections || [])
+    );
+  }, []);
+
+  // TICKET_173: Helper to find duplicate workflow pairs (moved from Host Shell)
+  const findDuplicateWorkflows = useCallback((workflows: WorkflowRow[]): [number, number][] => {
+    const duplicates: [number, number][] = [];
+    for (let i = 0; i < workflows.length; i++) {
+      for (let j = i + 1; j < workflows.length; j++) {
+        if (isWorkflowEqual(workflows[i], workflows[j])) {
+          duplicates.push([i + 1, j + 1]); // 1-indexed for display
+        }
+      }
+    }
+    return duplicates;
+  }, [isWorkflowEqual]);
+
+  // TICKET_173: Helper to run a single backtest (moved from Host Shell)
+  const runSingleBacktest = useCallback(async (
+    workflow: WorkflowRow,
+    config: BacktestDataConfig,
+    dataResult: any,
+    caseIndex: number,
+    totalWorkflows: number,
+    strategyName?: string
+  ): Promise<ExecutorResult> => {
+    const api = executorAPI || (window as any).electronAPI?.executor;
+    const startTime = Math.floor(new Date(config.startDate).getTime() / 1000);
+    const endTime = Math.floor(new Date(config.endDate).getTime() / 1000);
+
+    // Generate strategy for this specific workflow
+    messageAPI?.info(`Generating strategy (${caseIndex}/${totalWorkflows})...`);
+    const genResult = await api?.generateWorkflowStrategy({
+      workflows: [workflow],
+      symbol: config.symbol,
+      interval: config.timeframe,
+      startTime,
+      endTime,
+      initialCapital: config.initialCapital,
+    });
+
+    if (!genResult?.success || !genResult?.strategyPath) {
+      throw new Error(`Failed to generate strategy: ${genResult?.error}`);
+    }
+
+    console.debug(`[BacktestPage] Strategy ${caseIndex} generated at:`, genResult.strategyPath);
+
+    // Run backtest
+    messageAPI?.info(`Running backtest (${caseIndex}/${totalWorkflows})...`);
+    setCurrentResult(null);
+
+    // Build executor request inline (TICKET_173: replaces toExecutorRequest import)
+    const executorRequest = {
+      strategyPath: genResult.strategyPath,
+      strategyName,
+      symbol: config.symbol,
+      interval: config.timeframe,
+      startTime,
+      endTime,
+      dataPath: dataResult.dataPath,
+      dataSourceType: 'parquet',
+      initialCapital: config.initialCapital,
+      orderSize: config.orderSize,
+      orderSizeUnit: config.orderSizeUnit,
+    };
+
+    const result = await api?.runBacktest(executorRequest);
+
+    if (!result?.success) {
+      throw new Error(result?.error || 'Failed to start backtest');
+    }
+
+    console.debug(`[BacktestPage] Backtest ${caseIndex} started with taskId:`, result.taskId);
+
+    if (result.taskId) {
+      setCurrentTaskId(result.taskId);
+    }
+
+    // Wait for completion via Promise
+    return new Promise<ExecutorResult>((resolve, reject) => {
+      pendingBacktestRef.current = { resolve, reject };
+    });
+  }, [executorAPI, messageAPI]);
+
   // Validate data configuration
   const validateDataConfig = useCallback((config: BacktestDataConfig): boolean => {
     const errors: Partial<Record<keyof BacktestDataConfig, string>> = {};
@@ -588,47 +870,117 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   }, [isExecuting, dataConfig, validateDataConfig]);
 
   // TICKET_163: Handle naming dialog confirm - execute with strategy name
+  // TICKET_173: Full execution logic moved from Host Shell
   const handleConfirmNaming = useCallback(async (strategyName: string) => {
     setNamingDialogVisible(false);
-    setLocalExecuting(true);
-    setExecuteError(null); // TICKET_143: Clear previous error
+    setExecuteError(null);
 
-    try {
-      console.log('[BacktestPage] Executing backtest with name:', strategyName);
-      console.log('[BacktestPage] Config:', dataConfig);
-      console.log('[BacktestPage] Workflow rows:', workflowRows);
+    console.log('[BacktestPage] Executing backtest with name:', strategyName);
+    console.log('[BacktestPage] Config:', dataConfig);
+    console.log('[BacktestPage] Workflow rows:', workflowRows);
 
-      // TICKET_136: Ensure data is available before execution
-      const api = (window as any).electronAPI;
-      if (api?.data?.ensure) {
-        console.log('[BacktestPage] Ensuring data availability...');
-        const ensureResult = await api.data.ensure({
-          symbol: dataConfig.symbol,
-          startDate: dataConfig.startDate,
-          endDate: dataConfig.endDate,
-          interval: dataConfig.timeframe,
-        });
+    // Filter workflows with content
+    const activeWorkflows = workflowRows.filter(hasWorkflowContent);
+    if (activeWorkflows.length === 0) {
+      messageAPI?.error('No workflows configured. Please add at least one algorithm selection.');
+      return;
+    }
 
-        if (!ensureResult.success) {
-          console.error('[BacktestPage] Data ensure failed:', ensureResult.error);
-          // TICKET_143: Use dedicated execute error instead of field error
-          setExecuteError(ensureResult.error || 'Failed to fetch data');
+    // Check for duplicate workflows
+    if (activeWorkflows.length > 1) {
+      const duplicates = findDuplicateWorkflows(activeWorkflows);
+      if (duplicates.length > 0) {
+        const duplicateText = duplicates.map(([a, b]) => `Case ${a} and Case ${b}`).join(', ');
+        const confirmed = await messageAPI?.confirm(
+          `${duplicateText} have identical configurations.\nRunning duplicate cases will produce the same results.`,
+          {
+            title: 'Duplicate Cases Detected',
+            okText: 'Continue Anyway',
+            cancelText: 'Cancel',
+          }
+        );
+        if (!confirmed) {
+          console.debug('[BacktestPage] User cancelled due to duplicate cases');
           return;
         }
+      }
+    }
 
-        console.log('[BacktestPage] Data ready:', ensureResult);
+    // Clear previous results and set executing state
+    setBacktestResults([]);
+    setCurrentResult(null);
+    setIsExecuting(true);
+    setTotalCases(activeWorkflows.length);
+    setCurrentCaseIndex(0);
+
+    try {
+      // Step 1: Ensure data is available
+      const dataApi = dataAPI || (window as any).electronAPI?.data;
+      messageAPI?.info(`Loading market data for ${dataConfig.symbol}...`);
+
+      const dataRequest = {
+        symbol: dataConfig.symbol,
+        startDate: dataConfig.startDate,
+        endDate: dataConfig.endDate,
+        interval: dataConfig.timeframe,
+        provider: dataConfig.dataSource,
+        forceDownload: false,
+      };
+
+      console.debug('[BacktestPage] Fetching data:', dataRequest);
+      const dataResult = await dataApi?.ensure(dataRequest);
+
+      if (!dataResult?.success) {
+        messageAPI?.error(`Failed to load market data: ${dataResult?.error}`);
+        setIsExecuting(false);
+        return;
       }
 
-      // TICKET_163: Pass data config, workflows, and strategyName to Host layer
-      onExecute?.(dataConfig, workflowRows, strategyName);
+      const barsLoaded = dataResult.coverage?.totalBars || dataResult.downloadStats?.barsImported || 0;
+      messageAPI?.success(`Loaded ${barsLoaded} bars for ${dataConfig.symbol}`);
+      console.debug('[BacktestPage] Data loaded:', dataResult);
+
+      // Execute each workflow sequentially
+      const results: ExecutorResult[] = [];
+
+      for (let i = 0; i < activeWorkflows.length; i++) {
+        const workflow = activeWorkflows[i];
+        setCurrentCaseIndex(i + 1);
+
+        try {
+          const result = await runSingleBacktest(
+            workflow,
+            dataConfig,
+            dataResult,
+            i + 1,
+            activeWorkflows.length,
+            strategyName
+          );
+
+          results.push(result);
+          setBacktestResults([...results]);
+          messageAPI?.success(`Backtest ${i + 1}/${activeWorkflows.length} completed!`);
+        } catch (error) {
+          console.error(`[BacktestPage] Backtest ${i + 1} failed:`, error);
+          messageAPI?.error(`Backtest ${i + 1} failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+
+      // Final state
+      if (results.length > 0) {
+        setBacktestResults(results);
+        messageAPI?.success(`All ${results.length} backtest(s) completed!`);
+      } else {
+        messageAPI?.error('All backtests failed');
+      }
+      setIsExecuting(false);
     } catch (error) {
-      console.error('[BacktestPage] Execute failed:', error);
-      // TICKET_143: Use dedicated execute error instead of field error
+      messageAPI?.error('Failed to execute backtest. Please check the logs.');
+      console.error('[BacktestPage] Execute error:', error);
       setExecuteError(error instanceof Error ? error.message : 'Execution failed');
-    } finally {
-      setLocalExecuting(false);
+      setIsExecuting(false);
     }
-  }, [dataConfig, workflowRows, onExecute]);
+  }, [dataConfig, workflowRows, hasWorkflowContent, findDuplicateWorkflows, runSingleBacktest, dataAPI, messageAPI]);
 
   // TICKET_163: Handle naming dialog cancel
   const handleCancelNaming = useCallback(() => {
@@ -650,7 +1002,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
         <div className="flex-1 overflow-y-auto p-2">
           {/* TICKET_151_1: Show BACKTESTING tree during execution or when results exist */}
-          {(isExecuting || results.length > 0) ? (
+          {(isExecuting || backtestResults.length > 0) ? (
             <div className="space-y-1">
               {/* L1: BACKTESTING header */}
               <div className="w-full px-3 py-2 text-left">
@@ -661,7 +1013,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               </div>
 
               {/* L2: Case list */}
-              {Array.from({ length: totalCases || results.length }).map((_, i) => {
+              {Array.from({ length: totalCases || backtestResults.length }).map((_, i) => {
                 const caseNum = i + 1;
                 const isCompleted = caseNum < currentCaseIndex || !isExecuting;
                 const isRunning = isExecuting && caseNum === currentCaseIndex;
@@ -840,16 +1192,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               />
             </div>
           ) : /* TICKET_151: Show results if we have completed results */
-          results.length > 0 ? (
+          backtestResults.length > 0 ? (
             /* Component 9: Backtest Result Panel - pass all results for comparison */
             /* TICKET_151_1: Pass execution state for Charts stacking and Compare tab behavior */
             <BacktestResultPanel
-              results={results}
+              results={backtestResults}
               className="h-full"
               isExecuting={isExecuting}
               currentCaseIndex={currentCaseIndex}
               totalCases={totalCases}
-              onCaseSelect={onCaseSelect}
+              onCaseSelect={handleCaseClick}
               scrollToCase={scrollToCaseIndex}
             />
           ) : loading ? (
@@ -916,13 +1268,13 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 New Backtest
               </button>
             </div>
-          ) : /* TICKET_151: Check results array instead of single result */
-          results.length > 0 ? (
+          ) : /* TICKET_151: Check backtestResults array instead of single result */
+          backtestResults.length > 0 ? (
             /* TICKET_171: Two action buttons - Keep, Discard (left-aligned) */
             <div className="flex justify-start gap-3">
               {/* Keep: preserve result, return to config, preserve config */}
               <button
-                onClick={onKeepResult}
+                onClick={handleKeepResult}
                 className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all border-color-terminal-accent-teal bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal hover:bg-color-terminal-accent-teal/20"
               >
                 <CheckIcon className="w-3 h-3" />
@@ -930,7 +1282,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               </button>
               {/* Discard: delete from DB, return to config, reset config */}
               <button
-                onClick={onDiscardResult}
+                onClick={handleDiscardResult}
                 className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all border-red-500 bg-red-500/10 text-red-400 hover:bg-red-500/20"
               >
                 <XIcon className="w-3 h-3" />
