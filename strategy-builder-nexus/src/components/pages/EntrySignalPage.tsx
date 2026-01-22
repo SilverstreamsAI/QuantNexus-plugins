@@ -1,18 +1,19 @@
 /**
- * EntrySignalPage Component (page31)
+ * EntrySignalPage Component (page32)
  *
  * Entry Signal Generator page following TICKET_077 layout specification.
  * Zones: A (Header), B (Sidebar), C (Content), D (Action Bar)
- * Zone C displays component4 (DirectionalIndicatorSelector).
+ * Zone C displays component2 (RegimeSelector) and component4 (DirectionalIndicatorSelector).
  *
  * @see TICKET_077 - Silverstream UI Component Library
+ * @see TICKET_077_1 - Page Hierarchy and Navigation
  * @see TICKET_078 - Input Theming and Portal Patterns
  */
 
 import React, { useState, useCallback } from 'react';
 import { Settings, Play } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { DirectionalIndicatorSelector, DirectionalIndicatorBlock, IndicatorDefinition, StrategyTemplate } from '../ui';
+import { DirectionalIndicatorSelector, DirectionalIndicatorBlock, IndicatorDefinition, StrategyTemplate, RegimeSelector, BespokeData } from '../ui';
 
 // Import indicator data (same as component3)
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
@@ -42,6 +43,8 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
   const [strategyName, setStrategyName] = useState('New Entry Strategy');
   const [isSaved, setIsSaved] = useState(false);
   const [entryBlocks, setEntryBlocks] = useState<DirectionalIndicatorBlock[]>([]);
+  const [selectedRegime, setSelectedRegime] = useState<string>('');
+  const [bespokeData, setBespokeData] = useState<BespokeData>({ ticker: '', timeframe: '' });
 
   // Handle strategy name change
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,10 +57,12 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
     if (onGenerate) {
       await onGenerate({
         name: strategyName,
+        regime: selectedRegime,
+        bespokeData,
         entrySignals: entryBlocks,
       });
     }
-  }, [onGenerate, strategyName, entryBlocks]);
+  }, [onGenerate, strategyName, selectedRegime, bespokeData, entryBlocks]);
 
   return (
     <div className="h-full flex flex-col bg-color-terminal-bg text-color-terminal-text">
@@ -122,7 +127,15 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
           {/* ============================================================== */}
           {/* Zone C: Variable Content Area                                   */}
           {/* ============================================================== */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* component2: Regime Selector */}
+            <RegimeSelector
+              selectedRegime={selectedRegime}
+              onSelect={setSelectedRegime}
+              bespokeData={bespokeData}
+              onBespokeChange={setBespokeData}
+            />
+
             {/* component4: Directional Indicator Selector */}
             <DirectionalIndicatorSelector
               indicators={indicatorData as IndicatorDefinition[]}
