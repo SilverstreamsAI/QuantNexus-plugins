@@ -18,7 +18,8 @@
     "tierMapping": {
       "free": 0,
       "pro": 1,
-      "enterprise": 2
+      "enterprise": 2,
+      "gold": 3
     },
     "services": [
       {
@@ -49,7 +50,7 @@
         "id": "indicator_entry",
         "name": "INDICATOR ENTRY",
         "description": "Indicator-based entry signals",
-        "tier": "free",
+        "tier": "pro",
         "defaultEnabled": true,
         "category": "KRONOS MODE"
       },
@@ -65,7 +66,7 @@
         "id": "market_observer",
         "name": "MARKET OBSERVER",
         "description": "Real-time market observation",
-        "tier": "free",
+        "tier": "pro",
         "defaultEnabled": true,
         "category": "TRADER MODE"
       },
@@ -81,7 +82,7 @@
         "id": "indicator_exit_generator",
         "name": "INDICATOR EXIT GENERATOR",
         "description": "Risk management and exit strategy generation",
-        "tier": "free",
+        "tier": "pro",
         "defaultEnabled": true,
         "category": "RISK MANAGER"
       },
@@ -89,7 +90,7 @@
         "id": "ai_libero",
         "name": "AI LIBERO",
         "description": "Centralized AI control and autonomous agents",
-        "tier": "enterprise",
+        "tier": "gold",
         "defaultEnabled": true,
         "category": "AI COMMAND CENTER"
       }
