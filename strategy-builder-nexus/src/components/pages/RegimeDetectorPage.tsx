@@ -18,7 +18,7 @@ import { cn } from '../../lib/utils';
 import { RegimeSelector, BespokeData, ExpressionInput, StrategyCard, IndicatorSelector, IndicatorBlock, IndicatorDefinition, StrategyTemplate, useValidateBeforeGenerate, CodeDisplay, CodeDisplayState, FactorAddSelector, FactorDefinition, FactorBlock } from '../ui';
 
 // TICKET_091: Plugin directly calls API service
-import { executeMarketRegimeAnalysis, validateMarketRegimeConfig, MarketRegimeRule, saveAlgorithm } from '../../services';
+import { executeMarketRegimeAnalysis, validateMarketRegimeConfig, MarketRegimeRule, saveAlgorithm, getErrorMessage, ERROR_CODE_MESSAGES } from '../../services';
 
 // Import indicator data
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
@@ -293,16 +293,38 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
         } catch (saveError) {
           console.error('[RegimeDetector] Exception while saving algorithm:', saveError);
         }
-      } else if (result.status === 'failed') {
-        setGenerateResult({ error: result.error?.message || 'Generation failed' });
+      } else if (result.status === 'failed' || result.status === 'rejected') {
+        // Use getErrorMessage to get user-friendly error message
+        const errorMsg = getErrorMessage(result);
+        console.error('[RegimeDetector] Generation failed:', result.reason_code || result.error);
+        setGenerateResult({ error: errorMsg });
+
+        // Show error popup using Host modal API
+        globalThis.nexus?.window?.showAlert(errorMsg);
       } else {
         setGenerateResult({ error: 'Unexpected result status' });
       }
     } catch (error) {
-      console.error('[RegimeDetector] Generate error:', error);
-      setGenerateResult({
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
+      console.error('[RegimeDetector] Generate error (catch block):', error);
+
+      // Extract error code and message from thrown error
+      const err = error as Error & { code?: string; reasonCode?: string };
+      const errorCode = err.code || err.reasonCode;
+      console.error('[RegimeDetector] Error code:', errorCode, 'Message:', err.message);
+
+      // Use ERROR_CODE_MESSAGES mapping if error code is available
+      let errorMsg: string;
+      if (errorCode && ERROR_CODE_MESSAGES[errorCode]) {
+        errorMsg = ERROR_CODE_MESSAGES[errorCode];
+      } else {
+        errorMsg = err.message || 'Unknown error';
+      }
+
+      console.log('[RegimeDetector] Final error message:', errorMsg);
+      setGenerateResult({ error: errorMsg });
+
+      // Show error popup for caught exceptions
+      globalThis.nexus?.window?.showAlert(errorMsg);
     } finally {
       setIsGenerating(false);
     }

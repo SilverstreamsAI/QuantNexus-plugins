@@ -5,6 +5,8 @@
 export {
   executeMarketRegimeAnalysis,
   validateMarketRegimeConfig,
+  getErrorMessage,
+  ERROR_CODE_MESSAGES,
 } from './market-regime-service';
 
 export type {

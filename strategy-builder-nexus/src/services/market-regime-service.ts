@@ -56,9 +56,73 @@ export interface MarketRegimeRule {
 }
 
 export interface MarketRegimeResult {
-  status: 'completed' | 'failed' | 'processing';
+  status: 'completed' | 'failed' | 'processing' | 'rejected';
+  validation_status?: 'VALID' | 'VALID_WITH_WARNINGS' | 'INVALID';
+  reason_code?: string;
   strategy_code?: string;
-  error?: { code?: string; message?: string };
+  error?: {
+    error_code?: string;
+    error_message?: string;
+    code?: string;
+    message?: string;
+    details?: Record<string, unknown>;
+  };
+}
+
+/**
+ * Error code to user-friendly message mapping
+ * @see CODE_GENERATOR_PROMPT_BEST_PRACTICES.md
+ */
+export const ERROR_CODE_MESSAGES: Record<string, string> = {
+  // Security violations
+  SECURITY_VIOLATION: 'Security violation detected. Please check your input for potentially harmful content (e.g., code injection attempts, SQL injection, or prompt injection).',
+
+  // Validation errors
+  INVALID: 'Invalid input detected. Please check your configuration for syntax errors, unknown indicators, or unsupported operators.',
+  SYNTAX_ERROR: 'Syntax error in your expression. Please check bracket matching and operator usage.',
+  UNKNOWN_INDICATOR: 'Unknown indicator specified. Please use supported indicators from the indicator list.',
+  UNSUPPORTED_OPERATOR: 'Unsupported operator in expression. Please use valid operators.',
+
+  // Network/System errors
+  TIMEOUT: 'Request timed out. Please try again.',
+  NETWORK_ERROR: 'Network error occurred. Please check your connection and try again.',
+  TASK_FAILED: 'Task processing failed. Please try again later.',
+
+  // LLM errors
+  LLM_ERROR: 'AI model encountered an error. Please try again or simplify your request.',
+  GENERATION_FAILED: 'Code generation failed. Please review your configuration and try again.',
+};
+
+/**
+ * Get user-friendly error message from error response
+ */
+export function getErrorMessage(result: MarketRegimeResult): string {
+  // Check reason_code first (from rejected status)
+  if (result.reason_code && ERROR_CODE_MESSAGES[result.reason_code]) {
+    return ERROR_CODE_MESSAGES[result.reason_code];
+  }
+
+  // Check error.error_code
+  if (result.error?.error_code && ERROR_CODE_MESSAGES[result.error.error_code]) {
+    return ERROR_CODE_MESSAGES[result.error.error_code];
+  }
+
+  // Check error.code (legacy format)
+  if (result.error?.code && ERROR_CODE_MESSAGES[result.error.code]) {
+    return ERROR_CODE_MESSAGES[result.error.code];
+  }
+
+  // Return error_message or message if available
+  if (result.error?.error_message) {
+    return result.error.error_message;
+  }
+
+  if (result.error?.message) {
+    return result.error.message;
+  }
+
+  // Default message
+  return 'An unexpected error occurred. Please try again.';
 }
 
 // -----------------------------------------------------------------------------
@@ -245,7 +309,7 @@ export async function executeMarketRegimeAnalysis(
     handlePollResponse: (response: unknown) => {
       const resp = response as ApiResponse;
       const status = resp.data?.status;
-      const isComplete = status === 'completed' || status === 'failed';
+      const isComplete = status === 'completed' || status === 'failed' || status === 'rejected';
       const resultData = resp.data?.result as Record<string, unknown> | undefined;
 
       return {
@@ -254,6 +318,8 @@ export async function executeMarketRegimeAnalysis(
           // Spread first, then override to prevent inner status from overwriting
           ...(resultData || {}),
           status: status as MarketRegimeResult['status'],
+          validation_status: resultData?.validation_status as MarketRegimeResult['validation_status'],
+          reason_code: resultData?.reason_code as string | undefined,
           strategy_code: resultData?.strategy_code as string | undefined,
           error: resultData?.error as MarketRegimeResult['error'],
         } as MarketRegimeResult,

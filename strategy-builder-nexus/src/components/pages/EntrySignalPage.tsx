@@ -3,31 +3,90 @@
  *
  * Entry Signal Generator page following TICKET_077 layout specification.
  * Zones: A (Header), B (Sidebar), C (Content), D (Action Bar)
- * Zone C displays component2 (RegimeSelector) and component4 (DirectionalIndicatorSelector).
+ * Zone C displays: component2 (RegimeSelector), component3 (IndicatorSelector),
+ * component6 (FactorAddSelector), component1 (ExpressionInput + StrategyCards),
+ * component5 (CodeDisplay).
  *
  * @see TICKET_077 - Silverstream UI Component Library
  * @see TICKET_077_1 - Page Hierarchy and Navigation
  * @see TICKET_078 - Input Theming and Portal Patterns
  */
 
-import React, { useState, useCallback } from 'react';
-import { Settings, Play } from 'lucide-react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { Settings, Play, Loader2, RotateCcw } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { DirectionalIndicatorSelector, DirectionalIndicatorBlock, IndicatorDefinition, StrategyTemplate, RegimeSelector, BespokeData } from '../ui';
+import {
+  RegimeSelector,
+  BespokeData,
+  ExpressionInput,
+  StrategyCard,
+  IndicatorSelector,
+  IndicatorBlock,
+  IndicatorDefinition,
+  StrategyTemplate,
+  useValidateBeforeGenerate,
+  CodeDisplay,
+  CodeDisplayState,
+  FactorAddSelector,
+  FactorDefinition,
+  FactorBlock,
+} from '../ui';
 
-// Import indicator data (same as component3)
+// Import API services (same as RegimeDetectorPage)
+import { executeMarketRegimeAnalysis, validateMarketRegimeConfig, MarketRegimeRule, saveAlgorithm, getErrorMessage, ERROR_CODE_MESSAGES } from '../../services';
+
+// Import indicator data
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
 import strategyTemplates from '../../../assets/indicators/strategy-templates-library.json';
+
+// Sample factor data (component6)
+const sampleFactors: FactorDefinition[] = [
+  { name: 'KMID', category: 'technical', ic: null, icir: null },
+  { name: 'KLEN', category: 'volatility', ic: null, icir: null },
+  { name: 'KMID2', category: 'technical', ic: null, icir: null },
+  { name: 'KUP', category: 'technical', ic: null, icir: null },
+  { name: 'KUP2', category: 'technical', ic: null, icir: null },
+  { name: 'KLOW', category: 'technical', ic: null, icir: null },
+  { name: 'KLOW2', category: 'technical', ic: null, icir: null },
+  { name: 'KSFT', category: 'technical', ic: null, icir: null },
+  { name: 'KSFT2', category: 'technical', ic: null, icir: null },
+  { name: 'OPEN0', category: 'technical', ic: null, icir: null },
+  { name: 'ROC_5', category: 'momentum', ic: null, icir: null },
+  { name: 'ROC_10', category: 'momentum', ic: null, icir: null },
+  { name: 'ROC_20', category: 'momentum', ic: null, icir: null },
+  { name: 'MA_5', category: 'technical', ic: null, icir: null },
+  { name: 'MA_10', category: 'technical', ic: null, icir: null },
+  { name: 'MA_20', category: 'technical', ic: null, icir: null },
+  { name: 'STD_5', category: 'volatility', ic: null, icir: null },
+  { name: 'STD_10', category: 'volatility', ic: null, icir: null },
+  { name: 'STD_20', category: 'volatility', ic: null, icir: null },
+  { name: 'VOLUME_5', category: 'volume', ic: null, icir: null },
+  { name: 'VOLUME_10', category: 'volume', ic: null, icir: null },
+  { name: 'VOLUME_20', category: 'volume', ic: null, icir: null },
+];
 
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 
+interface Strategy {
+  id: string;
+  expression: string;
+}
+
+interface GenerateResult {
+  code?: string;
+  error?: string;
+}
+
 interface EntrySignalPageProps {
-  onGenerate?: (config: unknown) => Promise<void>;
   onSettingsClick?: () => void;
   /** Page title from navigation - uses feature name from PluginHub button */
   pageTitle?: string;
+  /** LLM provider setting from plugin config */
+  llmProvider?: string;
+  /** LLM model setting from plugin config */
+  llmModel?: string;
 }
 
 // -----------------------------------------------------------------------------
@@ -35,16 +94,26 @@ interface EntrySignalPageProps {
 // -----------------------------------------------------------------------------
 
 export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
-  onGenerate,
   onSettingsClick,
   pageTitle,
+  llmProvider = 'NONA',
+  llmModel = 'nona-fast',
 }) => {
   // State
   const [strategyName, setStrategyName] = useState('New Entry Strategy');
   const [isSaved, setIsSaved] = useState(false);
-  const [entryBlocks, setEntryBlocks] = useState<DirectionalIndicatorBlock[]>([]);
-  const [selectedRegime, setSelectedRegime] = useState<string>('');
-  const [bespokeData, setBespokeData] = useState<BespokeData>({ ticker: '', timeframe: '' });
+
+  // Plugin manages its own generation state (TICKET_095 refactor)
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generateResult, setGenerateResult] = useState<GenerateResult | null>(null);
+
+  // Ref for auto-scroll to code display (TICKET_095)
+  const codeDisplayRef = useRef<HTMLDivElement>(null);
+  const [strategies, setStrategies] = useState<Strategy[]>([]);
+  const [selectedRegime, setSelectedRegime] = useState('trend');
+  const [bespokeData, setBespokeData] = useState<BespokeData>({ name: '', notes: '' });
+  const [indicatorBlocks, setIndicatorBlocks] = useState<IndicatorBlock[]>([]);
+  const [factorBlocks, setFactorBlocks] = useState<FactorBlock[]>([]);
 
   // Handle strategy name change
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,17 +121,230 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
     setIsSaved(false);
   }, []);
 
-  // Handle generate
-  const handleGenerate = useCallback(async () => {
-    if (onGenerate) {
-      await onGenerate({
-        name: strategyName,
-        regime: selectedRegime,
-        bespokeData,
-        entrySignals: entryBlocks,
+  // Handle add strategy from ExpressionInput
+  const handleAddStrategy = useCallback((expression: string) => {
+    const newStrategy: Strategy = {
+      id: `strategy-${Date.now()}`,
+      expression,
+    };
+    setStrategies(prev => [...prev, newStrategy]);
+    setIsSaved(false);
+  }, []);
+
+  // Handle delete strategy
+  const handleDeleteStrategy = useCallback((id: string) => {
+    setStrategies(prev => prev.filter(s => s.id !== id));
+    setIsSaved(false);
+  }, []);
+
+  // Combine all rules for validation (TICKET_087)
+  // Rules = indicatorBlocks (template-based) + factorBlocks + strategies (custom expressions)
+  const allRules = [
+    ...indicatorBlocks,
+    ...factorBlocks,
+    ...strategies.map(s => ({ type: 'custom_expression', expression: s.expression })),
+  ];
+
+  // Validation hook (TICKET_087)
+  const { validate } = useValidateBeforeGenerate({
+    items: allRules,
+    errorMessage: 'Please add at least one indicator, factor, or expression',
+    onValidationFail: (message) => {
+      console.warn('[EntrySignal] Validation failed:', message);
+      // Use Host modal API via nexus.window (TICKET_096)
+      globalThis.nexus?.window?.showAlert(message);
+    },
+  });
+
+  // Auto-scroll to code display when result is ready (TICKET_095)
+  useEffect(() => {
+    if (generateResult?.code && codeDisplayRef.current) {
+      codeDisplayRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
       });
     }
-  }, [onGenerate, strategyName, selectedRegime, bespokeData, entryBlocks]);
+  }, [generateResult?.code]);
+
+  // Determine CodeDisplay state (TICKET_095)
+  const getCodeDisplayState = useCallback((): CodeDisplayState => {
+    if (isGenerating) return 'loading';
+    if (generateResult?.error) return 'error';
+    if (generateResult?.code) return 'success';
+    return 'idle';
+  }, [isGenerating, generateResult]);
+
+  // Check if we have a previous result (for button text)
+  const hasResult = Boolean(generateResult?.code);
+
+  // Handle generate with validation (TICKET_087, TICKET_091, TICKET_095)
+  // TICKET_091: Plugin directly calls API service (CSP relaxed)
+  const handleGenerate = useCallback(async () => {
+    // Validate UI state before proceeding
+    if (!validate()) {
+      return;
+    }
+
+    // Build rules from indicators and custom expressions
+    const rules: MarketRegimeRule[] = [];
+
+    // Add indicator-based rules
+    for (const ind of indicatorBlocks) {
+      if (!ind.indicatorSlug) continue;
+
+      const thresholdValue = ind.ruleThresholdValue;
+      const validThreshold = (thresholdValue !== undefined && thresholdValue !== null)
+        ? thresholdValue
+        : 0;
+
+      rules.push({
+        rule_type: 'template_based',
+        indicator: {
+          slug: ind.indicatorSlug,
+          name: ind.indicatorSlug,
+          params: ind.paramValues as Record<string, unknown>,
+        },
+        strategy: {
+          logic: {
+            type: ind.templateKey || 'threshold_level',
+            operator: ind.ruleOperator || '>',
+            threshold_value: validThreshold,
+          },
+        },
+      });
+    }
+
+    // Add custom expression rules
+    for (const expr of strategies) {
+      rules.push({
+        rule_type: 'custom_expression',
+        expression: expr.expression,
+      });
+    }
+
+    // Add factor-based rules
+    for (const fac of factorBlocks) {
+      if (!fac.factorName) continue;
+
+      rules.push({
+        rule_type: 'factor_based',
+        factor: {
+          name: fac.factorName,
+          category: fac.category,
+          params: fac.paramValues as Record<string, unknown>,
+        },
+      });
+    }
+
+    // Build regime value
+    let regimeValue = selectedRegime;
+    if (regimeValue === 'bespoke' && bespokeData?.name) {
+      regimeValue = `bespoke_${bespokeData.name}`;
+    }
+
+    // Validate config
+    const config = {
+      regime: regimeValue,
+      rules,
+      strategy_name: strategyName,
+      bespoke_notes: bespokeData?.notes,
+      llm_provider: llmProvider,
+      llm_model: llmModel,
+    };
+
+    const validation = validateMarketRegimeConfig(config);
+    if (!validation.valid) {
+      console.warn('[EntrySignal] Validation failed:', validation.error);
+      setGenerateResult({ error: validation.error });
+      return;
+    }
+
+    // Set loading state
+    setIsGenerating(true);
+    setGenerateResult(null);
+
+    try {
+      console.debug('[EntrySignal] Calling API directly:', config);
+      const result = await executeMarketRegimeAnalysis(config);
+
+      // Debug logs for CodeDisplay verification
+      console.log('[EntrySignal] API result status:', result.status);
+      console.log('[EntrySignal] strategy_code length:', result.strategy_code?.length);
+      console.log('[EntrySignal] strategy_code preview:', result.strategy_code?.substring(0, 200));
+
+      if (result.status === 'completed' && result.strategy_code) {
+        console.log('[EntrySignal] Setting generateResult with code');
+        setGenerateResult({ code: result.strategy_code });
+
+        // Save algorithm to database
+        try {
+          console.log('[EntrySignal] Saving generated algorithm to database...');
+          const saveResult = await saveAlgorithm({
+            strategy_name: strategyName,
+            strategy_type: 10, // Entry Signal Generator
+            generated_code: result.strategy_code,
+            metadata: {
+              regime: selectedRegime,
+              llm_provider: llmProvider,
+              llm_model: llmModel,
+              indicator_blocks: indicatorBlocks,
+              factor_blocks: factorBlocks,
+              custom_strategies: strategies,
+            },
+            rules: {
+              indicators: indicatorBlocks,
+              factors: factorBlocks,
+              expressions: strategies.map(s => s.expression),
+            },
+            description: `${selectedRegime} entry signal strategy`,
+          });
+
+          if (saveResult.success) {
+            console.log('[EntrySignal] Algorithm saved successfully:', saveResult.data);
+            setIsSaved(true);
+          } else {
+            console.error('[EntrySignal] Failed to save algorithm:', saveResult.error);
+          }
+        } catch (saveError) {
+          console.error('[EntrySignal] Exception while saving algorithm:', saveError);
+        }
+      } else if (result.status === 'failed' || result.status === 'rejected') {
+        // Use getErrorMessage to get user-friendly error message
+        const errorMsg = getErrorMessage(result);
+        console.error('[EntrySignal] Generation failed:', result.reason_code || result.error);
+        setGenerateResult({ error: errorMsg });
+
+        // Show error popup using Host modal API
+        globalThis.nexus?.window?.showAlert(errorMsg);
+      } else {
+        setGenerateResult({ error: 'Unexpected result status' });
+      }
+    } catch (error) {
+      console.error('[EntrySignal] Generate error (catch block):', error);
+
+      // Extract error code and message from thrown error
+      const err = error as Error & { code?: string; reasonCode?: string };
+      const errorCode = err.code || err.reasonCode;
+      console.error('[EntrySignal] Error code:', errorCode, 'Message:', err.message);
+
+      // Use ERROR_CODE_MESSAGES mapping if error code is available
+      let errorMsg: string;
+      if (errorCode && ERROR_CODE_MESSAGES[errorCode]) {
+        errorMsg = ERROR_CODE_MESSAGES[errorCode];
+      } else {
+        errorMsg = err.message || 'Unknown error';
+      }
+
+      console.log('[EntrySignal] Final error message:', errorMsg);
+      setGenerateResult({ error: errorMsg });
+
+      // Show error popup for caught exceptions
+      globalThis.nexus?.window?.showAlert(errorMsg);
+      console.log('[EntrySignal] showAlert called with:', errorMsg);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [strategyName, selectedRegime, bespokeData, indicatorBlocks, factorBlocks, strategies, validate, llmProvider, llmModel]);
 
   return (
     <div className="h-full flex flex-col bg-color-terminal-bg text-color-terminal-text">
@@ -71,7 +353,7 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
       {/* ================================================================== */}
       <div className="flex-shrink-0 h-12 px-6 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
         <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
-          {pageTitle || 'Entry Signal Generator'}
+          {pageTitle || 'Indicator Entry Generator'}
         </h1>
         <button
           onClick={onSettingsClick}
@@ -127,35 +409,102 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
           {/* ============================================================== */}
           {/* Zone C: Variable Content Area                                   */}
           {/* ============================================================== */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-6">
             {/* component2: Regime Selector */}
             <RegimeSelector
               selectedRegime={selectedRegime}
               onSelect={setSelectedRegime}
               bespokeData={bespokeData}
               onBespokeChange={setBespokeData}
+              className="mb-8"
             />
 
-            {/* component4: Directional Indicator Selector */}
-            <DirectionalIndicatorSelector
+            {/* component3: Indicator Selector */}
+            <IndicatorSelector
               indicators={indicatorData as IndicatorDefinition[]}
               templates={strategyTemplates as Record<string, StrategyTemplate>}
-              blocks={entryBlocks}
-              onChange={setEntryBlocks}
+              blocks={indicatorBlocks}
+              onChange={setIndicatorBlocks}
+              className="mb-8"
             />
+
+            {/* component6: Factor Add Selector */}
+            <FactorAddSelector
+              factors={sampleFactors}
+              blocks={factorBlocks}
+              onChange={setFactorBlocks}
+              maxRecommended={3}
+              className="mb-8"
+            />
+
+            {/* component1: Expression Builder (Input + Cards) */}
+            <ExpressionInput
+              onAdd={handleAddStrategy}
+              className="mb-6"
+            />
+
+            {/* Strategy Cards */}
+            {strategies.length > 0 && (
+              <div className="space-y-3">
+                {strategies.map((strategy) => (
+                  <StrategyCard
+                    key={strategy.id}
+                    id={strategy.id}
+                    expression={strategy.expression}
+                    onDelete={handleDeleteStrategy}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* ============================================================ */}
+            {/* Result Display Area - component5: CodeDisplay (TICKET_095)    */}
+            {/* ============================================================ */}
+            {(generateResult || isGenerating) && (
+              <div ref={codeDisplayRef} className="mt-8">
+                <CodeDisplay
+                  code={generateResult?.code || ''}
+                  state={getCodeDisplayState()}
+                  errorMessage={generateResult?.error}
+                  title="GENERATED ENTRY SIGNAL CODE"
+                  showLineNumbers={true}
+                  maxHeight="400px"
+                />
+              </div>
+            )}
           </div>
 
           {/* ============================================================== */}
           {/* Zone D: Action Bar                                              */}
           {/* ============================================================== */}
           <div className="flex-shrink-0 border-t border-color-terminal-border bg-color-terminal-surface/50 p-4">
-            {/* Primary Action */}
+            {/* Primary Action (TICKET_095: Show REGENERATE when has result) */}
             <button
               onClick={handleGenerate}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border border-color-terminal-accent-gold rounded bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20 transition-all"
+              disabled={isGenerating}
+              className={cn(
+                "w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all",
+                isGenerating
+                  ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
+                  : "border-color-terminal-accent-gold bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20"
+              )}
             >
-              <Play className="w-4 h-4" />
-              Start Generate
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Generating...
+                </>
+              ) : hasResult ? (
+                <>
+                  <RotateCcw className="w-4 h-4" />
+                  Regenerate
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" />
+                  Start Generate
+                </>
+              )}
             </button>
           </div>
         </div>

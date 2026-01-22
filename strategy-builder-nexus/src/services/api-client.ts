@@ -145,9 +145,27 @@ class PluginApiClient {
     log.info(`Starting task: ${startEndpoint}`);
     const startResponse = await this.post<ApiResponse>(startEndpoint, initialData);
 
+    // Debug: Log start response
+    log.debug(`Start response: success=${startResponse.success}`);
+    log.debug(`Start response data: ${JSON.stringify(startResponse.data || {}).substring(0, 1000)}`);
+
     if (!startResponse.success) {
-      const err = startResponse.data?.result as { error?: { message?: string } } | undefined;
-      throw new Error(err?.error?.message || 'Failed to start task');
+      const resultData = startResponse.data?.result as Record<string, unknown> | undefined;
+      const err = resultData?.error as { error_code?: string; error_message?: string; message?: string } | undefined;
+
+      // Log full error structure for debugging
+      log.error(`Start failed - Full result: ${JSON.stringify(resultData || {})}`);
+
+      // Create detailed error with reason_code if available
+      const reasonCode = resultData?.reason_code as string | undefined;
+      const errorCode = err?.error_code || reasonCode;
+      const errorMessage = err?.error_message || err?.message || 'Failed to start task';
+
+      // Throw error with both code and message for upstream handling
+      const error = new Error(errorMessage);
+      (error as Error & { code?: string; reasonCode?: string }).code = errorCode;
+      (error as Error & { code?: string; reasonCode?: string }).reasonCode = reasonCode;
+      throw error;
     }
 
     const taskId = startResponse.data?.task_id;
@@ -167,19 +185,21 @@ class PluginApiClient {
 
       const pollResponse = await this.post<ApiResponse>(pollEndpoint, { task_id: taskId });
 
+      // Debug: Log full poll response
+      log.debug(`Poll response: success=${pollResponse.success}, status=${pollResponse.data?.status}`);
+      log.debug(`Poll result: ${JSON.stringify(pollResponse.data?.result || {}).substring(0, 500)}`);
+
       if (!pollResponse.success) {
         const err = pollResponse.data?.result as { error?: { message?: string } } | undefined;
+        log.error(`Poll failed: ${JSON.stringify(err)}`);
         throw new Error(err?.error?.message || 'Poll request failed');
       }
 
       const status = pollResponse.data?.status;
 
-      if (status === 'failed') {
-        const err = pollResponse.data?.result as { error?: { message?: string } } | undefined;
-        throw new Error(err?.error?.message || 'Task failed');
-      }
-
+      // Let handlePollResponse process the response first (including failed/rejected status)
       const result = handlePollResponse(pollResponse);
+      log.debug(`handlePollResponse: isComplete=${result.isComplete}, resultStatus=${(result.result as { status?: string })?.status}`);
 
       if (result.isComplete) {
         if (result.result === undefined) {
