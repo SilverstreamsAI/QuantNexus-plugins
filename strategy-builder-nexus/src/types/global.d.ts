@@ -84,10 +84,17 @@ interface ElectronHubAPI {
   removeFile(fileId: string, deleteFile: boolean, pluginId: string): Promise<any>;
 }
 
+// TICKET_184: Auth API for JWT token injection
+interface ElectronAuthAPI {
+  getAccessToken(): Promise<{ success: boolean; data?: string | null; error?: string }>;
+  refresh(): Promise<{ success: boolean; error?: string }>;
+}
+
 interface ElectronAPI {
   credential: ElectronCredentialAPI;
   plugin: ElectronPluginAPI;
   hub: ElectronHubAPI;
+  auth?: ElectronAuthAPI;
 }
 
 declare global {

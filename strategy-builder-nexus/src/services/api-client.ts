@@ -67,15 +67,47 @@ class PluginApiClient {
   }
 
   /**
-   * Make HTTP request
+   * Make HTTP request (TICKET_184: JWT Token Injection)
    */
   private async request<T extends ApiResponse>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    isRetry: boolean = false
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
     log.info(`Request: ${options.method || 'GET'} ${url}`);
+
+    // TICKET_184: Get access token from Main Process via IPC
+    let accessToken: string | null = null;
+    try {
+      const tokenResult = await window.electronAPI?.auth?.getAccessToken();
+      if (tokenResult?.success && tokenResult.data) {
+        accessToken = tokenResult.data;
+      }
+    } catch {
+      log.debug('Failed to get access token');
+    }
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'X-Client-Type': 'desktop',
+    };
+
+    // Merge custom headers
+    if (options.headers) {
+      const customHeaders = options.headers as Record<string, string>;
+      Object.assign(headers, customHeaders);
+    }
+
+    // TICKET_184: Require login for all API requests
+    if (!accessToken) {
+      log.error('No access token - login required');
+      throw new Error('AUTH_REQUIRED');
+    }
+
+    headers['Authorization'] = `Bearer ${accessToken}`;
+    log.debug('Authorization header injected');
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
@@ -84,14 +116,21 @@ class PluginApiClient {
       const response = await fetch(url, {
         ...options,
         signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Client-Type': 'desktop',
-          ...options.headers,
-        },
+        headers,
       });
 
       clearTimeout(timeoutId);
+
+      // TICKET_184: Handle 401 - trigger token refresh and retry once
+      if (response.status === 401 && !isRetry && window.electronAPI?.auth?.refresh) {
+        log.info('401 received, attempting token refresh');
+        const refreshResult = await window.electronAPI.auth.refresh();
+        if (refreshResult?.success) {
+          log.info('Token refreshed, retrying request');
+          return this.request<T>(endpoint, options, true);
+        }
+        log.error('Token refresh failed');
+      }
 
       const serverResponse = await response.json();
       log.debug(`Response: ${response.status}`);
