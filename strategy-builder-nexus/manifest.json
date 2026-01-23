@@ -18,8 +18,7 @@
     "tierMapping": {
       "free": 0,
       "pro": 1,
-      "enterprise": 2,
-      "gold": 3
+      "gold": 1
     },
     "services": [
       {
@@ -90,7 +89,7 @@
         "id": "ai_libero",
         "name": "AI LIBERO",
         "description": "Centralized AI control and autonomous agents",
-        "tier": "gold",
+        "tier": "pro",
         "defaultEnabled": true,
         "category": "AI COMMAND CENTER"
       }
