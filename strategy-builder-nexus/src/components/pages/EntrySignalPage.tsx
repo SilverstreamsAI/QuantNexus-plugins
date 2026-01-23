@@ -30,7 +30,9 @@ import {
   FactorAddSelector,
   FactorDefinition,
   FactorBlock,
+  ApiKeyPrompt,
 } from '../ui';
+import { useLLMAccess } from '../../hooks/useLLMAccess';
 
 // Import API services (same as RegimeDetectorPage)
 import { executeMarketRegimeAnalysis, validateMarketRegimeConfig, MarketRegimeRule, saveAlgorithm, getErrorMessage, ERROR_CODE_MESSAGES } from '../../services';
@@ -115,6 +117,34 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
   const [indicatorBlocks, setIndicatorBlocks] = useState<IndicatorBlock[]>([]);
   const [factorBlocks, setFactorBlocks] = useState<FactorBlock[]>([]);
 
+  // TICKET_190: LLM access check hook
+  // Layer 2: checkOnMount for one-time page entry prompt
+  // Layer 3: checkAccess for button click interception
+  const {
+    checkAccess,
+    showPrompt,
+    userTier,
+    closePrompt,
+    openSettings,
+    triggerUpgrade,
+    triggerLogin,
+  } = useLLMAccess({
+    llmProvider, // Pass current provider to determine access rules
+    checkOnMount: true, // Layer 2: Show prompt on page entry (once per session)
+    pageId: 'entry-signal-page', // Unique page identifier for session tracking
+    onOpenSettings: onSettingsClick,
+    onUpgrade: () => {
+      // Open upgrade page (could use nexus.window.openExternal)
+      console.log('[EntrySignal] Upgrade requested');
+      globalThis.nexus?.window?.openExternal?.('https://ai.silvonastream.com/pricing');
+    },
+    onLogin: () => {
+      // Trigger login flow
+      console.log('[EntrySignal] Login requested');
+      window.electronAPI.auth?.login();
+    },
+  });
+
   // Handle strategy name change
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setStrategyName(e.target.value);
@@ -177,9 +207,19 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
   // Check if we have a previous result (for button text)
   const hasResult = Boolean(generateResult?.code);
 
-  // Handle generate with validation (TICKET_087, TICKET_091, TICKET_095)
+  // Handle generate with validation (TICKET_087, TICKET_091, TICKET_095, TICKET_190)
   // TICKET_091: Plugin directly calls API service (CSP relaxed)
+  // TICKET_190: Check LLM access before generation
   const handleGenerate = useCallback(async () => {
+    // TICKET_190: Check LLM access first
+    // - NONA provider requires login (backend proxy)
+    // - Other providers require BYOK or PRO/GOLD
+    const hasAccess = await checkAccess();
+    if (!hasAccess) {
+      // Prompt is shown by the hook
+      return;
+    }
+
     // Validate UI state before proceeding
     if (!validate()) {
       return;
@@ -344,7 +384,7 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
     } finally {
       setIsGenerating(false);
     }
-  }, [strategyName, selectedRegime, bespokeData, indicatorBlocks, factorBlocks, strategies, validate, llmProvider, llmModel]);
+  }, [strategyName, selectedRegime, bespokeData, indicatorBlocks, factorBlocks, strategies, validate, llmProvider, llmModel, checkAccess]);
 
   return (
     <div className="h-full flex flex-col bg-color-terminal-bg text-color-terminal-text">
@@ -509,6 +549,16 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
           </div>
         </div>
       </div>
+
+      {/* TICKET_190: API Key Prompt */}
+      <ApiKeyPrompt
+        isOpen={showPrompt}
+        userTier={userTier}
+        onConfigure={openSettings}
+        onUpgrade={triggerUpgrade}
+        onLogin={triggerLogin}
+        onDismiss={closePrompt}
+      />
     </div>
   );
 };

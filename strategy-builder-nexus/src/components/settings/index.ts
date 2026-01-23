@@ -7,6 +7,7 @@
  * @see TICKET_089 - LLM Selector Component
  * @see TICKET_090 - LLM API Key Management
  * @see TICKET_093 - Plugin Settings Decoupling
+ * @see TICKET_190 - BYOK Guest Mode and API Key Privacy
  */
 
 // Main settings page (TICKET_093)
@@ -20,3 +21,6 @@ export { SecretsTab } from './SecretsTab';
 // Custom LLM settings panel
 export { LLMSettingsPanel } from './LLMSettingsPanel';
 export type { LLMSettingsPanelProps } from './LLMSettingsPanel';
+
+// Privacy statement (TICKET_190)
+export { ApiKeyPrivacyStatement } from './ApiKeyPrivacyStatement';

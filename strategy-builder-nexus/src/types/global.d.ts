@@ -88,6 +88,24 @@ interface ElectronHubAPI {
 interface ElectronAuthAPI {
   getAccessToken(): Promise<{ success: boolean; data?: string | null; error?: string }>;
   refresh(): Promise<{ success: boolean; error?: string }>;
+  login(providerName?: string): Promise<{ success: boolean; data?: { authUrl: string }; error?: string }>;
+  logout(): Promise<{ success: boolean; error?: string }>;
+}
+
+// TICKET_190: LLM Access Result
+interface LLMAccessResult {
+  allowed: boolean;
+  source: 'platform' | 'byok' | 'none';
+  reason: 'platform_key' | 'byok_configured' | 'no_key' | 'default_provider';
+  requiresBYOK: boolean;
+  userTier: string | null;
+  configuredProvider?: string;
+}
+
+// TICKET_190: Entitlement API
+interface ElectronEntitlementAPI {
+  canAccessLLMFeatures(): Promise<{ success: boolean; data?: LLMAccessResult; error?: string }>;
+  getConfiguredBYOKProviders(): Promise<{ success: boolean; data?: string[]; error?: string }>;
 }
 
 interface ElectronAPI {
@@ -95,6 +113,7 @@ interface ElectronAPI {
   plugin: ElectronPluginAPI;
   hub: ElectronHubAPI;
   auth?: ElectronAuthAPI;
+  entitlement: ElectronEntitlementAPI; // TICKET_190
 }
 
 declare global {
@@ -109,6 +128,7 @@ declare global {
       showAlert(message: string): void;
       showConfirm(message: string): Promise<boolean>;
       showNotification(message: string, type?: 'info' | 'success' | 'warning' | 'error'): void;
+      openExternal?(url: string): void; // TICKET_190
     };
   } | undefined;
 }

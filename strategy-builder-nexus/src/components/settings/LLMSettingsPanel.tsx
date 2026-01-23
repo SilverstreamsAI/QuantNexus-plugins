@@ -33,6 +33,7 @@ import {
   type LLMProvider,
   type LLMModel,
 } from '../../config/llm-providers';
+import { ApiKeyPrivacyStatement } from './ApiKeyPrivacyStatement';
 
 // =============================================================================
 // Types
@@ -437,20 +438,8 @@ export function LLMSettingsPanel({ pluginId }: LLMSettingsPanelProps): JSX.Eleme
         })}
       </div>
 
-      {/* Security Note */}
-      <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-xs text-muted-foreground">
-        <div className="flex items-start gap-2">
-          <Key className="h-4 w-4 mt-0.5 text-color-terminal-accent-teal" />
-          <div>
-            <div className="font-medium text-white mb-1">Security</div>
-            <ul className="space-y-1">
-              <li>API keys are encrypted using system-level encryption</li>
-              <li>Keys are stored locally and never uploaded to cloud</li>
-              <li>Each provider connection is isolated</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      {/* TICKET_190: Privacy Statement */}
+      <ApiKeyPrivacyStatement compact />
     </div>
   );
 }
