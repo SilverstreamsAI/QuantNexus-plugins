@@ -30,6 +30,8 @@ interface PluginSettingsPageProps {
   pluginId: string;
   pluginName: string;
   onBack?: () => void;
+  /** Default tab to show when opening settings */
+  defaultTab?: SettingsTab;
 }
 
 // =============================================================================
@@ -178,8 +180,9 @@ export function PluginSettingsPage({
   pluginId,
   pluginName,
   onBack,
+  defaultTab = 'config',
 }: PluginSettingsPageProps): JSX.Element {
-  const [activeTab, setActiveTab] = useState<SettingsTab>('config');
+  const [activeTab, setActiveTab] = useState<SettingsTab>(defaultTab);
 
   return (
     <div className="h-full flex flex-col bg-silverstream terminal-theme">
@@ -204,4 +207,4 @@ export function PluginSettingsPage({
 }
 
 export default PluginSettingsPage;
-export type { PluginSettingsPageProps };
+export type { PluginSettingsPageProps, SettingsTab };

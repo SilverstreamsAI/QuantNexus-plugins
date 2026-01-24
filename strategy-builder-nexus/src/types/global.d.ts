@@ -39,6 +39,20 @@ interface CredentialAuditResult extends CredentialResult {
   entries: CredentialAuditEntry[];
 }
 
+// TICKET_192: API Key Validation Result
+interface ApiKeyValidationData {
+  valid: boolean;
+  error?: string;
+  errorCode?: 'INVALID_FORMAT' | 'AUTH_FAILED' | 'NETWORK_ERROR' | 'TIMEOUT' | 'UNKNOWN';
+  provider: string;
+}
+
+interface ApiKeyValidationResult {
+  success: boolean;
+  data?: ApiKeyValidationData;
+  errorMessage?: string;
+}
+
 interface ElectronCredentialAPI {
   get(pluginId: string, key: string): Promise<CredentialGetResult>;
   set(pluginId: string, key: string, value: string): Promise<CredentialResult>;
@@ -46,6 +60,8 @@ interface ElectronCredentialAPI {
   has(pluginId: string, key: string): Promise<CredentialHasResult>;
   list(pluginId: string): Promise<CredentialListResult>;
   getAuditLog(pluginId: string, maxEntries?: number): Promise<CredentialAuditResult>;
+  // TICKET_192: API Key Validation
+  validateApiKey(provider: string, apiKey: string): Promise<ApiKeyValidationResult>;
 }
 
 interface PluginManifestResult {
@@ -103,9 +119,11 @@ interface LLMAccessResult {
 }
 
 // TICKET_190: Entitlement API
+// TICKET_194: Added setLLMProviderValidationStatus
 interface ElectronEntitlementAPI {
   canAccessLLMFeatures(): Promise<{ success: boolean; data?: LLMAccessResult; error?: string }>;
   getConfiguredBYOKProviders(): Promise<{ success: boolean; data?: string[]; error?: string }>;
+  setLLMProviderValidationStatus(providerId: string, validated: boolean): Promise<{ success: boolean; error?: string }>;
 }
 
 interface ElectronAPI {

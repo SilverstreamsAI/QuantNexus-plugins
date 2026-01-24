@@ -25,6 +25,9 @@ import {
   ClipboardList,
   ExternalLink,
   Edit3,
+  FlaskConical,
+  Loader2,
+  XCircle,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { LLM_PROVIDERS } from '../../config/llm-providers';
@@ -51,6 +54,16 @@ interface Credential {
   description?: string;
   fromManifest?: boolean;
   docsUrl?: string;
+  /** Provider ID for API key validation (e.g., 'CLAUDE', 'OPENAI') */
+  providerId?: string;
+  /** TICKET_194_1: Whether API key has been verified */
+  isVerified?: boolean;
+}
+
+// TICKET_192: Test result state
+interface TestResult {
+  status: 'idle' | 'testing' | 'success' | 'error';
+  message?: string;
 }
 
 interface ActivityLogEntry {
@@ -93,6 +106,11 @@ function CredentialItem({ credential, pluginId, onUpdate }: CredentialItemProps)
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // TICKET_192: Test button state
+  // TICKET_194_1: Initialize with verified status if already verified
+  const [testResult, setTestResult] = useState<TestResult>(
+    credential.isVerified ? { status: 'success', message: 'Verified' } : { status: 'idle' }
+  );
 
   const handleView = async () => {
     if (showValue) {
@@ -159,6 +177,67 @@ function CredentialItem({ credential, pluginId, onUpdate }: CredentialItemProps)
     setEditing(false);
     setInputValue('');
     setError(null);
+  };
+
+  // TICKET_192: Test API key
+  // TICKET_194: Save validation status on success
+  const handleTest = async () => {
+    if (!credential.providerId || !credential.hasValue) return;
+
+    setTestResult({ status: 'testing' });
+
+    try {
+      // Get the stored API key value
+      const getResult = await window.electronAPI.credential.get(pluginId, credential.key);
+      if (!getResult.success || !getResult.value) {
+        setTestResult({ status: 'error', message: 'Failed to retrieve API key' });
+        return;
+      }
+
+      // Validate the key
+      const result = await window.electronAPI.credential.validateApiKey(
+        credential.providerId,
+        getResult.value
+      );
+
+      if (result.success && result.data) {
+        if (result.data.valid) {
+          setTestResult({ status: 'success', message: 'Verified' });
+          // TICKET_194: Save validation status
+          await window.electronAPI.entitlement.setLLMProviderValidationStatus(
+            credential.providerId,
+            true
+          );
+          // TICKET_194_1: Keep success state, don't reset
+        } else {
+          setTestResult({
+            status: 'error',
+            message: result.data.error || 'Invalid API key',
+          });
+          // TICKET_194: Clear validation status on failure
+          await window.electronAPI.entitlement.setLLMProviderValidationStatus(
+            credential.providerId,
+            false
+          );
+          // TICKET_194_1: Reset error state after 5 seconds
+          setTimeout(() => {
+            setTestResult({ status: 'idle' });
+          }, 5000);
+        }
+      } else {
+        setTestResult({ status: 'error', message: result.errorMessage || 'Validation failed' });
+        // TICKET_194_1: Reset error state after 5 seconds
+        setTimeout(() => {
+          setTestResult({ status: 'idle' });
+        }, 5000);
+      }
+    } catch (e) {
+      setTestResult({ status: 'error', message: `Error: ${e}` });
+      // TICKET_194_1: Only reset on error, keep success state
+      setTimeout(() => {
+        setTestResult({ status: 'idle' });
+      }, 5000);
+    }
   };
 
   return (
@@ -231,6 +310,33 @@ function CredentialItem({ credential, pluginId, onUpdate }: CredentialItemProps)
             <Edit3 className="h-4 w-4" />
           </button>
 
+          {/* TICKET_192: Test Button */}
+          {/* TICKET_194_1: Show verified state with teal color */}
+          {credential.hasValue && credential.providerId && (
+            <button
+              onClick={handleTest}
+              disabled={testResult.status === 'testing'}
+              className={cn(
+                'rounded-lg p-2 transition-colors',
+                testResult.status === 'idle' && 'hover:bg-white/5 text-color-terminal-text-muted hover:text-color-terminal-accent-teal',
+                testResult.status === 'testing' && 'text-color-terminal-accent-teal',
+                testResult.status === 'success' && 'text-color-terminal-accent-teal bg-color-terminal-accent-teal/10',
+                testResult.status === 'error' && 'text-red-500 bg-red-500/10'
+              )}
+              title={testResult.message || 'Test API key'}
+            >
+              {testResult.status === 'testing' ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : testResult.status === 'success' ? (
+                <CheckCircle className="h-4 w-4" />
+              ) : testResult.status === 'error' ? (
+                <XCircle className="h-4 w-4" />
+              ) : (
+                <FlaskConical className="h-4 w-4" />
+              )}
+            </button>
+          )}
+
           {credential.hasValue && (
             <button
               onClick={handleDelete}
@@ -242,6 +348,18 @@ function CredentialItem({ credential, pluginId, onUpdate }: CredentialItemProps)
           )}
         </div>
       </div>
+
+      {/* TICKET_192: Test Result Message */}
+      {testResult.status !== 'idle' && testResult.message && (
+        <div className={cn(
+          'mt-2 text-xs px-3 py-1.5 rounded',
+          testResult.status === 'success' && 'bg-green-500/10 text-green-500',
+          testResult.status === 'error' && 'bg-red-500/10 text-red-500',
+          testResult.status === 'testing' && 'bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal'
+        )}>
+          {testResult.status === 'testing' ? 'Testing...' : testResult.message}
+        </div>
+      )}
 
       {/* Edit Form */}
       {editing && (
@@ -366,7 +484,7 @@ export function SecretsTab({ pluginId }: SecretsTabProps): JSX.Element {
       if (manifest?.contributes?.configuration?.properties) {
         for (const [key, prop] of Object.entries(manifest.contributes.configuration.properties)) {
           if (prop.secret === true) {
-            // Find matching LLM provider for docsUrl
+            // Find matching LLM provider for docsUrl and providerId
             const provider = LLM_PROVIDERS.find(p => p.secretKey === key);
             credMap.set(key, {
               key,
@@ -374,6 +492,8 @@ export function SecretsTab({ pluginId }: SecretsTabProps): JSX.Element {
               description: prop.description,
               fromManifest: true,
               docsUrl: provider?.docsUrl,
+              // TICKET_192: Provider ID for API key validation
+              providerId: provider?.id,
             });
           }
         }
