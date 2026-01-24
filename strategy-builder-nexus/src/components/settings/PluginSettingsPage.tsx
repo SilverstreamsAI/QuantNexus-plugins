@@ -8,7 +8,7 @@
  * @see TICKET_081 - Plugin Settings Architecture
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Key, Sliders, ArrowLeft } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { ConfigTab } from './ConfigTab';
@@ -176,13 +176,24 @@ const SettingsHeaderBar: React.FC<SettingsHeaderBarProps> = ({
 // Main Component
 // =============================================================================
 
+// Valid tab values for runtime validation
+const VALID_TABS: SettingsTab[] = ['config', 'secrets'];
+
 export function PluginSettingsPage({
   pluginId,
   pluginName,
   onBack,
   defaultTab = 'config',
 }: PluginSettingsPageProps): JSX.Element {
-  const [activeTab, setActiveTab] = useState<SettingsTab>(defaultTab);
+  // Runtime validation: ensure defaultTab is valid, fallback to 'config'
+  const validatedDefaultTab = VALID_TABS.includes(defaultTab) ? defaultTab : 'config';
+  const [activeTab, setActiveTab] = useState<SettingsTab>(validatedDefaultTab);
+
+  // Sync activeTab when defaultTab prop changes (e.g., reopening settings with different tab)
+  useEffect(() => {
+    const newTab = VALID_TABS.includes(defaultTab) ? defaultTab : 'config';
+    setActiveTab(newTab);
+  }, [defaultTab]);
 
   return (
     <div className="h-full flex flex-col bg-silverstream terminal-theme">

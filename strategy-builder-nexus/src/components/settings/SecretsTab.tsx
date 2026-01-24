@@ -151,6 +151,19 @@ function CredentialItem({ credential, pluginId, onUpdate }: CredentialItemProps)
       if (result.success) {
         setEditing(false);
         setInputValue('');
+
+        // Reset verification status when saving new key
+        // New key needs to be re-verified
+        setTestResult({ status: 'idle' });
+
+        // Clear backend validation status if this is an LLM provider key
+        if (credential.providerId) {
+          await window.electronAPI.entitlement.setLLMProviderValidationStatus(
+            credential.providerId,
+            false
+          );
+        }
+
         onUpdate();
       } else {
         setError(result.error || 'Failed to save');
