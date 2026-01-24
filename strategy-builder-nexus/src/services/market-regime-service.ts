@@ -299,21 +299,36 @@ function buildServerRequest(config: MarketRegimeConfig, apiKey?: string): Server
 // -----------------------------------------------------------------------------
 
 /**
- * TICKET_193: Resolve API key for the selected provider
+ * TICKET_193/196: Resolve API key for the selected provider and model
+ *
+ * Rules per TICKET_196:
+ * - nona-nexus model: No API key needed (platform handles it)
+ * - Other models (gpt-5-mini, etc.): Need API key (BYOK or system)
  */
-async function resolveApiKeyForProvider(providerId: string): Promise<string | undefined> {
-  // NONA is platform provider, no API key needed
-  if (providerId === 'NONA') {
+async function resolveApiKeyForProvider(providerId: string, modelId: string): Promise<string | undefined> {
+  // nona-nexus is the only model that doesn't need API key
+  if (modelId === 'nona-nexus') {
+    console.debug('[MarketRegimeService] nona-nexus model, no API key needed');
     return undefined;
   }
 
+  // For all other models, try to resolve BYOK key
+  // Even for NONA provider with non-nona-nexus models (e.g., gpt-5-mini)
   try {
-    const result = await window.electronAPI.entitlement.resolveLLMApiKey(providerId);
+    // Determine which provider's key to use
+    // If NONA with external model, we need to find the matching provider
+    let keyProviderId = providerId;
+    if (providerId === 'NONA') {
+      // Map model to provider for BYOK key lookup
+      keyProviderId = mapModelToProvider(modelId);
+    }
+
+    const result = await window.electronAPI.entitlement.resolveLLMApiKey(keyProviderId);
     if (result.success && result.data?.key) {
-      console.debug(`[MarketRegimeService] Resolved API key for ${providerId}, source: ${result.data.source}`);
+      console.debug(`[MarketRegimeService] Resolved API key for ${keyProviderId}, source: ${result.data.source}`);
       return result.data.key;
     }
-    console.debug(`[MarketRegimeService] No API key found for ${providerId}`);
+    console.debug(`[MarketRegimeService] No BYOK key found for ${keyProviderId}, backend will use system key`);
     return undefined;
   } catch (error) {
     console.error(`[MarketRegimeService] Failed to resolve API key:`, error);
@@ -322,14 +337,28 @@ async function resolveApiKeyForProvider(providerId: string): Promise<string | un
 }
 
 /**
+ * TICKET_196: Map model ID to provider ID for BYOK key lookup
+ */
+function mapModelToProvider(modelId: string): string {
+  if (modelId.startsWith('gpt-') || modelId.startsWith('o3-')) return 'OPENAI';
+  if (modelId.startsWith('claude-')) return 'CLAUDE';
+  if (modelId.startsWith('gemini-')) return 'GEMINI';
+  if (modelId.startsWith('deepseek-')) return 'DEEPSEEK';
+  if (modelId.startsWith('grok-')) return 'GROK';
+  if (modelId.startsWith('qwen')) return 'QWEN';
+  return 'NONA'; // Fallback
+}
+
+/**
  * Execute market regime analysis
  */
 export async function executeMarketRegimeAnalysis(
   config: MarketRegimeConfig
 ): Promise<MarketRegimeResult> {
-  // TICKET_193: Resolve API key for BYOK provider
+  // TICKET_193/196: Resolve API key based on provider and model
   const providerId = config.llm_provider || 'NONA';
-  const apiKey = await resolveApiKeyForProvider(providerId);
+  const modelId = config.llm_model || 'nona-nexus';
+  const apiKey = await resolveApiKeyForProvider(providerId, modelId);
 
   const requestPayload = buildServerRequest(config, apiKey);
 

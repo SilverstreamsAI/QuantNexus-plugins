@@ -39,11 +39,29 @@ export interface LLMProvider {
 export const LLM_PROVIDERS: LLMProvider[] = [
   {
     id: 'NONA',
-    name: 'Nona Fast (Default)',
-    secretKey: '', // No API key required - always available
+    name: 'Nona',
+    secretKey: '', // No API key required - PRO/GOLD users
     apiKeyPlaceholder: '',
     models: [
-      { id: 'nona-fast', name: 'Nona Fast', description: 'Default fast model - no API key required' },
+      // Default
+      { id: 'nona-nexus', name: 'Nona Nexus', description: 'Default recommended' },
+      // OpenAI
+      { id: 'gpt-5.2', name: 'GPT-5.2', description: 'OpenAI flagship' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', description: 'OpenAI fast' },
+      // Claude
+      { id: 'claude-4-5-opus-latest', name: 'Claude 4.5 Opus', description: 'Best intelligence' },
+      { id: 'claude-4-5-sonnet-latest', name: 'Claude 4.5 Sonnet', description: 'Balanced' },
+      { id: 'claude-4-5-haiku-latest', name: 'Claude 4.5 Haiku', description: 'Fast' },
+      // DeepSeek
+      { id: 'deepseek-chat', name: 'DeepSeek V3', description: 'Best value' },
+      { id: 'deepseek-reasoner', name: 'DeepSeek R1', description: 'Reasoning' },
+      // Gemini
+      { id: 'gemini-3-pro-latest', name: 'Gemini 3 Pro', description: 'Google flagship' },
+      { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', description: 'Google fast' },
+      // Grok
+      { id: 'grok-4', name: 'Grok-4', description: 'xAI flagship' },
+      // Qwen
+      { id: 'qwen3-max', name: 'Qwen 3 Max', description: 'Best Chinese' },
     ],
   },
   {
@@ -67,9 +85,8 @@ export const LLM_PROVIDERS: LLMProvider[] = [
     apiKeyPattern: /^sk-/,
     docsUrl: 'https://platform.openai.com/api-keys',
     models: [
-      { id: 'gpt-5', name: 'GPT-5', description: 'Flagship' },
-      { id: 'gpt-5-mini', name: 'GPT-5 Mini', description: 'Cost-effective' },
-      { id: 'o3-2025-12-16', name: 'OpenAI O3', description: 'Strongest reasoning' },
+      { id: 'gpt-5.2', name: 'GPT-5.2', description: 'Most advanced coding & agent tasks' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', description: 'Faster & affordable' },
     ],
   },
   {
