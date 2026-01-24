@@ -517,6 +517,24 @@ export function SecretsTab({ pluginId }: SecretsTabProps): JSX.Element {
         }
       }
 
+      // TICKET_194_1: Get verification status for all providers
+      const providersResult = await window.electronAPI.entitlement.getLLMProvidersWithStatus();
+      const verifiedProviders = new Set<string>();
+      if (providersResult.success && providersResult.data) {
+        for (const p of providersResult.data) {
+          if (p.status === 'verified') {
+            verifiedProviders.add(p.id);
+          }
+        }
+      }
+
+      // Update credentials with verification status
+      for (const cred of credMap.values()) {
+        if (cred.providerId && verifiedProviders.has(cred.providerId)) {
+          cred.isVerified = true;
+        }
+      }
+
       // Sort: manifest secrets first, then alphabetically
       const sortedCreds = Array.from(credMap.values()).sort((a, b) => {
         if (a.fromManifest && !b.fromManifest) return -1;

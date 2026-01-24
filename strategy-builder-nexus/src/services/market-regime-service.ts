@@ -169,6 +169,7 @@ interface ServerRequest {
       prompt: string;
       provider: string;
       model: string;
+      api_key?: string; // TICKET_193: BYOK API key
     };
     rules: ServerRule[];
   };
@@ -260,7 +261,10 @@ function buildPrompt(config: MarketRegimeConfig): string {
   return `Generate a ${regimeLabel} strategy using: ${rulesStr}`;
 }
 
-function buildServerRequest(config: MarketRegimeConfig): ServerRequest {
+/**
+ * TICKET_193: Build server request with optional API key
+ */
+function buildServerRequest(config: MarketRegimeConfig, apiKey?: string): ServerRequest {
   const serverRules = transformRules(config.rules);
   const prompt = buildPrompt(config);
   const caseType = mapRegimeToCaseType(config.regime);
@@ -283,6 +287,7 @@ function buildServerRequest(config: MarketRegimeConfig): ServerRequest {
         prompt,
         provider: config.llm_provider || 'NONA',
         model: config.llm_model || 'nona-default',
+        api_key: apiKey, // TICKET_193: BYOK API key (undefined if not provided)
       },
       rules: serverRules,
     },
@@ -294,12 +299,39 @@ function buildServerRequest(config: MarketRegimeConfig): ServerRequest {
 // -----------------------------------------------------------------------------
 
 /**
+ * TICKET_193: Resolve API key for the selected provider
+ */
+async function resolveApiKeyForProvider(providerId: string): Promise<string | undefined> {
+  // NONA is platform provider, no API key needed
+  if (providerId === 'NONA') {
+    return undefined;
+  }
+
+  try {
+    const result = await window.electronAPI.entitlement.resolveLLMApiKey(providerId);
+    if (result.success && result.data?.key) {
+      console.debug(`[MarketRegimeService] Resolved API key for ${providerId}, source: ${result.data.source}`);
+      return result.data.key;
+    }
+    console.debug(`[MarketRegimeService] No API key found for ${providerId}`);
+    return undefined;
+  } catch (error) {
+    console.error(`[MarketRegimeService] Failed to resolve API key:`, error);
+    return undefined;
+  }
+}
+
+/**
  * Execute market regime analysis
  */
 export async function executeMarketRegimeAnalysis(
   config: MarketRegimeConfig
 ): Promise<MarketRegimeResult> {
-  const requestPayload = buildServerRequest(config);
+  // TICKET_193: Resolve API key for BYOK provider
+  const providerId = config.llm_provider || 'NONA';
+  const apiKey = await resolveApiKeyForProvider(providerId);
+
+  const requestPayload = buildServerRequest(config, apiKey);
 
   return await pluginApiClient.executeWithPolling<MarketRegimeResult>({
     initialData: requestPayload,

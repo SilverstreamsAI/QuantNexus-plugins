@@ -118,12 +118,31 @@ interface LLMAccessResult {
   configuredProvider?: string;
 }
 
+// TICKET_194: LLM Provider Info with verification status
+interface LLMProviderInfo {
+  id: string;
+  name: string;
+  configured: boolean;
+  status: 'platform' | 'verified' | 'unverified';
+  defaultModel: string;
+}
+
+// TICKET_193: API Key Resolution Result
+interface ApiKeyResolution {
+  source: 'platform' | 'byok' | 'none';
+  key?: string;
+  providerId: string;
+}
+
 // TICKET_190: Entitlement API
-// TICKET_194: Added setLLMProviderValidationStatus
+// TICKET_194: Added setLLMProviderValidationStatus, getLLMProvidersWithStatus
+// TICKET_193: Added resolveLLMApiKey
 interface ElectronEntitlementAPI {
   canAccessLLMFeatures(): Promise<{ success: boolean; data?: LLMAccessResult; error?: string }>;
   getConfiguredBYOKProviders(): Promise<{ success: boolean; data?: string[]; error?: string }>;
+  getLLMProvidersWithStatus(): Promise<{ success: boolean; data?: LLMProviderInfo[]; error?: string }>;
   setLLMProviderValidationStatus(providerId: string, validated: boolean): Promise<{ success: boolean; error?: string }>;
+  resolveLLMApiKey(providerId: string): Promise<{ success: boolean; data?: ApiKeyResolution; error?: string }>;
 }
 
 interface ElectronAPI {
