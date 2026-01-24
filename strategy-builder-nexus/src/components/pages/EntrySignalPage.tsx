@@ -31,6 +31,7 @@ import {
   FactorDefinition,
   FactorBlock,
   ApiKeyPrompt,
+  NamingDialog,
 } from '../ui';
 import { useLLMAccess } from '../../hooks/useLLMAccess';
 
@@ -108,6 +109,9 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
   // Plugin manages its own generation state (TICKET_095 refactor)
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateResult, setGenerateResult] = useState<GenerateResult | null>(null);
+
+  // TICKET_199: NamingDialog state
+  const [namingDialogVisible, setNamingDialogVisible] = useState(false);
 
   // Ref for auto-scroll to code display (TICKET_095)
   const codeDisplayRef = useRef<HTMLDivElement>(null);
@@ -207,23 +211,34 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
   // Check if we have a previous result (for button text)
   const hasResult = Boolean(generateResult?.code);
 
-  // Handle generate with validation (TICKET_087, TICKET_091, TICKET_095, TICKET_190)
-  // TICKET_091: Plugin directly calls API service (CSP relaxed)
-  // TICKET_190: Check LLM access before generation
-  const handleGenerate = useCallback(async () => {
+  // TICKET_199: Show naming dialog before generation
+  const handleShowNamingDialog = useCallback(async () => {
     // TICKET_190: Check LLM access first
-    // - NONA provider requires login (backend proxy)
-    // - Other providers require BYOK or PRO/GOLD
     const hasAccess = await checkAccess();
     if (!hasAccess) {
-      // Prompt is shown by the hook
       return;
     }
 
-    // Validate UI state before proceeding
+    // Validate UI state before showing dialog
     if (!validate()) {
       return;
     }
+
+    // Show naming dialog
+    setNamingDialogVisible(true);
+  }, [checkAccess, validate]);
+
+  // TICKET_199: Handle naming dialog cancel
+  const handleCancelNaming = useCallback(() => {
+    setNamingDialogVisible(false);
+  }, []);
+
+  // Handle generate with validation (TICKET_087, TICKET_091, TICKET_095, TICKET_190, TICKET_199)
+  // TICKET_091: Plugin directly calls API service (CSP relaxed)
+  // TICKET_199: Called after NamingDialog confirmation with final strategy name
+  const executeGeneration = useCallback(async (finalStrategyName: string) => {
+    // Update strategy name from dialog
+    setStrategyName(finalStrategyName);
 
     // Build rules from indicators and custom expressions
     const rules: MarketRegimeRule[] = [];
@@ -286,7 +301,7 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
     const config = {
       regime: regimeValue,
       rules,
-      strategy_name: strategyName,
+      strategy_name: finalStrategyName,
       bespoke_notes: bespokeData?.notes,
       llm_provider: llmProvider,
       llm_model: llmModel,
@@ -320,7 +335,7 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
         try {
           console.log('[EntrySignal] Saving generated algorithm to database...');
           const saveResult = await saveAlgorithm({
-            strategy_name: strategyName,
+            strategy_name: finalStrategyName,
             strategy_type: 10, // Entry Signal Generator
             generated_code: result.strategy_code,
             metadata: {
@@ -384,7 +399,13 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
     } finally {
       setIsGenerating(false);
     }
-  }, [strategyName, selectedRegime, bespokeData, indicatorBlocks, factorBlocks, strategies, validate, llmProvider, llmModel, checkAccess]);
+  }, [selectedRegime, bespokeData, indicatorBlocks, factorBlocks, strategies, llmProvider, llmModel]);
+
+  // TICKET_199: Handle naming dialog confirmation
+  const handleConfirmNaming = useCallback((finalName: string) => {
+    setNamingDialogVisible(false);
+    executeGeneration(finalName);
+  }, [executeGeneration]);
 
   return (
     <div className="h-full flex flex-col bg-color-terminal-bg text-color-terminal-text">
@@ -518,9 +539,9 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
           {/* Zone D: Action Bar                                              */}
           {/* ============================================================== */}
           <div className="flex-shrink-0 border-t border-color-terminal-border bg-color-terminal-surface/50 p-4">
-            {/* Primary Action (TICKET_095: Show REGENERATE when has result) */}
+            {/* Primary Action (TICKET_095: Show REGENERATE when has result, TICKET_199: Show NamingDialog) */}
             <button
-              onClick={handleGenerate}
+              onClick={handleShowNamingDialog}
               disabled={isGenerating}
               className={cn(
                 "w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all",
@@ -558,6 +579,14 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
         onUpgrade={triggerUpgrade}
         onLogin={triggerLogin}
         onDismiss={closePrompt}
+      />
+
+      {/* TICKET_199: Naming Dialog */}
+      <NamingDialog
+        visible={namingDialogVisible}
+        contextData={{ algorithm: 'EntrySignal' }}
+        onConfirm={handleConfirmNaming}
+        onCancel={handleCancelNaming}
       />
     </div>
   );

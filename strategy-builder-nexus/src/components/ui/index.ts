@@ -37,3 +37,7 @@ export type { FactorAddSelectorProps, FactorDefinition, FactorBlock } from './Fa
 // TICKET_190: BYOK API Key Prompt
 export { ApiKeyPrompt } from './ApiKeyPrompt';
 export type { ApiKeyPromptProps } from './ApiKeyPrompt';
+
+// TICKET_199: NamingDialog for Builder Pages
+export { NamingDialog } from './NamingDialog';
+export type { NamingDialogProps, NamingDialogContextData } from './NamingDialog';
