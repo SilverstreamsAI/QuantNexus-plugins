@@ -118,13 +118,14 @@ interface LLMAccessResult {
   configuredProvider?: string;
 }
 
-// TICKET_194: LLM Provider Info with verification status
+// TICKET_194/195: LLM Provider Info with verification status and models
 interface LLMProviderInfo {
   id: string;
   name: string;
   configured: boolean;
   status: 'platform' | 'verified' | 'unverified';
   defaultModel: string;
+  models: Array<{ id: string; name: string }>; // TICKET_195
 }
 
 // TICKET_193: API Key Resolution Result

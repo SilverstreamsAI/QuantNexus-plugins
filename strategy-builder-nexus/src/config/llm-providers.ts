@@ -33,6 +33,9 @@ export interface LLMProvider {
 // Provider Definitions
 // =============================================================================
 
+/**
+ * TICKET_195: Updated model list (2026 Latest)
+ */
 export const LLM_PROVIDERS: LLMProvider[] = [
   {
     id: 'NONA',
@@ -51,9 +54,9 @@ export const LLM_PROVIDERS: LLMProvider[] = [
     apiKeyPattern: /^sk-ant-/,
     docsUrl: 'https://console.anthropic.com/settings/keys',
     models: [
-      { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', description: 'Best balance of speed and intelligence' },
-      { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', description: 'Previous generation Sonnet' },
-      { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', description: 'Most capable model' },
+      { id: 'claude-4-5-opus-latest', name: 'Claude 4.5 Opus', description: 'Best intelligence' },
+      { id: 'claude-4-5-sonnet-latest', name: 'Claude 4.5 Sonnet', description: 'Balanced' },
+      { id: 'claude-4-5-haiku-latest', name: 'Claude 4.5 Haiku', description: 'Fast' },
     ],
   },
   {
@@ -64,9 +67,9 @@ export const LLM_PROVIDERS: LLMProvider[] = [
     apiKeyPattern: /^sk-/,
     docsUrl: 'https://platform.openai.com/api-keys',
     models: [
-      { id: 'gpt-4o', name: 'GPT-4o', description: 'Latest multimodal model' },
-      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', description: 'Fast GPT-4' },
-      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast and economical' },
+      { id: 'gpt-5', name: 'GPT-5', description: 'Flagship' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', description: 'Cost-effective' },
+      { id: 'o3-2025-12-16', name: 'OpenAI O3', description: 'Strongest reasoning' },
     ],
   },
   {
@@ -77,9 +80,12 @@ export const LLM_PROVIDERS: LLMProvider[] = [
     apiKeyPattern: /^AIza/,
     docsUrl: 'https://aistudio.google.com/app/apikey',
     models: [
-      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', description: 'Latest fast model' },
-      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', description: 'Advanced reasoning' },
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', description: 'Fast and efficient' },
+      { id: 'gemini-3-pro-latest', name: 'Gemini 3 Pro', description: 'Latest flagship' },
+      { id: 'gemini-3-flash', name: 'Gemini 3 Flash', description: 'Latest lightweight' },
+      { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', description: 'Stable, 2M context' },
+      { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', description: 'General purpose' },
+      { id: 'gemini-2.5-flash-thinking', name: 'Gemini 2.5 Flash (Thinking)', description: 'Chain-of-thought' },
+      { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite', description: 'Cheapest' },
     ],
   },
   {
@@ -89,8 +95,8 @@ export const LLM_PROVIDERS: LLMProvider[] = [
     apiKeyPlaceholder: 'sk-...',
     docsUrl: 'https://platform.deepseek.com/api_keys',
     models: [
-      { id: 'deepseek-chat', name: 'DeepSeek Chat', description: 'General chat model' },
-      { id: 'deepseek-coder', name: 'DeepSeek Coder', description: 'Code generation' },
+      { id: 'deepseek-chat', name: 'DeepSeek V3', description: 'Best value' },
+      { id: 'deepseek-reasoner', name: 'DeepSeek R1', description: 'Reasoning (O1-like)' },
     ],
   },
   {
@@ -101,8 +107,7 @@ export const LLM_PROVIDERS: LLMProvider[] = [
     apiKeyPattern: /^xai-/,
     docsUrl: 'https://console.x.ai/',
     models: [
-      { id: 'grok-2', name: 'Grok 2', description: 'Latest Grok model' },
-      { id: 'grok-beta', name: 'Grok Beta', description: 'Beta version' },
+      { id: 'grok-4', name: 'Grok-4', description: 'Flagship' },
     ],
   },
   {
@@ -112,9 +117,7 @@ export const LLM_PROVIDERS: LLMProvider[] = [
     apiKeyPlaceholder: 'sk-...',
     docsUrl: 'https://dashscope.console.aliyun.com/apiKey',
     models: [
-      { id: 'qwen-max', name: 'Qwen Max', description: 'Most capable Qwen' },
-      { id: 'qwen-plus', name: 'Qwen Plus', description: 'Balanced performance' },
-      { id: 'qwen-turbo', name: 'Qwen Turbo', description: 'Fast responses' },
+      { id: 'qwen3-max', name: 'Qwen 3 Max', description: 'Best Chinese' },
     ],
   },
 ];
