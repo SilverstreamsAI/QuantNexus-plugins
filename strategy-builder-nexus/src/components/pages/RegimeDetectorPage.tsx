@@ -19,7 +19,17 @@ import { RegimeSelector, BespokeData, ExpressionInput, StrategyCard, IndicatorSe
 import { useLLMAccess } from '../../hooks/useLLMAccess';
 
 // TICKET_091: Plugin directly calls API service
-import { executeMarketRegimeAnalysis, validateMarketRegimeConfig, MarketRegimeRule, saveAlgorithm, getErrorMessage, ERROR_CODE_MESSAGES } from '../../services';
+import {
+  executeMarketRegimeAnalysis,
+  validateMarketRegimeConfig,
+  MarketRegimeRule,
+  getErrorMessage,
+  ERROR_CODE_MESSAGES,
+  // TICKET_077_D1: Centralized Algorithm Storage Service
+  getAlgorithmStorageService,
+  buildRegimeDetectorRequest,
+  extractClassName,
+} from '../../services';
 
 // Import indicator data
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
@@ -103,6 +113,26 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
   const [bespokeData, setBespokeData] = useState<BespokeData>({ name: '', notes: '' });
   const [indicatorBlocks, setIndicatorBlocks] = useState<IndicatorBlock[]>([]);
   const [factorBlocks, setFactorBlocks] = useState<FactorBlock[]>([]);
+
+  // TICKET_200: Storage mode preference
+  const [storageMode, setStorageMode] = useState<'local' | 'remote' | 'hybrid'>('local');
+
+  // TICKET_200: Load storage mode from plugin config
+  useEffect(() => {
+    const loadStorageMode = async () => {
+      try {
+        const configResult = await window.electronAPI.plugin.getConfig('com.quantnexus.strategy-builder-nexus');
+        if (configResult.success && configResult.config) {
+          const mode = configResult.config['strategy.dataSource'] as string || 'local';
+          setStorageMode(mode as 'local' | 'remote' | 'hybrid');
+          console.debug('[RegimeDetector] Loaded storage mode:', mode);
+        }
+      } catch (e) {
+        console.error('[RegimeDetector] Failed to load storage mode:', e);
+      }
+    };
+    loadStorageMode();
+  }, []);
 
   // TICKET_190: LLM access check hook
   // Layer 2: checkOnMount for one-time page entry prompt
@@ -286,6 +316,8 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
       bespoke_notes: bespokeData?.notes,
       llm_provider: llmProvider,
       llm_model: llmModel,
+      // TICKET_200: Include storage mode preference
+      storage_mode: storageMode,
     };
 
     const validation = validateMarketRegimeConfig(config);
@@ -312,28 +344,27 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
         console.log('[RegimeDetector] Setting generateResult with code');
         setGenerateResult({ code: result.strategy_code });
 
-        // TICKET_077_COMPONENT7_SAVE_MISSING: Save algorithm to database
+        // TICKET_077_D1: Save algorithm using centralized AlgorithmStorageService
         try {
           console.log('[RegimeDetector] Saving generated algorithm to database...');
-          const saveResult = await saveAlgorithm({
-            strategy_name: finalStrategyName,
-            strategy_type: 9, // Regime Detector
-            generated_code: result.strategy_code,
-            metadata: {
+
+          const storageService = getAlgorithmStorageService();
+          const saveRequest = buildRegimeDetectorRequest(
+            {
+              strategy_name: finalStrategyName,
+              strategy_code: result.strategy_code,
+              class_name: extractClassName(result.strategy_code),
+            },
+            {
               regime: selectedRegime,
               llm_provider: llmProvider,
               llm_model: llmModel,
-              indicator_blocks: indicatorBlocks,
-              factor_blocks: factorBlocks,
-              custom_strategies: strategies,
-            },
-            rules: {
               indicators: indicatorBlocks,
-              factors: factorBlocks,
-              expressions: strategies.map(s => s.expression),
-            },
-            description: `${selectedRegime} regime detection strategy`,
-          });
+              rules: strategies.map(s => ({ expression: s.expression })),
+            }
+          );
+
+          const saveResult = await storageService.save(saveRequest);
 
           if (saveResult.success) {
             console.log('[RegimeDetector] Algorithm saved successfully:', saveResult.data);
@@ -379,7 +410,7 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
     } finally {
       setIsGenerating(false);
     }
-  }, [selectedRegime, bespokeData, indicatorBlocks, factorBlocks, strategies, llmProvider, llmModel]);
+  }, [selectedRegime, bespokeData, indicatorBlocks, factorBlocks, strategies, llmProvider, llmModel, storageMode]);
 
   // TICKET_199: Handle naming dialog confirmation
   const handleConfirmNaming = useCallback((finalName: string) => {

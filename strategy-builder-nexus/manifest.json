@@ -121,22 +121,6 @@
           "category": "Data",
           "order": 1
         },
-        "strategy.autoSave": {
-          "type": "boolean",
-          "default": true,
-          "description": "Automatically save strategy changes",
-          "category": "General",
-          "order": 2
-        },
-        "strategy.autoSaveInterval": {
-          "type": "number",
-          "default": 30000,
-          "minimum": 5000,
-          "maximum": 300000,
-          "description": "Auto-save interval in milliseconds",
-          "category": "General",
-          "order": 3
-        },
         "strategy.apiKey": {
           "type": "string",
           "default": "",

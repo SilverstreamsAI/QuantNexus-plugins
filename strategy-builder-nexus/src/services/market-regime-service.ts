@@ -30,6 +30,8 @@ export interface MarketRegimeConfig {
   bespoke_notes?: string;
   llm_provider?: string;
   llm_model?: string;
+  /** TICKET_200: Storage mode preference - tells server whether to store generated data */
+  storage_mode?: 'local' | 'remote' | 'hybrid';
 }
 
 export interface MarketRegimeRule {
@@ -155,6 +157,8 @@ interface ServerRequest {
   user_id: number;
   strategy_name: string;
   locale: string;
+  /** TICKET_200: Storage mode preference - server should not store data if 'local' */
+  storage_mode?: 'local' | 'remote' | 'hybrid';
   analysis_config: {
     regime: Array<{
       case_type: string;
@@ -263,6 +267,7 @@ function buildPrompt(config: MarketRegimeConfig): string {
 
 /**
  * TICKET_193: Build server request with optional API key
+ * TICKET_200: Include storage_mode preference
  */
 function buildServerRequest(config: MarketRegimeConfig, apiKey?: string): ServerRequest {
   const serverRules = transformRules(config.rules);
@@ -273,6 +278,8 @@ function buildServerRequest(config: MarketRegimeConfig, apiKey?: string): Server
     user_id: 1,
     strategy_name: config.strategy_name || 'Untitled Strategy',
     locale: 'en',
+    // TICKET_200: Include storage mode preference (defaults to 'local' if not specified)
+    storage_mode: config.storage_mode || 'local',
     analysis_config: {
       regime: [{
         case_type: caseType,
