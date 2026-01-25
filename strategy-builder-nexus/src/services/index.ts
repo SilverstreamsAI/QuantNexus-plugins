@@ -55,8 +55,10 @@ export type {
   AlgorithmSaveRequest,
   AlgorithmSaveResult,
   ClassificationMetadata,
-  KronosIndicatorEntryResult,
-  KronosIndicatorEntryConfig,
+  // Note: KronosIndicatorEntryResult/Config from algorithm-storage-service are for storage
+  // Use KronosEntryResult/Config from kronos-indicator-entry-service for API calls
+  KronosIndicatorEntryResult as StorageKronosEntryResult,
+  KronosIndicatorEntryConfig as StorageKronosEntryConfig,
   RegimeDetectorResult,
   RegimeDetectorConfig,
   EntrySignalResult,

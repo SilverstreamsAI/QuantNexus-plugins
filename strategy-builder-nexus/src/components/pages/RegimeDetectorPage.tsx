@@ -4,32 +4,54 @@
  * Market Regime Detector page following TICKET_077 layout specification.
  * Zones: A (Header), B (Sidebar), C (Content), D (Action Bar)
  *
- * TICKET_091: Plugin directly calls API (CSP relaxed)
- * TICKET_095: Plugin manages its own generation state
+ * TICKET_077_D2: Uses unified useGenerateWorkflow hook
  *
  * @see TICKET_077 - Silverstream UI Component Library
+ * @see TICKET_077_D2 - Unified Generate Workflow
  * @see TICKET_078 - Input Theming and Portal Patterns
- * @see TICKET_042 - Strategy Editor Plugin Design
  */
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Settings, Play, Loader2, RotateCcw } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { RegimeSelector, BespokeData, ExpressionInput, StrategyCard, IndicatorSelector, IndicatorBlock, IndicatorDefinition, StrategyTemplate, useValidateBeforeGenerate, CodeDisplay, CodeDisplayState, FactorAddSelector, FactorDefinition, FactorBlock, ApiKeyPrompt, NamingDialog } from '../ui';
-import { useLLMAccess } from '../../hooks/useLLMAccess';
+import {
+  RegimeSelector,
+  BespokeData,
+  ExpressionInput,
+  StrategyCard,
+  IndicatorSelector,
+  IndicatorBlock,
+  IndicatorDefinition,
+  StrategyTemplate,
+  CodeDisplay,
+  FactorAddSelector,
+  FactorDefinition,
+  FactorBlock,
+  ApiKeyPrompt,
+  NamingDialog,
+  GenerateContentWrapper,
+} from '../ui';
 
-// TICKET_091: Plugin directly calls API service
+// TICKET_077_D2: Unified Generate Workflow Hook
+import {
+  useGenerateWorkflow,
+  GenerateWorkflowConfig,
+  GenerationResult,
+} from '../../hooks';
+
+// Services - import from specific modules for consistency
 import {
   executeMarketRegimeAnalysis,
   validateMarketRegimeConfig,
-  MarketRegimeRule,
   getErrorMessage,
   ERROR_CODE_MESSAGES,
-  // TICKET_077_D1: Centralized Algorithm Storage Service
-  getAlgorithmStorageService,
+} from '../../services/market-regime-service';
+import type { MarketRegimeRule, MarketRegimeConfig, MarketRegimeResult } from '../../services/market-regime-service';
+import {
   buildRegimeDetectorRequest,
   extractClassName,
-} from '../../services';
+} from '../../services/algorithm-storage-service';
+import type { AlgorithmSaveRequest } from '../../services/algorithm-storage-service';
 
 // Import indicator data
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
@@ -70,11 +92,6 @@ interface Strategy {
   expression: string;
 }
 
-interface GenerateResult {
-  code?: string;
-  error?: string;
-}
-
 interface RegimeDetectorPageProps {
   onSettingsClick?: () => void;
   /** Page title from navigation - uses feature name from PluginHub button */
@@ -83,6 +100,126 @@ interface RegimeDetectorPageProps {
   llmProvider?: string;
   /** LLM model setting from plugin config */
   llmModel?: string;
+}
+
+/**
+ * Page state passed to workflow config builders
+ */
+interface RegimeDetectorState {
+  selectedRegime: string;
+  bespokeData: BespokeData;
+  indicatorBlocks: IndicatorBlock[];
+  factorBlocks: FactorBlock[];
+  strategies: Strategy[];
+  storageMode: 'local' | 'remote' | 'hybrid';
+  llmProvider: string;
+  llmModel: string;
+}
+
+// -----------------------------------------------------------------------------
+// Workflow Config Builders
+// -----------------------------------------------------------------------------
+
+/**
+ * Build rules array from page state
+ */
+function buildRulesFromState(state: RegimeDetectorState): MarketRegimeRule[] {
+  const rules: MarketRegimeRule[] = [];
+
+  // Add indicator-based rules
+  for (const ind of state.indicatorBlocks) {
+    if (!ind.indicatorSlug) continue;
+
+    const thresholdValue = ind.ruleThresholdValue;
+    const validThreshold = (thresholdValue !== undefined && thresholdValue !== null)
+      ? thresholdValue
+      : 0;
+
+    rules.push({
+      rule_type: 'template_based',
+      indicator: {
+        slug: ind.indicatorSlug,
+        name: ind.indicatorSlug,
+        params: ind.paramValues as Record<string, unknown>,
+      },
+      strategy: {
+        logic: {
+          type: ind.templateKey || 'threshold_level',
+          operator: ind.ruleOperator || '>',
+          threshold_value: validThreshold,
+        },
+      },
+    });
+  }
+
+  // Add custom expression rules
+  for (const expr of state.strategies) {
+    rules.push({
+      rule_type: 'custom_expression',
+      expression: expr.expression,
+    });
+  }
+
+  // Add factor-based rules
+  for (const fac of state.factorBlocks) {
+    if (!fac.factorName) continue;
+
+    rules.push({
+      rule_type: 'factor_based',
+      factor: {
+        name: fac.factorName,
+        category: fac.category,
+        params: fac.paramValues as Record<string, unknown>,
+      },
+    });
+  }
+
+  return rules;
+}
+
+/**
+ * Build API config from page state
+ */
+function buildApiConfig(state: RegimeDetectorState, strategyName: string): MarketRegimeConfig {
+  // Build regime value
+  let regimeValue = state.selectedRegime;
+  if (regimeValue === 'bespoke' && state.bespokeData?.name) {
+    regimeValue = `bespoke_${state.bespokeData.name}`;
+  }
+
+  return {
+    regime: regimeValue,
+    rules: buildRulesFromState(state),
+    strategy_name: strategyName,
+    bespoke_notes: state.bespokeData?.notes,
+    llm_provider: state.llmProvider,
+    llm_model: state.llmModel,
+    storage_mode: state.storageMode,
+  };
+}
+
+/**
+ * Build storage request from API result
+ */
+function buildStorageRequestFromResult(
+  result: GenerationResult,
+  state: RegimeDetectorState,
+  strategyName: string
+): AlgorithmSaveRequest {
+  return buildRegimeDetectorRequest(
+    {
+      strategy_name: strategyName,
+      strategy_code: result.strategy_code || '',
+      class_name: extractClassName(result.strategy_code || ''),
+    },
+    {
+      regime: state.selectedRegime,
+      llm_provider: state.llmProvider,
+      llm_model: state.llmModel,
+      indicators: state.indicatorBlocks,
+      rules: state.strategies.map(s => ({ expression: s.expression })),
+    }
+  );
 }
 
 // -----------------------------------------------------------------------------
@@ -95,29 +232,18 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
   llmProvider = 'NONA',
   llmModel = 'nona-fast',
 }) => {
-  // State
-  const [strategyName, setStrategyName] = useState('New Strategy');
-  const [isSaved, setIsSaved] = useState(false);
+  // ---------------------------------------------------------------------------
+  // Page-specific State (UI inputs)
+  // ---------------------------------------------------------------------------
 
-  // Plugin manages its own generation state (TICKET_095 refactor)
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generateResult, setGenerateResult] = useState<GenerateResult | null>(null);
-
-  // TICKET_199: NamingDialog state
-  const [namingDialogVisible, setNamingDialogVisible] = useState(false);
-
-  // Ref for auto-scroll to code display (TICKET_095)
-  const codeDisplayRef = useRef<HTMLDivElement>(null);
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [selectedRegime, setSelectedRegime] = useState('trend');
   const [bespokeData, setBespokeData] = useState<BespokeData>({ name: '', notes: '' });
   const [indicatorBlocks, setIndicatorBlocks] = useState<IndicatorBlock[]>([]);
   const [factorBlocks, setFactorBlocks] = useState<FactorBlock[]>([]);
-
-  // TICKET_200: Storage mode preference
   const [storageMode, setStorageMode] = useState<'local' | 'remote' | 'hybrid'>('local');
 
-  // TICKET_200: Load storage mode from plugin config
+  // Load storage mode from plugin config
   useEffect(() => {
     const loadStorageMode = async () => {
       try {
@@ -134,289 +260,78 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
     loadStorageMode();
   }, []);
 
-  // TICKET_190: LLM access check hook
-  // Layer 2: checkOnMount for one-time page entry prompt
-  // Layer 3: checkAccess for button click interception
-  const {
-    checkAccess,
-    showPrompt,
-    userTier,
-    closePrompt,
-    openSettings,
-    triggerUpgrade,
-    triggerLogin,
-  } = useLLMAccess({
-    llmProvider, // Pass current provider to determine access rules
-    checkOnMount: true, // Layer 2: Show prompt on page entry (once per session)
-    pageId: 'regime-detector-page', // Unique page identifier for session tracking
-    onOpenSettings: onSettingsClick,
-    onUpgrade: () => {
-      console.log('[RegimeDetector] Upgrade requested');
-      globalThis.nexus?.window?.openExternal?.('https://ai.silvonastream.com/pricing');
-    },
-    onLogin: () => {
-      console.log('[RegimeDetector] Login requested');
-      window.electronAPI.auth?.login();
-    },
-  });
+  // ---------------------------------------------------------------------------
+  // Workflow Configuration
+  // ---------------------------------------------------------------------------
 
-  // Handle strategy name change
+  // Current page state for workflow
+  const currentState: RegimeDetectorState = useMemo(() => ({
+    selectedRegime,
+    bespokeData,
+    indicatorBlocks,
+    factorBlocks,
+    strategies,
+    storageMode,
+    llmProvider,
+    llmModel,
+  }), [selectedRegime, bespokeData, indicatorBlocks, factorBlocks, strategies, storageMode, llmProvider, llmModel]);
+
+  // Validation items
+  const allRules = useMemo(() => [
+    ...indicatorBlocks,
+    ...factorBlocks,
+    ...strategies.map(s => ({ type: 'custom_expression', expression: s.expression })),
+  ], [indicatorBlocks, factorBlocks, strategies]);
+
+  // Workflow config
+  const workflowConfig = useMemo((): GenerateWorkflowConfig<MarketRegimeConfig, RegimeDetectorState> => ({
+    pageId: 'regime-detector-page',
+    llmProvider,
+    llmModel,
+    defaultStrategyName: 'New Strategy',
+    validationErrorMessage: 'Please add at least one indicator, factor, or expression',
+    buildConfig: buildApiConfig,
+    validateConfig: validateMarketRegimeConfig,
+    executeApi: executeMarketRegimeAnalysis as (config: MarketRegimeConfig) => Promise<GenerationResult>,
+    buildStorageRequest: buildStorageRequestFromResult,
+    errorMessages: ERROR_CODE_MESSAGES,
+    getErrorMessage: (result) => getErrorMessage(result as unknown as MarketRegimeResult),
+  }), [llmProvider, llmModel]);
+
+  // ---------------------------------------------------------------------------
+  // Unified Generate Workflow Hook
+  // ---------------------------------------------------------------------------
+
+  const { state, actions, llmAccess, codeDisplayRef } = useGenerateWorkflow(
+    workflowConfig,
+    { onSettingsClick },
+    currentState,
+    allRules
+  );
+
+  // ---------------------------------------------------------------------------
+  // Page-specific Handlers
+  // ---------------------------------------------------------------------------
+
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setStrategyName(e.target.value);
-    setIsSaved(false);
-  }, []);
+    actions.setStrategyName(e.target.value);
+  }, [actions]);
 
-  // Handle add strategy from ExpressionInput
   const handleAddStrategy = useCallback((expression: string) => {
     const newStrategy: Strategy = {
       id: `strategy-${Date.now()}`,
       expression,
     };
     setStrategies(prev => [...prev, newStrategy]);
-    setIsSaved(false);
   }, []);
 
-  // Handle delete strategy
   const handleDeleteStrategy = useCallback((id: string) => {
     setStrategies(prev => prev.filter(s => s.id !== id));
-    setIsSaved(false);
   }, []);
 
-  // Combine all rules for validation (TICKET_087)
-  // Rules = indicatorBlocks (template-based) + factorBlocks + strategies (custom expressions)
-  const allRules = [
-    ...indicatorBlocks,
-    ...factorBlocks,
-    ...strategies.map(s => ({ type: 'custom_expression', expression: s.expression })),
-  ];
-
-  // Validation hook (TICKET_087)
-  const { validate } = useValidateBeforeGenerate({
-    items: allRules,
-    errorMessage: 'Please add at least one indicator, factor, or expression',
-    onValidationFail: (message) => {
-      console.warn('[RegimeDetector] Validation failed:', message);
-      // Use Host modal API via nexus.window (TICKET_096)
-      globalThis.nexus?.window?.showAlert(message);
-    },
-  });
-
-  // Auto-scroll to code display when result is ready (TICKET_095)
-  useEffect(() => {
-    if (generateResult?.code && codeDisplayRef.current) {
-      codeDisplayRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
-  }, [generateResult?.code]);
-
-  // Determine CodeDisplay state (TICKET_095)
-  const getCodeDisplayState = useCallback((): CodeDisplayState => {
-    if (isGenerating) return 'loading';
-    if (generateResult?.error) return 'error';
-    if (generateResult?.code) return 'success';
-    return 'idle';
-  }, [isGenerating, generateResult]);
-
-  // Check if we have a previous result (for button text)
-  const hasResult = Boolean(generateResult?.code);
-
-  // TICKET_199: Show naming dialog before generation
-  const handleShowNamingDialog = useCallback(async () => {
-    // TICKET_190: Check LLM access first
-    const hasAccess = await checkAccess();
-    if (!hasAccess) {
-      return;
-    }
-
-    // Validate UI state before showing dialog
-    if (!validate()) {
-      return;
-    }
-
-    // Show naming dialog
-    setNamingDialogVisible(true);
-  }, [checkAccess, validate]);
-
-  // TICKET_199: Handle naming dialog cancel
-  const handleCancelNaming = useCallback(() => {
-    setNamingDialogVisible(false);
-  }, []);
-
-  // Handle generate with validation (TICKET_087, TICKET_091, TICKET_095, TICKET_190, TICKET_199)
-  // TICKET_091: Plugin directly calls API service (CSP relaxed)
-  // TICKET_199: Called after NamingDialog confirmation with final strategy name
-  const executeGeneration = useCallback(async (finalStrategyName: string) => {
-    // Update strategy name from dialog
-    setStrategyName(finalStrategyName);
-
-    // Build rules from indicators and custom expressions
-    const rules: MarketRegimeRule[] = [];
-
-    // Add indicator-based rules
-    for (const ind of indicatorBlocks) {
-      if (!ind.indicatorSlug) continue;
-
-      const thresholdValue = ind.ruleThresholdValue;
-      const validThreshold = (thresholdValue !== undefined && thresholdValue !== null)
-        ? thresholdValue
-        : 0;
-
-      rules.push({
-        rule_type: 'template_based',
-        indicator: {
-          slug: ind.indicatorSlug,
-          name: ind.indicatorSlug,
-          params: ind.paramValues as Record<string, unknown>,
-        },
-        strategy: {
-          logic: {
-            type: ind.templateKey || 'threshold_level',
-            operator: ind.ruleOperator || '>',
-            threshold_value: validThreshold,
-          },
-        },
-      });
-    }
-
-    // Add custom expression rules
-    for (const expr of strategies) {
-      rules.push({
-        rule_type: 'custom_expression',
-        expression: expr.expression,
-      });
-    }
-
-    // Add factor-based rules
-    for (const fac of factorBlocks) {
-      if (!fac.factorName) continue;
-
-      rules.push({
-        rule_type: 'factor_based',
-        factor: {
-          name: fac.factorName,
-          category: fac.category,
-          params: fac.paramValues as Record<string, unknown>,
-        },
-      });
-    }
-
-    // Build regime value
-    let regimeValue = selectedRegime;
-    if (regimeValue === 'bespoke' && bespokeData?.name) {
-      regimeValue = `bespoke_${bespokeData.name}`;
-    }
-
-    // Validate config
-    const config = {
-      regime: regimeValue,
-      rules,
-      strategy_name: finalStrategyName,
-      bespoke_notes: bespokeData?.notes,
-      llm_provider: llmProvider,
-      llm_model: llmModel,
-      // TICKET_200: Include storage mode preference
-      storage_mode: storageMode,
-    };
-
-    const validation = validateMarketRegimeConfig(config);
-    if (!validation.valid) {
-      console.warn('[RegimeDetector] Validation failed:', validation.error);
-      setGenerateResult({ error: validation.error });
-      return;
-    }
-
-    // Set loading state
-    setIsGenerating(true);
-    setGenerateResult(null);
-
-    try {
-      console.debug('[RegimeDetector] Calling API directly:', config);
-      const result = await executeMarketRegimeAnalysis(config);
-
-      // Debug logs for CodeDisplay verification
-      console.log('[RegimeDetector] API result status:', result.status);
-      console.log('[RegimeDetector] strategy_code length:', result.strategy_code?.length);
-      console.log('[RegimeDetector] strategy_code preview:', result.strategy_code?.substring(0, 200));
-
-      if (result.status === 'completed' && result.strategy_code) {
-        console.log('[RegimeDetector] Setting generateResult with code');
-        setGenerateResult({ code: result.strategy_code });
-
-        // TICKET_077_D1: Save algorithm using centralized AlgorithmStorageService
-        try {
-          console.log('[RegimeDetector] Saving generated algorithm to database...');
-
-          const storageService = getAlgorithmStorageService();
-          const saveRequest = buildRegimeDetectorRequest(
-            {
-              strategy_name: finalStrategyName,
-              strategy_code: result.strategy_code,
-              class_name: extractClassName(result.strategy_code),
-            },
-            {
-              regime: selectedRegime,
-              llm_provider: llmProvider,
-              llm_model: llmModel,
-              indicators: indicatorBlocks,
-              rules: strategies.map(s => ({ expression: s.expression })),
-            }
-          );
-
-          const saveResult = await storageService.save(saveRequest);
-
-          if (saveResult.success) {
-            console.log('[RegimeDetector] Algorithm saved successfully:', saveResult.data);
-            setIsSaved(true);
-          } else {
-            console.error('[RegimeDetector] Failed to save algorithm:', saveResult.error);
-          }
-        } catch (saveError) {
-          console.error('[RegimeDetector] Exception while saving algorithm:', saveError);
-        }
-      } else if (result.status === 'failed' || result.status === 'rejected') {
-        // Use getErrorMessage to get user-friendly error message
-        const errorMsg = getErrorMessage(result);
-        console.error('[RegimeDetector] Generation failed:', result.reason_code || result.error);
-        setGenerateResult({ error: errorMsg });
-
-        // Show error popup using Host modal API
-        globalThis.nexus?.window?.showAlert(errorMsg);
-      } else {
-        setGenerateResult({ error: 'Unexpected result status' });
-      }
-    } catch (error) {
-      console.error('[RegimeDetector] Generate error (catch block):', error);
-
-      // Extract error code and message from thrown error
-      const err = error as Error & { code?: string; reasonCode?: string };
-      const errorCode = err.code || err.reasonCode;
-      console.error('[RegimeDetector] Error code:', errorCode, 'Message:', err.message);
-
-      // Use ERROR_CODE_MESSAGES mapping if error code is available
-      let errorMsg: string;
-      if (errorCode && ERROR_CODE_MESSAGES[errorCode]) {
-        errorMsg = ERROR_CODE_MESSAGES[errorCode];
-      } else {
-        errorMsg = err.message || 'Unknown error';
-      }
-
-      console.log('[RegimeDetector] Final error message:', errorMsg);
-      setGenerateResult({ error: errorMsg });
-
-      // Show error popup for caught exceptions
-      globalThis.nexus?.window?.showAlert(errorMsg);
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [selectedRegime, bespokeData, indicatorBlocks, factorBlocks, strategies, llmProvider, llmModel, storageMode]);
-
-  // TICKET_199: Handle naming dialog confirmation
-  const handleConfirmNaming = useCallback((finalName: string) => {
-    setNamingDialogVisible(false);
-    executeGeneration(finalName);
-  }, [executeGeneration]);
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
 
   return (
     <div className="h-full flex flex-col bg-color-terminal-bg text-color-terminal-text">
@@ -447,7 +362,7 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
             </label>
             <input
               type="text"
-              value={strategyName}
+              value={state.strategyName}
               onChange={handleNameChange}
               placeholder="Strategy Name"
               className="w-full px-3 py-2 text-xs border rounded focus:outline-none"
@@ -462,15 +377,15 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
               <div
                 className={cn(
                   'w-1.5 h-1.5 rounded-full',
-                  isSaved ? 'bg-color-terminal-accent-teal' : 'bg-color-terminal-text-muted'
+                  state.isSaved ? 'bg-color-terminal-accent-teal' : 'bg-color-terminal-text-muted'
                 )}
               />
               <span
                 className={cn(
-                  isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
+                  state.isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
                 )}
               >
-                {isSaved ? 'Saved' : 'Unsaved'}
+                {state.isSaved ? 'Saved' : 'Unsaved'}
               </span>
             </div>
           </div>
@@ -482,62 +397,69 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
           {/* Zone C: Variable Content Area                                   */}
           {/* ============================================================== */}
           <div className="flex-1 overflow-y-auto p-6">
-            {/* component2: Regime Selector */}
-            <RegimeSelector
-              selectedRegime={selectedRegime}
-              onSelect={setSelectedRegime}
-              bespokeData={bespokeData}
-              onBespokeChange={setBespokeData}
-              className="mb-8"
-            />
+            {/* TICKET_077_D3: Wrap input area with GenerateContentWrapper */}
+            <GenerateContentWrapper
+              isGenerating={state.isGenerating}
+              loadingMessage="Generating strategy code..."
+            >
+              {/* component2: Regime Selector */}
+              <RegimeSelector
+                selectedRegime={selectedRegime}
+                onSelect={setSelectedRegime}
+                bespokeData={bespokeData}
+                onBespokeChange={setBespokeData}
+                className="mb-8"
+              />
 
-            {/* component3: Indicator Selector */}
-            <IndicatorSelector
-              indicators={indicatorData as IndicatorDefinition[]}
-              templates={strategyTemplates as Record<string, StrategyTemplate>}
-              blocks={indicatorBlocks}
-              onChange={setIndicatorBlocks}
-              className="mb-8"
-            />
+              {/* component3: Indicator Selector */}
+              <IndicatorSelector
+                indicators={indicatorData as IndicatorDefinition[]}
+                templates={strategyTemplates as Record<string, StrategyTemplate>}
+                blocks={indicatorBlocks}
+                onChange={setIndicatorBlocks}
+                className="mb-8"
+              />
 
-            {/* component6: Factor Add Selector */}
-            <FactorAddSelector
-              factors={sampleFactors}
-              blocks={factorBlocks}
-              onChange={setFactorBlocks}
-              maxRecommended={3}
-              className="mb-8"
-            />
+              {/* component6: Factor Add Selector */}
+              <FactorAddSelector
+                factors={sampleFactors}
+                blocks={factorBlocks}
+                onChange={setFactorBlocks}
+                maxRecommended={3}
+                className="mb-8"
+              />
 
-            {/* component1: Expression Builder (Input + Cards) */}
-            <ExpressionInput
-              onAdd={handleAddStrategy}
-              className="mb-6"
-            />
+              {/* component1: Expression Builder (Input + Cards) */}
+              <ExpressionInput
+                onAdd={handleAddStrategy}
+                className="mb-6"
+              />
 
-            {/* Strategy Cards */}
-            {strategies.length > 0 && (
-              <div className="space-y-3">
-                {strategies.map((strategy) => (
-                  <StrategyCard
-                    key={strategy.id}
-                    id={strategy.id}
-                    expression={strategy.expression}
-                    onDelete={handleDeleteStrategy}
-                  />
-                ))}
-              </div>
-            )}
+              {/* Strategy Cards */}
+              {strategies.length > 0 && (
+                <div className="space-y-3">
+                  {strategies.map((strategy) => (
+                    <StrategyCard
+                      key={strategy.id}
+                      id={strategy.id}
+                      expression={strategy.expression}
+                      onDelete={handleDeleteStrategy}
+                    />
+                  ))}
+                </div>
+              )}
+            </GenerateContentWrapper>
 
             {/* ============================================================ */}
-            {/* Result Display Area - component5: CodeDisplay (TICKET_095)    */}
+            {/* Result Display Area - component5: CodeDisplay                 */}
+            {/* (Outside wrapper - always visible during generation)          */}
             {/* ============================================================ */}
-            {(generateResult || isGenerating) && (
+            {(state.generateResult || state.isGenerating) && (
               <div ref={codeDisplayRef} className="mt-8">
                 <CodeDisplay
-                  code={generateResult?.code || ''}
-                  state={getCodeDisplayState()}
-                  errorMessage={generateResult?.error}
+                  code={state.generateResult?.code || ''}
+                  state={actions.getCodeDisplayState()}
+                  errorMessage={state.generateResult?.error}
                   title="GENERATED STRATEGY CODE"
                   showLineNumbers={true}
                   maxHeight="400px"
@@ -550,23 +472,22 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
           {/* Zone D: Action Bar                                              */}
           {/* ============================================================== */}
           <div className="flex-shrink-0 border-t border-color-terminal-border bg-color-terminal-surface/50 p-4">
-            {/* Primary Action (TICKET_095: Show REGENERATE when has result, TICKET_199: Show NamingDialog) */}
             <button
-              onClick={handleShowNamingDialog}
-              disabled={isGenerating}
+              onClick={actions.handleStartGenerate}
+              disabled={state.isGenerating}
               className={cn(
                 "w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all",
-                isGenerating
+                state.isGenerating
                   ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
                   : "border-color-terminal-accent-gold bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20"
               )}
             >
-              {isGenerating ? (
+              {state.isGenerating ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Generating...
                 </>
-              ) : hasResult ? (
+              ) : actions.hasResult ? (
                 <>
                   <RotateCcw className="w-4 h-4" />
                   Regenerate
@@ -584,20 +505,20 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
 
       {/* TICKET_190: API Key Prompt */}
       <ApiKeyPrompt
-        isOpen={showPrompt}
-        userTier={userTier}
-        onConfigure={openSettings}
-        onUpgrade={triggerUpgrade}
-        onLogin={triggerLogin}
-        onDismiss={closePrompt}
+        isOpen={llmAccess.showPrompt}
+        userTier={llmAccess.userTier}
+        onConfigure={llmAccess.openSettings}
+        onUpgrade={llmAccess.triggerUpgrade}
+        onLogin={llmAccess.triggerLogin}
+        onDismiss={llmAccess.closePrompt}
       />
 
       {/* TICKET_199: Naming Dialog */}
       <NamingDialog
-        visible={namingDialogVisible}
+        visible={state.namingDialogVisible}
         contextData={{ algorithm: selectedRegime || 'Regime' }}
-        onConfirm={handleConfirmNaming}
-        onCancel={handleCancelNaming}
+        onConfirm={actions.handleConfirmNaming}
+        onCancel={actions.handleCancelNaming}
       />
     </div>
   );

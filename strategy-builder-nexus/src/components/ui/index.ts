@@ -41,3 +41,7 @@ export type { ApiKeyPromptProps } from './ApiKeyPrompt';
 // TICKET_199: NamingDialog for Builder Pages
 export { NamingDialog } from './NamingDialog';
 export type { NamingDialogProps, NamingDialogContextData } from './NamingDialog';
+
+// TICKET_077_D3: Generate Content Wrapper
+export { GenerateContentWrapper } from './GenerateContentWrapper';
+export type { GenerateContentWrapperProps } from './GenerateContentWrapper';

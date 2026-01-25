@@ -3,16 +3,15 @@
  *
  * Entry Signal Generator page following TICKET_077 layout specification.
  * Zones: A (Header), B (Sidebar), C (Content), D (Action Bar)
- * Zone C displays: component2 (RegimeSelector), component3 (IndicatorSelector),
- * component6 (FactorAddSelector), component1 (ExpressionInput + StrategyCards),
- * component5 (CodeDisplay).
+ *
+ * TICKET_077_D2: Uses unified useGenerateWorkflow hook
  *
  * @see TICKET_077 - Silverstream UI Component Library
- * @see TICKET_077_1 - Page Hierarchy and Navigation
+ * @see TICKET_077_D2 - Unified Generate Workflow
  * @see TICKET_078 - Input Theming and Portal Patterns
  */
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Settings, Play, Loader2, RotateCcw } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -24,31 +23,36 @@ import {
   IndicatorBlock,
   IndicatorDefinition,
   StrategyTemplate,
-  useValidateBeforeGenerate,
   CodeDisplay,
-  CodeDisplayState,
   FactorAddSelector,
   FactorDefinition,
   FactorBlock,
   ApiKeyPrompt,
   NamingDialog,
+  GenerateContentWrapper,
 } from '../ui';
-import { useLLMAccess } from '../../hooks/useLLMAccess';
 
-// TICKET_201: Import correct API service for Entry Signal generation
-// Entry signals use /api/start_regime_indicator_entry (generates StandaloneStrategyBase)
-// NOT /api/start_market_regime_analysis (generates MarketStateBase)
+// TICKET_077_D2: Unified Generate Workflow Hook
+import {
+  useGenerateWorkflow,
+  GenerateWorkflowConfig,
+  GenerationResult,
+} from '../../hooks';
+
+// Services - import from specific modules to avoid type conflicts
 import {
   executeKronosIndicatorEntry,
   validateKronosIndicatorEntryConfig,
   IndicatorEntryRule,
   getEntryErrorMessage,
   ENTRY_ERROR_CODE_MESSAGES,
-  // TICKET_077_D1: Centralized Algorithm Storage Service
-  getAlgorithmStorageService,
+} from '../../services/kronos-indicator-entry-service';
+import type { KronosIndicatorEntryConfig, KronosIndicatorEntryResult } from '../../services/kronos-indicator-entry-service';
+import {
   buildEntrySignalRequest,
   extractClassName,
-} from '../../services';
+} from '../../services/algorithm-storage-service';
+import type { AlgorithmSaveRequest } from '../../services/algorithm-storage-service';
 
 // Import indicator data
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
@@ -89,11 +93,6 @@ interface Strategy {
   expression: string;
 }
 
-interface GenerateResult {
-  code?: string;
-  error?: string;
-}
-
 interface EntrySignalPageProps {
   onSettingsClick?: () => void;
   /** Page title from navigation - uses feature name from PluginHub button */
@@ -102,6 +101,118 @@ interface EntrySignalPageProps {
   llmProvider?: string;
   /** LLM model setting from plugin config */
   llmModel?: string;
+}
+
+/**
+ * Page state passed to workflow config builders
+ */
+interface EntrySignalState {
+  selectedRegime: string;
+  indicatorBlocks: IndicatorBlock[];
+  factorBlocks: FactorBlock[];
+  strategies: Strategy[];
+  storageMode: 'local' | 'remote' | 'hybrid';
+  llmProvider: string;
+  llmModel: string;
+}
+
+// -----------------------------------------------------------------------------
+// Workflow Config Builders
+// -----------------------------------------------------------------------------
+
+/**
+ * Build rules array from page state
+ */
+function buildRulesFromState(state: EntrySignalState): IndicatorEntryRule[] {
+  const rules: IndicatorEntryRule[] = [];
+
+  // Add indicator-based rules
+  for (const ind of state.indicatorBlocks) {
+    if (!ind.indicatorSlug) continue;
+
+    const thresholdValue = ind.ruleThresholdValue;
+    const validThreshold = (thresholdValue !== undefined && thresholdValue !== null)
+      ? thresholdValue
+      : 0;
+
+    rules.push({
+      rule_type: 'template_based',
+      indicator: {
+        slug: ind.indicatorSlug,
+        name: ind.indicatorSlug,
+        params: ind.paramValues as Record<string, unknown>,
+      },
+      strategy: {
+        logic: {
+          type: ind.templateKey || 'threshold_level',
+          operator: ind.ruleOperator || '>',
+          threshold_value: validThreshold,
+        },
+      },
+    });
+  }
+
+  // Add custom expression rules
+  for (const expr of state.strategies) {
+    rules.push({
+      rule_type: 'custom_expression',
+      expression: expr.expression,
+    });
+  }
+
+  // Add factor-based rules
+  for (const fac of state.factorBlocks) {
+    if (!fac.factorName) continue;
+
+    rules.push({
+      rule_type: 'factor_based',
+      factor: {
+        name: fac.factorName,
+        category: fac.category,
+        params: fac.paramValues as Record<string, unknown>,
+      },
+    });
+  }
+
+  return rules;
+}
+
+/**
+ * Build API config from page state
+ */
+function buildApiConfig(state: EntrySignalState, strategyName: string): KronosIndicatorEntryConfig {
+  return {
+    strategy_name: strategyName,
+    rules: buildRulesFromState(state),
+    entry_signal_base: state.selectedRegime as 'standalone' | 'trend' | 'range',
+    llm_provider: state.llmProvider,
+    llm_model: state.llmModel,
+    storage_mode: state.storageMode,
+  };
+}
+
+/**
+ * Build storage request from API result
+ */
+function buildStorageRequestFromResult(
+  result: GenerationResult,
+  state: EntrySignalState,
+  strategyName: string
+): AlgorithmSaveRequest {
+  return buildEntrySignalRequest(
+    {
+      strategy_name: strategyName,
+      strategy_code: result.strategy_code || '',
+      class_name: extractClassName(result.strategy_code || ''),
+    },
+    {
+      regime: state.selectedRegime,
+      indicator_blocks: state.indicatorBlocks,
+      factor_blocks: state.factorBlocks,
+      llm_provider: state.llmProvider,
+      llm_model: state.llmModel,
+    }
+  );
 }
 
 // -----------------------------------------------------------------------------
@@ -114,29 +225,18 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
   llmProvider = 'NONA',
   llmModel = 'nona-fast',
 }) => {
-  // State
-  const [strategyName, setStrategyName] = useState('New Entry Strategy');
-  const [isSaved, setIsSaved] = useState(false);
+  // ---------------------------------------------------------------------------
+  // Page-specific State (UI inputs)
+  // ---------------------------------------------------------------------------
 
-  // Plugin manages its own generation state (TICKET_095 refactor)
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generateResult, setGenerateResult] = useState<GenerateResult | null>(null);
-
-  // TICKET_199: NamingDialog state
-  const [namingDialogVisible, setNamingDialogVisible] = useState(false);
-
-  // Ref for auto-scroll to code display (TICKET_095)
-  const codeDisplayRef = useRef<HTMLDivElement>(null);
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [selectedRegime, setSelectedRegime] = useState('trend');
   const [bespokeData, setBespokeData] = useState<BespokeData>({ name: '', notes: '' });
   const [indicatorBlocks, setIndicatorBlocks] = useState<IndicatorBlock[]>([]);
   const [factorBlocks, setFactorBlocks] = useState<FactorBlock[]>([]);
-
-  // TICKET_200: Storage mode preference
   const [storageMode, setStorageMode] = useState<'local' | 'remote' | 'hybrid'>('local');
 
-  // TICKET_200: Load storage mode from plugin config
+  // Load storage mode from plugin config
   useEffect(() => {
     const loadStorageMode = async () => {
       try {
@@ -153,290 +253,77 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
     loadStorageMode();
   }, []);
 
-  // TICKET_190: LLM access check hook
-  // Layer 2: checkOnMount for one-time page entry prompt
-  // Layer 3: checkAccess for button click interception
-  const {
-    checkAccess,
-    showPrompt,
-    userTier,
-    closePrompt,
-    openSettings,
-    triggerUpgrade,
-    triggerLogin,
-  } = useLLMAccess({
-    llmProvider, // Pass current provider to determine access rules
-    checkOnMount: true, // Layer 2: Show prompt on page entry (once per session)
-    pageId: 'entry-signal-page', // Unique page identifier for session tracking
-    onOpenSettings: onSettingsClick,
-    onUpgrade: () => {
-      // Open upgrade page (could use nexus.window.openExternal)
-      console.log('[EntrySignal] Upgrade requested');
-      globalThis.nexus?.window?.openExternal?.('https://ai.silvonastream.com/pricing');
-    },
-    onLogin: () => {
-      // Trigger login flow
-      console.log('[EntrySignal] Login requested');
-      window.electronAPI.auth?.login();
-    },
-  });
+  // ---------------------------------------------------------------------------
+  // Workflow Configuration
+  // ---------------------------------------------------------------------------
 
-  // Handle strategy name change
+  // Current page state for workflow
+  const currentState: EntrySignalState = useMemo(() => ({
+    selectedRegime,
+    indicatorBlocks,
+    factorBlocks,
+    strategies,
+    storageMode,
+    llmProvider,
+    llmModel,
+  }), [selectedRegime, indicatorBlocks, factorBlocks, strategies, storageMode, llmProvider, llmModel]);
+
+  // Validation items
+  const allRules = useMemo(() => [
+    ...indicatorBlocks,
+    ...factorBlocks,
+    ...strategies.map(s => ({ type: 'custom_expression', expression: s.expression })),
+  ], [indicatorBlocks, factorBlocks, strategies]);
+
+  // Workflow config
+  const workflowConfig = useMemo((): GenerateWorkflowConfig<KronosIndicatorEntryConfig, EntrySignalState> => ({
+    pageId: 'entry-signal-page',
+    llmProvider,
+    llmModel,
+    defaultStrategyName: 'New Entry Strategy',
+    validationErrorMessage: 'Please add at least one indicator, factor, or expression',
+    buildConfig: buildApiConfig,
+    validateConfig: validateKronosIndicatorEntryConfig,
+    executeApi: executeKronosIndicatorEntry as (config: KronosIndicatorEntryConfig) => Promise<GenerationResult>,
+    buildStorageRequest: buildStorageRequestFromResult,
+    errorMessages: ENTRY_ERROR_CODE_MESSAGES,
+    getErrorMessage: (result) => getEntryErrorMessage(result as unknown as KronosIndicatorEntryResult),
+  }), [llmProvider, llmModel]);
+
+  // ---------------------------------------------------------------------------
+  // Unified Generate Workflow Hook
+  // ---------------------------------------------------------------------------
+
+  const { state, actions, llmAccess, codeDisplayRef } = useGenerateWorkflow(
+    workflowConfig,
+    { onSettingsClick },
+    currentState,
+    allRules
+  );
+
+  // ---------------------------------------------------------------------------
+  // Page-specific Handlers
+  // ---------------------------------------------------------------------------
+
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setStrategyName(e.target.value);
-    setIsSaved(false);
-  }, []);
+    actions.setStrategyName(e.target.value);
+  }, [actions]);
 
-  // Handle add strategy from ExpressionInput
   const handleAddStrategy = useCallback((expression: string) => {
     const newStrategy: Strategy = {
       id: `strategy-${Date.now()}`,
       expression,
     };
     setStrategies(prev => [...prev, newStrategy]);
-    setIsSaved(false);
   }, []);
 
-  // Handle delete strategy
   const handleDeleteStrategy = useCallback((id: string) => {
     setStrategies(prev => prev.filter(s => s.id !== id));
-    setIsSaved(false);
   }, []);
 
-  // Combine all rules for validation (TICKET_087)
-  // Rules = indicatorBlocks (template-based) + factorBlocks + strategies (custom expressions)
-  const allRules = [
-    ...indicatorBlocks,
-    ...factorBlocks,
-    ...strategies.map(s => ({ type: 'custom_expression', expression: s.expression })),
-  ];
-
-  // Validation hook (TICKET_087)
-  const { validate } = useValidateBeforeGenerate({
-    items: allRules,
-    errorMessage: 'Please add at least one indicator, factor, or expression',
-    onValidationFail: (message) => {
-      console.warn('[EntrySignal] Validation failed:', message);
-      // Use Host modal API via nexus.window (TICKET_096)
-      globalThis.nexus?.window?.showAlert(message);
-    },
-  });
-
-  // Auto-scroll to code display when result is ready (TICKET_095)
-  useEffect(() => {
-    if (generateResult?.code && codeDisplayRef.current) {
-      codeDisplayRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
-  }, [generateResult?.code]);
-
-  // Determine CodeDisplay state (TICKET_095)
-  const getCodeDisplayState = useCallback((): CodeDisplayState => {
-    if (isGenerating) return 'loading';
-    if (generateResult?.error) return 'error';
-    if (generateResult?.code) return 'success';
-    return 'idle';
-  }, [isGenerating, generateResult]);
-
-  // Check if we have a previous result (for button text)
-  const hasResult = Boolean(generateResult?.code);
-
-  // TICKET_199: Show naming dialog before generation
-  const handleShowNamingDialog = useCallback(async () => {
-    // TICKET_190: Check LLM access first
-    const hasAccess = await checkAccess();
-    if (!hasAccess) {
-      return;
-    }
-
-    // Validate UI state before showing dialog
-    if (!validate()) {
-      return;
-    }
-
-    // Show naming dialog
-    setNamingDialogVisible(true);
-  }, [checkAccess, validate]);
-
-  // TICKET_199: Handle naming dialog cancel
-  const handleCancelNaming = useCallback(() => {
-    setNamingDialogVisible(false);
-  }, []);
-
-  // Handle generate with validation (TICKET_087, TICKET_091, TICKET_095, TICKET_190, TICKET_199, TICKET_201)
-  // TICKET_091: Plugin directly calls API service (CSP relaxed)
-  // TICKET_199: Called after NamingDialog confirmation with final strategy name
-  // TICKET_201: Use correct API - /api/start_regime_indicator_entry for entry signals
-  const executeGeneration = useCallback(async (finalStrategyName: string) => {
-    // Update strategy name from dialog
-    setStrategyName(finalStrategyName);
-
-    // Build rules from indicators and custom expressions
-    // TICKET_201: Use IndicatorEntryRule type for correct API
-    const rules: IndicatorEntryRule[] = [];
-
-    // Add indicator-based rules
-    for (const ind of indicatorBlocks) {
-      if (!ind.indicatorSlug) continue;
-
-      const thresholdValue = ind.ruleThresholdValue;
-      const validThreshold = (thresholdValue !== undefined && thresholdValue !== null)
-        ? thresholdValue
-        : 0;
-
-      rules.push({
-        rule_type: 'template_based',
-        indicator: {
-          slug: ind.indicatorSlug,
-          name: ind.indicatorSlug,
-          params: ind.paramValues as Record<string, unknown>,
-        },
-        strategy: {
-          logic: {
-            type: ind.templateKey || 'threshold_level',
-            operator: ind.ruleOperator || '>',
-            threshold_value: validThreshold,
-          },
-        },
-      });
-    }
-
-    // Add custom expression rules
-    for (const expr of strategies) {
-      rules.push({
-        rule_type: 'custom_expression',
-        expression: expr.expression,
-      });
-    }
-
-    // Add factor-based rules
-    for (const fac of factorBlocks) {
-      if (!fac.factorName) continue;
-
-      rules.push({
-        rule_type: 'factor_based',
-        factor: {
-          name: fac.factorName,
-          category: fac.category,
-          params: fac.paramValues as Record<string, unknown>,
-        },
-      });
-    }
-
-    // TICKET_201: Build config for RegimeIndicatorEntry API
-    // Server supports: trend, range, consolidation, oscillation, bespoke, standalone
-    const config = {
-      strategy_name: finalStrategyName,
-      rules,
-      entry_signal_base: selectedRegime as 'standalone' | 'trend' | 'range',
-      llm_provider: llmProvider,
-      llm_model: llmModel,
-      storage_mode: storageMode,
-    };
-
-    // TICKET_201: Use correct validation function
-    const validation = validateKronosIndicatorEntryConfig(config);
-    if (!validation.valid) {
-      console.warn('[EntrySignal] Validation failed:', validation.error);
-      setGenerateResult({ error: validation.error });
-      return;
-    }
-
-    // Set loading state
-    setIsGenerating(true);
-    setGenerateResult(null);
-
-    try {
-      // TICKET_201: Call correct API endpoint for entry signal generation
-      // This generates StandaloneStrategyBase with actual trading logic
-      console.debug('[EntrySignal] Calling regime_indicator_entry API:', config);
-      const result = await executeKronosIndicatorEntry(config);
-
-      // Debug logs for CodeDisplay verification
-      console.log('[EntrySignal] API result status:', result.status);
-      console.log('[EntrySignal] strategy_code length:', result.strategy_code?.length);
-      console.log('[EntrySignal] strategy_code preview:', result.strategy_code?.substring(0, 200));
-
-      if (result.status === 'completed' && result.strategy_code) {
-        console.log('[EntrySignal] Setting generateResult with code');
-        setGenerateResult({ code: result.strategy_code });
-
-        // TICKET_077_D1: Save algorithm using centralized AlgorithmStorageService
-        try {
-          console.log('[EntrySignal] Saving generated algorithm to database...');
-
-          const storageService = getAlgorithmStorageService();
-          const saveRequest = buildEntrySignalRequest(
-            {
-              strategy_name: finalStrategyName,
-              strategy_code: result.strategy_code,
-              class_name: extractClassName(result.strategy_code),
-            },
-            {
-              regime: selectedRegime,
-              indicator_blocks: indicatorBlocks,
-              factor_blocks: factorBlocks,
-              llm_provider: llmProvider,
-              llm_model: llmModel,
-            }
-          );
-
-          const saveResult = await storageService.save(saveRequest);
-
-          if (saveResult.success) {
-            console.log('[EntrySignal] Algorithm saved successfully:', saveResult.data);
-            setIsSaved(true);
-          } else {
-            console.error('[EntrySignal] Failed to save algorithm:', saveResult.error);
-          }
-        } catch (saveError) {
-          console.error('[EntrySignal] Exception while saving algorithm:', saveError);
-        }
-      } else if (result.status === 'failed' || result.status === 'rejected') {
-        // TICKET_201: Use getEntryErrorMessage for correct error mapping
-        const errorMsg = getEntryErrorMessage(result);
-        console.error('[EntrySignal] Generation failed:', result.reason_code || result.error);
-        setGenerateResult({ error: errorMsg });
-
-        // Show error popup using Host modal API
-        globalThis.nexus?.window?.showAlert(errorMsg);
-      } else {
-        setGenerateResult({ error: 'Unexpected result status' });
-      }
-    } catch (error) {
-      console.error('[EntrySignal] Generate error (catch block):', error);
-
-      // Extract error code and message from thrown error
-      const err = error as Error & { code?: string; reasonCode?: string };
-      const errorCode = err.code || err.reasonCode;
-      console.error('[EntrySignal] Error code:', errorCode, 'Message:', err.message);
-
-      // TICKET_201: Use ENTRY_ERROR_CODE_MESSAGES for correct error mapping
-      let errorMsg: string;
-      if (errorCode && ENTRY_ERROR_CODE_MESSAGES[errorCode]) {
-        errorMsg = ENTRY_ERROR_CODE_MESSAGES[errorCode];
-      } else {
-        errorMsg = err.message || 'Unknown error';
-      }
-
-      console.log('[EntrySignal] Final error message:', errorMsg);
-      setGenerateResult({ error: errorMsg });
-
-      // Show error popup for caught exceptions
-      globalThis.nexus?.window?.showAlert(errorMsg);
-      console.log('[EntrySignal] showAlert called with:', errorMsg);
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [selectedRegime, indicatorBlocks, factorBlocks, strategies, llmProvider, llmModel, storageMode]);
-
-  // TICKET_199: Handle naming dialog confirmation
-  const handleConfirmNaming = useCallback((finalName: string) => {
-    setNamingDialogVisible(false);
-    executeGeneration(finalName);
-  }, [executeGeneration]);
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
 
   return (
     <div className="h-full flex flex-col bg-color-terminal-bg text-color-terminal-text">
@@ -467,7 +354,7 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
             </label>
             <input
               type="text"
-              value={strategyName}
+              value={state.strategyName}
               onChange={handleNameChange}
               placeholder="Strategy Name"
               className="w-full px-3 py-2 text-xs border rounded focus:outline-none"
@@ -482,15 +369,15 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
               <div
                 className={cn(
                   'w-1.5 h-1.5 rounded-full',
-                  isSaved ? 'bg-color-terminal-accent-teal' : 'bg-color-terminal-text-muted'
+                  state.isSaved ? 'bg-color-terminal-accent-teal' : 'bg-color-terminal-text-muted'
                 )}
               />
               <span
                 className={cn(
-                  isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
+                  state.isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
                 )}
               >
-                {isSaved ? 'Saved' : 'Unsaved'}
+                {state.isSaved ? 'Saved' : 'Unsaved'}
               </span>
             </div>
           </div>
@@ -502,62 +389,69 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
           {/* Zone C: Variable Content Area                                   */}
           {/* ============================================================== */}
           <div className="flex-1 overflow-y-auto p-6">
-            {/* component2: Regime Selector */}
-            <RegimeSelector
-              selectedRegime={selectedRegime}
-              onSelect={setSelectedRegime}
-              bespokeData={bespokeData}
-              onBespokeChange={setBespokeData}
-              className="mb-8"
-            />
+            {/* TICKET_077_D3: Wrap input area with GenerateContentWrapper */}
+            <GenerateContentWrapper
+              isGenerating={state.isGenerating}
+              loadingMessage="Generating entry signal code..."
+            >
+              {/* component2: Regime Selector */}
+              <RegimeSelector
+                selectedRegime={selectedRegime}
+                onSelect={setSelectedRegime}
+                bespokeData={bespokeData}
+                onBespokeChange={setBespokeData}
+                className="mb-8"
+              />
 
-            {/* component3: Indicator Selector */}
-            <IndicatorSelector
-              indicators={indicatorData as IndicatorDefinition[]}
-              templates={strategyTemplates as Record<string, StrategyTemplate>}
-              blocks={indicatorBlocks}
-              onChange={setIndicatorBlocks}
-              className="mb-8"
-            />
+              {/* component3: Indicator Selector */}
+              <IndicatorSelector
+                indicators={indicatorData as IndicatorDefinition[]}
+                templates={strategyTemplates as Record<string, StrategyTemplate>}
+                blocks={indicatorBlocks}
+                onChange={setIndicatorBlocks}
+                className="mb-8"
+              />
 
-            {/* component6: Factor Add Selector */}
-            <FactorAddSelector
-              factors={sampleFactors}
-              blocks={factorBlocks}
-              onChange={setFactorBlocks}
-              maxRecommended={3}
-              className="mb-8"
-            />
+              {/* component6: Factor Add Selector */}
+              <FactorAddSelector
+                factors={sampleFactors}
+                blocks={factorBlocks}
+                onChange={setFactorBlocks}
+                maxRecommended={3}
+                className="mb-8"
+              />
 
-            {/* component1: Expression Builder (Input + Cards) */}
-            <ExpressionInput
-              onAdd={handleAddStrategy}
-              className="mb-6"
-            />
+              {/* component1: Expression Builder (Input + Cards) */}
+              <ExpressionInput
+                onAdd={handleAddStrategy}
+                className="mb-6"
+              />
 
-            {/* Strategy Cards */}
-            {strategies.length > 0 && (
-              <div className="space-y-3">
-                {strategies.map((strategy) => (
-                  <StrategyCard
-                    key={strategy.id}
-                    id={strategy.id}
-                    expression={strategy.expression}
-                    onDelete={handleDeleteStrategy}
-                  />
-                ))}
-              </div>
-            )}
+              {/* Strategy Cards */}
+              {strategies.length > 0 && (
+                <div className="space-y-3">
+                  {strategies.map((strategy) => (
+                    <StrategyCard
+                      key={strategy.id}
+                      id={strategy.id}
+                      expression={strategy.expression}
+                      onDelete={handleDeleteStrategy}
+                    />
+                  ))}
+                </div>
+              )}
+            </GenerateContentWrapper>
 
             {/* ============================================================ */}
-            {/* Result Display Area - component5: CodeDisplay (TICKET_095)    */}
+            {/* Result Display Area - component5: CodeDisplay                 */}
+            {/* (Outside wrapper - always visible during generation)          */}
             {/* ============================================================ */}
-            {(generateResult || isGenerating) && (
+            {(state.generateResult || state.isGenerating) && (
               <div ref={codeDisplayRef} className="mt-8">
                 <CodeDisplay
-                  code={generateResult?.code || ''}
-                  state={getCodeDisplayState()}
-                  errorMessage={generateResult?.error}
+                  code={state.generateResult?.code || ''}
+                  state={actions.getCodeDisplayState()}
+                  errorMessage={state.generateResult?.error}
                   title="GENERATED ENTRY SIGNAL CODE"
                   showLineNumbers={true}
                   maxHeight="400px"
@@ -570,23 +464,22 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
           {/* Zone D: Action Bar                                              */}
           {/* ============================================================== */}
           <div className="flex-shrink-0 border-t border-color-terminal-border bg-color-terminal-surface/50 p-4">
-            {/* Primary Action (TICKET_095: Show REGENERATE when has result, TICKET_199: Show NamingDialog) */}
             <button
-              onClick={handleShowNamingDialog}
-              disabled={isGenerating}
+              onClick={actions.handleStartGenerate}
+              disabled={state.isGenerating}
               className={cn(
                 "w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all",
-                isGenerating
+                state.isGenerating
                   ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
                   : "border-color-terminal-accent-gold bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20"
               )}
             >
-              {isGenerating ? (
+              {state.isGenerating ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Generating...
                 </>
-              ) : hasResult ? (
+              ) : actions.hasResult ? (
                 <>
                   <RotateCcw className="w-4 h-4" />
                   Regenerate
@@ -604,20 +497,20 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
 
       {/* TICKET_190: API Key Prompt */}
       <ApiKeyPrompt
-        isOpen={showPrompt}
-        userTier={userTier}
-        onConfigure={openSettings}
-        onUpgrade={triggerUpgrade}
-        onLogin={triggerLogin}
-        onDismiss={closePrompt}
+        isOpen={llmAccess.showPrompt}
+        userTier={llmAccess.userTier}
+        onConfigure={llmAccess.openSettings}
+        onUpgrade={llmAccess.triggerUpgrade}
+        onLogin={llmAccess.triggerLogin}
+        onDismiss={llmAccess.closePrompt}
       />
 
       {/* TICKET_199: Naming Dialog */}
       <NamingDialog
-        visible={namingDialogVisible}
+        visible={state.namingDialogVisible}
         contextData={{ algorithm: 'EntrySignal' }}
-        onConfirm={handleConfirmNaming}
-        onCancel={handleCancelNaming}
+        onConfirm={actions.handleConfirmNaming}
+        onCancel={actions.handleCancelNaming}
       />
     </div>
   );

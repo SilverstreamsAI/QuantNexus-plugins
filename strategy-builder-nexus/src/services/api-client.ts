@@ -79,14 +79,19 @@ class PluginApiClient {
     log.info(`Request: ${options.method || 'GET'} ${url}`);
 
     // TICKET_184: Get access token from Main Process via IPC
+    // TICKET_201: Enhanced logging for auth debugging
     let accessToken: string | null = null;
     try {
+      log.debug('getAccessToken: calling IPC...');
       const tokenResult = await window.electronAPI?.auth?.getAccessToken();
+      log.debug(
+        `getAccessToken: success=${tokenResult?.success}, hasData=${!!tokenResult?.data}`
+      );
       if (tokenResult?.success && tokenResult.data) {
         accessToken = tokenResult.data;
       }
-    } catch {
-      log.debug('Failed to get access token');
+    } catch (err) {
+      log.error(`getAccessToken: IPC call failed - ${err}`);
     }
 
     const headers: Record<string, string> = {
@@ -101,8 +106,26 @@ class PluginApiClient {
     }
 
     // TICKET_184: Require login for all API requests
+    // TICKET_201: Show user-friendly modal before throwing
     if (!accessToken) {
       log.error('No access token - login required');
+
+      // TICKET_201: Show modal notification to user
+      if (globalThis.nexus?.window?.showAlert) {
+        // Non-blocking - show modal but don't await
+        globalThis.nexus.window.showAlert(
+          'Please log in to continue. Click the "Login / Sign Up" button in the top right corner.',
+          { title: 'Login Required' }
+        );
+      }
+
+      // TICKET_201: Dispatch event for Host layer to handle (optional login trigger)
+      window.dispatchEvent(
+        new CustomEvent('nexus:auth-required', {
+          detail: { message: 'Login required', action: 'login' },
+        })
+      );
+
       throw new Error('AUTH_REQUIRED');
     }
 

@@ -163,8 +163,8 @@ declare global {
   // eslint-disable-next-line no-var
   var nexus: {
     window?: {
-      showAlert(message: string): void;
-      showConfirm(message: string): Promise<boolean>;
+      showAlert(message: string, options?: { title?: string }): Promise<void>;
+      showConfirm(message: string, options?: { title?: string }): Promise<boolean>;
       showNotification(message: string, type?: 'info' | 'success' | 'warning' | 'error'): void;
       openExternal?(url: string): void; // TICKET_190
     };
