@@ -35,13 +35,15 @@ import {
 } from '../ui';
 import { useLLMAccess } from '../../hooks/useLLMAccess';
 
-// Import API services (same as RegimeDetectorPage)
+// TICKET_201: Import correct API service for Entry Signal generation
+// Entry signals use /api/start_regime_indicator_entry (generates StandaloneStrategyBase)
+// NOT /api/start_market_regime_analysis (generates MarketStateBase)
 import {
-  executeMarketRegimeAnalysis,
-  validateMarketRegimeConfig,
-  MarketRegimeRule,
-  getErrorMessage,
-  ERROR_CODE_MESSAGES,
+  executeKronosIndicatorEntry,
+  validateKronosIndicatorEntryConfig,
+  IndicatorEntryRule,
+  getEntryErrorMessage,
+  ENTRY_ERROR_CODE_MESSAGES,
   // TICKET_077_D1: Centralized Algorithm Storage Service
   getAlgorithmStorageService,
   buildEntrySignalRequest,
@@ -263,15 +265,17 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
     setNamingDialogVisible(false);
   }, []);
 
-  // Handle generate with validation (TICKET_087, TICKET_091, TICKET_095, TICKET_190, TICKET_199)
+  // Handle generate with validation (TICKET_087, TICKET_091, TICKET_095, TICKET_190, TICKET_199, TICKET_201)
   // TICKET_091: Plugin directly calls API service (CSP relaxed)
   // TICKET_199: Called after NamingDialog confirmation with final strategy name
+  // TICKET_201: Use correct API - /api/start_regime_indicator_entry for entry signals
   const executeGeneration = useCallback(async (finalStrategyName: string) => {
     // Update strategy name from dialog
     setStrategyName(finalStrategyName);
 
     // Build rules from indicators and custom expressions
-    const rules: MarketRegimeRule[] = [];
+    // TICKET_201: Use IndicatorEntryRule type for correct API
+    const rules: IndicatorEntryRule[] = [];
 
     // Add indicator-based rules
     for (const ind of indicatorBlocks) {
@@ -321,25 +325,19 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
       });
     }
 
-    // Build regime value
-    let regimeValue = selectedRegime;
-    if (regimeValue === 'bespoke' && bespokeData?.name) {
-      regimeValue = `bespoke_${bespokeData.name}`;
-    }
-
-    // Validate config
+    // TICKET_201: Build config for RegimeIndicatorEntry API
+    // Server supports: trend, range, consolidation, oscillation, bespoke, standalone
     const config = {
-      regime: regimeValue,
-      rules,
       strategy_name: finalStrategyName,
-      bespoke_notes: bespokeData?.notes,
+      rules,
+      entry_signal_base: selectedRegime as 'standalone' | 'trend' | 'range',
       llm_provider: llmProvider,
       llm_model: llmModel,
-      // TICKET_200: Include storage mode preference
       storage_mode: storageMode,
     };
 
-    const validation = validateMarketRegimeConfig(config);
+    // TICKET_201: Use correct validation function
+    const validation = validateKronosIndicatorEntryConfig(config);
     if (!validation.valid) {
       console.warn('[EntrySignal] Validation failed:', validation.error);
       setGenerateResult({ error: validation.error });
@@ -351,8 +349,10 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
     setGenerateResult(null);
 
     try {
-      console.debug('[EntrySignal] Calling API directly:', config);
-      const result = await executeMarketRegimeAnalysis(config);
+      // TICKET_201: Call correct API endpoint for entry signal generation
+      // This generates StandaloneStrategyBase with actual trading logic
+      console.debug('[EntrySignal] Calling regime_indicator_entry API:', config);
+      const result = await executeKronosIndicatorEntry(config);
 
       // Debug logs for CodeDisplay verification
       console.log('[EntrySignal] API result status:', result.status);
@@ -395,8 +395,8 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
           console.error('[EntrySignal] Exception while saving algorithm:', saveError);
         }
       } else if (result.status === 'failed' || result.status === 'rejected') {
-        // Use getErrorMessage to get user-friendly error message
-        const errorMsg = getErrorMessage(result);
+        // TICKET_201: Use getEntryErrorMessage for correct error mapping
+        const errorMsg = getEntryErrorMessage(result);
         console.error('[EntrySignal] Generation failed:', result.reason_code || result.error);
         setGenerateResult({ error: errorMsg });
 
@@ -413,10 +413,10 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
       const errorCode = err.code || err.reasonCode;
       console.error('[EntrySignal] Error code:', errorCode, 'Message:', err.message);
 
-      // Use ERROR_CODE_MESSAGES mapping if error code is available
+      // TICKET_201: Use ENTRY_ERROR_CODE_MESSAGES for correct error mapping
       let errorMsg: string;
-      if (errorCode && ERROR_CODE_MESSAGES[errorCode]) {
-        errorMsg = ERROR_CODE_MESSAGES[errorCode];
+      if (errorCode && ENTRY_ERROR_CODE_MESSAGES[errorCode]) {
+        errorMsg = ENTRY_ERROR_CODE_MESSAGES[errorCode];
       } else {
         errorMsg = err.message || 'Unknown error';
       }
@@ -430,7 +430,7 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
     } finally {
       setIsGenerating(false);
     }
-  }, [selectedRegime, bespokeData, indicatorBlocks, factorBlocks, strategies, llmProvider, llmModel, storageMode]);
+  }, [selectedRegime, indicatorBlocks, factorBlocks, strategies, llmProvider, llmModel, storageMode]);
 
   // TICKET_199: Handle naming dialog confirmation
   const handleConfirmNaming = useCallback((finalName: string) => {

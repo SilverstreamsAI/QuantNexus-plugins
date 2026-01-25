@@ -16,6 +16,23 @@ export type {
 } from './market-regime-service';
 
 // =============================================================================
+// Kronos Indicator Entry Service (TICKET_201) - Correct API for Entry Signals
+// =============================================================================
+
+export {
+  executeKronosIndicatorEntry,
+  validateKronosIndicatorEntryConfig,
+  getEntryErrorMessage,
+  ENTRY_ERROR_CODE_MESSAGES,
+} from './kronos-indicator-entry-service';
+
+export type {
+  KronosIndicatorEntryConfig as KronosEntryConfig,
+  IndicatorEntryRule,
+  KronosIndicatorEntryResult as KronosEntryResult,
+} from './kronos-indicator-entry-service';
+
+// =============================================================================
 // Algorithm Storage Service (TICKET_077_D1) - NEW Centralized Service
 // =============================================================================
 
