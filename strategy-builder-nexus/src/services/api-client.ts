@@ -240,7 +240,11 @@ class PluginApiClient {
       throw error;
     }
 
-    const taskId = startResponse.data?.task_id;
+    // TICKET_208: Support both response formats
+    // Format 1: { success: true, data: { task_id: "..." } } (regime APIs)
+    // Format 2: { success: true, task_id: "..." } (kronos APIs)
+    const taskId = startResponse.data?.task_id ||
+      (startResponse as unknown as { task_id?: string }).task_id;
     if (!taskId) {
       throw new Error('No task_id returned from server');
     }

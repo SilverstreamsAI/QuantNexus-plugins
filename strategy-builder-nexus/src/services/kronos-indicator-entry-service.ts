@@ -148,16 +148,18 @@ interface ServerIndicatorRule {
 
 /**
  * Server request format for /api/start_kronos_indicator_entry
+ * NOTE: Backend expects `indicator_entry_config` (not `kronos_indicator_entry_config`)
  */
 interface ServerRequest {
   user_id: number;
   task_id?: string;
   locale?: string;
-  kronos_indicator_entry_config: {
+  indicator_entry_config: {
+    locale?: string;
     longEntryIndicators: ServerIndicatorRule[];
     shortEntryIndicators: ServerIndicatorRule[];
     strategy_name: string;
-    // NO entry_signal_base - Kronos mode
+    entry_signal_base: 'kronos'; // Always "kronos" for this API
     llm_provider?: string;
     llm_model?: string;
   };
@@ -235,12 +237,12 @@ function buildServerRequest(config: KronosIndicatorEntryConfig): ServerRequest {
   return {
     user_id: 1,
     task_id: taskId,
-    locale: 'en',
-    kronos_indicator_entry_config: {
+    indicator_entry_config: {
+      locale: 'en_US',
       longEntryIndicators: serverRules,
       shortEntryIndicators: [],
       strategy_name: config.strategy_name || 'Untitled Kronos Entry Strategy',
-      // NO entry_signal_base - Kronos mode does not use market regime
+      entry_signal_base: 'kronos', // Always "kronos" for Kronos Indicator Entry
       llm_provider: config.llm_provider || 'NONA',
       llm_model: config.llm_model || 'nona-nexus',
     },
@@ -279,36 +281,19 @@ export async function executeKronosIndicatorEntry(
 
       console.debug('[KronosIndicatorEntry] Poll response:', JSON.stringify(resp, null, 2).substring(0, 2000));
 
-      // Extract result from kronos_indicator_entry_result
-      const entryResult = resp.data?.result as Record<string, unknown> | undefined;
-      const kronosResult = entryResult?.kronos_indicator_entry_result as Record<string, unknown> | undefined;
-
-      // Strategy code might be in different locations depending on server response
-      let strategyCode = kronosResult?.strategy_code as string | undefined;
-      if (!strategyCode) {
-        strategyCode = entryResult?.strategy_code as string | undefined;
-      }
-
-      let className = kronosResult?.class_name as string | undefined;
-      if (!className) {
-        className = entryResult?.class_name as string | undefined;
-      }
-
-      // Extract validation status
-      let validationStatus = kronosResult?.validation_status as string | undefined;
-      if (!validationStatus) {
-        validationStatus = entryResult?.validation_status as string | undefined;
-      }
+      // TICKET_208: Result is directly under data.result (not nested in kronos_indicator_entry_result)
+      // Response format: { success: true, data: { status: "completed", result: { strategy_code, class_name, ... } } }
+      const result = resp.data?.result as Record<string, unknown> | undefined;
 
       return {
         isComplete,
         result: {
           status: status as KronosIndicatorEntryResult['status'],
-          validation_status: validationStatus as KronosIndicatorEntryResult['validation_status'],
-          reason_code: (kronosResult?.reason_code || entryResult?.reason_code) as string | undefined,
-          strategy_code: strategyCode,
-          class_name: className,
-          error: (kronosResult?.error || entryResult?.error) as KronosIndicatorEntryResult['error'],
+          validation_status: result?.validation_status as KronosIndicatorEntryResult['validation_status'],
+          reason_code: result?.reason_code as string | undefined,
+          strategy_code: result?.strategy_code as string | undefined,
+          class_name: result?.class_name as string | undefined,
+          error: result?.error as KronosIndicatorEntryResult['error'],
         } as KronosIndicatorEntryResult,
         rawResponse: response,
       };
