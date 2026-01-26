@@ -111,7 +111,18 @@
   },
   "breadcrumb": {
     "backtestNexus": "回测系统",
+    "indicatorsCockpit": "指标驾驶舱",
     "result": "结果"
+  },
+  "locked": {
+    "requiresTier": "此功能需要 {{tier}} 订阅"
+  },
+  "auth": {
+    "loginToUnlock": "登录解锁",
+    "viewPlans": "查看方案"
+  },
+  "common": {
+    "cancel": "取消"
   },
   "resultPanel": {
     "tabs": {

@@ -111,7 +111,18 @@
   },
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
+    "indicatorsCockpit": "Indicators Cockpit",
     "result": "Result"
+  },
+  "locked": {
+    "requiresTier": "This feature requires {{tier}} subscription"
+  },
+  "auth": {
+    "loginToUnlock": "Login to Unlock",
+    "viewPlans": "View Plans"
+  },
+  "common": {
+    "cancel": "Cancel"
   },
   "resultPanel": {
     "tabs": {
