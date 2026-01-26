@@ -69,7 +69,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
       {/* Model Cards */}
       <div
-        className="flex gap-3 flex-wrap"
+        className="flex gap-3"
         role="radiogroup"
         aria-label={title}
       >
@@ -85,7 +85,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
               aria-checked={isSelected}
               className={cn(
                 'relative flex flex-col items-center',
-                'px-6 py-4 min-w-[140px]',
+                'flex-1 px-6 py-4',
                 'border-2 rounded-lg',
                 'transition-all duration-200',
                 'cursor-pointer',

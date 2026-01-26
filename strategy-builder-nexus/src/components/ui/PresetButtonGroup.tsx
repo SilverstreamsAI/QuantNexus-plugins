@@ -104,7 +104,7 @@ export const PresetButtonGroup: React.FC<PresetButtonGroupProps> = ({
   // Full variant
   return (
     <div
-      className={cn('flex gap-2 flex-wrap', className)}
+      className={cn('flex gap-2 w-full', className)}
       role="radiogroup"
       aria-label="Preset options"
     >
@@ -118,8 +118,8 @@ export const PresetButtonGroup: React.FC<PresetButtonGroupProps> = ({
             role="radio"
             aria-checked={isActive}
             className={cn(
-              'flex flex-col items-center',
-              'px-4 py-3 min-w-[100px]',
+              'flex flex-col items-center flex-1',
+              'px-4 py-3 min-w-0',
               'border rounded-lg',
               'transition-all duration-200',
               isActive
