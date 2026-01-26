@@ -12,6 +12,7 @@ import React from 'react';
 import { RegimeDetectorPage } from '../components/pages/RegimeDetectorPage';
 import { EntrySignalPage } from '../components/pages/EntrySignalPage';
 import { KronosPredictorPage } from '../components/pages/KronosPredictorPage';
+import { KronosIndicatorEntryPage } from '../components/pages/KronosIndicatorEntryPage';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -52,6 +53,10 @@ export const EDITOR_PROVIDERS: Record<string, EditorProvider> = {
   },
   'strategy.kronosPredictor': {
     component: KronosPredictorPage,
+  },
+  // TICKET_208: Kronos Indicator Entry Page
+  'strategy.kronosIndicatorEntry': {
+    component: KronosIndicatorEntryPage,
   },
 };
 

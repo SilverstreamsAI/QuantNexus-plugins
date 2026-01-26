@@ -262,6 +262,12 @@
         "displayName": "Kronos AI Predictor",
         "serviceIds": ["kronos_predictor"],
         "selector": [{ "resourceScheme": "strategy" }]
+      },
+      {
+        "viewType": "strategy.kronosIndicatorEntry",
+        "displayName": "Kronos Indicator Entry",
+        "serviceIds": ["indicator_entry"],
+        "selector": [{ "resourceScheme": "strategy" }]
       }
     ],
     "commands": [

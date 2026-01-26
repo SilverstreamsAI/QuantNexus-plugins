@@ -1,12 +1,16 @@
 /**
  * useKronosPredictor Hook
  *
+ * @deprecated TICKET_207: Use useGenerateWorkflow instead.
+ * KronosPredictorPage now uses the unified workflow for algorithm storage.
+ *
  * State management hook for Kronos AI Predictor page.
  * Handles model selection, prediction configuration, signal filters,
  * and API communication.
  *
  * @see TICKET_205 - Kronos Predictor Page Migration
  * @see TICKET_077_16 - SignalFilterPanel Component
+ * @see TICKET_207 - Algorithm Storage Migration
  */
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
@@ -71,6 +75,11 @@ export interface KronosPredictorState {
 export interface KronosPredictionResult {
   success: boolean;
   message?: string;
+  // Strategy code generation result (from backend)
+  strategy_code?: string;
+  class_name?: string;
+  strategy_name?: string;
+  // Legacy prediction fields (may not be used)
   prediction?: {
     direction: 'buy' | 'sell' | 'hold';
     confidence: number;
@@ -200,7 +209,12 @@ export function useKronosPredictor(): UseKronosPredictorReturn {
       console.debug('[KronosPredictor] Received completion:', data);
       if (data.result) {
         const result: KronosPredictionResult = {
-          success: data.result.success,
+          success: data.result.success ?? true,
+          // Strategy code generation result
+          strategy_code: data.result.strategy_code,
+          class_name: data.result.class_name,
+          strategy_name: data.result.strategy_name,
+          // Legacy fields
           prediction: data.result.prediction,
           signals: data.result.signals,
         };
@@ -340,7 +354,12 @@ export function useKronosPredictor(): UseKronosPredictorReturn {
   const runAnalysis = useCallback(async () => {
     if (!canSubmit) return;
 
+    console.log('[KronosPredictor] Setting isGenerating=true');
     setState(prev => ({ ...prev, isGenerating: true, error: null, result: null }));
+
+    // Allow React to render the loading state before making API call
+    await new Promise(resolve => setTimeout(resolve, 0));
+    console.log('[KronosPredictor] After yield, starting API call');
 
     try {
       // Build request payload
@@ -391,16 +410,27 @@ export function useKronosPredictor(): UseKronosPredictorReturn {
         throw new Error(response.error || 'Prediction request failed');
       }
 
-      // If synchronous result is returned, update state immediately
-      if (response.prediction) {
+      // Handle synchronous result directly (TICKET_206: avoid React batching issues)
+      // When backend returns strategy_code immediately, process it here instead of
+      // waiting for IPC event to ensure isGenerating state is properly rendered
+      if (response.strategyCode) {
+        console.debug('[KronosPredictor] Handling synchronous result');
         const result: KronosPredictionResult = {
           success: true,
-          message: 'Prediction completed',
-          prediction: response.prediction,
+          strategy_code: response.strategyCode,
+          class_name: response.className,
+          strategy_name: response.strategyName,
         };
         setState(prev => ({ ...prev, result, isGenerating: false }));
+        return;
       }
-      // Otherwise, wait for async completion via IPC events (handled in useEffect)
+
+      // For async task (taskId returned), wait for completion via IPC events
+      // The onComplete/onError handlers in useEffect will update state
+      if (response.taskId) {
+        console.debug('[KronosPredictor] Async task started:', response.taskId);
+        // isGenerating remains true, onComplete/onError will set it to false
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setState(prev => ({ ...prev, error: errorMessage, isGenerating: false }));

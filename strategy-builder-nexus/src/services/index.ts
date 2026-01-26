@@ -33,6 +33,23 @@ export type {
 } from './regime-indicator-entry-service';
 
 // =============================================================================
+// Kronos Indicator Entry Service (TICKET_208) - Kronos Mode Entry Signals
+// =============================================================================
+
+export {
+  executeKronosIndicatorEntry,
+  validateKronosIndicatorEntryConfig,
+  getKronosEntryErrorMessage,
+  KRONOS_ENTRY_ERROR_CODE_MESSAGES,
+} from './kronos-indicator-entry-service';
+
+export type {
+  KronosIndicatorEntryConfig,
+  KronosIndicatorRule,
+  KronosIndicatorEntryResult,
+} from './kronos-indicator-entry-service';
+
+// =============================================================================
 // Algorithm Storage Service (TICKET_077_D1) - NEW Centralized Service
 // =============================================================================
 
@@ -48,6 +65,7 @@ export {
   buildKronosIndicatorEntryRequest,
   buildRegimeDetectorRequest,
   buildEntrySignalRequest,
+  buildKronosPredictorRequest,
   extractClassName,
 } from './algorithm-storage-service';
 
@@ -61,6 +79,8 @@ export type {
   RegimeDetectorConfig,
   EntrySignalResult,
   EntrySignalConfig,
+  KronosPredictorResult,
+  KronosPredictorConfig,
 } from './algorithm-storage-service';
 
 // =============================================================================

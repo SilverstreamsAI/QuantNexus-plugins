@@ -155,6 +155,39 @@ export interface EntrySignalConfig {
   llm_model?: string;
 }
 
+/**
+ * Kronos Predictor result from API
+ */
+export interface KronosPredictorResult {
+  strategy_name: string;
+  strategy_code: string;
+  class_name: string;
+}
+
+/**
+ * Kronos Predictor configuration
+ */
+export interface KronosPredictorConfig {
+  user_id?: string;
+  model_version: string;
+  lookback: number;
+  pred_len: number;
+  temperature: number;
+  top_p: number;
+  top_k: number;
+  sample_count: number;
+  signal_filter: {
+    filters: {
+      confidence: { enabled: boolean; min_value: number };
+      expected_return: { enabled: boolean; min_value: number };
+      direction_filter: { enabled: boolean; mode: string };
+      magnitude: { enabled: boolean; min_value: number };
+      consistency: { enabled: boolean; min_value: number };
+    };
+    combination_logic: 'AND' | 'OR';
+  };
+}
+
 // =============================================================================
 // Service Implementation
 // =============================================================================
@@ -494,6 +527,56 @@ export function buildEntrySignalRequest(
       regime_type: config.regime,
       indicator_blocks: config.indicator_blocks || [],
       factor_blocks: config.factor_blocks || [],
+    },
+  };
+}
+
+/**
+ * Build save request for Kronos Predictor (TICKET_207)
+ */
+export function buildKronosPredictorRequest(
+  result: KronosPredictorResult,
+  config: KronosPredictorConfig
+): AlgorithmSaveRequest {
+  return {
+    strategy_name: result.strategy_name,
+    code: result.strategy_code,
+    user_id: config.user_id || 'default',
+    strategy_type: StrategyType.TYPE_KRONOS_PREDICTOR,
+    storage_mode: StorageMode.LOCAL,
+    classification_metadata: {
+      signal_source: SignalSource.KRONOS_PREDICTOR,
+      strategy_role: 'prediction',
+      trading_style: 'ai_driven',
+      strategy_composition: 'atomic',
+      class_name: result.class_name,
+      components: {
+        kronos_predictor: {
+          model_version: config.model_version,
+          lookback: config.lookback,
+          pred_len: config.pred_len,
+          temperature: config.temperature,
+          top_p: config.top_p,
+          top_k: config.top_k,
+          sample_count: config.sample_count,
+        },
+        signal_filter: config.signal_filter,
+      },
+      tags: ['kronos', 'predictor', 'ai', config.model_version],
+    },
+    strategy_rules: {
+      model_version: config.model_version,
+      prediction_settings: {
+        lookback: config.lookback,
+        pred_len: config.pred_len,
+      },
+      advanced_settings: {
+        temperature: config.temperature,
+        top_p: config.top_p,
+        top_k: config.top_k,
+        sample_count: config.sample_count,
+      },
+      signal_filter: config.signal_filter,
     },
   };
 }

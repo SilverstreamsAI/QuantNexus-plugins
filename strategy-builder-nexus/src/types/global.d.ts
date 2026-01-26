@@ -188,6 +188,11 @@ interface ElectronKronosAPI {
   predict(request: KronosPredictionRequest): Promise<{
     success: boolean;
     taskId?: string;
+    // Synchronous result fields (TICKET_206)
+    strategyCode?: string;
+    className?: string;
+    strategyName?: string;
+    // Legacy prediction fields
     prediction?: KronosPrediction;
     error?: string;
   }>;
@@ -215,6 +220,11 @@ interface ElectronKronosAPI {
     taskId: string;
     result: {
       success: boolean;
+      // Strategy code generation result (from backend)
+      strategy_code?: string;
+      class_name?: string;
+      strategy_name?: string;
+      // Legacy prediction fields
       prediction?: KronosPrediction;
       signals?: KronosSignal[];
     };
