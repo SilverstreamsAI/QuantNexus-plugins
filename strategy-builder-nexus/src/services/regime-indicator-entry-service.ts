@@ -1,16 +1,19 @@
 /**
  * Regime Indicator Entry Service - Plugin Layer
  *
+ * TICKET_203: Renamed from kronos-indicator-entry-service.ts
  * TICKET_201 Phase 4: Corrected API for Entry Signal generation
  *
  * Uses: /api/start_regime_indicator_entry (NOT /api/start_kronos_indicator_entry)
  *
- * This service generates StandaloneStrategyBase strategies that:
+ * This service generates TrendStrategyBase/RangeStrategyBase/StandaloneStrategyBase strategies that:
  * - check_open_conditions() -> (long_signal, short_signal)
  * - check_close_conditions() -> bool
  * - Execute actual trades (unlike MarketStateBase which only detects states)
  *
  * @see TICKET_201 - Workflow Strategy Code Generation Fix
+ * @see TICKET_202 - Builder Page Base Class Mapping
+ * @see TICKET_203 - Regime Indicator Entry Service Rename
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
@@ -29,7 +32,7 @@ const API_ENDPOINTS = {
 // Public Types (used by EntrySignalPage)
 // -----------------------------------------------------------------------------
 
-export interface KronosIndicatorEntryConfig {
+export interface RegimeIndicatorEntryConfig {
   strategy_name: string;
   rules: IndicatorEntryRule[];
   entry_signal_base?: 'standalone' | 'trend' | 'range';
@@ -63,7 +66,7 @@ export interface IndicatorEntryRule {
   };
 }
 
-export interface KronosIndicatorEntryResult {
+export interface RegimeIndicatorEntryResult {
   status: 'completed' | 'failed' | 'processing' | 'rejected';
   validation_status?: 'VALID' | 'VALID_WITH_WARNINGS' | 'INVALID';
   reason_code?: string;
@@ -98,7 +101,7 @@ export const ENTRY_ERROR_CODE_MESSAGES: Record<string, string> = {
 /**
  * Get user-friendly error message from error response
  */
-export function getEntryErrorMessage(result: KronosIndicatorEntryResult): string {
+export function getEntryErrorMessage(result: RegimeIndicatorEntryResult): string {
   if (result.reason_code && ENTRY_ERROR_CODE_MESSAGES[result.reason_code]) {
     return ENTRY_ERROR_CODE_MESSAGES[result.reason_code];
   }
@@ -221,7 +224,7 @@ function transformRule(rule: IndicatorEntryRule): ServerIndicatorRule | null {
 /**
  * Build server request from client config
  */
-function buildServerRequest(config: KronosIndicatorEntryConfig): ServerRequest {
+function buildServerRequest(config: RegimeIndicatorEntryConfig): ServerRequest {
   // Transform all rules to server format
   // For now, all rules go to longEntryIndicators
   // TODO: Support separate long/short indicators from UI
@@ -262,17 +265,17 @@ function buildServerRequest(config: KronosIndicatorEntryConfig): ServerRequest {
  * Execute Regime Indicator Entry generation
  *
  * TICKET_201: Calls /api/start_regime_indicator_entry which generates
- * StandaloneStrategyBase strategies with actual trading logic.
+ * TrendStrategyBase/RangeStrategyBase/StandaloneStrategyBase strategies with actual trading logic.
  */
-export async function executeKronosIndicatorEntry(
-  config: KronosIndicatorEntryConfig
-): Promise<KronosIndicatorEntryResult> {
+export async function executeRegimeIndicatorEntry(
+  config: RegimeIndicatorEntryConfig
+): Promise<RegimeIndicatorEntryResult> {
   const requestPayload = buildServerRequest(config);
 
   console.debug('[RegimeIndicatorEntry] Calling API:', API_ENDPOINTS.START);
   console.debug('[RegimeIndicatorEntry] Request payload:', JSON.stringify(requestPayload, null, 2).substring(0, 1000));
 
-  return await pluginApiClient.executeWithPolling<KronosIndicatorEntryResult>({
+  return await pluginApiClient.executeWithPolling<RegimeIndicatorEntryResult>({
     initialData: requestPayload,
     startEndpoint: API_ENDPOINTS.START,
     pollEndpoint: API_ENDPOINTS.STATUS,
@@ -309,13 +312,13 @@ export async function executeKronosIndicatorEntry(
       return {
         isComplete,
         result: {
-          status: status as KronosIndicatorEntryResult['status'],
-          validation_status: validationStatus as KronosIndicatorEntryResult['validation_status'],
+          status: status as RegimeIndicatorEntryResult['status'],
+          validation_status: validationStatus as RegimeIndicatorEntryResult['validation_status'],
           reason_code: (regimeResult?.reason_code || entryResult?.reason_code) as string | undefined,
           strategy_code: strategyCode,
           class_name: className,
-          error: (regimeResult?.error || entryResult?.error) as KronosIndicatorEntryResult['error'],
-        } as KronosIndicatorEntryResult,
+          error: (regimeResult?.error || entryResult?.error) as RegimeIndicatorEntryResult['error'],
+        } as RegimeIndicatorEntryResult,
         rawResponse: response,
       };
     },
@@ -323,10 +326,10 @@ export async function executeKronosIndicatorEntry(
 }
 
 /**
- * Validate Kronos Indicator Entry configuration
+ * Validate Regime Indicator Entry configuration
  */
-export function validateKronosIndicatorEntryConfig(
-  config: Partial<KronosIndicatorEntryConfig>
+export function validateRegimeIndicatorEntryConfig(
+  config: Partial<RegimeIndicatorEntryConfig>
 ): { valid: boolean; error?: string } {
   if (!config.rules || config.rules.length === 0) {
     return { valid: false, error: 'At least one indicator rule is required' };

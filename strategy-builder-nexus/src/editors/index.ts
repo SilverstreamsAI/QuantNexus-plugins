@@ -11,6 +11,7 @@
 import React from 'react';
 import { RegimeDetectorPage } from '../components/pages/RegimeDetectorPage';
 import { EntrySignalPage } from '../components/pages/EntrySignalPage';
+import { KronosPredictorPage } from '../components/pages/KronosPredictorPage';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -48,6 +49,9 @@ export const EDITOR_PROVIDERS: Record<string, EditorProvider> = {
   },
   'strategy.entrySignal': {
     component: EntrySignalPage,
+  },
+  'strategy.kronosPredictor': {
+    component: KronosPredictorPage,
   },
 };
 

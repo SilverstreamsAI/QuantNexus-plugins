@@ -26,3 +26,14 @@ export type {
   GenerateWorkflowLLMAccess,
   UseGenerateWorkflowReturn,
 } from './useGenerateWorkflow';
+
+// Kronos Predictor Hook (TICKET_205)
+export { useKronosPredictor, KRONOS_MODELS, PRESETS } from './useKronosPredictor';
+export type {
+  ModelOption,
+  PresetConfig,
+  KronosPredictorState,
+  KronosPredictionResult,
+  KronosPredictionRequest,
+  UseKronosPredictorReturn,
+} from './useKronosPredictor';

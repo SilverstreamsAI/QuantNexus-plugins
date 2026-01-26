@@ -146,12 +146,92 @@ interface ElectronEntitlementAPI {
   resolveLLMApiKey(providerId: string): Promise<{ success: boolean; data?: ApiKeyResolution; error?: string }>;
 }
 
+// TICKET_205: Kronos Predictor API
+interface KronosPredictionRequest {
+  model: string;
+  lookback: number;
+  pred_len: number;
+  temperature: number;
+  top_p: number;
+  top_k: number;
+  sample_count: number;
+  time_range: 'latest' | 'custom';
+  start_time?: string;
+  strategy_name: string;
+  signal_filter: {
+    filters: {
+      confidence: { enabled: boolean; min_value: number };
+      expected_return: { enabled: boolean; min_value: number };
+      direction_filter: { enabled: boolean; mode: string };
+      magnitude: { enabled: boolean; min_value: number };
+      consistency: { enabled: boolean; min_value: number };
+    };
+    combination_logic: 'AND' | 'OR';
+  };
+}
+
+interface KronosPrediction {
+  direction: 'buy' | 'sell' | 'hold';
+  confidence: number;
+  expectedReturn: number;
+  magnitude: number;
+}
+
+interface KronosSignal {
+  timestamp: number;
+  direction: 'buy' | 'sell';
+  confidence: number;
+  expectedReturn: number;
+}
+
+interface ElectronKronosAPI {
+  predict(request: KronosPredictionRequest): Promise<{
+    success: boolean;
+    taskId?: string;
+    prediction?: KronosPrediction;
+    error?: string;
+  }>;
+  cancel(taskId: string): Promise<{
+    success: boolean;
+    taskId?: string;
+    error?: string;
+  }>;
+  getModels(): Promise<{
+    success: boolean;
+    models?: Array<{
+      id: string;
+      name: string;
+      params: string;
+      maxContext: number;
+    }>;
+    error?: string;
+  }>;
+  onProgress(callback: (data: {
+    taskId: string;
+    status: string;
+    progress: number;
+  }) => void): () => void;
+  onComplete(callback: (data: {
+    taskId: string;
+    result: {
+      success: boolean;
+      prediction?: KronosPrediction;
+      signals?: KronosSignal[];
+    };
+  }) => void): () => void;
+  onError(callback: (data: {
+    taskId?: string;
+    message: string;
+  }) => void): () => void;
+}
+
 interface ElectronAPI {
   credential: ElectronCredentialAPI;
   plugin: ElectronPluginAPI;
   hub: ElectronHubAPI;
   auth?: ElectronAuthAPI;
   entitlement: ElectronEntitlementAPI; // TICKET_190
+  kronos: ElectronKronosAPI; // TICKET_205
 }
 
 declare global {

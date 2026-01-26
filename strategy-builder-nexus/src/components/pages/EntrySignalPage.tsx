@@ -40,14 +40,15 @@ import {
 } from '../../hooks';
 
 // Services - import from specific modules to avoid type conflicts
+// TICKET_203: Renamed from kronos-indicator-entry-service to regime-indicator-entry-service
 import {
-  executeKronosIndicatorEntry,
-  validateKronosIndicatorEntryConfig,
+  executeRegimeIndicatorEntry,
+  validateRegimeIndicatorEntryConfig,
   IndicatorEntryRule,
   getEntryErrorMessage,
   ENTRY_ERROR_CODE_MESSAGES,
-} from '../../services/kronos-indicator-entry-service';
-import type { KronosIndicatorEntryConfig, KronosIndicatorEntryResult } from '../../services/kronos-indicator-entry-service';
+} from '../../services/regime-indicator-entry-service';
+import type { RegimeIndicatorEntryConfig, RegimeIndicatorEntryResult } from '../../services/regime-indicator-entry-service';
 import {
   buildEntrySignalRequest,
   extractClassName,
@@ -180,7 +181,7 @@ function buildRulesFromState(state: EntrySignalState): IndicatorEntryRule[] {
 /**
  * Build API config from page state
  */
-function buildApiConfig(state: EntrySignalState, strategyName: string): KronosIndicatorEntryConfig {
+function buildApiConfig(state: EntrySignalState, strategyName: string): RegimeIndicatorEntryConfig {
   return {
     strategy_name: strategyName,
     rules: buildRulesFromState(state),
@@ -276,18 +277,19 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
   ], [indicatorBlocks, factorBlocks, strategies]);
 
   // Workflow config
-  const workflowConfig = useMemo((): GenerateWorkflowConfig<KronosIndicatorEntryConfig, EntrySignalState> => ({
+  // TICKET_203: Updated to use Regime naming
+  const workflowConfig = useMemo((): GenerateWorkflowConfig<RegimeIndicatorEntryConfig, EntrySignalState> => ({
     pageId: 'entry-signal-page',
     llmProvider,
     llmModel,
     defaultStrategyName: 'New Entry Strategy',
     validationErrorMessage: 'Please add at least one indicator, factor, or expression',
     buildConfig: buildApiConfig,
-    validateConfig: validateKronosIndicatorEntryConfig,
-    executeApi: executeKronosIndicatorEntry as (config: KronosIndicatorEntryConfig) => Promise<GenerationResult>,
+    validateConfig: validateRegimeIndicatorEntryConfig,
+    executeApi: executeRegimeIndicatorEntry as (config: RegimeIndicatorEntryConfig) => Promise<GenerationResult>,
     buildStorageRequest: buildStorageRequestFromResult,
     errorMessages: ENTRY_ERROR_CODE_MESSAGES,
-    getErrorMessage: (result) => getEntryErrorMessage(result as unknown as KronosIndicatorEntryResult),
+    getErrorMessage: (result) => getEntryErrorMessage(result as unknown as RegimeIndicatorEntryResult),
   }), [llmProvider, llmModel]);
 
   // ---------------------------------------------------------------------------

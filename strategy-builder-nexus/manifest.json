@@ -256,6 +256,12 @@
         "displayName": "Entry Signal Generator",
         "serviceIds": ["indicator_entry_generator"],
         "selector": [{ "resourceScheme": "strategy" }]
+      },
+      {
+        "viewType": "strategy.kronosPredictor",
+        "displayName": "Kronos AI Predictor",
+        "serviceIds": ["kronos_predictor"],
+        "selector": [{ "resourceScheme": "strategy" }]
       }
     ],
     "commands": [

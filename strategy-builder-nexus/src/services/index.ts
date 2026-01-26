@@ -16,21 +16,21 @@ export type {
 } from './market-regime-service';
 
 // =============================================================================
-// Kronos Indicator Entry Service (TICKET_201) - Correct API for Entry Signals
+// Regime Indicator Entry Service (TICKET_203) - Correct API for Entry Signals
 // =============================================================================
 
 export {
-  executeKronosIndicatorEntry,
-  validateKronosIndicatorEntryConfig,
+  executeRegimeIndicatorEntry,
+  validateRegimeIndicatorEntryConfig,
   getEntryErrorMessage,
   ENTRY_ERROR_CODE_MESSAGES,
-} from './kronos-indicator-entry-service';
+} from './regime-indicator-entry-service';
 
 export type {
-  KronosIndicatorEntryConfig as KronosEntryConfig,
+  RegimeIndicatorEntryConfig,
   IndicatorEntryRule,
-  KronosIndicatorEntryResult as KronosEntryResult,
-} from './kronos-indicator-entry-service';
+  RegimeIndicatorEntryResult,
+} from './regime-indicator-entry-service';
 
 // =============================================================================
 // Algorithm Storage Service (TICKET_077_D1) - NEW Centralized Service
@@ -55,10 +55,8 @@ export type {
   AlgorithmSaveRequest,
   AlgorithmSaveResult,
   ClassificationMetadata,
-  // Note: KronosIndicatorEntryResult/Config from algorithm-storage-service are for storage
-  // Use KronosEntryResult/Config from kronos-indicator-entry-service for API calls
-  KronosIndicatorEntryResult as StorageKronosEntryResult,
-  KronosIndicatorEntryConfig as StorageKronosEntryConfig,
+  // Note: Storage types are for algorithm-storage-service internal use
+  // Use RegimeIndicatorEntryResult/Config from regime-indicator-entry-service for API calls
   RegimeDetectorResult,
   RegimeDetectorConfig,
   EntrySignalResult,
