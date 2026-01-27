@@ -7,15 +7,16 @@ designed based on nona_server patterns.
 Components:
 - BacktestConfig: Configuration management
 - BacktestAccountManager: Account and position tracking
-- BacktestPluginServicer: gRPC service implementation
 - BacktraderEngine: Backtrader integration wrapper
 - BacktestWorkflow: Workflow orchestration
 - CheckpointManager: Resume capability
 - LLMTriggerEstimator: LLM call estimation
 - StrategyGroup: Multi-phase strategy management
 - StrategyStateManager: Phase state coordination
-- PluginLifecycleManager: Core integration and heartbeat
 - DataProviderManager: Data source integration
+
+Note (TICKET_211): PluginLifecycleManager requires explicit import:
+  from src.lifecycle import PluginLifecycleManager
 """
 
 __version__ = "1.0.0"
@@ -46,12 +47,8 @@ from .strategy import (
     PHASE_POSTCONDITION,
     STANDARD_PHASES,
 )
-from .lifecycle import (
-    PluginLifecycleManager,
-    PluginConfig,
-    PluginState,
-    PluginMetrics,
-)
+# TICKET_211: lifecycle removed from top-level imports (V3 no gRPC)
+# Use explicit import if needed: from src.lifecycle import PluginLifecycleManager
 from .data import (
     DataProviderManager,
     MockDataProvider,
@@ -97,11 +94,7 @@ __all__ = [
     "PHASE_EXECUTION",
     "PHASE_POSTCONDITION",
     "STANDARD_PHASES",
-    # Lifecycle (Phase 4)
-    "PluginLifecycleManager",
-    "PluginConfig",
-    "PluginState",
-    "PluginMetrics",
+    # TICKET_211: Lifecycle removed (V3 no gRPC)
     # Data (Phase 4)
     "DataProviderManager",
     "MockDataProvider",
