@@ -28,7 +28,7 @@ export enum StrategyType {
   TYPE_EXECUTION = 0,
   TYPE_TREND = 1,
   TYPE_RANGE = 2,
-  TYPE_SHOCK = 3,
+  TYPE_ENTRY_SIGNAL = 3,  // TICKET_210: Renamed from TYPE_SHOCK to match backend standard
   TYPE_PRECONDITION = 7,
   TYPE_POSTCONDITION = 8,
   TYPE_ANALYSIS = 9,
@@ -499,6 +499,7 @@ export function buildRegimeDetectorRequest(
 
 /**
  * Build save request for Entry Signal Generator
+ * TICKET_210: Fixed strategy_type and signal_source to match backend standard
  */
 export function buildEntrySignalRequest(
   result: EntrySignalResult,
@@ -508,10 +509,10 @@ export function buildEntrySignalRequest(
     strategy_name: result.strategy_name,
     code: result.strategy_code,
     user_id: config.user_id || 'default',
-    strategy_type: StrategyType.TYPE_EXECUTION,
+    strategy_type: StrategyType.TYPE_ENTRY_SIGNAL,  // TICKET_210: Fix 0 -> 3
     storage_mode: StorageMode.LOCAL,
     classification_metadata: {
-      signal_source: SignalSource.INDICATOR_DETECTOR,
+      signal_source: `indicator_entry_${config.regime}`,  // TICKET_210: Fix to indicator_entry_{base}
       strategy_role: 'execution',
       trading_style: 'indicator_confirmation',
       strategy_composition: 'atomic',

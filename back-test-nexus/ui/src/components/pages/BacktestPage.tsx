@@ -24,17 +24,15 @@ import {
   type ExecutorResult,
   NamingDialog,
   CheckpointResumePanel,
+  BacktestHistorySidebar,
+  type BacktestHistoryItem,
 } from '../ui';
 import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
 
-// Inline SVG icons
-const HistoryIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-    <path d="M3 3v5h5" />
-    <path d="M12 7v5l4 2" />
-  </svg>
-);
+// -----------------------------------------------------------------------------
+// Inline SVG Icons (Zone D Action Bar only)
+// Zone B icons moved to BacktestHistorySidebar component (TICKET_077_18)
+// -----------------------------------------------------------------------------
 
 const PlayIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -65,13 +63,6 @@ const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-// TICKET_151_1: ChevronDown icon for BACKTESTING tree
-const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m6 9 6 6 6-6" />
-  </svg>
-);
-
 // TICKET_171: Check icon for Keep button
 const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -87,14 +78,6 @@ const XIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-// TICKET_176_1: Pause icon for checkpoint badge
-const PauseIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="6" y="4" width="4" height="16" />
-    <rect x="14" y="4" width="4" height="16" />
-  </svg>
-);
-
 // TICKET_171: Reset icon for config page
 const RotateCcwIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -107,22 +90,8 @@ const RotateCcwIcon: React.FC<{ className?: string }> = ({ className }) => (
 // Types
 // -----------------------------------------------------------------------------
 
-interface HistoryItem {
-  id: string;
-  name: string;
-  symbol: string;
-  timeframe: string;
-  totalReturn: number | null;
-  // Backtest parameters
-  startDate: string;
-  endDate: string;
-  initialCapital: number;
-  orderSize: number | null;
-  orderSizeUnit: string | null;
-  // Timestamp with seconds
-  createdAt: string;
-  status: 'completed' | 'failed' | 'running';
-}
+// HistoryItem type imported from BacktestHistorySidebar (TICKET_077_18)
+// Use BacktestHistoryItem for history records
 
 // TICKET_176_1: Checkpoint types
 interface CheckpointMetrics {
@@ -239,7 +208,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
   const pendingBacktestRef = useRef<BacktestResolver | null>(null);
   // TICKET_153_1: History from SQLite
-  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+  const [historyItems, setHistoryItems] = useState<BacktestHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [workflowRows, setWorkflowRows] = useState<WorkflowRow[]>([createInitialRow()]);
   const [algorithms, setAlgorithms] = useState(EMPTY_ALGORITHMS);
@@ -267,7 +236,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   // TICKET_162: Selected history result for page41 display
   const [selectedHistoryResult, setSelectedHistoryResult] = useState<ExecutorResult | null>(null);
   // TICKET_162: Selected history item metadata for title display
-  const [selectedHistoryItem, setSelectedHistoryItem] = useState<HistoryItem | null>(null);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<BacktestHistoryItem | null>(null);
 
   // TICKET_163: Naming dialog state
   const [namingDialogVisible, setNamingDialogVisible] = useState(false);
@@ -315,7 +284,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     try {
       const result = await api.executor.getHistory({ limit: 20 });
       if (result.success && result.data) {
-        const items: HistoryItem[] = result.data.map((record: any) => ({
+        const items: BacktestHistoryItem[] = result.data.map((record: any) => ({
           id: record.task_id,
           name: record.strategy_name,
           symbol: record.symbol,
@@ -737,15 +706,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   }, [currentTaskId, executorAPI, messageAPI, clearResultState]);
 
   // Load algorithms from database on mount
+  // TICKET_210: Use combined strategy_type + signal_source filtering
   useEffect(() => {
     async function loadAlgorithms() {
       try {
         setLoading(true);
 
         const [trendRange, preCondition, selectSteps, postCondition] = await Promise.all([
-          algorithmService.getTrendRangeAlgorithms(),
+          algorithmService.getIndicatorDetectorAlgorithms(),  // strategy_type=9 + indicator_detector%
           algorithmService.getPreConditionAlgorithms(),
-          algorithmService.getSelectStepsAlgorithms(),
+          algorithmService.getIndicatorEntryAlgorithms(),     // strategy_type=3 + indicator_entry%
           algorithmService.getPostConditionAlgorithms(),
         ]);
 
@@ -756,10 +726,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           postCondition: postCondition.map(toAlgorithmOption),
         });
 
-        console.log('[BacktestPage] Loaded algorithms:', {
-          trendRange: trendRange.length,
+        console.log('[BacktestPage] Loaded algorithms (TICKET_210: combined filtering):', {
+          indicatorDetector: trendRange.length,
           preCondition: preCondition.length,
-          selectSteps: selectSteps.length,
+          indicatorEntry: selectSteps.length,
           postCondition: postCondition.length,
         });
       } catch (error) {
@@ -1130,154 +1100,24 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
   return (
     <div className="h-full flex bg-color-terminal-bg text-color-terminal-text">
-      {/* Zone B: History Sidebar */}
-      <div className="w-56 flex-shrink-0 border-r border-color-terminal-border bg-color-terminal-panel/30 flex flex-col">
-        <div className="px-4 py-3 border-b border-color-terminal-border">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <HistoryIcon className="w-4 h-4 text-color-terminal-text-muted" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-                {t('sidebar.history')}
-              </span>
-            </div>
-            {/* TICKET_176_1: Checkpoint badge indicator */}
-            {checkpointInfo && !showCheckpointPanel && (
-              <button
-                onClick={() => setShowCheckpointPanel(true)}
-                className="flex items-center gap-1 px-2 py-1 text-[10px] rounded bg-amber-500/15 border border-amber-500/50 text-amber-400 hover:bg-amber-500/25 transition-colors"
-                title={`Checkpoint: ${checkpointInfo.progressPercent}% completed`}
-              >
-                <PauseIcon className="w-3 h-3" />
-                <span>{checkpointInfo.progressPercent}%</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-2">
-          {/* TICKET_151_1: Show BACKTESTING tree during execution or when results exist */}
-          {(isExecuting || backtestResults.length > 0) ? (
-            <div className="space-y-1">
-              {/* L1: BACKTESTING header */}
-              <div className="w-full px-3 py-2 text-left">
-                <ChevronDownIcon className="w-3 h-3 inline mr-1 text-color-terminal-text-muted" />
-                <span className="text-xs font-bold uppercase text-color-terminal-text-secondary">
-                  {t('sidebar.backtesting')}
-                </span>
-              </div>
-
-              {/* L2: Case list */}
-              {Array.from({ length: totalCases || backtestResults.length }).map((_, i) => {
-                const caseNum = i + 1;
-                const isCompleted = caseNum < currentCaseIndex || !isExecuting;
-                const isRunning = isExecuting && caseNum === currentCaseIndex;
-                // isPending = isExecuting && caseNum > currentCaseIndex (gray color)
-
-                return (
-                  <button
-                    key={i}
-                    onClick={() => handleCaseClick(i)}
-                    className={cn(
-                      "w-full px-6 py-1.5 text-left text-xs rounded transition-colors",
-                      "hover:bg-white/5"
-                    )}
-                  >
-                    <span style={{ color: isCompleted ? '#4ade80' : isRunning ? '#fbbf24' : '#6b7280' }}>
-                      {caseNum}{isRunning ? ` ${t('sidebar.testing')}` : ''}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : historyLoading ? (
-            <div className="px-2 py-8 text-center">
-              <LoaderIcon className="w-6 h-6 mx-auto mb-2 text-color-terminal-text-muted animate-spin" />
-              <p className="text-[11px] text-color-terminal-text-muted">{t('sidebar.loading')}</p>
-            </div>
-          ) : historyItems.length === 0 ? (
-            <div className="px-2 py-8 text-center">
-              <HistoryIcon className="w-8 h-8 mx-auto mb-3 text-color-terminal-text-muted opacity-50" />
-              <p className="text-[11px] text-color-terminal-text-muted">
-                {t('sidebar.noHistory')}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {historyItems.map((item) => {
-                const isProfit = (item.totalReturn ?? 0) >= 0;
-                const returnStr = item.totalReturn !== null
-                  ? `${isProfit ? '+' : ''}${(item.totalReturn * 100).toFixed(1)}%`
-                  : '-';
-                const capitalStr = item.initialCapital >= 1000
-                  ? `$${(item.initialCapital / 1000).toFixed(0)}K`
-                  : `$${item.initialCapital}`;
-                // Format order size display
-                const orderSizeStr = item.orderSize !== null && item.orderSizeUnit
-                  ? item.orderSizeUnit === 'percent'
-                    ? `${item.orderSize}%`
-                    : item.orderSizeUnit === 'cash'
-                      ? `$${item.orderSize}`
-                      : `${item.orderSize}sh`
-                  : null;
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => handleHistoryItemClick(item.id)}
-                    className={cn(
-                      "group w-full px-3 py-2 text-left rounded transition-colors cursor-pointer",
-                      "hover:bg-white/5 border border-transparent hover:border-white/10"
-                    )}
-                  >
-                    {/* Row 1: Strategy name + Return */}
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-color-terminal-text truncate flex-1">
-                        {item.name}
-                      </span>
-                      <span className={cn(
-                        "text-xs font-bold ml-2",
-                        isProfit ? "text-green-400" : "text-red-400"
-                      )}>
-                        {returnStr}
-                      </span>
-                    </div>
-                    {/* Row 2: Symbol + Timeframe */}
-                    <div className="flex items-center gap-2 text-[10px] text-color-terminal-text-muted mb-1">
-                      <span className="text-color-terminal-accent-teal">{item.symbol}</span>
-                      <span>{item.timeframe}</span>
-                    </div>
-                    {/* Row 3: Capital + OrderSize with labels */}
-                    <div className="flex items-center gap-3 text-[9px] text-color-terminal-text-muted/80 mb-1">
-                      <span>Cap: <span className="text-color-terminal-text-secondary">{capitalStr}</span></span>
-                      {orderSizeStr && <span>Size: <span className="text-color-terminal-text-secondary">{orderSizeStr}</span></span>}
-                    </div>
-                    {/* Row 4: Date range */}
-                    <div className="text-[9px] text-color-terminal-text-muted/70 mb-1">
-                      {item.startDate} ~ {item.endDate}
-                    </div>
-                    {/* Row 5: Created timestamp + Delete button */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-[9px] text-color-terminal-text-muted/50">
-                        {item.createdAt}
-                      </span>
-                      {/* TICKET_160: Delete button - always visible, highlight on hover */}
-                      <button
-                        onClick={(e) => handleDeleteClick(e, item.id)}
-                        className={cn(
-                          "p-0.5 rounded transition-all",
-                          "text-color-terminal-text-muted opacity-50 hover:opacity-100 hover:text-red-400 hover:bg-red-400/10"
-                        )}
-                        title="Delete"
-                      >
-                        <TrashIcon className="w-2.5 h-2.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Zone B: History Sidebar - TICKET_077_18 Modularized */}
+      <BacktestHistorySidebar
+        isExecuting={isExecuting}
+        currentCaseIndex={currentCaseIndex}
+        totalCases={totalCases}
+        resultsCount={backtestResults.length}
+        historyItems={historyItems}
+        historyLoading={historyLoading}
+        checkpointInfo={checkpointInfo ? {
+          taskId: checkpointInfo.taskId,
+          progressPercent: checkpointInfo.progressPercent,
+        } : null}
+        showCheckpointPanel={showCheckpointPanel}
+        onHistoryItemClick={handleHistoryItemClick}
+        onDeleteClick={handleDeleteClick}
+        onCaseClick={handleCaseClick}
+        onShowCheckpointPanel={() => setShowCheckpointPanel(true)}
+      />
 
       {/* Zone C + Zone D */}
       <div className="flex-1 flex flex-col overflow-hidden">

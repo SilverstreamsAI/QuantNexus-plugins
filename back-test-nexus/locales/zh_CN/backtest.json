@@ -112,7 +112,23 @@
   "breadcrumb": {
     "backtestNexus": "回测系统",
     "indicatorsCockpit": "指标驾驶舱",
+    "kronosCockpit": "克洛诺斯驾驶舱",
     "result": "结果"
+  },
+  "kronos": {
+    "title": "克洛诺斯策略",
+    "subtitle": "选择一个克洛诺斯生成的策略进行回测",
+    "noStrategies": "暂无克洛诺斯策略",
+    "noStrategiesHint": "使用策略构建器中的克洛诺斯功能生成策略后，将在此处显示。",
+    "columnName": "策略名称",
+    "columnType": "类型",
+    "columnCreated": "创建时间",
+    "columnAction": "选择",
+    "execute": "执行",
+    "executing": "执行中...",
+    "selectAlgorithmFirst": "请先选择一个策略",
+    "executionStarted": "执行已开始",
+    "executionFailed": "执行失败"
   },
   "locked": {
     "requiresTier": "此功能需要 {{tier}} 订阅"

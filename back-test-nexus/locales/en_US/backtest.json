@@ -112,7 +112,23 @@
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
     "indicatorsCockpit": "Indicators Cockpit",
+    "kronosCockpit": "Kronos Cockpit",
     "result": "Result"
+  },
+  "kronos": {
+    "title": "KRONOS STRATEGIES",
+    "subtitle": "Select a Kronos-generated strategy to backtest",
+    "noStrategies": "No Kronos Strategies",
+    "noStrategiesHint": "Generate strategies using the Kronos feature in Strategy Builder to see them here.",
+    "columnName": "Strategy Name",
+    "columnType": "Type",
+    "columnCreated": "Created",
+    "columnAction": "Select",
+    "execute": "Execute",
+    "executing": "Executing...",
+    "selectAlgorithmFirst": "Please select a strategy first",
+    "executionStarted": "Execution started",
+    "executionFailed": "Execution failed"
   },
   "locked": {
     "requiresTier": "This feature requires {{tier}} subscription"

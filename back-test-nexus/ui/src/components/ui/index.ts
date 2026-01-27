@@ -49,3 +49,11 @@ export {
 // TICKET_176_1: Checkpoint Resume UI
 export { CheckpointBadge } from './CheckpointBadge';
 export { CheckpointResumePanel } from './CheckpointResumePanel';
+
+// TICKET_077_18: Backtest History Sidebar
+export {
+  BacktestHistorySidebar,
+  type BacktestHistoryItem,
+  type CheckpointBadgeInfo,
+  type BacktestHistorySidebarProps,
+} from './BacktestHistorySidebar';

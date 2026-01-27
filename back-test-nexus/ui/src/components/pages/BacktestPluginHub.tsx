@@ -116,8 +116,8 @@ const COCKPIT_ITEMS: CockpitItem[] = [
     name: 'KRONOS COCKPIT',
     description: 'Kronos time-series backtest integration',
     icon: ClockIcon,
-    tier: 'pro',
-    locked: true,
+    tier: 'free',
+    locked: false,
   },
 ];
 
