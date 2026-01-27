@@ -50,6 +50,27 @@ export type {
 } from './kronos-indicator-entry-service';
 
 // =============================================================================
+// Kronos AI Entry Service (TICKET_211) - LLM-powered Entry Signals
+// =============================================================================
+
+export {
+  executeKronosAIEntry,
+  validateKronosAIEntryConfig,
+  getKronosAIEntryErrorMessage,
+  getDefaultBespokeConfig,
+  getPresetModeDescription,
+  KRONOS_AI_ENTRY_ERROR_CODE_MESSAGES,
+} from './kronos-ai-entry-service';
+
+export type {
+  KronosAIEntryConfig,
+  KronosAIEntryResult,
+  TraderPresetMode,
+  BespokeConfig,
+  RawIndicatorBlock,
+} from './kronos-ai-entry-service';
+
+// =============================================================================
 // Algorithm Storage Service (TICKET_077_D1) - NEW Centralized Service
 // =============================================================================
 
@@ -66,6 +87,7 @@ export {
   buildRegimeDetectorRequest,
   buildEntrySignalRequest,
   buildKronosPredictorRequest,
+  buildKronosAIEntryRequest,
   extractClassName,
 } from './algorithm-storage-service';
 
@@ -81,6 +103,9 @@ export type {
   EntrySignalConfig,
   KronosPredictorResult,
   KronosPredictorConfig,
+  // TICKET_211: Kronos AI Entry storage types
+  KronosAIEntryResult as StorageKronosAIEntryResult,
+  KronosAIEntryConfig as StorageKronosAIEntryConfig,
 } from './algorithm-storage-service';
 
 // =============================================================================

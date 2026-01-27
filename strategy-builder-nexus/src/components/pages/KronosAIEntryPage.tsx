@@ -41,6 +41,23 @@ import {
   GenerationResult,
 } from '../../hooks';
 
+// TICKET_211: Kronos AI Entry Service
+import {
+  executeKronosAIEntry,
+  validateKronosAIEntryConfig,
+  getKronosAIEntryErrorMessage,
+  KRONOS_AI_ENTRY_ERROR_CODE_MESSAGES,
+  KronosAIEntryConfig,
+  KronosAIEntryResult,
+} from '../../services/kronos-ai-entry-service';
+
+// TICKET_077_D1: Centralized Algorithm Storage Service
+import {
+  buildKronosAIEntryRequest,
+  extractClassName,
+  AlgorithmSaveRequest,
+} from '../../services/algorithm-storage-service';
+
 // Import indicator data for RawIndicatorSelector
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
 
@@ -56,30 +73,6 @@ interface KronosAIEntryPageProps {
   llmProvider?: string;
   /** LLM model setting from plugin config */
   llmModel?: string;
-}
-
-/**
- * API Configuration for Kronos AI Entry
- */
-interface KronosAIEntryConfig {
-  strategy_name: string;
-  preset_mode: TraderPresetMode;
-  bespoke_config?: BespokeConfig;
-  prompt: string;
-  indicators: RawIndicatorBlock[];
-  llm_provider: string;
-  llm_model: string;
-  storage_mode: 'local' | 'remote' | 'hybrid';
-}
-
-/**
- * API Result for Kronos AI Entry
- */
-interface KronosAIEntryResult {
-  success: boolean;
-  strategy_code?: string;
-  error_code?: string;
-  error_message?: string;
 }
 
 /**
@@ -105,13 +98,6 @@ const DEFAULT_PROMPT = `Generate an entry signal strategy that:
 3. Adapts to current market volatility
 4. Manages risk with appropriate position sizing`;
 
-const ERROR_CODE_MESSAGES: Record<string, string> = {
-  INVALID_CONFIG: 'Invalid configuration provided',
-  LLM_ERROR: 'LLM service error occurred',
-  TIMEOUT: 'Request timed out',
-  NETWORK_ERROR: 'Network connection error',
-};
-
 // -----------------------------------------------------------------------------
 // Workflow Config Builders
 // -----------------------------------------------------------------------------
@@ -133,101 +119,55 @@ function buildApiConfig(state: KronosAIEntryState, strategyName: string): Kronos
 }
 
 /**
- * Validate config before API call
- */
-function validateConfig(config: KronosAIEntryConfig): { valid: boolean; error?: string } {
-  if (!config.prompt || config.prompt.trim().length < 10) {
-    return { valid: false, error: 'Please enter a prompt (at least 10 characters)' };
-  }
-  return { valid: true };
-}
-
-/**
- * Execute API call (placeholder - will be implemented with actual API)
+ * Execute API call using kronos-ai-entry-service
+ * Transforms KronosAIEntryResult to GenerationResult format
  */
 async function executeApi(config: KronosAIEntryConfig): Promise<GenerationResult> {
-  // TODO: Implement actual API call to /api/kronos_llm_entry
   console.log('[KronosAIEntry] Execute API with config:', config);
 
-  // Placeholder response
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        success: true,
-        strategy_code: `# Generated Kronos AI Entry Strategy
-# Preset: ${config.preset_mode}
-# Provider: ${config.llm_provider}
+  const result = await executeKronosAIEntry(config);
 
-from backtrader_strategy import KronosAIEntryBase
+  // Transform service result to GenerationResult format
+  if (result.status === 'completed' && result.strategy_code) {
+    return {
+      status: 'completed',
+      strategy_code: result.strategy_code,
+    };
+  }
 
-class ${config.strategy_name.replace(/\s+/g, '')}Strategy(KronosAIEntryBase):
-    """
-    AI-generated entry strategy based on prompt:
-    ${config.prompt.substring(0, 100)}...
-    """
-
-    params = (
-        ('lookback', ${config.bespoke_config?.lookbackBars || 100}),
-        ('leverage', ${config.bespoke_config?.leverage || 1}),
-    )
-
-    def __init__(self):
-        super().__init__()
-        # Indicator initialization based on config
-        ${config.indicators.map(ind => `# ${ind.indicatorSlug || 'Unknown'}`).join('\n        ')}
-
-    def next(self):
-        # AI-generated entry logic
-        if self.should_enter_long():
-            self.buy()
-        elif self.should_enter_short():
-            self.sell()
-
-    def should_enter_long(self):
-        # Generated long entry condition
-        return True  # Placeholder
-
-    def should_enter_short(self):
-        # Generated short entry condition
-        return False  # Placeholder
-`,
-      });
-    }, 2000);
-  });
+  // Handle error cases
+  const errorMessage = getKronosAIEntryErrorMessage(result);
+  return {
+    status: 'failed',
+    error: errorMessage,
+    reason_code: result.reason_code || result.error?.error_code,
+  };
 }
 
 /**
  * Build storage request from result
+ * Uses centralized buildKronosAIEntryRequest for consistent AlgorithmSaveRequest format
  */
 function buildStorageRequest(
   result: GenerationResult,
   state: KronosAIEntryState,
   strategyName: string
-) {
-  return {
-    strategy_name: strategyName,
-    strategy_code: result.strategy_code || '',
-    class_name: `${strategyName.replace(/\s+/g, '')}Strategy`,
-    strategy_type: 1, // TYPE_EXECUTION
-    signal_source: 'kronosAIEntry',
-    entry_signal_base: 'kronos',
-    config: {
+): AlgorithmSaveRequest {
+  return buildKronosAIEntryRequest(
+    {
+      strategy_name: strategyName,
+      strategy_code: result.strategy_code || '',
+      class_name: extractClassName(result.strategy_code || ''),
+    },
+    {
       preset_mode: state.presetMode,
-      bespoke_config: state.bespokeConfig,
+      bespoke_config: state.presetMode === 'bespoke' ? state.bespokeConfig : undefined,
       prompt: state.prompt,
       indicators: state.indicatorBlocks,
-    },
-  };
-}
-
-/**
- * Get error message from result
- */
-function getErrorMessage(result: KronosAIEntryResult): string | undefined {
-  if (result.error_code && ERROR_CODE_MESSAGES[result.error_code]) {
-    return ERROR_CODE_MESSAGES[result.error_code];
-  }
-  return result.error_message;
+      llm_provider: state.llmProvider,
+      llm_model: state.llmModel,
+    }
+  );
 }
 
 // -----------------------------------------------------------------------------
@@ -320,11 +260,11 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
     defaultStrategyName: 'New Kronos AI Strategy',
     validationErrorMessage: 'Please enter a prompt to generate the strategy',
     buildConfig: buildApiConfig,
-    validateConfig,
+    validateConfig: validateKronosAIEntryConfig,
     executeApi,
     buildStorageRequest,
-    errorMessages: ERROR_CODE_MESSAGES,
-    getErrorMessage: (result) => getErrorMessage(result as unknown as KronosAIEntryResult),
+    errorMessages: KRONOS_AI_ENTRY_ERROR_CODE_MESSAGES,
+    getErrorMessage: (result) => getKronosAIEntryErrorMessage(result as unknown as KronosAIEntryResult),
   }), [llmProvider, llmModel]);
 
   // ---------------------------------------------------------------------------

@@ -188,6 +188,40 @@ export interface KronosPredictorConfig {
   };
 }
 
+/**
+ * Kronos AI Entry result from API (TICKET_211)
+ */
+export interface KronosAIEntryResult {
+  strategy_name: string;
+  strategy_code: string;
+  class_name: string;
+  created_at?: string;
+}
+
+/**
+ * Kronos AI Entry configuration (TICKET_211)
+ */
+export interface KronosAIEntryConfig {
+  user_id?: string;
+  preset_mode: 'baseline' | 'monk' | 'warrior' | 'bespoke';
+  bespoke_config?: {
+    lookbackBars: number;
+    positionLimits: number;
+    leverage: number;
+    tradingFrequency: number;
+    typicalYield: number;
+    maxDrawdown: number;
+  };
+  prompt: string;
+  indicators: Array<{
+    id: string;
+    indicatorSlug: string | null;
+    paramValues: Record<string, number | string>;
+  }>;
+  llm_provider?: string;
+  llm_model?: string;
+}
+
 // =============================================================================
 // Service Implementation
 // =============================================================================
@@ -579,6 +613,50 @@ export function buildKronosPredictorRequest(
         sample_count: config.sample_count,
       },
       signal_filter: config.signal_filter,
+    },
+  };
+}
+
+/**
+ * Build save request for Kronos AI Entry (TICKET_211)
+ * LLM-powered entry signal generation using preset modes
+ */
+export function buildKronosAIEntryRequest(
+  result: KronosAIEntryResult,
+  config: KronosAIEntryConfig
+): AlgorithmSaveRequest {
+  return {
+    strategy_name: result.strategy_name,
+    code: result.strategy_code,
+    user_id: config.user_id || 'default',
+    strategy_type: StrategyType.TYPE_EXECUTION,  // TYPE_EXECUTION = 1 for entry strategies
+    storage_mode: StorageMode.LOCAL,
+    classification_metadata: {
+      signal_source: SignalSource.KRONOS_LLM_ENTRY,  // 'kronos_llm_entry'
+      strategy_role: 'execution',
+      trading_style: 'ai_driven',
+      strategy_composition: 'atomic',
+      class_name: result.class_name,
+      entry_signal_base: 'kronos',
+      components: {
+        kronos_ai_entry: {
+          preset_mode: config.preset_mode,
+          bespoke_config: config.bespoke_config,
+          prompt: config.prompt,
+          llm_provider: config.llm_provider,
+          llm_model: config.llm_model,
+        },
+        indicator_context: config.indicators.filter(i => i.indicatorSlug),
+      },
+      tags: ['kronos', 'ai_entry', 'llm', config.preset_mode],
+      created_at: result.created_at || new Date().toISOString(),
+    },
+    strategy_rules: {
+      entry_signal_base: 'kronos',
+      preset_mode: config.preset_mode,
+      bespoke_config: config.bespoke_config,
+      prompt: config.prompt,
+      indicator_context: config.indicators.filter(i => i.indicatorSlug),
     },
   };
 }
