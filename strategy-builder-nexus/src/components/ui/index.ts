@@ -79,3 +79,22 @@ export type {
 // TICKET_077_17: TimeRangeSelector
 export { TimeRangeSelector } from './TimeRangeSelector';
 export type { TimeRangeSelectorProps, TimeRangeMode } from './TimeRangeSelector';
+
+// TICKET_077_19: Kronos AI Entry Components
+export { TemplateToolbar } from './TemplateToolbar';
+export type { TemplateToolbarProps, TemplateToolbarLabels } from './TemplateToolbar';
+
+export { RawIndicatorSelector } from './RawIndicatorSelector';
+export type { RawIndicatorSelectorProps, RawIndicatorBlock } from './RawIndicatorSelector';
+
+export { TraderPresetSelector } from './TraderPresetSelector';
+export type { TraderPresetSelectorProps, TraderPresetOption, TraderPresetMode } from './TraderPresetSelector';
+
+export { ModeDetailsPanel } from './ModeDetailsPanel';
+export type { ModeDetailsPanelProps, ModeDetail } from './ModeDetailsPanel';
+
+export { BespokeConfigPanel, DEFAULT_BESPOKE_CONFIG } from './BespokeConfigPanel';
+export type { BespokeConfigPanelProps, BespokeConfig, SliderConfig } from './BespokeConfigPanel';
+
+export { PromptTextarea } from './PromptTextarea';
+export type { PromptTextareaProps } from './PromptTextarea';

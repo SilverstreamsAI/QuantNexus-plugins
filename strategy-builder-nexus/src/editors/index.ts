@@ -13,6 +13,7 @@ import { RegimeDetectorPage } from '../components/pages/RegimeDetectorPage';
 import { EntrySignalPage } from '../components/pages/EntrySignalPage';
 import { KronosPredictorPage } from '../components/pages/KronosPredictorPage';
 import { KronosIndicatorEntryPage } from '../components/pages/KronosIndicatorEntryPage';
+import { KronosAIEntryPage } from '../components/pages/KronosAIEntryPage';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -57,6 +58,10 @@ export const EDITOR_PROVIDERS: Record<string, EditorProvider> = {
   // TICKET_208: Kronos Indicator Entry Page
   'strategy.kronosIndicatorEntry': {
     component: KronosIndicatorEntryPage,
+  },
+  // TICKET_211: Kronos AI Entry Page
+  'strategy.kronosAIEntry': {
+    component: KronosAIEntryPage,
   },
 };
 
