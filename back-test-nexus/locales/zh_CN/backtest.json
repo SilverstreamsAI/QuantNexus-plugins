@@ -103,10 +103,10 @@
     "deleteMessage": "这将永久删除回测结果，包括所有交易记录和权益曲线数据。"
   },
   "workflowSelector": {
-    "selectAlgorithm": "选择算法",
-    "preCondition": "前置条件",
-    "selectSteps": "选择步骤",
-    "postCondition": "后置条件",
+    "selectAlgorithm": "市场分析",
+    "preCondition": "入场过滤",
+    "selectSteps": "入场信号",
+    "postCondition": "退出策略",
     "search": "搜索..."
   },
   "breadcrumb": {

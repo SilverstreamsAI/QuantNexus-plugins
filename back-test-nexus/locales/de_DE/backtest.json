@@ -103,10 +103,10 @@
     "deleteMessage": "This will permanently delete the backtest result, including all trade records and equity curve data."
   },
   "workflowSelector": {
-    "selectAlgorithm": "Select Algorithm",
-    "preCondition": "Pre-condition",
-    "selectSteps": "Select Steps",
-    "postCondition": "Post-condition",
+    "selectAlgorithm": "Market Analysis",
+    "preCondition": "Entry Filter",
+    "selectSteps": "Entry Signal",
+    "postCondition": "Exit Strategy",
     "search": "Search..."
   },
   "breadcrumb": {
