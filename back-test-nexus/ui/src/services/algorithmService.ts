@@ -141,18 +141,19 @@ export const algorithmService = {
   },
 
   /**
-   * Get Kronos Detector algorithms for KronosCockpitPage (page42)
-   * signal_source starts with 'kronos_detector' (strategy_type = 9)
+   * Get Kronos Predictor algorithms for KronosCockpitPage (page42) Select Algorithm
+   * Matches: strategy_type=9 (TYPE_ANALYSIS) + signal_source='kronos_prediction'
+   * @see STRATEGY_TYPE_AND_SIGNAL_SOURCE_REFERENCE.md Section 9
    */
   async getKronosDetectorAlgorithms(): Promise<Algorithm[]> {
     const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
       userId: 'default',
       strategyType: 9,
-      signalSourcePrefix: 'kronos_detector',
+      signalSourcePrefix: 'kronos_prediction',
     });
 
     if (!response.success || !response.data) {
-      console.error('[algorithmService] Failed to fetch kronos-detector algorithms:', response.error);
+      console.error('[algorithmService] Failed to fetch kronos-predictor algorithms:', response.error);
       return [];
     }
 
@@ -160,18 +161,19 @@ export const algorithmService = {
   },
 
   /**
-   * Get Kronos Entry algorithms for KronosCockpitPage (page42)
-   * signal_source starts with 'kronos_entry' (strategy_type = 3)
+   * Get Kronos Indicator Entry algorithms for KronosCockpitPage (page42) Select Steps
+   * Matches: strategy_type=1 (TYPE_EXECUTION) + signal_source='kronosIndicatorEntry'
+   * @see STRATEGY_TYPE_AND_SIGNAL_SOURCE_REFERENCE.md Section 10
    */
   async getKronosEntryAlgorithms(): Promise<Algorithm[]> {
     const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
       userId: 'default',
-      strategyType: 3,
-      signalSourcePrefix: 'kronos_entry',
+      strategyType: 1,
+      signalSourcePrefix: 'kronosIndicatorEntry',
     });
 
     if (!response.success || !response.data) {
-      console.error('[algorithmService] Failed to fetch kronos-entry algorithms:', response.error);
+      console.error('[algorithmService] Failed to fetch kronos-indicator-entry algorithms:', response.error);
       return [];
     }
 

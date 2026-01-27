@@ -23,27 +23,27 @@ export enum StorageMode {
 
 /**
  * Strategy type constants (matches backend constants/business/strategy.py)
+ * @see STRATEGY_TYPE_AND_SIGNAL_SOURCE_REFERENCE.md
  */
 export enum StrategyType {
-  TYPE_EXECUTION = 0,
-  TYPE_TREND = 1,
-  TYPE_RANGE = 2,
-  TYPE_ENTRY_SIGNAL = 3,  // TICKET_210: Renamed from TYPE_SHOCK to match backend standard
-  TYPE_PRECONDITION = 7,
-  TYPE_POSTCONDITION = 8,
-  TYPE_ANALYSIS = 9,
-  TYPE_DIRECTOR = 10,
-  TYPE_KRONOS_PREDICTOR = 11,
-  TYPE_KRONOS_LLM_ENTRY = 12,
+  TYPE_EXECUTION = 1,       // Execution strategies
+  TYPE_ENTRY_SIGNAL = 3,    // Entry signal strategies (Legacy)
+  TYPE_EXIT_SIGNAL = 6,     // Exit signal strategies
+  TYPE_PRECONDITION = 7,    // Pre-condition strategies
+  TYPE_POSTCONDITION = 8,   // Post-condition strategies
+  TYPE_ANALYSIS = 9,        // Analysis strategies (Market Regime, Kronos Predictor)
+  TYPE_DIRECTOR = 10,       // Director strategies
+  TYPE_ADVISOR = 11,        // Advisor strategies
 }
 
 /**
  * Signal source constants (matches backend SignalSourceConstants)
+ * @see STRATEGY_TYPE_AND_SIGNAL_SOURCE_REFERENCE.md
  */
 export enum SignalSource {
   INDICATOR_DETECTOR = 'indicator_detector',
-  KRONOS_INDICATOR_ENTRY = 'kronos_indicator_entry',
-  KRONOS_PREDICTOR = 'kronos_predictor',
+  KRONOS_INDICATOR_ENTRY = 'kronosIndicatorEntry',  // TICKET_210: Match backend standard
+  KRONOS_PREDICTOR = 'kronos_prediction',           // TICKET_210: Match backend standard
   KRONOS_LLM_ENTRY = 'kronos_llm_entry',
   AI_ENTRY = 'ai_entry',
   MARKET_REGIME = 'market_regime',
@@ -534,6 +534,7 @@ export function buildEntrySignalRequest(
 
 /**
  * Build save request for Kronos Predictor (TICKET_207)
+ * @see STRATEGY_TYPE_AND_SIGNAL_SOURCE_REFERENCE.md Section 9
  */
 export function buildKronosPredictorRequest(
   result: KronosPredictorResult,
@@ -543,10 +544,10 @@ export function buildKronosPredictorRequest(
     strategy_name: result.strategy_name,
     code: result.strategy_code,
     user_id: config.user_id || 'default',
-    strategy_type: StrategyType.TYPE_KRONOS_PREDICTOR,
+    strategy_type: StrategyType.TYPE_ANALYSIS,  // TYPE_ANALYSIS = 9 for Kronos Predictor
     storage_mode: StorageMode.LOCAL,
     classification_metadata: {
-      signal_source: SignalSource.KRONOS_PREDICTOR,
+      signal_source: SignalSource.KRONOS_PREDICTOR,  // 'kronos_prediction'
       strategy_role: 'prediction',
       trading_style: 'ai_driven',
       strategy_composition: 'atomic',
