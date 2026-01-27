@@ -235,6 +235,28 @@ interface ElectronKronosAPI {
   }) => void): () => void;
 }
 
+// TICKET_212: Database API for algorithm queries
+interface AlgorithmRecord {
+  id: number;
+  code: string;
+  strategy_name: string;
+  strategy_type: number;
+  description: string | null;
+  classification_metadata?: string; // JSON string
+}
+
+interface ElectronDatabaseAPI {
+  getAlgorithms: (params: {
+    userId: string;
+    strategyType: number | number[];
+    signalSourcePrefix?: string;
+  }) => Promise<{
+    success: boolean;
+    data?: AlgorithmRecord[];
+    error?: { code: string; message: string };
+  }>;
+}
+
 interface ElectronAPI {
   credential: ElectronCredentialAPI;
   plugin: ElectronPluginAPI;
@@ -242,6 +264,7 @@ interface ElectronAPI {
   auth?: ElectronAuthAPI;
   entitlement: ElectronEntitlementAPI; // TICKET_190
   kronos: ElectronKronosAPI; // TICKET_205
+  database: ElectronDatabaseAPI; // TICKET_212
 }
 
 declare global {

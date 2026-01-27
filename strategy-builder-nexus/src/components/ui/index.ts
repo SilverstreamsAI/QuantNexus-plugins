@@ -98,3 +98,11 @@ export type { BespokeConfigPanelProps, BespokeConfig, SliderConfig } from './Bes
 
 export { PromptTextarea } from './PromptTextarea';
 export type { PromptTextareaProps } from './PromptTextarea';
+
+// TICKET_212: Algorithm Selector Dialog
+export { AlgorithmSelectorDialog } from './AlgorithmSelectorDialog';
+export type { AlgorithmSelectorDialogProps } from './AlgorithmSelectorDialog';
+
+// TICKET_212: Indicator Template Selector Dialog
+export { IndicatorTemplateSelectorDialog } from './IndicatorTemplateSelectorDialog';
+export type { IndicatorTemplateSelectorDialogProps, IndicatorTemplate } from './IndicatorTemplateSelectorDialog';

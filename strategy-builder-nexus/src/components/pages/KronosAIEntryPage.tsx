@@ -32,6 +32,8 @@ import {
   NamingDialog,
   GenerateContentWrapper,
   IndicatorDefinition,
+  IndicatorTemplateSelectorDialog,
+  IndicatorTemplate,
 } from '../ui';
 
 // TICKET_077_D2: Unified Generate Workflow Hook
@@ -190,6 +192,9 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
   const [indicatorBlocks, setIndicatorBlocks] = useState<RawIndicatorBlock[]>([]);
   const [storageMode, setStorageMode] = useState<'local' | 'remote' | 'hybrid'>('local');
 
+  // TICKET_212: Load Template dialog state
+  const [isLoadDialogOpen, setIsLoadDialogOpen] = useState(false);
+
   // Load storage mode from plugin config
   useEffect(() => {
     const loadStorageMode = async () => {
@@ -210,9 +215,28 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
   // Template Toolbar Handlers
   // ---------------------------------------------------------------------------
 
+  // TICKET_212: Handle indicator template selection from Load Template dialog
+  const handleSelectTemplate = useCallback((template: IndicatorTemplate) => {
+    console.log('[KronosAIEntry] Loading indicator template:', template.name);
+
+    // Load indicators from template
+    if (template.indicators && template.indicators.length > 0) {
+      // Generate new IDs to avoid conflicts
+      const indicatorsWithNewIds = template.indicators.map((ind, index) => ({
+        ...ind,
+        id: `template_${Date.now()}_${index}`,
+      }));
+      setIndicatorBlocks(indicatorsWithNewIds);
+    }
+
+    window.nexus?.window?.showNotification(
+      `Template "${template.name}" loaded with ${template.indicators.length} indicators`,
+      'success'
+    );
+  }, []);
+
   const handleLoadTemplate = useCallback(() => {
-    // TODO: Implement template loading
-    console.log('[KronosAIEntry] Load template');
+    setIsLoadDialogOpen(true);
   }, []);
 
   const handleSaveTemplate = useCallback(() => {
@@ -479,6 +503,15 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
         contextData={{ algorithm: 'KronosAIEntry' }}
         onConfirm={actions.handleConfirmNaming}
         onCancel={actions.handleCancelNaming}
+      />
+
+      {/* TICKET_212: Load Indicator Template Dialog */}
+      <IndicatorTemplateSelectorDialog
+        isOpen={isLoadDialogOpen}
+        onClose={() => setIsLoadDialogOpen(false)}
+        onSelect={handleSelectTemplate}
+        title="Load Indicator Template"
+        emptyMessage="No indicator templates available"
       />
     </div>
   );

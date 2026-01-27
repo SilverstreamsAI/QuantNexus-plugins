@@ -106,6 +106,30 @@ export interface AlgorithmSaveResult {
   };
 }
 
+/**
+ * TICKET_212: Algorithm list item
+ */
+export interface AlgorithmListItem {
+  id: number;
+  code: string;
+  strategyName: string;
+  strategyType: number;
+  description?: string;
+  classificationMetadata?: ClassificationMetadata;
+}
+
+/**
+ * TICKET_212: Algorithm list result
+ */
+export interface AlgorithmListResult {
+  success: boolean;
+  data: AlgorithmListItem[];
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
 // =============================================================================
 // Factory Function Input Types
 // =============================================================================
@@ -448,6 +472,55 @@ export class AlgorithmStorageService {
       user_id: request.user_id,
       file_path: `generated/${request.strategy_name}.py`,
     };
+  }
+
+  /**
+   * TICKET_212: Get Kronos AI Entry algorithms
+   * Filters by strategy_type=1 (TYPE_EXECUTION) + signal_source='kronos_llm_entry'
+   */
+  async getKronosAIEntryAlgorithms(): Promise<AlgorithmListResult> {
+    try {
+      const response = await window.electronAPI.database.getAlgorithms({
+        userId: 'default',
+        strategyType: StrategyType.TYPE_EXECUTION,
+        signalSourcePrefix: 'kronos_llm_entry',
+      });
+
+      if (!response.success || !response.data) {
+        console.error('[AlgorithmStorageService] Failed to fetch Kronos AI Entry algorithms:', response.error);
+        return {
+          success: false,
+          data: [],
+          error: response.error,
+        };
+      }
+
+      const algorithms = response.data.map(record => ({
+        id: record.id,
+        code: record.code,
+        strategyName: record.strategy_name,
+        strategyType: record.strategy_type,
+        description: record.description || undefined,
+        classificationMetadata: record.classification_metadata
+          ? JSON.parse(record.classification_metadata)
+          : undefined,
+      }));
+
+      return {
+        success: true,
+        data: algorithms,
+      };
+    } catch (error) {
+      console.error('[AlgorithmStorageService] getKronosAIEntryAlgorithms exception:', error);
+      return {
+        success: false,
+        data: [],
+        error: {
+          code: 'FETCH_EXCEPTION',
+          message: error instanceof Error ? error.message : 'Unknown error',
+        },
+      };
+    }
   }
 }
 

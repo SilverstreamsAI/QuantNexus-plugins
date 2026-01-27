@@ -95,6 +95,9 @@ export type {
   AlgorithmSaveRequest,
   AlgorithmSaveResult,
   ClassificationMetadata,
+  // TICKET_212: Algorithm list types
+  AlgorithmListItem,
+  AlgorithmListResult,
   // Note: Storage types are for algorithm-storage-service internal use
   // Use RegimeIndicatorEntryResult/Config from regime-indicator-entry-service for API calls
   RegimeDetectorResult,
