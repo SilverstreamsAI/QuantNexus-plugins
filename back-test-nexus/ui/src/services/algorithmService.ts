@@ -141,17 +141,37 @@ export const algorithmService = {
   },
 
   /**
-   * Get Kronos algorithms for KronosCockpitPage (page42)
-   * signal_source starts with 'kronos' (all strategy_types)
+   * Get Kronos Detector algorithms for KronosCockpitPage (page42)
+   * signal_source starts with 'kronos_detector' (strategy_type = 9)
    */
-  async getKronosAlgorithms(): Promise<Algorithm[]> {
+  async getKronosDetectorAlgorithms(): Promise<Algorithm[]> {
     const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
       userId: 'default',
-      signalSourcePrefix: 'kronos',
+      strategyType: 9,
+      signalSourcePrefix: 'kronos_detector',
     });
 
     if (!response.success || !response.data) {
-      console.error('[algorithmService] Failed to fetch kronos algorithms:', response.error);
+      console.error('[algorithmService] Failed to fetch kronos-detector algorithms:', response.error);
+      return [];
+    }
+
+    return response.data.map(toAlgorithm);
+  },
+
+  /**
+   * Get Kronos Entry algorithms for KronosCockpitPage (page42)
+   * signal_source starts with 'kronos_entry' (strategy_type = 3)
+   */
+  async getKronosEntryAlgorithms(): Promise<Algorithm[]> {
+    const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
+      userId: 'default',
+      strategyType: 3,
+      signalSourcePrefix: 'kronos_entry',
+    });
+
+    if (!response.success || !response.data) {
+      console.error('[algorithmService] Failed to fetch kronos-entry algorithms:', response.error);
       return [];
     }
 

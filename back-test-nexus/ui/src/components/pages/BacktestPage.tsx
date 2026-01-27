@@ -134,8 +134,11 @@ type BacktestResolver = {
   reject: (error: Error) => void;
 };
 
+/** Cockpit mode determines algorithm filtering */
+export type CockpitMode = 'indicators' | 'kronos';
+
 // TICKET_173: API types from Host (use any to avoid type dependency on Host types)
-interface BacktestPageProps {
+export interface BacktestPageProps {
   /** TICKET_173: Executor API from Host */
   executorAPI?: any;
   /** TICKET_173: Data API from Host */
@@ -146,6 +149,8 @@ interface BacktestPageProps {
   onResultViewChange?: (isResultView: boolean) => void;
   /** TICKET_164: Reset key - when changed, clear all result states */
   resetKey?: number;
+  /** Cockpit mode: 'indicators' (default) or 'kronos' for different algorithm filtering */
+  cockpitMode?: CockpitMode;
 }
 
 // -----------------------------------------------------------------------------
@@ -196,6 +201,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   messageAPI,
   onResultViewChange,
   resetKey = 0,
+  cockpitMode = 'indicators',
 }) => {
   const { t } = useTranslation('backtest');
 
@@ -707,17 +713,31 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
   // Load algorithms from database on mount
   // TICKET_210: Use combined strategy_type + signal_source filtering
+  // cockpitMode determines which algorithms to load (indicators vs kronos)
   useEffect(() => {
     async function loadAlgorithms() {
       try {
         setLoading(true);
 
-        const [trendRange, preCondition, selectSteps, postCondition] = await Promise.all([
-          algorithmService.getIndicatorDetectorAlgorithms(),  // strategy_type=9 + indicator_detector%
-          algorithmService.getPreConditionAlgorithms(),
-          algorithmService.getIndicatorEntryAlgorithms(),     // strategy_type=3 + indicator_entry%
-          algorithmService.getPostConditionAlgorithms(),
-        ]);
+        let trendRange, preCondition, selectSteps, postCondition;
+
+        if (cockpitMode === 'kronos') {
+          // Kronos cockpit: load kronos-prefixed algorithms
+          [trendRange, preCondition, selectSteps, postCondition] = await Promise.all([
+            algorithmService.getKronosDetectorAlgorithms(),  // strategy_type=9 + kronos_detector%
+            algorithmService.getPreConditionAlgorithms(),
+            algorithmService.getKronosEntryAlgorithms(),     // strategy_type=3 + kronos_entry%
+            algorithmService.getPostConditionAlgorithms(),
+          ]);
+        } else {
+          // Indicators cockpit (default): load indicator-prefixed algorithms
+          [trendRange, preCondition, selectSteps, postCondition] = await Promise.all([
+            algorithmService.getIndicatorDetectorAlgorithms(),  // strategy_type=9 + indicator_detector%
+            algorithmService.getPreConditionAlgorithms(),
+            algorithmService.getIndicatorEntryAlgorithms(),     // strategy_type=3 + indicator_entry%
+            algorithmService.getPostConditionAlgorithms(),
+          ]);
+        }
 
         setAlgorithms({
           trendRange: trendRange.map(toAlgorithmOption),
@@ -726,10 +746,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           postCondition: postCondition.map(toAlgorithmOption),
         });
 
-        console.log('[BacktestPage] Loaded algorithms (TICKET_210: combined filtering):', {
-          indicatorDetector: trendRange.length,
+        console.log(`[BacktestPage] Loaded algorithms (cockpitMode=${cockpitMode}):`, {
+          trendRange: trendRange.length,
           preCondition: preCondition.length,
-          indicatorEntry: selectSteps.length,
+          selectSteps: selectSteps.length,
           postCondition: postCondition.length,
         });
       } catch (error) {
@@ -740,7 +760,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     }
 
     loadAlgorithms();
-  }, []);
+  }, [cockpitMode]);
 
   // TICKET_139: Subscribe to auth state changes
   useEffect(() => {

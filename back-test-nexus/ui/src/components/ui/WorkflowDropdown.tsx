@@ -7,7 +7,7 @@
  * @see TICKET_077 - component7 (WorkflowRowSelector)
  */
 
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '../../lib/utils';
 
@@ -130,6 +130,8 @@ export const WorkflowDropdown: React.FC<WorkflowDropdownProps> = ({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 456 });
+  // Track if dropdown should open upward (for position recalculation after render)
+  const [openUpward, setOpenUpward] = useState(false);
 
   const themeColors = THEME_COLORS[theme];
 
@@ -145,28 +147,45 @@ export const WorkflowDropdown: React.FC<WorkflowDropdownProps> = ({
   }, [options, searchQuery]);
 
   // Update dropdown position with boundary detection and flip
-  const updatePosition = useCallback(() => {
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const preferredMaxHeight = 456;
-      const gap = 4;
-      const spaceBelow = window.innerHeight - rect.bottom - gap;
-      const spaceAbove = rect.top - gap;
+  // Uses actual dropdown height for upward positioning (fixes empty state positioning)
+  const updatePosition = useCallback((useActualHeight = false) => {
+    if (!buttonRef.current) return;
 
-      // Flip upward if insufficient space below and more space above
-      const openUpward = spaceBelow < preferredMaxHeight && spaceAbove > spaceBelow;
+    const rect = buttonRef.current.getBoundingClientRect();
+    const preferredMaxHeight = 456;
+    const gap = 4;
+    const spaceBelow = window.innerHeight - rect.bottom - gap;
+    const spaceAbove = rect.top - gap;
 
-      // Dynamic maxHeight based on available space
-      const availableSpace = openUpward ? spaceAbove : spaceBelow;
-      const maxHeight = Math.min(preferredMaxHeight, availableSpace);
+    // Flip upward if insufficient space below and more space above
+    const shouldOpenUpward = spaceBelow < preferredMaxHeight && spaceAbove > spaceBelow;
+    setOpenUpward(shouldOpenUpward);
 
-      setDropdownPosition({
-        top: openUpward ? rect.top - maxHeight - gap : rect.bottom + gap,
-        left: rect.left,
-        width: Math.max(rect.width, 280),
-        maxHeight,
-      });
+    // Dynamic maxHeight based on available space
+    const availableSpace = shouldOpenUpward ? spaceAbove : spaceBelow;
+    const maxHeight = Math.min(preferredMaxHeight, availableSpace);
+
+    // For upward positioning, use actual dropdown height if available
+    let top: number;
+    if (shouldOpenUpward) {
+      if (useActualHeight && dropdownRef.current) {
+        // Use actual rendered height for precise positioning
+        const actualHeight = dropdownRef.current.offsetHeight;
+        top = rect.top - actualHeight - gap;
+      } else {
+        // Initial render: position at button top (will be adjusted after render)
+        top = rect.top - gap;
+      }
+    } else {
+      top = rect.bottom + gap;
     }
+
+    setDropdownPosition({
+      top,
+      left: rect.left,
+      width: Math.max(rect.width, 280),
+      maxHeight,
+    });
   }, []);
 
   // Handle open
@@ -230,13 +249,22 @@ export const WorkflowDropdown: React.FC<WorkflowDropdownProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    window.addEventListener('scroll', updatePosition, true);
-    window.addEventListener('resize', updatePosition);
+    const handleScrollResize = () => updatePosition(true);
+    window.addEventListener('scroll', handleScrollResize, true);
+    window.addEventListener('resize', handleScrollResize);
     return () => {
-      window.removeEventListener('scroll', updatePosition, true);
-      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', handleScrollResize, true);
+      window.removeEventListener('resize', handleScrollResize);
     };
   }, [isOpen, updatePosition]);
+
+  // Recalculate position after dropdown renders (for accurate upward positioning)
+  useLayoutEffect(() => {
+    if (isOpen && openUpward && dropdownRef.current) {
+      // Recalculate with actual height after render
+      updatePosition(true);
+    }
+  }, [isOpen, openUpward, filteredOptions.length, updatePosition]);
 
   // Get selected count text
   const selectedCount = selectedIds.length;
