@@ -159,6 +159,7 @@ interface ServerRequest {
   user_id: number;
   task_id?: string;
   locale?: string;
+  storage_mode: 'local' | 'remote' | 'hybrid';
   regime_indicator_entry_config: {
     longEntryIndicators: ServerIndicatorRule[];
     shortEntryIndicators: ServerIndicatorRule[];
@@ -244,6 +245,7 @@ function buildServerRequest(config: RegimeIndicatorEntryConfig): ServerRequest {
     user_id: 1,
     task_id: taskId,
     locale: 'en',
+    storage_mode: config.storage_mode || 'local',
     regime_indicator_entry_config: {
       longEntryIndicators: serverRules,
       shortEntryIndicators: [], // TODO: Support from UI

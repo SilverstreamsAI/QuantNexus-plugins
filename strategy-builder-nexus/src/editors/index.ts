@@ -14,6 +14,7 @@ import { EntrySignalPage } from '../components/pages/EntrySignalPage';
 import { KronosPredictorPage } from '../components/pages/KronosPredictorPage';
 import { KronosIndicatorEntryPage } from '../components/pages/KronosIndicatorEntryPage';
 import { KronosAIEntryPage } from '../components/pages/KronosAIEntryPage';
+import { MarketObserverPage } from '../components/pages/MarketObserverPage';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -62,6 +63,10 @@ export const EDITOR_PROVIDERS: Record<string, EditorProvider> = {
   // TICKET_211: Kronos AI Entry Page
   'strategy.kronosAIEntry': {
     component: KronosAIEntryPage,
+  },
+  // TICKET_077_1: Market Observer Page (page35) - Trader Mode
+  'strategy.marketObserver': {
+    component: MarketObserverPage,
   },
 };
 

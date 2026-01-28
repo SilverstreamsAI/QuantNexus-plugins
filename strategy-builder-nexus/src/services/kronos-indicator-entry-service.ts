@@ -153,7 +153,7 @@ interface ServerIndicatorRule {
 interface ServerRequest {
   user_id: number;
   task_id?: string;
-  locale?: string;
+  storage_mode: 'local' | 'remote' | 'hybrid';
   indicator_entry_config: {
     locale?: string;
     longEntryIndicators: ServerIndicatorRule[];
@@ -237,6 +237,7 @@ function buildServerRequest(config: KronosIndicatorEntryConfig): ServerRequest {
   return {
     user_id: 1,
     task_id: taskId,
+    storage_mode: config.storage_mode || 'local',
     indicator_entry_config: {
       locale: 'en_US',
       longEntryIndicators: serverRules,

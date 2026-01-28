@@ -47,6 +47,7 @@ export enum SignalSource {
   KRONOS_LLM_ENTRY = 'kronos_llm_entry',
   AI_ENTRY = 'ai_entry',
   MARKET_REGIME = 'market_regime',
+  TRADER_OBSERVER = 'traderObserver',               // TICKET_077_1: Market Observer (page35)
 }
 
 // =============================================================================
@@ -244,6 +245,27 @@ export interface KronosAIEntryConfig {
   }>;
   llm_provider?: string;
   llm_model?: string;
+}
+
+/**
+ * Market Observer result from API (TICKET_077_1 page35)
+ */
+export interface MarketObserverResult {
+  strategy_name: string;
+  strategy_code: string;
+  class_name: string;
+  created_at?: string;
+}
+
+/**
+ * Market Observer configuration (TICKET_077_1 page35)
+ */
+export interface MarketObserverConfig {
+  user_id?: string;
+  llm_provider?: string;
+  llm_model?: string;
+  indicators?: unknown[];
+  rules?: unknown[];
 }
 
 // =============================================================================
@@ -730,6 +752,42 @@ export function buildKronosAIEntryRequest(
       bespoke_config: config.bespoke_config,
       prompt: config.prompt,
       indicator_context: config.indicators.filter(i => i.indicatorSlug),
+    },
+  };
+}
+
+/**
+ * Build save request for Market Observer (TICKET_077_1 page35)
+ * Precondition strategy for Trader Mode
+ */
+export function buildMarketObserverRequest(
+  result: MarketObserverResult,
+  config: MarketObserverConfig
+): AlgorithmSaveRequest {
+  return {
+    strategy_name: result.strategy_name,
+    code: result.strategy_code,
+    user_id: config.user_id || 'default',
+    strategy_type: StrategyType.TYPE_PRECONDITION,  // TYPE_PRECONDITION = 7
+    storage_mode: StorageMode.LOCAL,
+    classification_metadata: {
+      signal_source: SignalSource.TRADER_OBSERVER,  // 'traderObserver'
+      strategy_role: 'precondition',
+      trading_style: 'observation',
+      strategy_composition: 'atomic',
+      class_name: result.class_name,
+      components: {
+        market_observer: {
+          llm_provider: config.llm_provider,
+          llm_model: config.llm_model,
+        },
+      },
+      tags: ['trader', 'observer', 'precondition'],
+      created_at: result.created_at || new Date().toISOString(),
+    },
+    strategy_rules: {
+      indicators: config.indicators || [],
+      rules: config.rules || [],
     },
   };
 }

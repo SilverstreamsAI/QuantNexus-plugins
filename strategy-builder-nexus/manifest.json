@@ -274,6 +274,12 @@
         "displayName": "Kronos AI Entry",
         "serviceIds": ["ai_entry"],
         "selector": [{ "resourceScheme": "strategy" }]
+      },
+      {
+        "viewType": "strategy.marketObserver",
+        "displayName": "Market Observer",
+        "serviceIds": ["market_observer"],
+        "selector": [{ "resourceScheme": "strategy" }]
       }
     ],
     "commands": [

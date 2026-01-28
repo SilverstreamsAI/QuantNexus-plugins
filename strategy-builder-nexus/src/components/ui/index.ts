@@ -106,3 +106,7 @@ export type { AlgorithmSelectorDialogProps } from './AlgorithmSelectorDialog';
 // TICKET_212: Indicator Template Selector Dialog
 export { IndicatorTemplateSelectorDialog } from './IndicatorTemplateSelectorDialog';
 export type { IndicatorTemplateSelectorDialogProps, IndicatorTemplate } from './IndicatorTemplateSelectorDialog';
+
+// TICKET_077_1: WatchlistConfigPanel for Market Observer (page35)
+export { WatchlistConfigPanel } from './WatchlistConfigPanel';
+export type { WatchlistConfigPanelProps, WatchlistData, TimeframeOption, DataSourceOption } from './WatchlistConfigPanel';

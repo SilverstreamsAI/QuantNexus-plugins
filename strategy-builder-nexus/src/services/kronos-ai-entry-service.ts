@@ -178,6 +178,7 @@ interface ServerRequest {
   user_id: number;
   task_id?: string;
   locale?: string;
+  storage_mode: 'local' | 'remote' | 'hybrid';
   operation_type: 'generate_strategy';
   operation_data: {
     strategy_id?: number;
@@ -264,6 +265,7 @@ function buildServerRequest(config: KronosAIEntryConfig): ServerRequest {
     user_id: 1,
     task_id: taskId,
     locale: 'en_US',
+    storage_mode: config.storage_mode || 'local',
     operation_type: 'generate_strategy',
     operation_data: {
       strategy_name: config.strategy_name || 'Untitled Kronos AI Strategy',
