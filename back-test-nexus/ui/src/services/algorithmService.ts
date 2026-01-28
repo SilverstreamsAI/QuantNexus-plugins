@@ -179,6 +179,26 @@ export const algorithmService = {
 
     return response.data.map(toAlgorithm);
   },
+
+  /**
+   * Get Kronos AI Entry algorithms for KronosCockpitPage (page42) Select Steps
+   * Matches: strategy_type=1 (TYPE_EXECUTION) + signal_source='kronos_llm_entry'
+   * @see TICKET_210 - Kronos AI Entry (Page 34) uses kronos_llm_entry signal_source
+   */
+  async getKronosAIEntryAlgorithms(): Promise<Algorithm[]> {
+    const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
+      userId: 'default',
+      strategyType: 1,
+      signalSourcePrefix: 'kronos_llm_entry',
+    });
+
+    if (!response.success || !response.data) {
+      console.error('[algorithmService] Failed to fetch kronos-ai-entry algorithms:', response.error);
+      return [];
+    }
+
+    return response.data.map(toAlgorithm);
+  },
 };
 
 // -----------------------------------------------------------------------------

@@ -722,13 +722,19 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         let trendRange, preCondition, selectSteps, postCondition;
 
         if (cockpitMode === 'kronos') {
-          // Kronos cockpit: load Kronos Predictor + Kronos Indicator Entry algorithms
-          [trendRange, preCondition, selectSteps, postCondition] = await Promise.all([
+          // Kronos cockpit: load Kronos Predictor + all Kronos Entry algorithms
+          // TICKET_210: Merge kronosIndicatorEntry + kronos_llm_entry
+          const [kronosDetector, preCond, kronosIndicatorEntry, kronosAIEntry, postCond] = await Promise.all([
             algorithmService.getKronosDetectorAlgorithms(),  // strategy_type=9 + kronos_prediction
             algorithmService.getPreConditionAlgorithms(),
             algorithmService.getKronosEntryAlgorithms(),     // strategy_type=1 + kronosIndicatorEntry
+            algorithmService.getKronosAIEntryAlgorithms(),   // strategy_type=1 + kronos_llm_entry
             algorithmService.getPostConditionAlgorithms(),
           ]);
+          trendRange = kronosDetector;
+          preCondition = preCond;
+          selectSteps = [...kronosIndicatorEntry, ...kronosAIEntry];
+          postCondition = postCond;
         } else {
           // Indicators cockpit (default): load indicator-prefixed algorithms
           [trendRange, preCondition, selectSteps, postCondition] = await Promise.all([

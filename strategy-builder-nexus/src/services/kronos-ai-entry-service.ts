@@ -142,27 +142,33 @@ export function getKronosAIEntryErrorMessage(result: KronosAIEntryResult): strin
 // -----------------------------------------------------------------------------
 
 /**
- * Preset mode configuration for server
+ * Server raw indicator format
  */
-interface ServerPresetConfig {
-  mode: TraderPresetMode;
-  bespoke_params?: {
-    lookback_bars: number;
-    position_limits: number;
-    leverage: number;
-    trading_frequency: number;
-    typical_yield: number;
-    max_drawdown: number;
-  };
+interface ServerRawIndicator {
+  type: 'raw_indicator';
+  indicator_slug: string;
+  parameters: Record<string, unknown>;
+  output_name: string;
 }
 
 /**
- * Server indicator context format
+ * Server LLM configuration
  */
-interface ServerIndicatorContext {
-  slug: string;
-  name: string;
-  params: Record<string, unknown>;
+interface ServerLLMConfig {
+  provider: string;
+  model: string;
+  timeout: number;
+  retries: number;
+  prompt: string;
+}
+
+/**
+ * Server Kronos configuration
+ */
+interface ServerKronosConfig {
+  confidenceThreshold: number;
+  expectedReturnThreshold: number;
+  directionFilter: boolean;
 }
 
 /**
@@ -172,17 +178,17 @@ interface ServerRequest {
   user_id: number;
   task_id?: string;
   locale?: string;
-  kronos_llm_entry_config: {
+  operation_type: 'generate_strategy';
+  operation_data: {
+    strategy_id?: number;
     strategy_name: string;
-    preset_config: ServerPresetConfig;
-    analysis_prompt: string;
-    indicator_context: ServerIndicatorContext[];
-    entry_signal_base: 'kronos'; // Always "kronos" for Kronos mode
-    llm_provider?: string;
-    llm_model?: string;
+    prediction: {
+      lookbackBars: number;
+    };
+    llm: ServerLLMConfig;
+    rawIndicators: ServerRawIndicator[];
+    kronosConfig: ServerKronosConfig;
   };
-  llm_provider?: string;
-  llm_model?: string;
 }
 
 // -----------------------------------------------------------------------------
@@ -190,29 +196,52 @@ interface ServerRequest {
 // -----------------------------------------------------------------------------
 
 /**
- * Transform bespoke config to server format
+ * Default lookback bars by preset mode
  */
-function transformBespokeConfig(config: BespokeConfig): ServerPresetConfig['bespoke_params'] {
-  return {
-    lookback_bars: config.lookbackBars,
-    position_limits: config.positionLimits,
-    leverage: config.leverage,
-    trading_frequency: config.tradingFrequency,
-    typical_yield: config.typicalYield,
-    max_drawdown: config.maxDrawdown,
-  };
-}
+const PRESET_LOOKBACK_BARS: Record<TraderPresetMode, number> = {
+  baseline: 100,
+  monk: 150,
+  warrior: 50,
+  bespoke: 100, // Will be overridden by bespoke_config.lookbackBars
+};
+
+/**
+ * Default Kronos config by preset mode
+ */
+const PRESET_KRONOS_CONFIG: Record<TraderPresetMode, ServerKronosConfig> = {
+  baseline: {
+    confidenceThreshold: 0.5,
+    expectedReturnThreshold: 0.01,
+    directionFilter: true,
+  },
+  monk: {
+    confidenceThreshold: 0.7,
+    expectedReturnThreshold: 0.03,
+    directionFilter: true,
+  },
+  warrior: {
+    confidenceThreshold: 0.3,
+    expectedReturnThreshold: 0.005,
+    directionFilter: false,
+  },
+  bespoke: {
+    confidenceThreshold: 0.6,
+    expectedReturnThreshold: 0.02,
+    directionFilter: true,
+  },
+};
 
 /**
  * Transform raw indicator blocks to server format
  */
-function transformIndicatorContext(blocks: RawIndicatorBlock[]): ServerIndicatorContext[] {
+function transformRawIndicators(blocks: RawIndicatorBlock[]): ServerRawIndicator[] {
   return blocks
     .filter(block => block.indicatorSlug)
-    .map(block => ({
-      slug: block.indicatorSlug!,
-      name: block.indicatorSlug!,
-      params: block.paramValues as Record<string, unknown>,
+    .map((block, index) => ({
+      type: 'raw_indicator' as const,
+      indicator_slug: block.indicatorSlug!,
+      parameters: block.paramValues as Record<string, unknown>,
+      output_name: `${block.indicatorSlug!.toLowerCase()}_${index}`,
     }));
 }
 
@@ -220,34 +249,37 @@ function transformIndicatorContext(blocks: RawIndicatorBlock[]): ServerIndicator
  * Build server request from client config
  */
 function buildServerRequest(config: KronosAIEntryConfig): ServerRequest {
-  // Build preset config
-  const presetConfig: ServerPresetConfig = {
-    mode: config.preset_mode,
-  };
+  // Determine lookback bars
+  const lookbackBars = config.preset_mode === 'bespoke' && config.bespoke_config
+    ? config.bespoke_config.lookbackBars
+    : PRESET_LOOKBACK_BARS[config.preset_mode];
 
-  // Add bespoke params if bespoke mode
-  if (config.preset_mode === 'bespoke' && config.bespoke_config) {
-    presetConfig.bespoke_params = transformBespokeConfig(config.bespoke_config);
-  }
+  // Get Kronos config for preset mode
+  const kronosConfig = PRESET_KRONOS_CONFIG[config.preset_mode];
 
   // Generate task_id
-  const taskId = `kronos_ai_entry_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  const taskId = `kronos_llm_entry_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
   return {
     user_id: 1,
     task_id: taskId,
     locale: 'en_US',
-    kronos_llm_entry_config: {
+    operation_type: 'generate_strategy',
+    operation_data: {
       strategy_name: config.strategy_name || 'Untitled Kronos AI Strategy',
-      preset_config: presetConfig,
-      analysis_prompt: config.prompt,
-      indicator_context: transformIndicatorContext(config.indicators),
-      entry_signal_base: 'kronos',
-      llm_provider: config.llm_provider || 'NONA',
-      llm_model: config.llm_model || 'nona-nexus',
+      prediction: {
+        lookbackBars,
+      },
+      llm: {
+        provider: config.llm_provider || 'NONA',
+        model: config.llm_model || 'nona-default',
+        timeout: 60,
+        retries: 5,
+        prompt: config.prompt,
+      },
+      rawIndicators: transformRawIndicators(config.indicators),
+      kronosConfig,
     },
-    llm_provider: config.llm_provider || 'NONA',
-    llm_model: config.llm_model || 'nona-nexus',
   };
 }
 
