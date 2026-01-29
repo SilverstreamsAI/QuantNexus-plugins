@@ -177,30 +177,33 @@ interface TraderModeConstraints {
 }
 
 /**
- * Server request format for /api/llm_trader
+ * Server request format for /api/llm_trader (ISSUE_3299)
+ * - llm_provider/llm_model at top level (Page 35 pattern)
+ * - llm object includes provider/model
  */
 interface ServerRequest {
   user_id: number;
   task_id?: string;
   locale?: string;
+  llm_provider: string;
+  llm_model: string;
   storage_mode: 'local' | 'remote' | 'hybrid';
   operation_type: 'generate_strategy';
   operation_data: {
     strategy_id?: number;
     strategy_name: string;
-    project_name: string;
     trader_mode: ServerTraderMode;
     prediction: {
       lookbackBars: number;
     };
     llm: {
+      provider: string;
+      model: string;
       timeout: number;
       retries: number;
       prompt: string;
     };
     rawIndicators: ServerRawIndicator[];
-    llm_provider: string;
-    llm_model: string;
   };
 }
 
@@ -208,34 +211,49 @@ interface ServerRequest {
 // Preset Mode Constraints
 // -----------------------------------------------------------------------------
 
+/**
+ * Preset mode constraints (source: ModeDetailsPanel.tsx:40-97)
+ */
 const PRESET_MODE_CONSTRAINTS: Record<TraderPresetMode, TraderModeConstraints> = {
   baseline: {
-    coreGoal: 'Maximize absolute returns without extra constraints',
-    riskTolerance: 'Medium to High',
-    positionLimits: 'None or very loose',
-    tradingFrequency: 'Unlimited',
-    leverage: '1x or very low',
+    'Core Goal': 'Maximize absolute returns without extra constraints',
+    'Risk Tolerance': 'Medium to High (Model decided)',
+    'Position Limits': 'None or very loose',
+    'Trading Frequency': 'Unlimited (High frequency or long term)',
+    'Leverage': '1x (No leverage) or very low',
+    'Risk Metrics': 'Sharpe Ratio, Max Drawdown',
+    'Decision Inputs': 'Market data, News, Fundamentals',
+    'Model Requirements': 'Comprehensive capabilities',
   },
   monk: {
-    coreGoal: 'Stability and risk-adjusted returns',
-    riskTolerance: 'Very Low (Mandatory rules)',
-    positionLimits: 'Strict (<2% per trade)',
-    tradingFrequency: 'Very Low (Daily/Weekly)',
-    leverage: 'Forbidden',
+    'Core Goal': 'Stability and risk-adjusted returns under strict limits',
+    'Risk Tolerance': 'Very Low (Mandatory rules)',
+    'Position Limits': 'Strict (e.g., <2% per trade, sector limits)',
+    'Trading Frequency': 'Very Low (Daily/Weekly caps, forced "asceticism")',
+    'Leverage': 'Forbidden',
+    'Risk Metrics': 'Sortino Ratio, Max Drawdown, Volatility',
+    'Decision Inputs': 'Filter short-term noise, focus on long-term trends',
+    'Model Requirements': 'Discipline, Patience, Long-term value',
   },
   warrior: {
-    coreGoal: 'Maximize returns through aggressive engagement',
-    riskTolerance: 'Very High',
-    positionLimits: 'Flexible (Concentrated)',
-    tradingFrequency: 'High (Active)',
-    leverage: 'High (5x-10x+)',
+    'Core Goal': 'Maximize returns through aggressive market engagement',
+    'Risk Tolerance': 'Very High (Aggressive pursuit)',
+    'Position Limits': 'Flexible (Concentrated positions allowed)',
+    'Trading Frequency': 'High (Active market participation)',
+    'Leverage': 'High (5x-10x or more)',
+    'Risk Metrics': 'Absolute Returns, Recovery Speed',
+    'Decision Inputs': 'Real-time data, Momentum, Volatility',
+    'Model Requirements': 'Precise execution, Quick adaptation, Stop-loss discipline',
   },
   bespoke: {
-    coreGoal: 'Fully customized',
-    riskTolerance: 'User-defined',
-    positionLimits: 'User-defined',
-    tradingFrequency: 'User-defined',
-    leverage: 'User-defined',
+    'Core Goal': 'Customized objectives based on user configuration',
+    'Risk Tolerance': 'User defined',
+    'Position Limits': 'User defined',
+    'Trading Frequency': 'User defined',
+    'Leverage': 'User defined',
+    'Risk Metrics': 'User defined',
+    'Decision Inputs': 'User defined',
+    'Model Requirements': 'Tailored to specific needs',
   },
 };
 
@@ -265,7 +283,8 @@ function transformRawIndicators(blocks: RawIndicatorBlock[]): ServerRawIndicator
 }
 
 /**
- * Build server request from client config
+ * Build server request from client config (ISSUE_3299)
+ * Reference: market-observer-service.ts (Page 35 pattern)
  */
 function buildServerRequest(config: TraderAIEntryConfig): ServerRequest {
   const lookbackBars = config.preset_mode === 'bespoke' && config.bespoke_config
@@ -274,16 +293,24 @@ function buildServerRequest(config: TraderAIEntryConfig): ServerRequest {
 
   const taskId = `llm_trader_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
+  const llmProvider = config.llm_provider || 'NONA';
+  const llmModel = config.llm_model || 'nona-default';
+
   // Build constraints with bespoke overrides if applicable
-  let constraints = { ...PRESET_MODE_CONSTRAINTS[config.preset_mode] };
+  let constraints: TraderModeConstraints = { ...PRESET_MODE_CONSTRAINTS[config.preset_mode] };
   if (config.preset_mode === 'bespoke' && config.bespoke_config) {
     const bc = config.bespoke_config;
+    const riskLevel = bc.maxDrawdown <= 10 ? 'Low' : bc.maxDrawdown <= 30 ? 'Medium' : 'High';
+    const freqLevel = bc.tradingFrequency <= 10 ? 'Low' : bc.tradingFrequency <= 100 ? 'Medium' : 'High';
     constraints = {
-      coreGoal: 'Fully customized strategy',
-      riskTolerance: bc.maxDrawdown <= 10 ? 'Low' : bc.maxDrawdown <= 30 ? 'Medium' : 'High',
-      positionLimits: `${bc.positionLimits}%`,
-      tradingFrequency: bc.tradingFrequency <= 10 ? 'Low' : bc.tradingFrequency <= 100 ? 'Medium' : 'High',
-      leverage: `${bc.leverage}x`,
+      'Core Goal': 'Customized objectives based on user configuration',
+      'Risk Tolerance': riskLevel,
+      'Position Limits': `${bc.positionLimits}%`,
+      'Trading Frequency': freqLevel,
+      'Leverage': `${bc.leverage}x`,
+      'Risk Metrics': 'User defined',
+      'Decision Inputs': 'User defined',
+      'Model Requirements': 'Tailored to specific needs',
     };
   }
 
@@ -291,28 +318,29 @@ function buildServerRequest(config: TraderAIEntryConfig): ServerRequest {
     user_id: 1,
     task_id: taskId,
     locale: 'en_US',
+    llm_provider: llmProvider,
+    llm_model: llmModel,
     storage_mode: config.storage_mode || 'local',
     operation_type: 'generate_strategy',
     operation_data: {
       strategy_name: config.strategy_name || 'Untitled Trader Strategy',
-      project_name: 'LLM Trader Project',
       trader_mode: {
         mode: config.preset_mode,
-        version: '1.0',
-        config_source: config.preset_mode === 'bespoke' ? 'bespoke' : 'quick_presets',
+        version: '1.0.0',
+        config_source: 'trader-modes.json',
         constraints,
       },
       prediction: {
         lookbackBars,
       },
       llm: {
+        provider: llmProvider,
+        model: llmModel,
         timeout: 120,
         retries: 3,
         prompt: config.prompt,
       },
       rawIndicators: transformRawIndicators(config.indicators),
-      llm_provider: config.llm_provider || 'NONA',
-      llm_model: config.llm_model || 'nona-default',
     },
   };
 }
@@ -478,5 +506,5 @@ export function getDefaultBespokeConfig(): BespokeConfig {
 }
 
 export function getPresetModeDescription(mode: TraderPresetMode): string {
-  return PRESET_MODE_CONSTRAINTS[mode].coreGoal;
+  return PRESET_MODE_CONSTRAINTS[mode]['Core Goal'];
 }
