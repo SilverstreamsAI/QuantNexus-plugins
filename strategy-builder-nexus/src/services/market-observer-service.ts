@@ -6,6 +6,8 @@
  *
  * @see TICKET_077_1 - Page 35 (MarketObserverPage)
  * @see TICKET_202 - Builder Page Base Class Mapping
+ * @see TICKET_211 - Market Observer API Integration
+ * @see ISSUE_7016 - Market Observer API Protocol Specification
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
@@ -118,83 +120,81 @@ export function getErrorMessage(result: MarketObserverResult): string {
 }
 
 // -----------------------------------------------------------------------------
-// Request Builder Types
+// Request Builder Types (ISSUE_7016 Protocol)
 // -----------------------------------------------------------------------------
 
-interface ServerRule {
-  rule_type: 'template_based' | 'custom_expression' | 'factor_based';
-  indicator?: {
-    slug: string;
-    name: string;
-    params?: Record<string, unknown>;
-  };
-  strategy?: {
-    type: string;
-    logic: {
-      operator: string;
-      threshold_value: string | number;
-    };
-  };
-  expression?: string;
-  factor?: {
-    name: string;
-    category: string;
-    params?: Record<string, unknown>;
-  };
-}
-
+/**
+ * Server request format per ISSUE_7016
+ * - symbol, item_type, strategy_name, condition_type in operation_data
+ * - llm_provider, llm_model, temporary_api_key, storage_mode at top level
+ */
 interface ServerRequest {
   user_id: number;
-  strategy_name: string;
+  operation_type: 'add_item' | 'remove_item' | 'add_alert' | 'get_list' | 'get_item';
   locale: string;
-  storage_mode?: 'local' | 'remote' | 'hybrid';
-  observer_config: {
-    llm_config: {
-      prompt: string;
-      provider: string;
-      model: string;
-      api_key?: string;
+  llm_provider: string;
+  llm_model: string;
+  temporary_api_key?: string;
+  storage_mode: 'local' | 'remote' | 'hybrid';
+  operation_data: {
+    symbol: string;
+    item_type: 'CRYPTO' | 'STOCK' | 'FUND';
+    strategy_name: string;
+    condition_type: 'indicator' | 'expression';
+    // Mode 1: Structured indicator
+    indicator?: {
+      name: string;
+      slug: string;
+      params?: Record<string, unknown>;
     };
-    rules: ServerRule[];
+    strategy?: {
+      type: string;
+      description?: string;
+    };
+    // Mode 2: Expression
+    expression?: string;
   };
 }
 
 // -----------------------------------------------------------------------------
-// Request Builder
+// Request Builder (ISSUE_7016 Protocol)
 // -----------------------------------------------------------------------------
 
-function transformRules(rules: MarketObserverRule[]): ServerRule[] {
-  return rules.map((rule): ServerRule => {
-    if (rule.rule_type === 'custom_expression') {
-      return {
-        rule_type: 'custom_expression',
-        expression: rule.expression || '',
-      };
-    }
+/**
+ * Map templateKey to backend strategy.type
+ * Backend supports: threshold_level, crossover, band_break, indicator_crossover,
+ *                   boundary_comparison, pattern_detected
+ * @see strategy-templates-library.json
+ */
+const TEMPLATE_KEY_TO_TYPE: Record<string, string> = {
+  // threshold_level
+  threshold_simple: 'threshold_level',
+  volatility_threshold: 'threshold_level',
+  volume_spike: 'threshold_level',
+  // crossover
+  crossover_price_indicator: 'crossover',
+  crossover_fast_slow_ma: 'crossover',
+  // boundary_comparison
+  boundary_comparison_oscillator: 'boundary_comparison',
+  // band_break
+  band_break_bollinger: 'band_break',
+  // pattern_detected
+  pattern_recognition: 'pattern_detected',
+};
 
-    if (rule.rule_type === 'factor_based') {
-      return {
-        rule_type: 'factor_based',
-        factor: rule.factor,
-      };
-    }
-
-    return {
-      rule_type: 'template_based',
-      indicator: rule.indicator,
-      strategy: {
-        type: rule.strategy?.logic?.type || 'threshold_level',
-        logic: {
-          operator: rule.strategy?.logic?.operator || '>',
-          threshold_value: rule.strategy?.logic?.threshold_value ?? 0,
-        },
-      },
-    };
-  });
+/**
+ * Convert templateKey to backend strategy.type
+ */
+function mapTemplateKeyToType(templateKey: string | undefined): string {
+  if (!templateKey) return 'threshold_level';
+  return TEMPLATE_KEY_TO_TYPE[templateKey] || templateKey;
 }
 
-function buildPrompt(config: MarketObserverConfig): string {
-  const ruleDescriptions = config.rules.map((rule) => {
+/**
+ * Build expression string from rules for expression mode
+ */
+function buildExpressionFromRules(rules: MarketObserverRule[]): string {
+  const parts = rules.map((rule) => {
     if (rule.rule_type === 'custom_expression') {
       return rule.expression || '';
     }
@@ -204,25 +204,36 @@ function buildPrompt(config: MarketObserverConfig): string {
       const paramsStr = factor?.params
         ? Object.entries(factor.params).map(([k, v]) => `${k}=${v}`).join(', ')
         : '';
-      return paramsStr ? `Factor:${factor?.name}(${paramsStr})` : `Factor:${factor?.name}`;
+      return paramsStr ? `${factor?.name}(${paramsStr})` : factor?.name || '';
     }
 
+    // template_based: build indicator expression
     const indicator = rule.indicator;
     const logic = rule.strategy?.logic;
     const paramsStr = indicator?.params
       ? Object.entries(indicator.params).map(([k, v]) => `${k}=${v}`).join(', ')
       : '';
-    const indicatorPart = paramsStr ? `${indicator?.name}(${paramsStr})` : indicator?.name;
+    const indicatorPart = paramsStr ? `${indicator?.slug}(${paramsStr})` : indicator?.slug;
     const logicStr = logic?.operator && logic?.threshold_value !== undefined
       ? `${logic.operator} ${logic.threshold_value}`
       : '';
 
-    return logicStr ? `${indicatorPart} ${logicStr}` : indicatorPart;
+    return logicStr ? `${indicatorPart} ${logicStr}` : indicatorPart || '';
   });
 
-  const rulesStr = ruleDescriptions.filter(Boolean).join(' AND ');
+  return parts.filter(Boolean).join(' AND ');
+}
 
-  return `Generate a market observer precondition strategy using: ${rulesStr}`;
+/**
+ * Determine condition type based on rules
+ * - Single template_based rule -> indicator mode
+ * - Multiple rules or custom_expression -> expression mode
+ */
+function determineConditionType(rules: MarketObserverRule[]): 'indicator' | 'expression' {
+  if (rules.length === 1 && rules[0].rule_type === 'template_based') {
+    return 'indicator';
+  }
+  return 'expression';
 }
 
 /**
@@ -260,24 +271,49 @@ function mapModelToProvider(modelId: string): string {
   return 'NONA';
 }
 
+/**
+ * Build server request per ISSUE_7016 protocol
+ * - symbol, item_type in operation_data
+ * - llm_provider, llm_model, storage_mode at top level
+ */
 function buildServerRequest(config: MarketObserverConfig, apiKey?: string): ServerRequest {
-  const serverRules = transformRules(config.rules);
-  const prompt = buildPrompt(config);
+  const conditionType = determineConditionType(config.rules);
+  const strategyName = config.strategy_name || 'Untitled Observer';
+
+  // Build operation_data
+  const operationData: ServerRequest['operation_data'] = {
+    symbol: 'BTC/USDT',
+    item_type: 'CRYPTO',
+    strategy_name: strategyName,
+    condition_type: conditionType,
+  };
+
+  if (conditionType === 'indicator' && config.rules.length === 1) {
+    // Single indicator mode
+    const rule = config.rules[0];
+    operationData.indicator = {
+      name: rule.indicator?.name || rule.indicator?.slug || '',
+      slug: rule.indicator?.slug || '',
+      params: rule.indicator?.params,
+    };
+    operationData.strategy = {
+      type: mapTemplateKeyToType(rule.strategy?.logic?.type),
+      description: `${rule.strategy?.logic?.operator || '>'} ${rule.strategy?.logic?.threshold_value ?? 0}`,
+    };
+  } else {
+    // Expression mode - combine all rules
+    operationData.expression = buildExpressionFromRules(config.rules);
+  }
 
   return {
     user_id: 1,
-    strategy_name: config.strategy_name || 'Untitled Observer',
+    operation_type: 'add_item',
     locale: 'en',
+    llm_provider: config.llm_provider || 'NONA',
+    llm_model: config.llm_model || 'nona-nexus',
+    temporary_api_key: apiKey,
     storage_mode: config.storage_mode || 'local',
-    observer_config: {
-      llm_config: {
-        prompt,
-        provider: config.llm_provider || 'NONA',
-        model: config.llm_model || 'nona-default',
-        api_key: apiKey,
-      },
-      rules: serverRules,
-    },
+    operation_data: operationData,
   };
 }
 

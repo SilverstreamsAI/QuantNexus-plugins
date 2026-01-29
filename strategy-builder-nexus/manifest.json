@@ -280,6 +280,12 @@
         "displayName": "Market Observer",
         "serviceIds": ["market_observer"],
         "selector": [{ "resourceScheme": "strategy" }]
+      },
+      {
+        "viewType": "strategy.traderAIEntry",
+        "displayName": "AI Entry Generator",
+        "serviceIds": ["ai_entry_generator"],
+        "selector": [{ "resourceScheme": "strategy" }]
       }
     ],
     "commands": [

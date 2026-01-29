@@ -110,3 +110,8 @@ export type { IndicatorTemplateSelectorDialogProps, IndicatorTemplate } from './
 // TICKET_077_1: WatchlistConfigPanel for Market Observer (page35)
 export { WatchlistConfigPanel } from './WatchlistConfigPanel';
 export type { WatchlistConfigPanelProps, WatchlistData, TimeframeOption, DataSourceOption } from './WatchlistConfigPanel';
+
+// TICKET_214: SaveTemplateDialog for Trader AI Entry (page36)
+export { SaveTemplateDialog } from './SaveTemplateDialog';
+export type { SaveTemplateDialogProps } from './SaveTemplateDialog';
+export type { IndicatorTemplate as UserIndicatorTemplate } from './SaveTemplateDialog';

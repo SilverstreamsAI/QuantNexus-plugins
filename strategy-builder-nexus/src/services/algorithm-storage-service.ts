@@ -793,6 +793,84 @@ export function buildMarketObserverRequest(
 }
 
 /**
+ * Trader AI Entry result from API (TICKET_214 page36)
+ */
+export interface TraderAIEntryResult {
+  strategy_name: string;
+  strategy_code: string;
+  class_name: string;
+  created_at?: string;
+}
+
+/**
+ * Trader AI Entry configuration (TICKET_214 page36)
+ */
+export interface TraderAIEntryConfig {
+  user_id?: string;
+  preset_mode: 'baseline' | 'monk' | 'warrior' | 'bespoke';
+  bespoke_config?: {
+    lookbackBars: number;
+    positionLimits: number;
+    leverage: number;
+    tradingFrequency: number;
+    typicalYield: number;
+    maxDrawdown: number;
+  };
+  prompt: string;
+  indicators: Array<{
+    id: string;
+    indicatorSlug: string | null;
+    paramValues: Record<string, number | string>;
+  }>;
+  llm_provider?: string;
+  llm_model?: string;
+}
+
+/**
+ * Build save request for Trader AI Entry (TICKET_214 page36)
+ * LLM-powered trader strategy generation with full template management
+ */
+export function buildTraderAIEntryRequest(
+  result: TraderAIEntryResult,
+  config: TraderAIEntryConfig
+): AlgorithmSaveRequest {
+  return {
+    strategy_name: result.strategy_name,
+    code: result.strategy_code,
+    user_id: config.user_id || 'default',
+    strategy_type: StrategyType.TYPE_EXECUTION,  // TYPE_EXECUTION = 1 for entry strategies
+    storage_mode: StorageMode.LOCAL,
+    classification_metadata: {
+      signal_source: SignalSource.AI_ENTRY,  // 'ai_entry'
+      strategy_role: 'execution',
+      trading_style: 'ai_driven',
+      strategy_composition: 'atomic',
+      class_name: result.class_name,
+      entry_signal_base: 'trader',
+      components: {
+        trader_ai_entry: {
+          preset_mode: config.preset_mode,
+          bespoke_config: config.bespoke_config,
+          prompt: config.prompt,
+          llm_provider: config.llm_provider,
+          llm_model: config.llm_model,
+        },
+        indicator_context: config.indicators.filter(i => i.indicatorSlug),
+      },
+      tags: ['trader', 'ai_entry', 'llm', config.preset_mode],
+      created_at: result.created_at || new Date().toISOString(),
+    },
+    strategy_rules: {
+      entry_signal_base: 'trader',
+      preset_mode: config.preset_mode,
+      bespoke_config: config.bespoke_config,
+      prompt: config.prompt,
+      indicator_context: config.indicators.filter(i => i.indicatorSlug),
+    },
+  };
+}
+
+/**
  * Extract class name from generated Python code
  */
 export function extractClassName(code: string): string {

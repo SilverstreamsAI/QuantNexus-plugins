@@ -6,6 +6,7 @@
  * @see TICKET_205 - Kronos Predictor Page Migration
  * @see TICKET_208 - Kronos Indicator Entry Page Migration
  * @see TICKET_211 - Kronos AI Entry Page
+ * @see TICKET_214 - Trader AI Entry Page (page36)
  */
 
 export { RegimeDetectorPage } from './RegimeDetectorPage';
@@ -14,3 +15,4 @@ export { KronosPredictorPage } from './KronosPredictorPage';
 export { KronosIndicatorEntryPage } from './KronosIndicatorEntryPage';
 export { KronosAIEntryPage } from './KronosAIEntryPage';
 export { MarketObserverPage } from './MarketObserverPage';
+export { TraderAIEntryPage } from './TraderAIEntryPage';
