@@ -130,6 +130,7 @@ export function getErrorMessage(result: MarketObserverResult): string {
  */
 interface ServerRequest {
   user_id: number;
+  output_format?: 'v1' | 'v3'; // TICKET_220: V3 framework import format
   operation_type: 'add_item' | 'remove_item' | 'add_alert' | 'get_list' | 'get_item';
   locale: string;
   llm_provider: string;
@@ -307,6 +308,7 @@ function buildServerRequest(config: MarketObserverConfig, apiKey?: string): Serv
 
   return {
     user_id: 1,
+    output_format: 'v3', // TICKET_220: V3 framework import format
     operation_type: 'add_item',
     locale: 'en',
     llm_provider: config.llm_provider || 'NONA',

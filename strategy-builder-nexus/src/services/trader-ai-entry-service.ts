@@ -185,6 +185,7 @@ interface ServerRequest {
   user_id: number;
   task_id?: string;
   locale?: string;
+  output_format?: 'v1' | 'v3'; // TICKET_220: V3 framework import format
   llm_provider: string;
   llm_model: string;
   storage_mode: 'local' | 'remote' | 'hybrid';
@@ -318,6 +319,7 @@ function buildServerRequest(config: TraderAIEntryConfig): ServerRequest {
     user_id: 1,
     task_id: taskId,
     locale: 'en_US',
+    output_format: 'v3', // TICKET_220: V3 framework import format
     llm_provider: llmProvider,
     llm_model: llmModel,
     storage_mode: config.storage_mode || 'local',
