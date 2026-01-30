@@ -159,6 +159,7 @@ interface ServerRequest {
   user_id: number;
   task_id?: string;
   locale?: string;
+  output_format?: 'v1' | 'v3'; // TICKET_223: V3 framework import format
   storage_mode: 'local' | 'remote' | 'hybrid';
   regime_indicator_entry_config: {
     longEntryIndicators: ServerIndicatorRule[];
@@ -245,6 +246,7 @@ function buildServerRequest(config: RegimeIndicatorEntryConfig): ServerRequest {
     user_id: 1,
     task_id: taskId,
     locale: 'en',
+    output_format: 'v3', // TICKET_223: V3 framework import format
     storage_mode: config.storage_mode || 'local',
     regime_indicator_entry_config: {
       longEntryIndicators: serverRules,

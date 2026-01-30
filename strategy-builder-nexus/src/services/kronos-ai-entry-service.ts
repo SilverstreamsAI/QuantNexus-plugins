@@ -178,6 +178,7 @@ interface ServerRequest {
   user_id: number;
   task_id?: string;
   locale?: string;
+  output_format?: 'v1' | 'v3'; // TICKET_223: V3 framework import format
   storage_mode: 'local' | 'remote' | 'hybrid';
   operation_type: 'generate_strategy';
   operation_data: {
@@ -265,6 +266,7 @@ function buildServerRequest(config: KronosAIEntryConfig): ServerRequest {
     user_id: 1,
     task_id: taskId,
     locale: 'en_US',
+    output_format: 'v3', // TICKET_223: V3 framework import format
     storage_mode: config.storage_mode || 'local',
     operation_type: 'generate_strategy',
     operation_data: {

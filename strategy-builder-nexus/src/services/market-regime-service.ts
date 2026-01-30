@@ -157,6 +157,7 @@ interface ServerRequest {
   user_id: number;
   strategy_name: string;
   locale: string;
+  output_format?: 'v1' | 'v3'; // TICKET_223: V3 framework import format
   /** TICKET_200: Storage mode preference - server should not store data if 'local' */
   storage_mode?: 'local' | 'remote' | 'hybrid';
   analysis_config: {
@@ -278,6 +279,7 @@ function buildServerRequest(config: MarketRegimeConfig, apiKey?: string): Server
     user_id: 1,
     strategy_name: config.strategy_name || 'Untitled Strategy',
     locale: 'en',
+    output_format: 'v3', // TICKET_223: V3 framework import format
     // TICKET_200: Include storage mode preference (defaults to 'local' if not specified)
     storage_mode: config.storage_mode || 'local',
     analysis_config: {
