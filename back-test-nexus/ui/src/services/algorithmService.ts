@@ -199,6 +199,46 @@ export const algorithmService = {
 
     return response.data.map(toAlgorithm);
   },
+
+  /**
+   * TICKET_077_20: Get Watchlist algorithms for TraderCockpitPage (page43) Market Analysis
+   * Matches: strategy_type=7 (TYPE_PRECONDITION) + signal_source='watchlist'
+   * @see STRATEGY_TYPE_AND_SIGNAL_SOURCE_REFERENCE.md Section 1 (Watchlist)
+   */
+  async getWatchlistAlgorithms(): Promise<Algorithm[]> {
+    const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
+      userId: 'default',
+      strategyType: 7,
+      signalSourcePrefix: 'watchlist',
+    });
+
+    if (!response.success || !response.data) {
+      console.error('[algorithmService] Failed to fetch watchlist algorithms:', response.error);
+      return [];
+    }
+
+    return response.data.map(toAlgorithm);
+  },
+
+  /**
+   * TICKET_077_20: Get LLM Trader algorithms for TraderCockpitPage (page43) Entry Signal
+   * Matches: strategy_type=1 (TYPE_EXECUTION) + signal_source='llmtrader'
+   * @see STRATEGY_TYPE_AND_SIGNAL_SOURCE_REFERENCE.md Section 4 (LLM Trader)
+   */
+  async getLLMTraderAlgorithms(): Promise<Algorithm[]> {
+    const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
+      userId: 'default',
+      strategyType: 1,
+      signalSourcePrefix: 'llmtrader',
+    });
+
+    if (!response.success || !response.data) {
+      console.error('[algorithmService] Failed to fetch llmtrader algorithms:', response.error);
+      return [];
+    }
+
+    return response.data.map(toAlgorithm);
+  },
 };
 
 // -----------------------------------------------------------------------------

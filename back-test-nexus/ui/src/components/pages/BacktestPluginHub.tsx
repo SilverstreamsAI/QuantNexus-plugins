@@ -66,12 +66,16 @@ const LockIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 type CockpitTier = 'free' | 'pro';
 
-interface CockpitItem {
+interface CockpitConfig {
   id: string;
   name: string;
   description: string;
   icon: React.ElementType;
   tier: CockpitTier;
+}
+
+// TICKET_211: Runtime item with computed locked state
+interface CockpitItem extends CockpitConfig {
   locked: boolean;
 }
 
@@ -80,28 +84,32 @@ export interface BacktestPluginHubProps {
   onSelectCockpit: (cockpitId: string) => void;
   /** Callback when a locked cockpit is clicked */
   onLockedClick?: (cockpit: CockpitItem) => void;
+  /** TICKET_211: User has PRO/GOLD plan (from host via useHasPlan) */
+  userHasPro?: boolean;
 }
 
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
 
-const COCKPIT_ITEMS: CockpitItem[] = [
+/**
+ * TICKET_211: Cockpit configurations without hardcoded locked state.
+ * locked is computed dynamically based on userHasPro prop.
+ */
+const COCKPIT_CONFIGS: CockpitConfig[] = [
   {
     id: 'indicators',
     name: 'INDICATORS COCKPIT',
     description: 'Indicator-based backtest with workflow configuration',
     icon: BarChart3Icon,
     tier: 'free',
-    locked: false,
   },
   {
-    id: 'trail',
-    name: 'TRAIL COCKPIT',
-    description: 'Trail-based backtest strategies',
+    id: 'trader',
+    name: 'TRADER COCKPIT',
+    description: 'Watchlist + LLM Trader backtest strategies',
     icon: TrendingUpIcon,
     tier: 'pro',
-    locked: true,
   },
   {
     id: 'ai',
@@ -109,15 +117,13 @@ const COCKPIT_ITEMS: CockpitItem[] = [
     description: 'AI-powered backtest analysis',
     icon: CpuIcon,
     tier: 'pro',
-    locked: true,
   },
   {
     id: 'kronos',
     name: 'KRONOS COCKPIT',
     description: 'Kronos time-series backtest integration',
     icon: ClockIcon,
-    tier: 'free',
-    locked: false,
+    tier: 'pro',
   },
 ];
 
@@ -212,7 +218,15 @@ const CockpitCard: React.FC<CockpitCardProps> = ({ cockpit, onClick }) => {
 export const BacktestPluginHub: React.FC<BacktestPluginHubProps> = ({
   onSelectCockpit,
   onLockedClick,
+  userHasPro = false,
 }) => {
+  // TICKET_211: Compute locked state dynamically based on user tier
+  // PRO cockpits are locked if user does not have PRO/GOLD plan
+  const cockpitItems: CockpitItem[] = COCKPIT_CONFIGS.map((config) => ({
+    ...config,
+    locked: config.tier === 'pro' && !userHasPro,
+  }));
+
   const handleCardClick = (cockpit: CockpitItem) => {
     if (cockpit.locked) {
       onLockedClick?.(cockpit);
@@ -242,7 +256,7 @@ export const BacktestPluginHub: React.FC<BacktestPluginHubProps> = ({
 
           {/* Cockpit Grid (2x2) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {COCKPIT_ITEMS.map((cockpit) => (
+            {cockpitItems.map((cockpit) => (
               <CockpitCard
                 key={cockpit.id}
                 cockpit={cockpit}

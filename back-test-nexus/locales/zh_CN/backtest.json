@@ -113,6 +113,7 @@
     "backtestNexus": "回测系统",
     "indicatorsCockpit": "指标驾驶舱",
     "kronosCockpit": "克洛诺斯驾驶舱",
+    "traderCockpit": "交易员驾驶舱",
     "result": "结果"
   },
   "kronos": {

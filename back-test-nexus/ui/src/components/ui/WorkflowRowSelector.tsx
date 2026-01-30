@@ -55,6 +55,8 @@ export interface WorkflowRowSelectorProps {
   maxRows?: number;
   /** Permanently disable Pre-condition and Post-condition buttons */
   disableConditions?: boolean;
+  /** TICKET_077_20: Permanently disable Market Analysis button (for Trader cockpit) */
+  disableAnalysis?: boolean;
   /** Additional class names */
   className?: string;
 }
@@ -139,10 +141,11 @@ interface WorkflowRowItemProps {
   algorithms: WorkflowRowSelectorProps['algorithms'];
   onUpdate: (rowId: string, updates: Partial<WorkflowRow>) => void;
   disableConditions?: boolean;
+  disableAnalysis?: boolean;
   t: (key: string) => string;
 }
 
-const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUpdate, disableConditions, t }) => {
+const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUpdate, disableConditions, disableAnalysis, t }) => {
   const toSelection = (opt: AlgorithmOption): AlgorithmSelection => ({
     id: opt.id,
     code: opt.code,
@@ -187,8 +190,10 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
     onUpdate(row.id, { [columnKey]: newSelections });
   };
 
-  // Pre-condition: enabled when algorithm is selected (respects disableConditions)
-  const preConditionEnabled = disableConditions ? false : row.analysisSelections.length > 0;
+  // Pre-condition (Entry Filter):
+  // - If disableAnalysis is true (trader mode), always enabled (independent of Market Analysis)
+  // - Otherwise, enabled when algorithm is selected (respects disableConditions)
+  const preConditionEnabled = disableAnalysis ? true : (disableConditions ? false : row.analysisSelections.length > 0);
   // Post-condition: enabled when step is selected (independent of disableConditions)
   const postConditionEnabled = row.stepSelections.length > 0;
 
@@ -206,7 +211,7 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
 
       {/* 4 Buttons in a row - wider for enabled (3), narrower for disabled (2) */}
       <div className="flex flex-row gap-3 w-full">
-        {/* Select Algorithm - wide (3 units) */}
+        {/* Select Algorithm (Market Analysis) - wide (3 units) */}
         <div className="flex-[3]">
           <WorkflowDropdown
             label={t('workflowSelector.selectAlgorithm')}
@@ -214,6 +219,7 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
             selectedIds={row.analysisSelections.map((s) => s.id)}
             onChange={(ids) => handleSelectionChange('analysis', ids, algorithms.trendRange)}
             theme="teal"
+            disabled={disableAnalysis}
             multiSelect={true}
             showSearch={true}
             searchPlaceholder={t('workflowSelector.search')}
@@ -297,6 +303,7 @@ export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
   algorithms,
   maxRows = 10,
   disableConditions = false,
+  disableAnalysis = false,
   className,
 }) => {
   const { t } = useTranslation('backtest');
@@ -344,6 +351,7 @@ export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
           algorithms={algorithms}
           onUpdate={updateRow}
           disableConditions={disableConditions}
+          disableAnalysis={disableAnalysis}
           t={t}
         />
       ))}

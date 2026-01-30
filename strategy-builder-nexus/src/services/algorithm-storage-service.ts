@@ -45,9 +45,9 @@ export enum SignalSource {
   KRONOS_INDICATOR_ENTRY = 'kronosIndicatorEntry',  // TICKET_210: Match backend standard
   KRONOS_PREDICTOR = 'kronos_prediction',           // TICKET_210: Match backend standard
   KRONOS_LLM_ENTRY = 'kronos_llm_entry',
-  AI_ENTRY = 'ai_entry',
   MARKET_REGIME = 'market_regime',
-  TRADER_OBSERVER = 'traderObserver',               // TICKET_077_1: Market Observer (page35)
+  WATCHLIST = 'watchlist',                          // Trader Mode > Market Observer
+  LLMTRADER = 'llmtrader',                          // Trader Mode > AI Entry Generator
 }
 
 // =============================================================================
@@ -771,7 +771,7 @@ export function buildMarketObserverRequest(
     strategy_type: StrategyType.TYPE_PRECONDITION,  // TYPE_PRECONDITION = 7
     storage_mode: StorageMode.LOCAL,
     classification_metadata: {
-      signal_source: SignalSource.TRADER_OBSERVER,  // 'traderObserver'
+      signal_source: SignalSource.WATCHLIST,        // 'watchlist'
       strategy_role: 'precondition',
       trading_style: 'observation',
       strategy_composition: 'atomic',
@@ -841,14 +841,14 @@ export function buildTraderAIEntryRequest(
     strategy_type: StrategyType.TYPE_EXECUTION,  // TYPE_EXECUTION = 1 for entry strategies
     storage_mode: StorageMode.LOCAL,
     classification_metadata: {
-      signal_source: SignalSource.AI_ENTRY,  // 'ai_entry'
+      signal_source: SignalSource.LLMTRADER,  // 'llmtrader'
       strategy_role: 'execution',
       trading_style: 'ai_driven',
       strategy_composition: 'atomic',
       class_name: result.class_name,
       entry_signal_base: 'trader',
       components: {
-        trader_ai_entry: {
+        llm_trader: {
           preset_mode: config.preset_mode,
           bespoke_config: config.bespoke_config,
           prompt: config.prompt,
@@ -857,7 +857,7 @@ export function buildTraderAIEntryRequest(
         },
         indicator_context: config.indicators.filter(i => i.indicatorSlug),
       },
-      tags: ['trader', 'ai_entry', 'llm', config.preset_mode],
+      tags: ['trader', 'llmtrader', 'llm', config.preset_mode],
       created_at: result.created_at || new Date().toISOString(),
     },
     strategy_rules: {

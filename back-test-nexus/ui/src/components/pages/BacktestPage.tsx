@@ -735,6 +735,20 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           preCondition = preCond;
           selectSteps = [...kronosIndicatorEntry, ...kronosAIEntry];
           postCondition = postCond;
+        } else if (cockpitMode === 'trader') {
+          // TICKET_077_20: Trader cockpit - Market Analysis disabled, Entry Filter shows watchlist
+          // Market Analysis: disabled (no algorithms)
+          // Entry Filter: watchlist (strategy_type=7, signal_source='watchlist') - Market Observer
+          // Entry Signal: llmtrader (strategy_type=1, signal_source='llmtrader') - AI Entry
+          const [watchlist, llmTrader, postCond] = await Promise.all([
+            algorithmService.getWatchlistAlgorithms(),       // strategy_type=7 + watchlist
+            algorithmService.getLLMTraderAlgorithms(),       // strategy_type=1 + llmtrader
+            algorithmService.getPostConditionAlgorithms(),
+          ]);
+          trendRange = [];  // Market Analysis disabled
+          preCondition = watchlist;  // Entry Filter shows Market Observer algorithms
+          selectSteps = llmTrader;
+          postCondition = postCond;
         } else {
           // Indicators cockpit (default): load indicator-prefixed algorithms
           [trendRange, preCondition, selectSteps, postCondition] = await Promise.all([
@@ -1273,6 +1287,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 algorithms={algorithms}
                 maxRows={10}
                 disableConditions={true}
+                disableAnalysis={cockpitMode === 'trader'}
               />
             </div>
           )}
