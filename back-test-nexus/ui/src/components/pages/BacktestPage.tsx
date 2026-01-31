@@ -28,6 +28,7 @@ import {
   type BacktestHistoryItem,
 } from '../ui';
 import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
+import { convertPythonResultToExecutorResult } from '../../utils/executorResultConverter';
 
 // -----------------------------------------------------------------------------
 // Inline SVG Icons (Zone D Action Bar only)
@@ -211,6 +212,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   const [isExecuting, setIsExecuting] = useState(false);
   const [currentCaseIndex, setCurrentCaseIndex] = useState(0);
   const [totalCases, setTotalCases] = useState(0);
+  // TICKET_228: Track executor progress from progress events
+  const [executorProgress, setExecutorProgress] = useState(0);
+  // TICKET_231: Track processed bars for synchronized candle/equity display
+  const [processedBars, setProcessedBars] = useState(0);
+  const [backtestTotalBars, setBacktestTotalBars] = useState(0);
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
   const pendingBacktestRef = useRef<BacktestResolver | null>(null);
   // TICKET_153_1: History from SQLite
@@ -256,7 +262,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   const [hasHistoryResult, setHasHistoryResult] = useState(false);
 
   // TICKET_173: Determine if viewing results (execution or history)
-  const isResultView = backtestResults.length > 0 || hasHistoryResult;
+  // TICKET_227: Switch to result view when backtest starts (real-time display)
+  const isResultView = isExecuting || backtestResults.length > 0 || hasHistoryResult;
 
   // TICKET_173: Centralized state reset helper
   const clearResultState = useCallback(() => {
@@ -264,14 +271,25 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setCurrentResult(null);
     setCurrentCaseIndex(0);
     setTotalCases(0);
+    setExecutorProgress(0);  // TICKET_228: Reset executor progress
+    setProcessedBars(0);     // TICKET_231: Reset processed bars
+    setBacktestTotalBars(0); // TICKET_231: Reset total bars
     setHasHistoryResult(false);
     setCurrentTaskId(null);
   }, []);
 
   // TICKET_173: Notify Host when result view state changes
+  // TICKET_227: Debug logging for page switch
   useEffect(() => {
+    console.debug('[TICKET_227] isResultView changed:', {
+      isResultView,
+      isExecuting,
+      hasCurrentResult: !!currentResult,
+      backtestResultsLength: backtestResults.length,
+      hasHistoryResult,
+    });
     onResultViewChange?.(isResultView);
-  }, [isResultView, onResultViewChange]);
+  }, [isResultView, onResultViewChange, isExecuting, currentResult, backtestResults.length, hasHistoryResult]);
 
   // TICKET_151_1: Handle case selection from History panel
   const handleCaseClick = useCallback((index: number) => {
@@ -472,6 +490,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setIsExecuting(true);
     setTotalCases(1);
     setCurrentCaseIndex(1);
+    setExecutorProgress(0);  // TICKET_228: Reset progress for resume
 
     try {
       messageAPI?.info('Resuming backtest from checkpoint...');
@@ -559,11 +578,13 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         throttleTimer = null;
       }
       pendingBuffer.length = 0;
+      // TICKET_230: Convert Python snake_case to TypeScript camelCase
+      const convertedResult = convertPythonResultToExecutorResult(data.result);
       if (pendingBacktestRef.current) {
-        pendingBacktestRef.current.resolve(data.result as ExecutorResult);
+        pendingBacktestRef.current.resolve(convertedResult);
         pendingBacktestRef.current = null;
       }
-      setCurrentResult(data.result as ExecutorResult);
+      setCurrentResult(convertedResult);
     });
 
     const unsubError = api.onError((data: any) => {
@@ -578,6 +599,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
     const unsubProgress = api.onProgress((data: any) => {
       console.debug('[BacktestPage] Backtest progress:', data);
+      // TICKET_228: Update executor progress from progress events
+      if (typeof data?.percent === 'number') {
+        setExecutorProgress(data.percent);
+      }
     });
 
     // Throttled buffer for incremental updates
@@ -588,6 +613,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
     const flushBuffer = () => {
       if (isCompleted || pendingBuffer.length === 0) return;
+
+      // TICKET_231: Get processedBars and totalBars from last increment
+      const lastIncrement = pendingBuffer[pendingBuffer.length - 1];
+      const latestProcessedBars = lastIncrement?.processedBars ?? 0;
+      const latestTotalBars = lastIncrement?.totalBars ?? 0;
 
       const merged = pendingBuffer.reduce((acc, inc) => ({
         newCandles: acc.newCandles.concat(inc.newCandles || []),
@@ -603,6 +633,21 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
       pendingBuffer.length = 0;
 
+      // TICKET_231: Update processed bars for synchronized display
+      if (latestProcessedBars > 0) {
+        setProcessedBars(latestProcessedBars);
+      }
+      if (latestTotalBars > 0) {
+        setBacktestTotalBars(latestTotalBars);
+      }
+
+      console.debug('[TICKET_227] flushBuffer: setting currentResult', {
+        candles: merged.newCandles.length,
+        equityPoints: merged.newEquityPoints.length,
+        trades: merged.newTrades.length,
+        processedBars: latestProcessedBars,
+        totalBars: latestTotalBars,
+      });
       setCurrentResult(prev => {
         if (!prev) {
           return {
@@ -646,6 +691,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     };
 
     const unsubIncrement = api.onIncrement((data: any) => {
+      // TICKET_231: Debug increment data structure
+      console.debug('[TICKET_231] onIncrement received:', {
+        hasIncrement: !!data.increment,
+        processedBars: data.increment?.processedBars,
+        totalBars: data.increment?.totalBars,
+        equityCount: data.increment?.newEquityPoints?.length,
+        candlesCount: data.increment?.newCandles?.length,
+      });
       pendingBuffer.push(data.increment);
       if (!throttleTimer) {
         throttleTimer = setTimeout(() => {
@@ -1097,6 +1150,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       for (let i = 0; i < activeWorkflows.length; i++) {
         const workflow = activeWorkflows[i];
         setCurrentCaseIndex(i + 1);
+        setExecutorProgress(0);  // TICKET_228: Reset progress for each case
 
         try {
           const result = await runSingleBacktest(
@@ -1225,10 +1279,40 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 totalCases={1}
               />
             </div>
-          ) : /* TICKET_151: Show results if we have completed results */
-          backtestResults.length > 0 ? (
+          ) : /* TICKET_227: Show executing status or completed results */
+          isExecuting ? (
+            /* TICKET_227: During execution, show status panel with real-time data if available */
+            currentResult ? (
+              <BacktestResultPanel
+                results={[currentResult]}
+                className="h-full"
+                isExecuting={isExecuting}
+                currentCaseIndex={currentCaseIndex}
+                totalCases={totalCases}
+                onCaseSelect={handleCaseClick}
+                scrollToCase={scrollToCaseIndex}
+                processedBars={processedBars}
+                backtestTotalBars={backtestTotalBars}
+              />
+            ) : (
+              /* TICKET_227: No incremental data yet (backtrader), show execution status */
+              /* TICKET_228: Use executorProgress for actual execution progress */
+              <div className="h-full flex flex-col items-center justify-center">
+                <ExecutorStatusPanel
+                  status="running"
+                  progress={executorProgress}
+                  message={totalCases > 1
+                    ? `Running backtest ${currentCaseIndex}/${totalCases}...`
+                    : 'Running backtest...'
+                  }
+                />
+                <div className="mt-4 text-xs text-color-terminal-text-muted">
+                  Real-time chart will appear when data is available
+                </div>
+              </div>
+            )
+          ) : backtestResults.length > 0 ? (
             /* Component 9: Backtest Result Panel - pass all results for comparison */
-            /* TICKET_151_1: Pass execution state for Charts stacking and Compare tab behavior */
             <BacktestResultPanel
               results={backtestResults}
               className="h-full"
@@ -1248,10 +1332,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             <div className="space-y-6">
               {/* Component 8: Executor Status Panel (shown when executing) */}
               {/* TICKET_151: Show progress for sequential execution */}
+              {/* TICKET_228: Use executorProgress for actual execution progress */}
               {isExecuting && (
                 <ExecutorStatusPanel
                   status="running"
-                  progress={totalCases > 0 ? Math.round((currentCaseIndex / totalCases) * 100) : 0}
+                  progress={executorProgress}
                   message={totalCases > 1
                     ? `Running backtest ${currentCaseIndex}/${totalCases}...`
                     : 'Running backtest...'

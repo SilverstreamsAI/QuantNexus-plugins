@@ -11,6 +11,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
+import { getCandleColor, isCandleProcessed, CANDLE_COLOR_UNPROCESSED } from '../../utils/chart-utils';
 
 // -----------------------------------------------------------------------------
 // Types (matching ExecutorResult from useExecutor hook)
@@ -326,10 +327,31 @@ interface SingleCaseChartsProps {
   equityCurve: EquityPoint[];
   candles: Candle[];
   trades: ExecutorTrade[];
+  /** TICKET_231: Number of bars processed for gray-to-color transition */
+  processedBars?: number;
+  /** TICKET_231: Total bars in backtest */
+  backtestTotalBars?: number;
 }
 
-const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({ equityCurve, candles, trades }) => {
+const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
+  equityCurve,
+  candles,
+  trades,
+  processedBars = 0,
+  backtestTotalBars = 0,
+}) => {
   const { t } = useTranslation('backtest');
+
+  // TICKET_231: Debug sync values
+  const isBacktestInProgress = backtestTotalBars > 0 && processedBars > 0 && processedBars < backtestTotalBars;
+  console.debug('[TICKET_231] SingleCaseCharts render:', {
+    processedBars,
+    backtestTotalBars,
+    isBacktestInProgress,
+    equityCurveLength: equityCurve?.length,
+    candlesLength: candles?.length,
+  });
+
   // Equity curve chart dimensions
   const equityHeight = 180;
   const klineHeight = 220;
@@ -349,39 +371,49 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({ equityCurve, candle
       Number.isFinite(p.equity) && Math.abs(p.equity) < 1e15
     );
 
+    // TICKET_231: Limit equity display to processedBars for synchronized display
+    // When backtest is in progress, limit to min(processedBars, equityCurve.length)
+    // This keeps equity curve in sync with K-LINE processed bar indicator
+    const displayLimit = isBacktestInProgress
+      ? Math.min(processedBars, validEquityCurve.length)
+      : validEquityCurve.length;
+    const displayEquityCurve = validEquityCurve.slice(0, displayLimit);
+
     // TICKET_155: Need at least 2 points to render a line (avoid division by zero)
-    if (validEquityCurve.length < 2) {
+    if (displayEquityCurve.length < 2) {
       return (
         <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
-          {t('resultPanel.charts.processing', { count: validEquityCurve.length })}
+          {t('resultPanel.charts.processing', { count: displayEquityCurve.length })}
         </div>
       );
     }
 
-    const minEquity = Math.min(...validEquityCurve.map(p => p.equity)) * 0.98;
-    const maxEquity = Math.max(...validEquityCurve.map(p => p.equity)) * 1.02;
+    const minEquity = Math.min(...displayEquityCurve.map(p => p.equity)) * 0.98;
+    const maxEquity = Math.max(...displayEquityCurve.map(p => p.equity)) * 1.02;
     const range = maxEquity - minEquity || 1;
 
     const width = 100;
     const height = 100;
-    const pointCount = validEquityCurve.length;
+    // TICKET_231: Use candles.length as X-axis reference to sync with K-LINE chart
+    // This ensures equity curve only spans the same X range as processed candles
+    const totalXPoints = candles?.length || displayEquityCurve.length;
 
-    // Equity line (using filtered valid data)
-    const equityPoints = validEquityCurve.map((point, index) => {
-      const x = (index / (pointCount - 1)) * width;
+    // Equity line (using filtered and limited data)
+    const equityPoints = displayEquityCurve.map((point, index) => {
+      const x = (index / (totalXPoints - 1)) * width;
       const y = height - ((point.equity - minEquity) / range) * height;
       return `${x},${y}`;
     }).join(' ');
 
     // Area fill
-    const areaPath = `M 0,${height} ` + validEquityCurve.map((point, index) => {
-      const x = (index / (pointCount - 1)) * width;
+    const areaPath = `M 0,${height} ` + displayEquityCurve.map((point, index) => {
+      const x = (index / (totalXPoints - 1)) * width;
       const y = height - ((point.equity - minEquity) / range) * height;
       return `L ${x},${y}`;
-    }).join(' ') + ` L ${width},${height} Z`;
+    }).join(' ') + ` L ${(displayEquityCurve.length - 1) / (totalXPoints - 1) * width},${height} Z`;
 
-    const startEquity = validEquityCurve[0]?.equity || 0;
-    const endEquity = validEquityCurve[validEquityCurve.length - 1]?.equity || 0;
+    const startEquity = displayEquityCurve[0]?.equity || 0;
+    const endEquity = displayEquityCurve[displayEquityCurve.length - 1]?.equity || 0;
     const pnl = endEquity - startEquity;
     const color = pnl >= 0 ? '#4ade80' : '#f87171';
 
@@ -458,11 +490,13 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({ equityCurve, candle
             />
           ))}
 
-          {/* Candles */}
+          {/* Candles - TICKET_231: Gray-to-color transition based on processedBars */}
           {candles.map((candle, i) => {
             const x = i * candleWidth + candleWidth / 2;
             const isUp = candle.close >= candle.open;
-            const color = isUp ? '#22C55E' : '#EF4444';
+            // TICKET_231: Use centralized color logic for gray-to-color transition
+            const isProcessed = isCandleProcessed(i, processedBars, backtestTotalBars);
+            const color = getCandleColor(isUp, isProcessed);
             const bodyTop = priceToY(Math.max(candle.open, candle.close));
             const bodyBottom = priceToY(Math.min(candle.open, candle.close));
             const bodyH = Math.max(0.3, bodyBottom - bodyTop);
@@ -562,9 +596,21 @@ interface ChartsTabProps {
   isExecuting?: boolean;
   totalCases?: number;
   scrollToCaseRef?: React.MutableRefObject<((index: number) => void) | null>;
+  /** TICKET_231: Number of bars processed for gray-to-color transition */
+  processedBars?: number;
+  /** TICKET_231: Total bars in backtest */
+  backtestTotalBars?: number;
 }
 
-const ChartsTab: React.FC<ChartsTabProps> = ({ results, currentCaseIndex, isExecuting, totalCases = 0, scrollToCaseRef }) => {
+const ChartsTab: React.FC<ChartsTabProps> = ({
+  results,
+  currentCaseIndex,
+  isExecuting,
+  totalCases = 0,
+  scrollToCaseRef,
+  processedBars = 0,
+  backtestTotalBars = 0,
+}) => {
   const { t } = useTranslation('backtest');
   const containerRef = useRef<HTMLDivElement>(null);
   const caseRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -605,6 +651,8 @@ const ChartsTab: React.FC<ChartsTabProps> = ({ results, currentCaseIndex, isExec
         equityCurve={results[0]?.equityCurve || []}
         candles={results[0]?.candles || []}
         trades={results[0]?.trades || []}
+        processedBars={processedBars}
+        backtestTotalBars={backtestTotalBars}
       />
     );
   }
@@ -650,6 +698,8 @@ const ChartsTab: React.FC<ChartsTabProps> = ({ results, currentCaseIndex, isExec
                 equityCurve={result.equityCurve}
                 candles={result.candles || []}
                 trades={result.trades}
+                processedBars={processedBars}
+                backtestTotalBars={backtestTotalBars}
               />
             ) : (
               <div className="flex items-center justify-center h-96 text-color-terminal-text-muted text-xs">
@@ -885,6 +935,10 @@ export interface BacktestResultPanelProps {
   onCaseSelect?: (index: number) => void;
   /** TICKET_151_1: Index to scroll to when user clicks case in History panel */
   scrollToCase?: number;
+  /** TICKET_231: Number of bars processed so far (for gray-to-color transition) */
+  processedBars?: number;
+  /** TICKET_231: Total bars in backtest (for gray-to-color transition) */
+  backtestTotalBars?: number;
 }
 
 export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
@@ -896,6 +950,8 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   totalCases = 0,
   onCaseSelect,
   scrollToCase,
+  processedBars = 0,
+  backtestTotalBars = 0,
 }) => {
   const { t } = useTranslation('backtest');
   const [activeTab, setActiveTab] = useState<TabId>('charts');
@@ -996,6 +1052,8 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
             isExecuting={isExecuting}
             totalCases={totalCases}
             scrollToCaseRef={scrollToChartsCaseRef}
+            processedBars={processedBars}
+            backtestTotalBars={backtestTotalBars}
           />
         )}
       </div>
