@@ -152,6 +152,12 @@ export interface BacktestPageProps {
   resetKey?: number;
   /** Cockpit mode: 'indicators' (default) or 'kronos' for different algorithm filtering */
   cockpitMode?: CockpitMode;
+  /** TICKET_233: Notify Host when backtest starts (for global status bar) */
+  onBacktestStart?: (taskId: string, strategyName: string) => void;
+  /** TICKET_233: Notify Host of backtest progress (for global status bar) */
+  onBacktestProgress?: (taskId: string, progress: number) => void;
+  /** TICKET_233: Notify Host when backtest completes (for global status bar) */
+  onBacktestComplete?: (taskId: string, success: boolean) => void;
 }
 
 // -----------------------------------------------------------------------------
@@ -203,6 +209,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   onResultViewChange,
   resetKey = 0,
   cockpitMode = 'indicators',
+  onBacktestStart,
+  onBacktestProgress,
+  onBacktestComplete,
 }) => {
   const { t } = useTranslation('backtest');
 
@@ -585,6 +594,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         pendingBacktestRef.current = null;
       }
       setCurrentResult(convertedResult);
+      // TICKET_233: Notify global status
+      if (data.taskId) {
+        onBacktestComplete?.(data.taskId, true);
+      }
     });
 
     const unsubError = api.onError((data: any) => {
@@ -595,6 +608,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       }
       setIsExecuting(false);
       messageAPI?.error(`Backtest failed: ${data.error}`);
+      // TICKET_233: Notify global status
+      if (data.taskId) {
+        onBacktestComplete?.(data.taskId, false);
+      }
     });
 
     const unsubProgress = api.onProgress((data: any) => {
@@ -602,6 +619,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       // TICKET_228: Update executor progress from progress events
       if (typeof data?.percent === 'number') {
         setExecutorProgress(data.percent);
+        // TICKET_233: Notify global status
+        if (data.taskId) {
+          onBacktestProgress?.(data.taskId, data.percent);
+        }
       }
     });
 
@@ -722,7 +743,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       unsubProgress();
       unsubIncrement();
     };
-  }, [executorAPI, messageAPI]);
+  }, [executorAPI, messageAPI, onBacktestComplete, onBacktestProgress]);
 
   // TICKET_173: Action button handlers (moved from Host Shell)
   const handleNewBacktest = useCallback(() => {
@@ -1015,13 +1036,15 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
     if (result.taskId) {
       setCurrentTaskId(result.taskId);
+      // TICKET_233: Notify global status
+      onBacktestStart?.(result.taskId, strategyName || 'Backtest');
     }
 
     // Wait for completion via Promise
     return new Promise<ExecutorResult>((resolve, reject) => {
       pendingBacktestRef.current = { resolve, reject };
     });
-  }, [executorAPI, messageAPI]);
+  }, [executorAPI, messageAPI, onBacktestStart]);
 
   // Validate data configuration
   const validateDataConfig = useCallback((config: BacktestDataConfig): boolean => {

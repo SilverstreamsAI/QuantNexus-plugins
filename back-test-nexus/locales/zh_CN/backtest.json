@@ -141,6 +141,9 @@
   "common": {
     "cancel": "取消"
   },
+  "notification": {
+    "backtestCompleted": "回测执行成功"
+  },
   "resultPanel": {
     "tabs": {
       "charts": "图表",

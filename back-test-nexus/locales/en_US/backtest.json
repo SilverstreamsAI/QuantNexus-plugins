@@ -141,6 +141,9 @@
   "common": {
     "cancel": "Cancel"
   },
+  "notification": {
+    "backtestCompleted": "Backtest completed successfully"
+  },
   "resultPanel": {
     "tabs": {
       "charts": "CHARTS",
