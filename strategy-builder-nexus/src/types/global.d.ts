@@ -103,6 +103,17 @@ interface ElectronHubAPI {
 // TICKET_184: Auth API for JWT token injection
 interface ElectronAuthAPI {
   getAccessToken(): Promise<{ success: boolean; data?: string | null; error?: string }>;
+  getUser(): Promise<{
+    success: boolean;
+    data?: {
+      id: string;
+      email: string;
+      name: string;
+      avatar?: string;
+      plan: 'FREE' | 'PRO' | 'GOLD';
+    } | null;
+    error?: string;
+  }>;
   refresh(): Promise<{ success: boolean; error?: string }>;
   login(providerName?: string): Promise<{ success: boolean; data?: { authUrl: string }; error?: string }>;
   logout(): Promise<{ success: boolean; error?: string }>;
@@ -257,6 +268,111 @@ interface ElectronDatabaseAPI {
   }>;
 }
 
+// TICKET_077_19: AI Conversation API
+interface ConversationRecord {
+  id: number;
+  user_id: string;
+  title: string;
+  preview: string | null;
+  message_count: number;
+  token_usage: number;
+  token_limit: number;
+  strategy_rules: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface MessageRecord {
+  id: number;
+  conversation_id: number;
+  type: 'user' | 'assistant' | 'system';
+  content: string;
+  token_count: number;
+  metadata: string | null;
+  created_at: string;
+}
+
+interface ElectronConversationAPI {
+  create(data: {
+    user_id: string;
+    title?: string;
+    preview?: string;
+    token_limit?: number;
+    strategy_rules?: string;
+  }): Promise<{
+    success: boolean;
+    data?: ConversationRecord;
+    error?: { code: string; message: string };
+  }>;
+  get(id: number): Promise<{
+    success: boolean;
+    data?: ConversationRecord;
+    error?: { code: string; message: string };
+  }>;
+  list(options: {
+    userId: string;
+    limit?: number;
+    offset?: number;
+    status?: string;
+  }): Promise<{
+    success: boolean;
+    data?: ConversationRecord[];
+    error?: { code: string; message: string };
+  }>;
+  update(id: number, data: {
+    title?: string;
+    preview?: string;
+    message_count?: number;
+    token_usage?: number;
+    token_limit?: number;
+    strategy_rules?: string;
+    status?: 'active' | 'archived' | 'deleted';
+  }): Promise<{
+    success: boolean;
+    data?: ConversationRecord;
+    error?: { code: string; message: string };
+  }>;
+  delete(id: number): Promise<{
+    success: boolean;
+    error?: { code: string; message: string };
+  }>;
+  search(userId: string, query: string, limit?: number): Promise<{
+    success: boolean;
+    data?: ConversationRecord[];
+    error?: { code: string; message: string };
+  }>;
+}
+
+interface ElectronMessageAPI {
+  add(data: {
+    conversation_id: number;
+    type: 'user' | 'assistant' | 'system';
+    content: string;
+    token_count?: number;
+    metadata?: string;
+  }): Promise<{
+    success: boolean;
+    data?: {
+      messageId: number;
+      conversation: ConversationRecord;
+    };
+    error?: { code: string; message: string };
+  }>;
+  list(conversationId: number, options?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<{
+    success: boolean;
+    data?: MessageRecord[];
+    error?: { code: string; message: string };
+  }>;
+  delete(messageId: number): Promise<{
+    success: boolean;
+    error?: { code: string; message: string };
+  }>;
+}
+
 interface ElectronAPI {
   credential: ElectronCredentialAPI;
   plugin: ElectronPluginAPI;
@@ -265,6 +381,8 @@ interface ElectronAPI {
   entitlement: ElectronEntitlementAPI; // TICKET_190
   kronos: ElectronKronosAPI; // TICKET_205
   database: ElectronDatabaseAPI; // TICKET_212
+  conversation: ElectronConversationAPI; // TICKET_077_19
+  message: ElectronMessageAPI; // TICKET_077_19
 }
 
 declare global {

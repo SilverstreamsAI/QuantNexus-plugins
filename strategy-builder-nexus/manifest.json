@@ -92,6 +92,14 @@
         "tier": "pro",
         "defaultEnabled": true,
         "category": "AI COMMAND CENTER"
+      },
+      {
+        "id": "ai_strategy_studio",
+        "name": "AI STRATEGY STUDIO",
+        "description": "AI-powered strategy studio for comprehensive strategy creation",
+        "tier": "pro",
+        "defaultEnabled": true,
+        "category": "AI STRATEGY STUDIO"
       }
     ]
   },
@@ -285,6 +293,12 @@
         "viewType": "strategy.traderAIEntry",
         "displayName": "AI Entry Generator",
         "serviceIds": ["ai_entry_generator"],
+        "selector": [{ "resourceScheme": "strategy" }]
+      },
+      {
+        "viewType": "strategy.aiStrategyStudio",
+        "displayName": "AI Strategy Studio",
+        "serviceIds": ["ai_strategy_studio"],
         "selector": [{ "resourceScheme": "strategy" }]
       }
     ],
