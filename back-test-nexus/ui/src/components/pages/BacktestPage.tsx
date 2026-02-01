@@ -138,6 +138,16 @@ type BacktestResolver = {
 /** Cockpit mode determines algorithm filtering */
 export type CockpitMode = 'indicators' | 'kronos';
 
+// TICKET_234: Execution state for global store
+export interface ExecutionStateUpdate {
+  isExecuting: boolean;
+  currentCaseIndex: number;
+  totalCases: number;
+  executorProgress: number;
+  processedBars?: number;
+  totalBars?: number;
+}
+
 // TICKET_173: API types from Host (use any to avoid type dependency on Host types)
 export interface BacktestPageProps {
   /** TICKET_173: Executor API from Host */
@@ -158,6 +168,12 @@ export interface BacktestPageProps {
   onBacktestProgress?: (taskId: string, progress: number) => void;
   /** TICKET_233: Notify Host when backtest completes (for global status bar) */
   onBacktestComplete?: (taskId: string, success: boolean) => void;
+  /** TICKET_234: Notify Host when current result updates (for global store) */
+  onCurrentResultUpdate?: (result: ExecutorResult | null) => void;
+  /** TICKET_234: Notify Host when results array updates (for global store) */
+  onResultsUpdate?: (results: ExecutorResult[]) => void;
+  /** TICKET_234: Notify Host when execution state updates (for global store) */
+  onExecutionStateUpdate?: (state: ExecutionStateUpdate) => void;
 }
 
 // -----------------------------------------------------------------------------
@@ -212,6 +228,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   onBacktestStart,
   onBacktestProgress,
   onBacktestComplete,
+  onCurrentResultUpdate,
+  onResultsUpdate,
+  onExecutionStateUpdate,
 }) => {
   const { t } = useTranslation('backtest');
 
@@ -299,6 +318,28 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     });
     onResultViewChange?.(isResultView);
   }, [isResultView, onResultViewChange, isExecuting, currentResult, backtestResults.length, hasHistoryResult]);
+
+  // TICKET_234: Notify Host when currentResult changes (for global store)
+  useEffect(() => {
+    onCurrentResultUpdate?.(currentResult);
+  }, [currentResult, onCurrentResultUpdate]);
+
+  // TICKET_234: Notify Host when backtestResults array changes (for global store)
+  useEffect(() => {
+    onResultsUpdate?.(backtestResults);
+  }, [backtestResults, onResultsUpdate]);
+
+  // TICKET_234: Notify Host when execution state changes (for global store)
+  useEffect(() => {
+    onExecutionStateUpdate?.({
+      isExecuting,
+      currentCaseIndex,
+      totalCases,
+      executorProgress,
+      processedBars,
+      totalBars: backtestTotalBars,
+    });
+  }, [isExecuting, currentCaseIndex, totalCases, executorProgress, processedBars, backtestTotalBars, onExecutionStateUpdate]);
 
   // TICKET_151_1: Handle case selection from History panel
   const handleCaseClick = useCallback((index: number) => {
@@ -593,7 +634,23 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         pendingBacktestRef.current.resolve(convertedResult);
         pendingBacktestRef.current = null;
       }
-      setCurrentResult(convertedResult);
+      // TICKET_234_4: Preserve accumulated data from incremental updates
+      // Python final result may not include candles/trades, so we must preserve them
+      setCurrentResult(prev => {
+        if (!prev) return convertedResult;
+
+        return {
+          ...convertedResult,
+          // Preserve candles from incremental accumulation
+          candles: prev.candles.length > 0 ? prev.candles : convertedResult.candles,
+          // Preserve equity curve if final result has fewer points
+          equityCurve: prev.equityCurve.length > convertedResult.equityCurve.length
+            ? prev.equityCurve
+            : convertedResult.equityCurve,
+          // TICKET_234_4: Preserve trades from incremental accumulation
+          trades: prev.trades.length > 0 ? prev.trades : convertedResult.trades,
+        };
+      });
       // TICKET_233: Notify global status
       if (data.taskId) {
         onBacktestComplete?.(data.taskId, true);

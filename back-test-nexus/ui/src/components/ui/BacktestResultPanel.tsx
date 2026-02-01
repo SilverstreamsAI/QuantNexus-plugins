@@ -320,6 +320,24 @@ const TradesTab: React.FC<TradesTabProps> = ({ results, currentCaseIndex, isExec
 };
 
 // -----------------------------------------------------------------------------
+// TICKET_234_3: Status Indicator Icons
+// -----------------------------------------------------------------------------
+
+const SpinnerIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={cn('animate-spin', className)} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+    <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+  </svg>
+);
+
+const CheckmarkIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M9 12l2 2 4-4" />
+  </svg>
+);
+
+// -----------------------------------------------------------------------------
 // Single Case Charts (Dual-Chart: Equity + K-Line) - TICKET_151_1
 // -----------------------------------------------------------------------------
 
@@ -331,6 +349,8 @@ interface SingleCaseChartsProps {
   processedBars?: number;
   /** TICKET_231: Total bars in backtest */
   backtestTotalBars?: number;
+  /** TICKET_234_3: Whether backtest is currently executing */
+  isExecuting?: boolean;
 }
 
 const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
@@ -339,6 +359,7 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
   trades,
   processedBars = 0,
   backtestTotalBars = 0,
+  isExecuting = false,
 }) => {
   const { t } = useTranslation('backtest');
 
@@ -358,12 +379,23 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
 
   // Equity curve rendering
   const renderEquityCurve = () => {
+    // TICKET_234_3: Show status indicator when no equity data
     if (!equityCurve || equityCurve.length === 0) {
-      return (
-        <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
-          {t('resultPanel.charts.noEquityData')}
-        </div>
-      );
+      if (isExecuting) {
+        // Testing in progress - show spinner only
+        return (
+          <div className="flex items-center justify-center h-full">
+            <SpinnerIcon className="w-8 h-8 text-color-terminal-accent-teal" />
+          </div>
+        );
+      } else {
+        // Completed with no trades - show checkmark only
+        return (
+          <div className="flex items-center justify-center h-full">
+            <CheckmarkIcon className="w-8 h-8 text-color-terminal-accent-gold" />
+          </div>
+        );
+      }
     }
 
     // TICKET_154: Filter out invalid equity values (NaN, Infinity, overflow)
@@ -653,6 +685,7 @@ const ChartsTab: React.FC<ChartsTabProps> = ({
         trades={results[0]?.trades || []}
         processedBars={processedBars}
         backtestTotalBars={backtestTotalBars}
+        isExecuting={false}
       />
     );
   }
@@ -700,6 +733,7 @@ const ChartsTab: React.FC<ChartsTabProps> = ({
                 trades={result.trades}
                 processedBars={processedBars}
                 backtestTotalBars={backtestTotalBars}
+                isExecuting={isCurrentCase}
               />
             ) : (
               <div className="flex items-center justify-center h-96 text-color-terminal-text-muted text-xs">

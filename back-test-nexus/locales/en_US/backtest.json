@@ -86,7 +86,10 @@
   "page": {
     "loadingAlgorithms": "Loading algorithms...",
     "workflowTitle": "WORKFLOW CONFIGURATION",
-    "workflowStep": "Workflow Step"
+    "workflowStep": "Workflow Step",
+    "noResults": "No backtest results available.",
+    "startBacktest": "Start a backtest from the Config page.",
+    "realtimeChartPending": "Real-time chart will appear when data is available"
   },
   "buttons": {
     "newBacktest": "New Backtest",
@@ -96,7 +99,8 @@
     "execute": "Execute",
     "executing": "Executing...",
     "cancel": "Cancel",
-    "delete": "Delete"
+    "delete": "Delete",
+    "backToConfig": "Back to Config"
   },
   "dialog": {
     "deleteTitle": "Delete History Record",
@@ -114,7 +118,8 @@
     "indicatorsCockpit": "Indicators Cockpit",
     "kronosCockpit": "Kronos Cockpit",
     "traderCockpit": "Trader Cockpit",
-    "result": "Result"
+    "result": "Result",
+    "backtestResult": "Backtest Result"
   },
   "kronos": {
     "title": "KRONOS STRATEGIES",
@@ -156,7 +161,9 @@
       "bars": "{{count}} bars",
       "noEquityData": "No equity data",
       "noKlineData": "No K-line data",
-      "processing": "Processing... ({{count}} points)"
+      "processing": "Processing... ({{count}} points)",
+      "backtesting": "Backtesting...",
+      "noTrades": "No trades"
     },
     "summary": {
       "equity": "Equity: {{count}} points",

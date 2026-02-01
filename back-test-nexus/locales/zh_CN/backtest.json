@@ -86,7 +86,10 @@
   "page": {
     "loadingAlgorithms": "加载算法中...",
     "workflowTitle": "工作流配置",
-    "workflowStep": "工作流步骤"
+    "workflowStep": "工作流步骤",
+    "noResults": "暂无回测结果",
+    "startBacktest": "请从配置页面启动回测",
+    "realtimeChartPending": "实时图表将在数据可用时显示"
   },
   "buttons": {
     "newBacktest": "新建回测",
@@ -96,7 +99,8 @@
     "execute": "执行",
     "executing": "执行中...",
     "cancel": "取消",
-    "delete": "删除"
+    "delete": "删除",
+    "backToConfig": "返回配置"
   },
   "dialog": {
     "deleteTitle": "删除历史记录",
@@ -114,7 +118,8 @@
     "indicatorsCockpit": "指标驾驶舱",
     "kronosCockpit": "克洛诺斯驾驶舱",
     "traderCockpit": "交易员驾驶舱",
-    "result": "结果"
+    "result": "结果",
+    "backtestResult": "回测结果"
   },
   "kronos": {
     "title": "克洛诺斯策略",
@@ -156,7 +161,9 @@
       "bars": "{{count}} 根K线",
       "noEquityData": "无权益数据",
       "noKlineData": "无K线数据",
-      "processing": "处理中... ({{count}} 点)"
+      "processing": "处理中... ({{count}} 点)",
+      "backtesting": "回测中...",
+      "noTrades": "无交易"
     },
     "summary": {
       "equity": "权益: {{count}} 点",
