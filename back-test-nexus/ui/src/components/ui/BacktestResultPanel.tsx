@@ -287,7 +287,6 @@ const TradesTab: React.FC<TradesTabProps> = ({ results, currentCaseIndex, isExec
               )}>
                 {t('resultPanel.status.case', { index: index + 1 })}
                 {isCurrentCase && t('resultPanel.status.testing')}
-                {isPending && t('resultPanel.status.pending')}
               </span>
               {hasResult && result.metrics && (
                 <span className={cn(
@@ -676,8 +675,8 @@ const ChartsTab: React.FC<ChartsTabProps> = ({
     );
   }
 
-  // Single case and not executing multi-case: render without case header
-  if (casesToRender === 1 && !isExecuting) {
+  // Single case: render without case header, pass isExecuting directly
+  if (casesToRender === 1) {
     return (
       <SingleCaseCharts
         equityCurve={results[0]?.equityCurve || []}
@@ -685,7 +684,7 @@ const ChartsTab: React.FC<ChartsTabProps> = ({
         trades={results[0]?.trades || []}
         processedBars={processedBars}
         backtestTotalBars={backtestTotalBars}
-        isExecuting={false}
+        isExecuting={isExecuting}
       />
     );
   }
@@ -713,7 +712,6 @@ const ChartsTab: React.FC<ChartsTabProps> = ({
               )}>
                 {t('resultPanel.status.case', { index: index + 1 })}
                 {isCurrentCase && t('resultPanel.status.testing')}
-                {isPending && t('resultPanel.status.pending')}
               </span>
               {hasResult && result.metrics && (
                 <span className={cn(

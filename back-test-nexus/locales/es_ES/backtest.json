@@ -96,11 +96,18 @@
     "execute": "Execute",
     "executing": "Executing...",
     "cancel": "Cancel",
-    "delete": "Delete"
+    "delete": "Delete",
+    "runInBackground": "Run in Background"
   },
   "dialog": {
     "deleteTitle": "Delete History Record",
     "deleteMessage": "This will permanently delete the backtest result, including all trade records and equity curve data."
+  },
+  "cancelDialog": {
+    "title": "Cancel Backtest",
+    "message": "Are you sure you want to cancel the running backtest? This action cannot be undone.",
+    "confirm": "Cancel Backtest",
+    "keep": "Keep Running"
   },
   "workflowSelector": {
     "selectAlgorithm": "Market Analysis",
