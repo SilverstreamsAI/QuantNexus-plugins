@@ -878,14 +878,21 @@ export function buildTraderAIEntryRequest(
 interface AILiberoResult {
   strategy_name: string;
   strategy_code: string;
-  class_name?: string;
+  class_name: string;
   created_at?: string;
 }
 
 interface AILiberoConfig {
   user_id?: string;
   preset_mode: string;
-  bespoke_config?: Record<string, unknown>;
+  bespoke_config?: {
+    lookbackBars: number;
+    positionLimits: number;
+    leverage: number;
+    tradingFrequency: number;
+    typicalYield: number;
+    maxDrawdown: number;
+  };
   prediction_config: {
     batchSize: number;
     warmupPeriod: number;
