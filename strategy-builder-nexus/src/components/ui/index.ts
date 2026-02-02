@@ -115,3 +115,7 @@ export type { WatchlistConfigPanelProps, WatchlistData, TimeframeOption, DataSou
 export { SaveTemplateDialog } from './SaveTemplateDialog';
 export type { SaveTemplateDialogProps } from './SaveTemplateDialog';
 export type { IndicatorTemplate as UserIndicatorTemplate } from './SaveTemplateDialog';
+
+// TICKET_077_26: AdvancedConfigPanel for AI Libero (page37)
+export { AdvancedConfigPanel, DEFAULT_PREDICTION_CONFIG, getPresetPredictionConfig } from './AdvancedConfigPanel';
+export type { AdvancedConfigPanelProps, PredictionConfig } from './AdvancedConfigPanel';

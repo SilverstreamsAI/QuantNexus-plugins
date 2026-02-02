@@ -48,6 +48,7 @@ export enum SignalSource {
   MARKET_REGIME = 'market_regime',
   WATCHLIST = 'watchlist',                          // Trader Mode > Market Observer
   LLMTRADER = 'llmtrader',                          // Trader Mode > AI Entry Generator
+  AI_LIBERO = 'aiLibero',                           // Agent Mode > AI Libero (TICKET_077_26)
 }
 
 // =============================================================================
@@ -864,6 +865,79 @@ export function buildTraderAIEntryRequest(
       entry_signal_base: 'trader',
       preset_mode: config.preset_mode,
       bespoke_config: config.bespoke_config,
+      prompt: config.prompt,
+      indicator_context: config.indicators.filter(i => i.indicatorSlug),
+    },
+  };
+}
+
+// -----------------------------------------------------------------------------
+// AI Libero Request Builder (TICKET_077_26 page37)
+// -----------------------------------------------------------------------------
+
+interface AILiberoResult {
+  strategy_name: string;
+  strategy_code: string;
+  class_name?: string;
+  created_at?: string;
+}
+
+interface AILiberoConfig {
+  user_id?: string;
+  preset_mode: string;
+  bespoke_config?: Record<string, unknown>;
+  prediction_config: {
+    batchSize: number;
+    warmupPeriod: number;
+    lookbackBars: number;
+    analysisInterval: number;
+  };
+  prompt: string;
+  indicators: Array<{ indicatorSlug: string | null; paramValues: Record<string, unknown> }>;
+  llm_provider?: string;
+  llm_model?: string;
+}
+
+/**
+ * Build save request for AI Libero (TICKET_077_26 page37)
+ * Agent Mode LLM-powered strategy generation with advanced prediction config
+ */
+export function buildAILiberoRequest(
+  result: AILiberoResult,
+  config: AILiberoConfig
+): AlgorithmSaveRequest {
+  return {
+    strategy_name: result.strategy_name,
+    code: result.strategy_code,
+    user_id: config.user_id || 'default',
+    strategy_type: StrategyType.TYPE_EXECUTION,  // TYPE_EXECUTION = 1 for entry strategies
+    storage_mode: StorageMode.LOCAL,
+    classification_metadata: {
+      signal_source: SignalSource.AI_LIBERO,  // 'aiLibero'
+      strategy_role: 'execution',
+      trading_style: 'ai_driven',
+      strategy_composition: 'atomic',
+      class_name: result.class_name,
+      entry_signal_base: 'agent',
+      components: {
+        ai_libero: {
+          preset_mode: config.preset_mode,
+          bespoke_config: config.bespoke_config,
+          prediction_config: config.prediction_config,
+          prompt: config.prompt,
+          llm_provider: config.llm_provider,
+          llm_model: config.llm_model,
+        },
+        indicator_context: config.indicators.filter(i => i.indicatorSlug),
+      },
+      tags: ['agent', 'aiLibero', 'llm', config.preset_mode],
+      created_at: result.created_at || new Date().toISOString(),
+    },
+    strategy_rules: {
+      entry_signal_base: 'agent',
+      preset_mode: config.preset_mode,
+      bespoke_config: config.bespoke_config,
+      prediction_config: config.prediction_config,
       prompt: config.prompt,
       indicator_context: config.indicators.filter(i => i.indicatorSlug),
     },

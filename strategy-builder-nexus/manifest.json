@@ -296,6 +296,12 @@
         "selector": [{ "resourceScheme": "strategy" }]
       },
       {
+        "viewType": "strategy.aiLibero",
+        "displayName": "AI Libero",
+        "serviceIds": ["ai_libero"],
+        "selector": [{ "resourceScheme": "strategy" }]
+      },
+      {
         "viewType": "strategy.aiStrategyStudio",
         "displayName": "AI Strategy Studio",
         "serviceIds": ["ai_strategy_studio"],
