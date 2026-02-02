@@ -127,3 +127,25 @@ export type {
   AlgorithmGenerationConfig,
   AlgorithmSaveResult as LegacyAlgorithmSaveResult,
 } from './algorithm-save-service';
+
+// =============================================================================
+// Vibing Chat Service (ISSUE_7029) - AI Strategy Studio Backend Communication
+// =============================================================================
+
+export {
+  executeVibingChat,
+  executeVibingChatAction,
+  getVibingChatErrorMessage,
+  VIBING_CHAT_ERROR_CODE_MESSAGES,
+} from './vibing-chat-service';
+
+export type {
+  VibingChatRequest,
+  VibingChatResult,
+  VibingChatResponse,
+  StrategyRulesResponse,
+  EntryCondition,
+  ExitCondition,
+  StrategyIndicator,
+  RiskManagement,
+} from './vibing-chat-service';

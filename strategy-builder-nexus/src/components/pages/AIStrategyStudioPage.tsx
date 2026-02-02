@@ -16,6 +16,13 @@ import {
   ConversationRecord,
   MessageRecord,
 } from '../../services/conversation-service';
+import {
+  executeVibingChat,
+  executeVibingChatAction,
+  getVibingChatErrorMessage,
+  VibingChatResponse,
+  StrategyRulesResponse,
+} from '../../services';
 
 // AI Studio Components (component19)
 import {
@@ -167,6 +174,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
 
   // -------------------------------------------------------------------------
   // Load User & Conversations on Mount
+  // TICKET_235: Always create a new chat on page load
   // -------------------------------------------------------------------------
   useEffect(() => {
     const loadUserAndConversations = async () => {
@@ -176,10 +184,28 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
         const currentUserId = authResult?.data?.id || 'anonymous';
         setUserId(currentUserId);
 
-        // Load conversations from SQLite
+        // Load existing conversations from SQLite
         const result = await conversationService.listConversations(currentUserId);
-        if (result.success && result.data) {
-          setConversations(result.data.map(toConversation));
+        const loadedConversations = result.success && result.data
+          ? result.data.map(toConversation)
+          : [];
+
+        // TICKET_235: Always create a new chat on page load
+        const createResult = await conversationService.createConversation({
+          userId: currentUserId,
+          title: 'New Strategy',
+          preview: 'Start describing your strategy...',
+        });
+
+        if (createResult.success && createResult.data) {
+          const newConversation = toConversation(createResult.data);
+          setConversations([newConversation, ...loadedConversations]);
+          setActiveConversationId(newConversation.id);
+          setActiveDbId(createResult.data.id);
+          setTokenUsage({ current: 0, limit: createResult.data.token_limit });
+        } else {
+          // Fallback: just load existing conversations
+          setConversations(loadedConversations);
         }
       } catch (error) {
         console.error('[AIStrategyStudio] Failed to load conversations:', error);
@@ -337,12 +363,45 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
         });
       }
 
-      // Simulate AI response (TODO: Replace with actual API call)
-      setTimeout(async () => {
-        const assistantContent = `I understand you want to create a strategy. Based on your description:\n\n"${content}"\n\nI'll help you define the entry and exit rules. Would you like me to:\n\n1. **Generate entry rules** based on technical indicators\n2. **Add risk management** conditions\n3. **Create exit rules** for profit taking and stop loss\n\nPlease let me know which aspect you'd like to focus on first.`;
-        const assistantTokens = estimateTokens(assistantContent);
+      // Call vibing_chat API
+      try {
+        // Build session ID in expected format
+        const sessionId = `strategy-${activeDbId}-session`;
 
-        try {
+        // Collect current strategy rules for context
+        const currentRules: Partial<StrategyRulesResponse> | undefined = strategyRules.length > 0
+          ? {
+              entry_conditions: strategyRules
+                .filter((r) => r.type === 'entry')
+                .map((r) => ({ type: 'LONG', condition: r.condition })),
+              exit_conditions: strategyRules
+                .filter((r) => r.type === 'exit')
+                .map((r) => ({ type: 'TAKE_PROFIT', condition: r.condition })),
+              filters: strategyRules
+                .filter((r) => r.type === 'filter')
+                .map((r) => r.condition),
+            }
+          : undefined;
+
+        const response: VibingChatResponse = await executeVibingChat({
+          session_id: sessionId,
+          message: content,
+          strategy_name: initialStrategyName || 'New Strategy',
+          strategy_id: strategyId,
+          current_strategy_rules: currentRules,
+          output_format: 'v3',
+          storage_mode: 'local',
+          metadata: {
+            user_id: parseInt(userId, 10) || 1,
+            mode: 'generator',
+          },
+        });
+
+        if (response.success && response.result) {
+          const assistantContent = response.result.content || response.result.explanation || '';
+          const assistantTokens = estimateTokens(assistantContent);
+
+          // Save assistant message to SQLite
           const assistantResult = await conversationService.addMessage({
             conversationId: activeDbId,
             type: 'assistant',
@@ -374,17 +433,106 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
               )
             );
           }
-        } catch (error) {
-          console.error('[AIStrategyStudio] Failed to save assistant message:', error);
-        } finally {
-          setIsLoading(false);
+
+          // Sync strategy_rules from response to StrategyRulesPanel
+          if (response.result.strategy_rules) {
+            const serverRules = response.result.strategy_rules;
+            const newRules: StrategyRule[] = [];
+
+            // Convert entry conditions
+            serverRules.entry_conditions?.forEach((ec) => {
+              newRules.push({
+                id: generateLocalId(),
+                type: 'entry',
+                condition: ec.condition,
+                description: ec.action || `Entry: ${ec.type}`,
+                enabled: true,
+              });
+            });
+
+            // Convert exit conditions
+            serverRules.exit_conditions?.forEach((ec) => {
+              newRules.push({
+                id: generateLocalId(),
+                type: 'exit',
+                condition: ec.condition,
+                description: `Exit: ${ec.type}`,
+                enabled: true,
+              });
+            });
+
+            // Convert indicators as filter rules
+            serverRules.indicators?.forEach((ind) => {
+              newRules.push({
+                id: generateLocalId(),
+                type: 'filter',
+                condition: `${ind.name}(${ind.params})`,
+                description: ind.description || ind.name,
+                enabled: true,
+              });
+            });
+
+            if (newRules.length > 0) {
+              setStrategyRules(newRules);
+              // Save rules to DB
+              conversationService.updateConversation(activeDbId, {
+                strategyRules: JSON.stringify(newRules),
+              }).catch((err) => console.error('[AIStrategyStudio] Failed to save rules:', err));
+            }
+          }
+        } else {
+          // Handle error response
+          const errorMessage = getVibingChatErrorMessage(response);
+          const errorResult = await conversationService.addMessage({
+            conversationId: activeDbId,
+            type: 'system',
+            content: `Error: ${errorMessage}`,
+            tokenCount: 0,
+          });
+
+          if (errorResult.success && errorResult.data) {
+            const systemMessage: Message = {
+              id: String(errorResult.data.messageId),
+              type: 'system',
+              content: `Error: ${errorMessage}`,
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, systemMessage]);
+          }
         }
-      }, 1500);
+      } catch (error) {
+        console.error('[AIStrategyStudio] API call failed:', error);
+
+        // Handle network/auth errors
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        try {
+          const errorResult = await conversationService.addMessage({
+            conversationId: activeDbId,
+            type: 'system',
+            content: `Error: ${errorMessage}`,
+            tokenCount: 0,
+          });
+
+          if (errorResult.success && errorResult.data) {
+            const systemMessage: Message = {
+              id: String(errorResult.data.messageId),
+              type: 'system',
+              content: `Error: ${errorMessage}`,
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, systemMessage]);
+          }
+        } catch (saveError) {
+          console.error('[AIStrategyStudio] Failed to save error message:', saveError);
+        }
+      } finally {
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error('[AIStrategyStudio] Failed to send message:', error);
       setIsLoading(false);
     }
-  }, [inputValue, isLoading, activeDbId, activeConversationId]);
+  }, [inputValue, isLoading, activeDbId, activeConversationId, strategyRules, initialStrategyName, strategyId, userId]);
 
   // -------------------------------------------------------------------------
   // Action Handlers
@@ -394,39 +542,119 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
 
     setActionStates((prev) => ({ ...prev, [actionId]: true }));
 
-    // Simulate action
-    setTimeout(async () => {
-      setActionStates((prev) => ({ ...prev, [actionId]: false }));
+    try {
+      const sessionId = `strategy-${activeDbId}-session`;
 
-      const actionLabels: Record<ActionId, string> = {
-        generate_code: 'Code generation completed',
-        save_strategy: 'Strategy saved successfully',
-        run_backtest: 'Backtest started',
-      };
+      // Collect current strategy rules for context
+      const currentRules: Partial<StrategyRulesResponse> | undefined = strategyRules.length > 0
+        ? {
+            entry_conditions: strategyRules
+              .filter((r) => r.type === 'entry')
+              .map((r) => ({ type: 'LONG', condition: r.condition })),
+            exit_conditions: strategyRules
+              .filter((r) => r.type === 'exit')
+              .map((r) => ({ type: 'TAKE_PROFIT', condition: r.condition })),
+            filters: strategyRules
+              .filter((r) => r.type === 'filter')
+              .map((r) => r.condition),
+          }
+        : undefined;
 
-      try {
-        // Add system message to SQLite
-        const result = await conversationService.addMessage({
+      const response = await executeVibingChatAction(sessionId, actionId, currentRules);
+
+      if (response.success && response.result) {
+        const actionLabels: Record<ActionId, string> = {
+          generate_code: 'Code generation completed',
+          save_strategy: 'Strategy saved successfully',
+          run_backtest: 'Backtest started',
+        };
+
+        // If action returned content, show it as assistant message
+        if (response.result.content) {
+          const assistantTokens = estimateTokens(response.result.content);
+          const assistantResult = await conversationService.addMessage({
+            conversationId: activeDbId,
+            type: 'assistant',
+            content: response.result.content,
+            tokenCount: assistantTokens,
+          });
+
+          if (assistantResult.success && assistantResult.data) {
+            const assistantMessage: Message = {
+              id: String(assistantResult.data.messageId),
+              type: 'assistant',
+              content: response.result.content,
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, assistantMessage]);
+          }
+        }
+
+        // Add system message for action completion
+        const systemResult = await conversationService.addMessage({
           conversationId: activeDbId,
           type: 'system',
           content: actionLabels[actionId],
           tokenCount: 0,
         });
 
-        if (result.success && result.data) {
+        if (systemResult.success && systemResult.data) {
           const systemMessage: Message = {
-            id: String(result.data.messageId),
+            id: String(systemResult.data.messageId),
             type: 'system',
             content: actionLabels[actionId],
             timestamp: new Date(),
           };
           setMessages((prev) => [...prev, systemMessage]);
         }
-      } catch (error) {
-        console.error('[AIStrategyStudio] Failed to save system message:', error);
+      } else {
+        // Handle error
+        const errorMessage = getVibingChatErrorMessage(response);
+        const errorResult = await conversationService.addMessage({
+          conversationId: activeDbId,
+          type: 'system',
+          content: `Action failed: ${errorMessage}`,
+          tokenCount: 0,
+        });
+
+        if (errorResult.success && errorResult.data) {
+          const systemMessage: Message = {
+            id: String(errorResult.data.messageId),
+            type: 'system',
+            content: `Action failed: ${errorMessage}`,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, systemMessage]);
+        }
       }
-    }, 2000);
-  }, [activeDbId]);
+    } catch (error) {
+      console.error('[AIStrategyStudio] Action failed:', error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      try {
+        const errorResult = await conversationService.addMessage({
+          conversationId: activeDbId,
+          type: 'system',
+          content: `Action failed: ${errorMessage}`,
+          tokenCount: 0,
+        });
+
+        if (errorResult.success && errorResult.data) {
+          const systemMessage: Message = {
+            id: String(errorResult.data.messageId),
+            type: 'system',
+            content: `Action failed: ${errorMessage}`,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, systemMessage]);
+        }
+      } catch (saveError) {
+        console.error('[AIStrategyStudio] Failed to save error message:', saveError);
+      }
+    } finally {
+      setActionStates((prev) => ({ ...prev, [actionId]: false }));
+    }
+  }, [activeDbId, strategyRules]);
 
   // -------------------------------------------------------------------------
   // Strategy Rules Handlers
