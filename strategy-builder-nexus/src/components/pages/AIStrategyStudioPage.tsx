@@ -100,6 +100,30 @@ function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
 }
 
+/**
+ * Delete all empty conversations (message_count === 0)
+ * Called before creating a new conversation to prevent accumulation
+ * TICKET_243: AI Strategy Studio Empty Conversation Cleanup
+ */
+async function cleanupEmptyConversations(
+  conversations: Conversation[]
+): Promise<string[]> {
+  const emptyConversations = conversations.filter((c) => c.messageCount === 0);
+  const deletedIds: string[] = [];
+
+  for (const conv of emptyConversations) {
+    const dbId = parseInt(conv.id, 10);
+    if (!isNaN(dbId)) {
+      const result = await conversationService.deleteConversation(dbId);
+      if (result.success) {
+        deletedIds.push(conv.id);
+      }
+    }
+  }
+
+  return deletedIds;
+}
+
 // -----------------------------------------------------------------------------
 // Component
 // -----------------------------------------------------------------------------
@@ -190,6 +214,12 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
           ? result.data.map(toConversation)
           : [];
 
+        // TICKET_243: Cleanup empty conversations before creating new one
+        const deletedIds = await cleanupEmptyConversations(loadedConversations);
+        const cleanedConversations = deletedIds.length > 0
+          ? loadedConversations.filter((c) => !deletedIds.includes(c.id))
+          : loadedConversations;
+
         // TICKET_235: Always create a new chat on page load
         const createResult = await conversationService.createConversation({
           userId: currentUserId,
@@ -199,13 +229,13 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
 
         if (createResult.success && createResult.data) {
           const newConversation = toConversation(createResult.data);
-          setConversations([newConversation, ...loadedConversations]);
+          setConversations([newConversation, ...cleanedConversations]);
           setActiveConversationId(newConversation.id);
           setActiveDbId(createResult.data.id);
           setTokenUsage({ current: 0, limit: createResult.data.token_limit });
         } else {
           // Fallback: just load existing conversations
-          setConversations(loadedConversations);
+          setConversations(cleanedConversations);
         }
       } catch (error) {
         console.error('[AIStrategyStudio] Failed to load conversations:', error);
@@ -225,6 +255,12 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
 
     setIsLoading(true);
     try {
+      // TICKET_243: Cleanup empty conversations before creating new one
+      const deletedIds = await cleanupEmptyConversations(conversations);
+      if (deletedIds.length > 0) {
+        setConversations((prev) => prev.filter((c) => !deletedIds.includes(c.id)));
+      }
+
       // Create conversation in SQLite
       const result = await conversationService.createConversation({
         userId,
@@ -246,7 +282,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [userId]);
+  }, [userId, conversations]);
 
   const handleSelectConversation = useCallback(async (id: string) => {
     const dbId = parseInt(id, 10);
