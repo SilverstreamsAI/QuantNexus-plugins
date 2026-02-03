@@ -24,9 +24,6 @@ import {
   IndicatorDefinition,
   StrategyTemplate,
   CodeDisplay,
-  FactorAddSelector,
-  FactorDefinition,
-  FactorBlock,
   ApiKeyPrompt,
   NamingDialog,
   GenerateContentWrapper,
@@ -59,31 +56,6 @@ import type { AlgorithmSaveRequest } from '../../services/algorithm-storage-serv
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
 import strategyTemplates from '../../../assets/indicators/strategy-templates-library.json';
 
-// Sample factor data (component6)
-const sampleFactors: FactorDefinition[] = [
-  { name: 'KMID', category: 'technical', ic: null, icir: null },
-  { name: 'KLEN', category: 'volatility', ic: null, icir: null },
-  { name: 'KMID2', category: 'technical', ic: null, icir: null },
-  { name: 'KUP', category: 'technical', ic: null, icir: null },
-  { name: 'KUP2', category: 'technical', ic: null, icir: null },
-  { name: 'KLOW', category: 'technical', ic: null, icir: null },
-  { name: 'KLOW2', category: 'technical', ic: null, icir: null },
-  { name: 'KSFT', category: 'technical', ic: null, icir: null },
-  { name: 'KSFT2', category: 'technical', ic: null, icir: null },
-  { name: 'OPEN0', category: 'technical', ic: null, icir: null },
-  { name: 'ROC_5', category: 'momentum', ic: null, icir: null },
-  { name: 'ROC_10', category: 'momentum', ic: null, icir: null },
-  { name: 'ROC_20', category: 'momentum', ic: null, icir: null },
-  { name: 'MA_5', category: 'technical', ic: null, icir: null },
-  { name: 'MA_10', category: 'technical', ic: null, icir: null },
-  { name: 'MA_20', category: 'technical', ic: null, icir: null },
-  { name: 'STD_5', category: 'volatility', ic: null, icir: null },
-  { name: 'STD_10', category: 'volatility', ic: null, icir: null },
-  { name: 'STD_20', category: 'volatility', ic: null, icir: null },
-  { name: 'VOLUME_5', category: 'volume', ic: null, icir: null },
-  { name: 'VOLUME_10', category: 'volume', ic: null, icir: null },
-  { name: 'VOLUME_20', category: 'volume', ic: null, icir: null },
-];
 
 // -----------------------------------------------------------------------------
 // Types
@@ -110,7 +82,6 @@ interface EntrySignalPageProps {
 interface EntrySignalState {
   selectedRegime: string;
   indicatorBlocks: IndicatorBlock[];
-  factorBlocks: FactorBlock[];
   strategies: Strategy[];
   storageMode: 'local' | 'remote' | 'hybrid';
   llmProvider: string;
@@ -161,20 +132,6 @@ function buildRulesFromState(state: EntrySignalState): IndicatorEntryRule[] {
     });
   }
 
-  // Add factor-based rules
-  for (const fac of state.factorBlocks) {
-    if (!fac.factorName) continue;
-
-    rules.push({
-      rule_type: 'factor_based',
-      factor: {
-        name: fac.factorName,
-        category: fac.category,
-        params: fac.paramValues as Record<string, unknown>,
-      },
-    });
-  }
-
   return rules;
 }
 
@@ -209,7 +166,6 @@ function buildStorageRequestFromResult(
     {
       regime: state.selectedRegime,
       indicator_blocks: state.indicatorBlocks,
-      factor_blocks: state.factorBlocks,
       llm_provider: state.llmProvider,
       llm_model: state.llmModel,
     }
@@ -234,7 +190,6 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
   const [selectedRegime, setSelectedRegime] = useState('trend');
   const [bespokeData, setBespokeData] = useState<BespokeData>({ name: '', notes: '' });
   const [indicatorBlocks, setIndicatorBlocks] = useState<IndicatorBlock[]>([]);
-  const [factorBlocks, setFactorBlocks] = useState<FactorBlock[]>([]);
   const [storageMode, setStorageMode] = useState<'local' | 'remote' | 'hybrid'>('local');
 
   // Load storage mode from plugin config
@@ -262,19 +217,17 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
   const currentState: EntrySignalState = useMemo(() => ({
     selectedRegime,
     indicatorBlocks,
-    factorBlocks,
     strategies,
     storageMode,
     llmProvider,
     llmModel,
-  }), [selectedRegime, indicatorBlocks, factorBlocks, strategies, storageMode, llmProvider, llmModel]);
+  }), [selectedRegime, indicatorBlocks, strategies, storageMode, llmProvider, llmModel]);
 
   // Validation items
   const allRules = useMemo(() => [
     ...indicatorBlocks,
-    ...factorBlocks,
     ...strategies.map(s => ({ type: 'custom_expression', expression: s.expression })),
-  ], [indicatorBlocks, factorBlocks, strategies]);
+  ], [indicatorBlocks, strategies]);
 
   // Workflow config
   // TICKET_203: Updated to use Regime naming
@@ -411,15 +364,6 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
                 templates={strategyTemplates as Record<string, StrategyTemplate>}
                 blocks={indicatorBlocks}
                 onChange={setIndicatorBlocks}
-                className="mb-8"
-              />
-
-              {/* component6: Factor Add Selector */}
-              <FactorAddSelector
-                factors={sampleFactors}
-                blocks={factorBlocks}
-                onChange={setFactorBlocks}
-                maxRecommended={3}
                 className="mb-8"
               />
 
