@@ -2,30 +2,35 @@
  * WorkflowRowSelector Component (component7)
  *
  * Algorithm workflow builder for Zone C variable content area.
- * Displays a row of 4 algorithm selection buttons:
- * - Select Algorithm (Trend-Range)
- * - Pre-condition
- * - Select Steps
- * - Post-condition
+ * Displays a row of 4 algorithm selection buttons with stage-level timeframe:
+ * - Select Algorithm (Trend-Range) + Timeframe
+ * - Pre-condition + Timeframe
+ * - Select Steps + Timeframe
+ * - Post-condition + Timeframe
  *
  * @see TICKET_077 - Silverstream UI Component Library
+ * @see TICKET_248 - Stage-Level Timeframe Selector
  */
 
 import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
-import { WorkflowDropdown, type AlgorithmOption } from './WorkflowDropdown';
+import { WorkflowDropdown, type AlgorithmOption, type ColorTheme } from './WorkflowDropdown';
+import { TimeframeDropdown, type TimeframeValue } from './TimeframeDropdown';
 
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 
+/** TICKET_248: Algorithm selection with stage-level timeframe */
 export interface AlgorithmSelection {
   id: number;
   code: string;
   strategyName: string;
   strategyType: number;
   description?: string;
+  /** TICKET_248: Stage-level timeframe for this algorithm */
+  timeframe: TimeframeValue;
 }
 
 export interface WorkflowRow {
@@ -65,6 +70,9 @@ export interface WorkflowRowSelectorProps {
 // Constants
 // -----------------------------------------------------------------------------
 
+/** Default timeframe for new selections */
+const DEFAULT_TIMEFRAME: TimeframeValue = '1d';
+
 // -----------------------------------------------------------------------------
 // Helper Functions
 // -----------------------------------------------------------------------------
@@ -88,19 +96,27 @@ const hasContent = (row: WorkflowRow): boolean => {
 };
 
 // -----------------------------------------------------------------------------
-// Selection Chips Component
+// Selection Chips Component (with timeframe display)
 // -----------------------------------------------------------------------------
 
 interface SelectionChipsProps {
   selections: AlgorithmSelection[];
   onRemove: (id: number) => void;
-  theme: 'teal' | 'purple' | 'blue' | 'gold';
+  onTimeframeChange: (id: number, timeframe: TimeframeValue) => void;
+  theme: ColorTheme;
+  disabled?: boolean;
 }
 
-const SelectionChips: React.FC<SelectionChipsProps> = ({ selections, onRemove, theme }) => {
+const SelectionChips: React.FC<SelectionChipsProps> = ({
+  selections,
+  onRemove,
+  onTimeframeChange,
+  theme,
+  disabled,
+}) => {
   if (selections.length === 0) return null;
 
-  const themeClasses = {
+  const themeClasses: Record<ColorTheme, string> = {
     teal: 'bg-[#64ffda]/10 text-[#64ffda] border-[#64ffda]/30',
     purple: 'bg-[#a78bfa]/10 text-[#a78bfa] border-[#a78bfa]/30',
     blue: 'bg-[#60a5fa]/10 text-[#60a5fa] border-[#60a5fa]/30',
@@ -108,26 +124,148 @@ const SelectionChips: React.FC<SelectionChipsProps> = ({ selections, onRemove, t
   };
 
   return (
-    <div className="flex flex-wrap gap-1 mt-2">
+    <div className="flex flex-wrap gap-1.5 mt-2">
       {selections.map((sel) => (
-        <span
+        <div
           key={sel.id}
           className={cn(
-            'inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded border',
+            'inline-flex items-center gap-1.5 pl-1 pr-2 py-0.5 text-[10px] rounded border',
             themeClasses[theme]
           )}
         >
-          <span className="truncate max-w-[100px]">{sel.strategyName}</span>
+          {/* Inline timeframe selector */}
+          <TimeframeDropdown
+            value={sel.timeframe}
+            onChange={(tf) => onTimeframeChange(sel.id, tf)}
+            theme={theme}
+            disabled={disabled}
+            className="!min-w-[40px] !px-1 !py-0.5 !text-[9px] !border-0 !bg-transparent"
+          />
+          <span className="truncate max-w-[80px]">{sel.strategyName}</span>
           <button
             onClick={() => onRemove(sel.id)}
             className="hover:opacity-70 transition-opacity"
+            disabled={disabled}
           >
             <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>
           </button>
-        </span>
+        </div>
       ))}
+    </div>
+  );
+};
+
+// -----------------------------------------------------------------------------
+// Algorithm Selector with Timeframe
+// -----------------------------------------------------------------------------
+
+interface AlgorithmSelectorWithTimeframeProps {
+  label: string;
+  options: AlgorithmOption[];
+  selections: AlgorithmSelection[];
+  onSelectionsChange: (selections: AlgorithmSelection[]) => void;
+  theme: ColorTheme;
+  disabled?: boolean;
+  multiSelect?: boolean;
+  showSearch?: boolean;
+  searchPlaceholder?: string;
+  /** Current timeframe for new selections */
+  defaultTimeframe: TimeframeValue;
+  onDefaultTimeframeChange: (timeframe: TimeframeValue) => void;
+}
+
+const AlgorithmSelectorWithTimeframe: React.FC<AlgorithmSelectorWithTimeframeProps> = ({
+  label,
+  options,
+  selections,
+  onSelectionsChange,
+  theme,
+  disabled = false,
+  multiSelect = true,
+  showSearch = true,
+  searchPlaceholder,
+  defaultTimeframe,
+  onDefaultTimeframeChange,
+}) => {
+  // Handle algorithm selection change
+  const handleAlgorithmChange = useCallback((selectedIds: number[]) => {
+    // Find newly added IDs
+    const existingIds = new Set(selections.map(s => s.id));
+    const newSelections: AlgorithmSelection[] = [];
+
+    for (const id of selectedIds) {
+      if (existingIds.has(id)) {
+        // Keep existing selection with its timeframe
+        const existing = selections.find(s => s.id === id);
+        if (existing) {
+          newSelections.push(existing);
+        }
+      } else {
+        // Add new selection with default timeframe
+        const option = options.find(o => o.id === id);
+        if (option) {
+          newSelections.push({
+            id: option.id,
+            code: option.code,
+            strategyName: option.strategyName,
+            strategyType: option.strategyType,
+            description: option.description,
+            timeframe: defaultTimeframe,
+          });
+        }
+      }
+    }
+
+    onSelectionsChange(newSelections);
+  }, [selections, options, defaultTimeframe, onSelectionsChange]);
+
+  // Handle chip removal
+  const handleRemoveChip = useCallback((id: number) => {
+    onSelectionsChange(selections.filter(s => s.id !== id));
+  }, [selections, onSelectionsChange]);
+
+  // Handle timeframe change for a specific selection
+  const handleTimeframeChange = useCallback((id: number, timeframe: TimeframeValue) => {
+    onSelectionsChange(
+      selections.map(s => s.id === id ? { ...s, timeframe } : s)
+    );
+  }, [selections, onSelectionsChange]);
+
+  return (
+    <div className="flex flex-col">
+      {/* Row: Timeframe + Algorithm Dropdown */}
+      <div className="flex items-stretch gap-1">
+        {/* Timeframe selector (for new selections) */}
+        <TimeframeDropdown
+          value={defaultTimeframe}
+          onChange={onDefaultTimeframeChange}
+          theme={theme}
+          disabled={disabled}
+        />
+        {/* Algorithm dropdown */}
+        <WorkflowDropdown
+          label={label}
+          options={options}
+          selectedIds={selections.map(s => s.id)}
+          onChange={handleAlgorithmChange}
+          theme={theme}
+          disabled={disabled}
+          multiSelect={multiSelect}
+          showSearch={showSearch}
+          searchPlaceholder={searchPlaceholder}
+          className="flex-1"
+        />
+      </div>
+      {/* Selection chips with inline timeframe */}
+      <SelectionChips
+        selections={selections}
+        onRemove={handleRemoveChip}
+        onTimeframeChange={handleTimeframeChange}
+        theme={theme}
+        disabled={disabled}
+      />
     </div>
   );
 };
@@ -145,25 +283,31 @@ interface WorkflowRowItemProps {
   t: (key: string) => string;
 }
 
-const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUpdate, disableConditions, disableAnalysis, t }) => {
-  const toSelection = (opt: AlgorithmOption): AlgorithmSelection => ({
-    id: opt.id,
-    code: opt.code,
-    strategyName: opt.strategyName,
-    strategyType: opt.strategyType,
-    description: opt.description,
+const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({
+  row,
+  algorithms,
+  onUpdate,
+  disableConditions,
+  disableAnalysis,
+  t,
+}) => {
+  // TICKET_248: Track default timeframe for each column (used when adding new selections)
+  const [defaultTimeframes, setDefaultTimeframes] = useState<{
+    analysis: TimeframeValue;
+    preCondition: TimeframeValue;
+    steps: TimeframeValue;
+    postCondition: TimeframeValue;
+  }>({
+    analysis: '1d',
+    preCondition: '1d',
+    steps: '1d',
+    postCondition: '1d',
   });
 
-  const handleSelectionChange = (
+  const handleSelectionsChange = useCallback((
     column: 'analysis' | 'preCondition' | 'steps' | 'postCondition',
-    selectedIds: number[],
-    availableOptions: AlgorithmOption[]
+    selections: AlgorithmSelection[]
   ) => {
-    const selectedItems = selectedIds
-      .map((id) => availableOptions.find((opt) => opt.id === id))
-      .filter((opt): opt is AlgorithmOption => opt !== undefined)
-      .map(toSelection);
-
     const updateKey = {
       analysis: 'analysisSelections',
       preCondition: 'preConditionSelections',
@@ -171,24 +315,15 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
       postCondition: 'postConditionSelections',
     }[column] as keyof WorkflowRow;
 
-    onUpdate(row.id, { [updateKey]: selectedItems });
-  };
+    onUpdate(row.id, { [updateKey]: selections });
+  }, [row.id, onUpdate]);
 
-  const handleRemoveChip = (
+  const handleDefaultTimeframeChange = useCallback((
     column: 'analysis' | 'preCondition' | 'steps' | 'postCondition',
-    selectionId: number
+    timeframe: TimeframeValue
   ) => {
-    const columnKey = {
-      analysis: 'analysisSelections',
-      preCondition: 'preConditionSelections',
-      steps: 'stepSelections',
-      postCondition: 'postConditionSelections',
-    }[column] as keyof WorkflowRow;
-
-    const currentSelections = row[columnKey] as AlgorithmSelection[];
-    const newSelections = currentSelections.filter((s) => s.id !== selectionId);
-    onUpdate(row.id, { [columnKey]: newSelections });
-  };
+    setDefaultTimeframes(prev => ({ ...prev, [column]: timeframe }));
+  }, []);
 
   // Pre-condition (Entry Filter):
   // - If disableAnalysis is true (trader mode), always enabled (independent of Market Analysis)
@@ -209,82 +344,70 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({ row, algorithms, onUp
         </span>
       </div>
 
-      {/* 4 Buttons in a row - wider for enabled (3), narrower for disabled (2) */}
+      {/* 4 Columns: [TF][Algorithm] for each */}
       <div className="flex flex-row gap-3 w-full">
         {/* Select Algorithm (Market Analysis) - wide (3 units) */}
         <div className="flex-[3]">
-          <WorkflowDropdown
+          <AlgorithmSelectorWithTimeframe
             label={t('workflowSelector.selectAlgorithm')}
             options={algorithms.trendRange}
-            selectedIds={row.analysisSelections.map((s) => s.id)}
-            onChange={(ids) => handleSelectionChange('analysis', ids, algorithms.trendRange)}
+            selections={row.analysisSelections}
+            onSelectionsChange={(sel) => handleSelectionsChange('analysis', sel)}
             theme="teal"
             disabled={disableAnalysis}
             multiSelect={true}
             showSearch={true}
             searchPlaceholder={t('workflowSelector.search')}
-          />
-          <SelectionChips
-            selections={row.analysisSelections}
-            onRemove={(id) => handleRemoveChip('analysis', id)}
-            theme="teal"
+            defaultTimeframe={defaultTimeframes.analysis}
+            onDefaultTimeframeChange={(tf) => handleDefaultTimeframeChange('analysis', tf)}
           />
         </div>
 
         {/* Pre-condition - narrow (2 units) */}
         <div className="flex-[2]">
-          <WorkflowDropdown
+          <AlgorithmSelectorWithTimeframe
             label={t('workflowSelector.preCondition')}
             options={algorithms.preCondition}
-            selectedIds={row.preConditionSelections.map((s) => s.id)}
-            onChange={(ids) => handleSelectionChange('preCondition', ids, algorithms.preCondition)}
+            selections={row.preConditionSelections}
+            onSelectionsChange={(sel) => handleSelectionsChange('preCondition', sel)}
             theme="purple"
             disabled={!preConditionEnabled}
             multiSelect={false}
             showSearch={false}
-          />
-          <SelectionChips
-            selections={row.preConditionSelections}
-            onRemove={(id) => handleRemoveChip('preCondition', id)}
-            theme="purple"
+            defaultTimeframe={defaultTimeframes.preCondition}
+            onDefaultTimeframeChange={(tf) => handleDefaultTimeframeChange('preCondition', tf)}
           />
         </div>
 
         {/* Select Steps - wide (3 units) */}
         <div className="flex-[3]">
-          <WorkflowDropdown
+          <AlgorithmSelectorWithTimeframe
             label={t('workflowSelector.selectSteps')}
             options={algorithms.selectSteps}
-            selectedIds={row.stepSelections.map((s) => s.id)}
-            onChange={(ids) => handleSelectionChange('steps', ids, algorithms.selectSteps)}
+            selections={row.stepSelections}
+            onSelectionsChange={(sel) => handleSelectionsChange('steps', sel)}
             theme="blue"
             multiSelect={true}
             showSearch={true}
             searchPlaceholder={t('workflowSelector.search')}
-          />
-          <SelectionChips
-            selections={row.stepSelections}
-            onRemove={(id) => handleRemoveChip('steps', id)}
-            theme="blue"
+            defaultTimeframe={defaultTimeframes.steps}
+            onDefaultTimeframeChange={(tf) => handleDefaultTimeframeChange('steps', tf)}
           />
         </div>
 
         {/* Post-condition - narrow (2 units) */}
         <div className="flex-[2]">
-          <WorkflowDropdown
+          <AlgorithmSelectorWithTimeframe
             label={t('workflowSelector.postCondition')}
             options={algorithms.postCondition}
-            selectedIds={row.postConditionSelections.map((s) => s.id)}
-            onChange={(ids) => handleSelectionChange('postCondition', ids, algorithms.postCondition)}
+            selections={row.postConditionSelections}
+            onSelectionsChange={(sel) => handleSelectionsChange('postCondition', sel)}
             theme="gold"
             disabled={!postConditionEnabled}
             multiSelect={false}
             showSearch={false}
-          />
-          <SelectionChips
-            selections={row.postConditionSelections}
-            onRemove={(id) => handleRemoveChip('postCondition', id)}
-            theme="gold"
+            defaultTimeframe={defaultTimeframes.postCondition}
+            onDefaultTimeframeChange={(tf) => handleDefaultTimeframeChange('postCondition', tf)}
           />
         </div>
       </div>

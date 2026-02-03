@@ -12,6 +12,13 @@ export {
   type WorkflowRowSelectorProps,
 } from './WorkflowRowSelector';
 
+// TICKET_248: Stage-Level Timeframe Selector
+export {
+  TimeframeDropdown,
+  type TimeframeValue,
+  type TimeframeDropdownProps,
+} from './TimeframeDropdown';
+
 export {
   BacktestDataConfigPanel,
   type BacktestDataConfig,
