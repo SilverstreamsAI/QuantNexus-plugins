@@ -285,7 +285,9 @@ export async function executeVibingChat(
 export async function executeVibingChatAction(
   sessionId: string,
   action: 'generate_code' | 'save_strategy' | 'run_backtest',
-  currentRules?: Partial<StrategyRulesResponse>
+  currentRules?: Partial<StrategyRulesResponse>,
+  llmProvider?: VibingChatRequest['model'],
+  llmModel?: string
 ): Promise<VibingChatResponse> {
   // Action triggers use special message format
   const actionMessage = `<${action}>`;
@@ -296,5 +298,7 @@ export async function executeVibingChatAction(
     current_strategy_rules: currentRules,
     output_format: 'v3',
     storage_mode: 'local',
+    model: llmProvider,
+    llm_model: llmModel,
   });
 }

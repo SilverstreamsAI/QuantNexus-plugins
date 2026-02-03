@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
   conversationService,
@@ -20,6 +21,7 @@ import {
   executeVibingChat,
   executeVibingChatAction,
   getVibingChatErrorMessage,
+  VibingChatRequest,
   VibingChatResponse,
   StrategyRulesResponse,
 } from '../../services';
@@ -55,6 +57,12 @@ export interface AIStrategyStudioPageProps {
   onStrategyNameChange?: (name: string) => void;
   /** Additional CSS classes */
   className?: string;
+  /** LLM provider setting from plugin config */
+  llmProvider?: string;
+  /** LLM model setting from plugin config */
+  llmModel?: string;
+  /** Settings click handler */
+  onSettingsClick?: () => void;
 }
 
 // -----------------------------------------------------------------------------
@@ -134,6 +142,9 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
   strategyId = '',
   onStrategyNameChange,
   className,
+  llmProvider = 'NONA',
+  llmModel = 'nona-fast',
+  onSettingsClick,
 }) => {
   // -------------------------------------------------------------------------
   // User State
@@ -427,6 +438,8 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
           current_strategy_rules: currentRules,
           output_format: 'v3',
           storage_mode: 'local',
+          model: llmProvider as VibingChatRequest['model'],
+          llm_model: llmModel,
           metadata: {
             user_id: parseInt(userId, 10) || 1,
             mode: 'generator',
@@ -568,7 +581,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
       console.error('[AIStrategyStudio] Failed to send message:', error);
       setIsLoading(false);
     }
-  }, [inputValue, isLoading, activeDbId, activeConversationId, strategyRules, initialStrategyName, strategyId, userId]);
+  }, [inputValue, isLoading, activeDbId, activeConversationId, strategyRules, initialStrategyName, strategyId, userId, llmProvider, llmModel]);
 
   // -------------------------------------------------------------------------
   // Action Handlers
@@ -596,7 +609,13 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
           }
         : undefined;
 
-      const response = await executeVibingChatAction(sessionId, actionId, currentRules);
+      const response = await executeVibingChatAction(
+        sessionId,
+        actionId,
+        currentRules,
+        llmProvider as VibingChatRequest['model'],
+        llmModel
+      );
 
       if (response.success && response.result) {
         const actionLabels: Record<ActionId, string> = {
@@ -690,7 +709,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
     } finally {
       setActionStates((prev) => ({ ...prev, [actionId]: false }));
     }
-  }, [activeDbId, strategyRules]);
+  }, [activeDbId, strategyRules, llmProvider, llmModel]);
 
   // -------------------------------------------------------------------------
   // Strategy Rules Handlers
@@ -755,71 +774,89 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
   return (
     <div
       className={cn(
-        'flex h-full w-full overflow-hidden',
+        'flex flex-col h-full w-full overflow-hidden',
         'bg-color-terminal-bg',
         className
       )}
     >
-      {/* Left Sidebar - Conversation History */}
-      <ConversationSidebar
-        conversations={conversations}
-        activeConversationId={activeConversationId}
-        onNewChat={handleNewChat}
-        onSelectConversation={handleSelectConversation}
-        onDeleteConversation={handleDeleteConversation}
-        isLoading={isLoadingConversations}
-        width={280}
-      />
+      {/* ================================================================== */}
+      {/* Zone A: Page Header                                                */}
+      {/* ================================================================== */}
+      <div className="flex-shrink-0 h-12 px-6 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
+        <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
+          {pageTitle}
+        </h1>
+        <button
+          onClick={onSettingsClick}
+          className="p-2 text-color-terminal-text-muted hover:text-color-terminal-text hover:bg-white/5 rounded transition-all"
+        >
+          <Settings className="w-4 h-4" />
+        </button>
+      </div>
 
-      {/* Main Area - Chat Interface */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Session Info Panel */}
-        <SessionInfoPanel
-          sessionId={activeConversationId || ''}
-          messageCount={messages.length}
-          tokenUsage={tokenUsage}
-          showCompressionWarning={tokenUsage.current / tokenUsage.limit > 0.85}
-          visible={messages.length > 0}
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Sidebar - Conversation History */}
+        <ConversationSidebar
+          conversations={conversations}
+          activeConversationId={activeConversationId}
+          onNewChat={handleNewChat}
+          onSelectConversation={handleSelectConversation}
+          onDeleteConversation={handleDeleteConversation}
+          isLoading={isLoadingConversations}
+          width={280}
         />
 
-        {/* Messages Container */}
-        <MessagesContainer
-          messages={messages}
-          isLoading={isLoading}
-          welcomeTitle="AI Strategy Studio"
-          welcomeSubtitle="Describe your trading strategy in natural language. I'll help you build entry rules, exit conditions, and risk management."
+        {/* Main Area - Chat Interface */}
+        <main className="flex-1 flex flex-col overflow-hidden">
+          {/* Session Info Panel */}
+          <SessionInfoPanel
+            sessionId={activeConversationId || ''}
+            messageCount={messages.length}
+            tokenUsage={tokenUsage}
+            showCompressionWarning={tokenUsage.current / tokenUsage.limit > 0.85}
+            visible={messages.length > 0}
+          />
+
+          {/* Messages Container */}
+          <MessagesContainer
+            messages={messages}
+            isLoading={isLoading}
+            welcomeTitle="AI Strategy Studio"
+            welcomeSubtitle="Describe your trading strategy in natural language. I'll help you build entry rules, exit conditions, and risk management."
+          />
+
+          {/* Action Buttons */}
+          {availableActions.length > 0 && (
+            <div className="px-4">
+              <ActionButtons
+                actions={availableActions}
+                onAction={handleAction}
+                disabled={isLoading}
+              />
+            </div>
+          )}
+
+          {/* Chat Input Area */}
+          <ChatInputArea
+            value={inputValue}
+            onChange={setInputValue}
+            onSend={handleSendMessage}
+            disabled={isLoading || !activeDbId}
+            placeholder={activeDbId ? 'Describe your trading strategy...' : 'Create a new chat to start...'}
+          />
+        </main>
+
+        {/* Right Sidebar - Strategy Rules */}
+        <StrategyRulesPanel
+          rules={strategyRules}
+          onAddRule={handleAddRule}
+          onEditRule={handleEditRule}
+          onDeleteRule={handleDeleteRule}
+          onToggleRule={handleToggleRule}
+          width={360}
         />
-
-        {/* Action Buttons */}
-        {availableActions.length > 0 && (
-          <div className="px-4">
-            <ActionButtons
-              actions={availableActions}
-              onAction={handleAction}
-              disabled={isLoading}
-            />
-          </div>
-        )}
-
-        {/* Chat Input Area */}
-        <ChatInputArea
-          value={inputValue}
-          onChange={setInputValue}
-          onSend={handleSendMessage}
-          disabled={isLoading || !activeDbId}
-          placeholder={activeDbId ? 'Describe your trading strategy...' : 'Create a new chat to start...'}
-        />
-      </main>
-
-      {/* Right Sidebar - Strategy Rules */}
-      <StrategyRulesPanel
-        rules={strategyRules}
-        onAddRule={handleAddRule}
-        onEditRule={handleEditRule}
-        onDeleteRule={handleDeleteRule}
-        onToggleRule={handleToggleRule}
-        width={360}
-      />
+      </div>
     </div>
   );
 };
