@@ -542,20 +542,22 @@ export const IndicatorSelector: React.FC<IndicatorSelectorProps> = ({
       )}
 
       {/* Add Indicator Button */}
-      <button
-        onClick={handleAddBlock}
-        className={cn(
-          'w-full flex items-center justify-center gap-2',
-          'px-4 py-3 text-xs font-bold uppercase tracking-wider',
-          'border border-dashed border-color-terminal-border rounded-lg',
-          'text-color-terminal-text-secondary',
-          'hover:border-color-terminal-accent-teal/50 hover:text-color-terminal-accent-teal',
-          'transition-all duration-200'
-        )}
-      >
-        <Plus className="w-4 h-4" />
-        Add Indicator
-      </button>
+      <div className="w-1/2 ml-auto">
+        <button
+          onClick={handleAddBlock}
+          className={cn(
+            'w-full flex items-center justify-center gap-2',
+            'px-4 py-3 text-xs font-bold uppercase tracking-wider',
+            'border border-dashed border-color-terminal-border rounded-lg',
+            'text-color-terminal-text-secondary',
+            'hover:border-color-terminal-accent-teal/50 hover:text-color-terminal-accent-teal',
+            'transition-all duration-200'
+          )}
+        >
+          <Plus className="w-4 h-4" />
+          Add Indicator
+        </button>
+      </div>
     </div>
   );
 };

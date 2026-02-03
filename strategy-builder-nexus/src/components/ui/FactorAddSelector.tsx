@@ -407,20 +407,22 @@ export const FactorAddSelector: React.FC<FactorAddSelectorProps> = ({
       )}
 
       {/* Add Strategy Button */}
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className={cn(
-          'w-full flex items-center justify-center gap-2',
-          'px-4 py-3 text-xs font-bold uppercase tracking-wider',
-          'border border-dashed border-color-terminal-border rounded-lg',
-          'text-color-terminal-text-secondary',
-          'hover:border-color-terminal-accent-teal/50 hover:text-color-terminal-accent-teal',
-          'transition-all duration-200'
-        )}
-      >
-        <Plus className="w-4 h-4" />
-        {addButtonLabel}
-      </button>
+      <div className="w-1/2 ml-auto">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className={cn(
+            'w-full flex items-center justify-center gap-2',
+            'px-4 py-3 text-xs font-bold uppercase tracking-wider',
+            'border border-dashed border-color-terminal-border rounded-lg',
+            'text-color-terminal-text-secondary',
+            'hover:border-color-terminal-accent-teal/50 hover:text-color-terminal-accent-teal',
+            'transition-all duration-200'
+          )}
+        >
+          <Plus className="w-4 h-4" />
+          {addButtonLabel}
+        </button>
+      </div>
 
       {/* Factor Selection Modal */}
       <FactorModal

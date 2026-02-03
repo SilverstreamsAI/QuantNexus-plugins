@@ -130,18 +130,19 @@ export const ExpressionInput: React.FC<ExpressionInputProps> = ({
       </div>
 
       {/* Add Button */}
-      <div className="flex justify-end">
+      <div className="w-1/2 ml-auto">
         <button
           onClick={handleAdd}
           className={cn(
-            'flex items-center gap-1.5 px-4 py-2',
-            'text-[10px] font-bold uppercase tracking-wider',
-            'border border-color-terminal-border rounded',
-            'hover:border-color-terminal-accent-teal/50 hover:bg-white/5',
-            'transition-all'
+            'w-full flex items-center justify-center gap-2',
+            'px-4 py-3 text-xs font-bold uppercase tracking-wider',
+            'border border-dashed border-color-terminal-border rounded-lg',
+            'text-color-terminal-text-secondary',
+            'hover:border-color-terminal-accent-teal/50 hover:text-color-terminal-accent-teal',
+            'transition-all duration-200'
           )}
         >
-          <Plus className="w-3 h-3" />
+          <Plus className="w-4 h-4" />
           {buttonLabel}
         </button>
       </div>
