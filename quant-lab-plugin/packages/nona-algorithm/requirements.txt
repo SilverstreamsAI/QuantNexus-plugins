@@ -1,0 +1,4 @@
+# NONA Algorithm Dependencies
+# TICKET_250_7: Python Alpha Factory Framework
+
+numpy>=1.20.0

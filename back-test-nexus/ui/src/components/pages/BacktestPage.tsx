@@ -203,12 +203,12 @@ const createInitialRow = (): WorkflowRow => ({
 });
 
 // Default data configuration
+// TICKET_248: timeframe removed - now set at stage-level in WorkflowRowSelector
 const createDefaultDataConfig = (): BacktestDataConfig => ({
   symbol: '',
   dataSource: 'clickhouse',
   startDate: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   endDate: new Date().toISOString().split('T')[0],
-  timeframe: '1d',
   initialCapital: 10000,
   orderSize: 100,
   orderSizeUnit: 'percent',
@@ -1035,6 +1035,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   }, [isWorkflowEqual]);
 
   // TICKET_173: Helper to run a single backtest (moved from Host Shell)
+  // TICKET_248: Extract timeframes from workflow selections (Phase 1: use first selection's timeframe)
   const runSingleBacktest = useCallback(async (
     workflow: WorkflowRow,
     config: BacktestDataConfig,
@@ -1047,12 +1048,25 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     const startTime = Math.floor(new Date(config.startDate).getTime() / 1000);
     const endTime = Math.floor(new Date(config.endDate).getTime() / 1000);
 
+    // TICKET_248: Get timeframe from workflow selections (Phase 1: use first available)
+    // Phase 2 will support multi-timeframe data loading
+    const getWorkflowTimeframe = (): string => {
+      const allSelections = [
+        ...workflow.analysisSelections,
+        ...workflow.preConditionSelections,
+        ...workflow.stepSelections,
+        ...workflow.postConditionSelections,
+      ];
+      return allSelections[0]?.timeframe || '1d';
+    };
+    const workflowTimeframe = getWorkflowTimeframe();
+
     // Generate strategy for this specific workflow
     messageAPI?.info(`Generating strategy (${caseIndex}/${totalWorkflows})...`);
     const genResult = await api?.generateWorkflowStrategy({
       workflows: [workflow],
       symbol: config.symbol,
-      interval: config.timeframe,
+      interval: workflowTimeframe,
       startTime,
       endTime,
       initialCapital: config.initialCapital,
@@ -1069,11 +1083,12 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setCurrentResult(null);
 
     // Build executor request inline (TICKET_173: replaces toExecutorRequest import)
+    // TICKET_248: Use workflow-level timeframe instead of global config.timeframe
     const executorRequest = {
       strategyPath: genResult.strategyPath,
       strategyName,
       symbol: config.symbol,
-      interval: config.timeframe,
+      interval: workflowTimeframe,
       startTime,
       endTime,
       dataPath: dataResult.dataPath,
@@ -1202,11 +1217,28 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       const dataApi = dataAPI || (window as any).electronAPI?.data;
       messageAPI?.info(`Loading market data for ${dataConfig.symbol}...`);
 
+      // TICKET_248: Get timeframe from first workflow's first selection
+      // Phase 2 will support loading multiple timeframes
+      const getDataTimeframe = (): string => {
+        for (const wf of activeWorkflows) {
+          const allSelections = [
+            ...wf.analysisSelections,
+            ...wf.preConditionSelections,
+            ...wf.stepSelections,
+            ...wf.postConditionSelections,
+          ];
+          if (allSelections.length > 0 && allSelections[0].timeframe) {
+            return allSelections[0].timeframe;
+          }
+        }
+        return '1d'; // Default fallback
+      };
+
       const dataRequest = {
         symbol: dataConfig.symbol,
         startDate: dataConfig.startDate,
         endDate: dataConfig.endDate,
-        interval: dataConfig.timeframe,
+        interval: getDataTimeframe(),
         provider: dataConfig.dataSource,
         forceDownload: false,
       };

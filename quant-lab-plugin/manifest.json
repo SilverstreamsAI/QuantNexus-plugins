@@ -1,0 +1,9 @@
+{
+  "name": "alpha-factory",
+  "version": "1.0.0",
+  "description": "Alpha Factory plugin for signal combination and evaluation",
+  "libraryName": "libalpha_factory",
+  "dependencies": [],
+  "author": "QuantNexus",
+  "license": "MIT"
+}

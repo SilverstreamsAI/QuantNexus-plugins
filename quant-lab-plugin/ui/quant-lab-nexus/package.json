@@ -1,0 +1,24 @@
+{
+  "name": "quant-lab-nexus",
+  "version": "1.0.0",
+  "description": "QUANT LAB UI Plugin - Alpha Factory Interface",
+  "main": "src/index.tsx",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "reactflow": "^11.10.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

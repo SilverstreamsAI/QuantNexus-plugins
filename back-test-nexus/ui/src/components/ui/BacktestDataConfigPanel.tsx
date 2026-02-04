@@ -4,12 +4,14 @@
  * Data source and configuration panel for Zone C variable content area.
  * Displays 3 rows of backtest configuration inputs:
  * - Row 1: Data Source + Symbol Search
- * - Row 2: Start Date + End Date + Timeframe
+ * - Row 2: Start Date + End Date
  * - Row 3: Initial Capital + Order Size + Unit
  *
  * IMPORTANT: This component does NOT include the Execute button (Zone D).
+ * TICKET_248: Timeframe moved to stage-level in WorkflowRowSelector.
  *
  * @see TICKET_077_COMPONENT8 - BacktestDataConfigPanel Design
+ * @see TICKET_248 - Stage-Level Timeframe Selector
  */
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
@@ -48,7 +50,8 @@ export interface BacktestDataConfig {
   // Row 2
   startDate: string;
   endDate: string;
-  timeframe: TimeframeOption;
+  /** @deprecated TICKET_248: Timeframe moved to stage-level in WorkflowRowSelector */
+  timeframe?: TimeframeOption;
 
   // Row 3
   initialCapital: number;
@@ -83,10 +86,10 @@ export interface BacktestDataConfigPanelProps {
 // Constants
 // =============================================================================
 
-// Timeframe and order unit options are generated with translations in the component
+// Order unit options are generated with translations in the component
+// TICKET_248: Timeframe options removed - now set at stage-level in WorkflowRowSelector
 
 const DEFAULT_DATA_SOURCE = 'clickhouse';
-const DEFAULT_TIMEFRAME: TimeframeOption = '1d';
 const DEFAULT_ORDER_SIZE_UNIT: OrderSizeUnit = 'percent';
 
 // =============================================================================
@@ -454,18 +457,7 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
 }) => {
   const { t } = useTranslation('backtest');
 
-  // Generate timeframe options with translations
-  const timeframeOptions = useMemo(() => [
-    { value: '1m' as TimeframeOption, label: t('timeframes.1m') },
-    { value: '5m' as TimeframeOption, label: t('timeframes.5m') },
-    { value: '15m' as TimeframeOption, label: t('timeframes.15m') },
-    { value: '30m' as TimeframeOption, label: t('timeframes.30m') },
-    { value: '1h' as TimeframeOption, label: t('timeframes.1h') },
-    { value: '4h' as TimeframeOption, label: t('timeframes.4h') },
-    { value: '1d' as TimeframeOption, label: t('timeframes.1d') },
-    { value: '1w' as TimeframeOption, label: t('timeframes.1w') },
-    { value: '1M' as TimeframeOption, label: t('timeframes.1M') },
-  ], [t]);
+  // TICKET_248: timeframeOptions removed - timeframe now set at stage-level in WorkflowRowSelector
 
   // Generate order size unit options with translations
   const orderSizeUnits = useMemo(() => [
@@ -546,8 +538,8 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
           />
         </div>
 
-        {/* Row 2: Start Date + End Date + Timeframe */}
-        <div className="grid grid-cols-3 gap-4">
+        {/* Row 2: Start Date + End Date (TICKET_248: Timeframe moved to stage-level) */}
+        <div className="grid grid-cols-2 gap-4">
           <InputField
             label={t('config.startDate')}
             type="date"
@@ -562,14 +554,6 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
             value={value.endDate}
             onChange={(v) => handleChange('endDate', v)}
             error={errors.endDate}
-            disabled={disabled}
-          />
-          <SelectField
-            label={t('config.timeframe')}
-            value={value.timeframe || DEFAULT_TIMEFRAME}
-            onChange={(v) => handleChange('timeframe', v as TimeframeOption)}
-            options={timeframeOptions}
-            error={errors.timeframe}
             disabled={disabled}
           />
         </div>
