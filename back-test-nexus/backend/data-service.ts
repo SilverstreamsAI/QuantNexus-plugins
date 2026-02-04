@@ -65,6 +65,8 @@ export interface EnsureDataResult {
   success: boolean;
   symbol: string;
   dataType?: 'forex' | 'stock' | 'crypto';
+  /** TICKET_248 Phase 2: Path to the data file (parquet) */
+  dataPath?: string;
   coverage?: {
     symbol: string;
     interval: string;
@@ -480,6 +482,133 @@ export async function ensureData(config: EnsureDataConfig): Promise<EnsureDataRe
       error: errorMessage,
     };
   }
+}
+
+// =============================================================================
+// TICKET_248 Phase 2: Multi-Timeframe Data Loading
+// =============================================================================
+
+/**
+ * Multi-timeframe data request configuration
+ */
+export interface EnsureMultiTimeframeConfig {
+  symbol: string;
+  startDate: string;
+  endDate: string;
+  timeframes: string[];  // e.g., ['1d', '1h']
+  provider?: string;
+  forceDownload?: boolean;
+}
+
+/**
+ * Data feed info for a single timeframe
+ */
+export interface DataFeedInfo {
+  dataPath: string;
+  totalBars: number;
+}
+
+/**
+ * Multi-timeframe data result
+ */
+export interface EnsureMultiTimeframeResult {
+  success: boolean;
+  symbol: string;
+  dataFeeds: Record<string, DataFeedInfo>;  // key = timeframe
+  error?: string;
+}
+
+/**
+ * Load data for multiple timeframes
+ *
+ * TICKET_248 Phase 2: Iterates through requested timeframes and ensures
+ * data is available for each one. Returns a map of timeframe -> data info.
+ *
+ * @param config - Multi-timeframe request configuration
+ * @returns Result with dataFeeds map or error
+ */
+export async function ensureMultiTimeframeData(
+  config: EnsureMultiTimeframeConfig
+): Promise<EnsureMultiTimeframeResult> {
+  if (!deps) throw new Error('DataService not initialized');
+
+  deps.log.info(`[DataService] Ensuring multi-timeframe data: ${config.symbol}, timeframes: [${config.timeframes.join(', ')}]`);
+
+  const dataFeeds: Record<string, DataFeedInfo> = {};
+
+  // Send initial progress
+  deps.sendProgress('data:progress', {
+    symbol: config.symbol,
+    phase: 'multi_timeframe_loading',
+    progress: 0,
+    currentChunk: 0,
+    totalChunks: config.timeframes.length,
+    rowsProcessed: 0,
+    message: `Loading data for ${config.timeframes.length} timeframe(s)...`,
+  });
+
+  for (let i = 0; i < config.timeframes.length; i++) {
+    const timeframe = config.timeframes[i];
+
+    deps.log.debug(`[DataService] Loading timeframe ${i + 1}/${config.timeframes.length}: ${timeframe}`);
+
+    // Update progress
+    deps.sendProgress('data:progress', {
+      symbol: config.symbol,
+      phase: 'multi_timeframe_loading',
+      progress: i / config.timeframes.length,
+      currentChunk: i + 1,
+      totalChunks: config.timeframes.length,
+      rowsProcessed: 0,
+      message: `Loading ${timeframe} data...`,
+    });
+
+    // Load data for this timeframe
+    const result = await ensureData({
+      symbol: config.symbol,
+      startDate: config.startDate,
+      endDate: config.endDate,
+      interval: timeframe,
+      provider: config.provider,
+      forceDownload: config.forceDownload,
+    });
+
+    if (!result.success) {
+      deps.log.error(`[DataService] Failed to load ${timeframe} data: ${result.error}`);
+      return {
+        success: false,
+        symbol: config.symbol,
+        dataFeeds: {},
+        error: `Failed to load ${timeframe} data: ${result.error}`,
+      };
+    }
+
+    // Store data feed info
+    // Note: dataPath comes from the backend response via coverage check
+    dataFeeds[timeframe] = {
+      dataPath: result.dataPath || '',
+      totalBars: result.coverage?.totalBars || 0,
+    };
+  }
+
+  // Send completion progress
+  deps.sendProgress('data:progress', {
+    symbol: config.symbol,
+    phase: 'complete',
+    progress: 1,
+    currentChunk: config.timeframes.length,
+    totalChunks: config.timeframes.length,
+    rowsProcessed: Object.values(dataFeeds).reduce((sum, df) => sum + df.totalBars, 0),
+    message: `Loaded data for ${config.timeframes.length} timeframe(s)`,
+  });
+
+  deps.log.info(`[DataService] Multi-timeframe data loaded successfully: ${Object.keys(dataFeeds).join(', ')}`);
+
+  return {
+    success: true,
+    symbol: config.symbol,
+    dataFeeds,
+  };
 }
 
 // =============================================================================

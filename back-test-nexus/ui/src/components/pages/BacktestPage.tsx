@@ -29,6 +29,7 @@ import {
 } from '../ui';
 import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
 import { convertPythonResultToExecutorResult } from '../../utils/executorResultConverter';
+import { extractUniqueTimeframes } from '../../utils/timeframe-utils';
 
 // -----------------------------------------------------------------------------
 // Inline SVG Icons (Zone D Action Bar only)
@@ -1083,20 +1084,31 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setCurrentResult(null);
 
     // Build executor request inline (TICKET_173: replaces toExecutorRequest import)
-    // TICKET_248: Use workflow-level timeframe instead of global config.timeframe
-    const executorRequest = {
+    // TICKET_248 Phase 2: Include dataFeeds for multi-timeframe support
+    const executorRequest: any = {
       strategyPath: genResult.strategyPath,
       strategyName,
       symbol: config.symbol,
       interval: workflowTimeframe,
       startTime,
       endTime,
-      dataPath: dataResult.dataPath,
+      dataPath: dataResult.dataPath || '',
       dataSourceType: 'parquet',
       initialCapital: config.initialCapital,
       orderSize: config.orderSize,
       orderSizeUnit: config.orderSizeUnit,
     };
+
+    // TICKET_248 Phase 2: Pass dataFeeds for multi-timeframe execution
+    if (dataResult.dataFeeds && Object.keys(dataResult.dataFeeds).length > 0) {
+      executorRequest.dataFeeds = Object.entries(dataResult.dataFeeds).map(
+        ([interval, info]: [string, any]) => ({
+          interval,
+          dataPath: info.dataPath || '',
+        })
+      );
+      console.log('[BacktestPage] Multi-timeframe dataFeeds:', executorRequest.dataFeeds);
+    }
 
     const result = await api?.runBacktest(executorRequest);
 
@@ -1217,43 +1229,61 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       const dataApi = dataAPI || (window as any).electronAPI?.data;
       messageAPI?.info(`Loading market data for ${dataConfig.symbol}...`);
 
-      // TICKET_248: Get timeframe from first workflow's first selection
-      // Phase 2 will support loading multiple timeframes
-      const getDataTimeframe = (): string => {
-        for (const wf of activeWorkflows) {
-          const allSelections = [
-            ...wf.analysisSelections,
-            ...wf.preConditionSelections,
-            ...wf.stepSelections,
-            ...wf.postConditionSelections,
-          ];
-          if (allSelections.length > 0 && allSelections[0].timeframe) {
-            return allSelections[0].timeframe;
-          }
+      // TICKET_248 Phase 2: Extract unique timeframes from all workflow selections
+      const timeframes = extractUniqueTimeframes(activeWorkflows);
+      console.log('[BacktestPage] Extracted timeframes:', timeframes);
+
+      // TICKET_248 Phase 2: Load data for all required timeframes
+      let dataResult: any;
+
+      if (timeframes.length > 1 && dataApi?.ensureMultiTimeframe) {
+        // Multi-timeframe mode
+        const multiRequest = {
+          symbol: dataConfig.symbol,
+          startDate: dataConfig.startDate,
+          endDate: dataConfig.endDate,
+          timeframes,
+          provider: dataConfig.dataSource,
+          forceDownload: false,
+        };
+
+        console.log('[BacktestPage] Fetching multi-timeframe data:', multiRequest);
+        dataResult = await dataApi.ensureMultiTimeframe(multiRequest);
+
+        if (!dataResult?.success) {
+          messageAPI?.error(`Failed to load market data: ${dataResult?.error}`);
+          setIsExecuting(false);
+          return;
         }
-        return '1d'; // Default fallback
-      };
 
-      const dataRequest = {
-        symbol: dataConfig.symbol,
-        startDate: dataConfig.startDate,
-        endDate: dataConfig.endDate,
-        interval: getDataTimeframe(),
-        provider: dataConfig.dataSource,
-        forceDownload: false,
-      };
+        const totalBars = Object.values(dataResult.dataFeeds || {}).reduce(
+          (sum: number, feed: any) => sum + (feed.totalBars || 0), 0
+        );
+        messageAPI?.success(`Loaded ${totalBars} bars across ${timeframes.length} timeframe(s)`);
+      } else {
+        // Single timeframe mode (legacy fallback)
+        const singleRequest = {
+          symbol: dataConfig.symbol,
+          startDate: dataConfig.startDate,
+          endDate: dataConfig.endDate,
+          interval: timeframes[0] || '1d',
+          provider: dataConfig.dataSource,
+          forceDownload: false,
+        };
 
-      console.debug('[BacktestPage] Fetching data:', dataRequest);
-      const dataResult = await dataApi?.ensure(dataRequest);
+        console.debug('[BacktestPage] Fetching single-timeframe data:', singleRequest);
+        dataResult = await dataApi?.ensure(singleRequest);
 
-      if (!dataResult?.success) {
-        messageAPI?.error(`Failed to load market data: ${dataResult?.error}`);
-        setIsExecuting(false);
-        return;
+        if (!dataResult?.success) {
+          messageAPI?.error(`Failed to load market data: ${dataResult?.error}`);
+          setIsExecuting(false);
+          return;
+        }
+
+        const barsLoaded = dataResult.coverage?.totalBars || dataResult.downloadStats?.barsImported || 0;
+        messageAPI?.success(`Loaded ${barsLoaded} bars for ${dataConfig.symbol}`);
       }
 
-      const barsLoaded = dataResult.coverage?.totalBars || dataResult.downloadStats?.barsImported || 0;
-      messageAPI?.success(`Loaded ${barsLoaded} bars for ${dataConfig.symbol}`);
       console.debug('[BacktestPage] Data loaded:', dataResult);
 
       // Execute each workflow sequentially
