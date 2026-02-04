@@ -525,8 +525,9 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
           {candles.map((candle, i) => {
             const x = i * candleWidth + candleWidth / 2;
             const isUp = candle.close >= candle.open;
-            // TICKET_231: Use centralized color logic for gray-to-color transition
-            const isProcessed = isCandleProcessed(i, processedBars, backtestTotalBars);
+            // TICKET_231/255: Use centralized color logic for gray-to-color transition
+            // When backtest is complete (!isExecuting), all candles should be colored
+            const isProcessed = !isExecuting || isCandleProcessed(i, processedBars, backtestTotalBars);
             const color = getCandleColor(isUp, isProcessed);
             const bodyTop = priceToY(Math.max(candle.open, candle.close));
             const bodyBottom = priceToY(Math.min(candle.open, candle.close));
