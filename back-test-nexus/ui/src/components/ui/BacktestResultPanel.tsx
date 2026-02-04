@@ -956,6 +956,14 @@ const baseTabs: Tab[] = [
 
 const comparisonTab: Tab = { id: 'comparison', label: 'resultPanel.tabs.compare', icon: <CompareIcon className="w-4 h-4" /> };
 
+/** TICKET_257: Workflow timeframe configuration */
+export interface WorkflowTimeframes {
+  analysis?: string;
+  entryFilter?: string;
+  entrySignal?: string;
+  exitStrategy?: string;
+}
+
 export interface BacktestResultPanelProps {
   /** TICKET_151: Support single result (legacy) or array of results for comparison */
   result?: ExecutorResult;
@@ -972,6 +980,8 @@ export interface BacktestResultPanelProps {
   processedBars?: number;
   /** TICKET_231: Total bars in backtest (for gray-to-color transition) */
   backtestTotalBars?: number;
+  /** TICKET_257: Workflow timeframes for display in tab header */
+  workflowTimeframes?: WorkflowTimeframes;
 }
 
 export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
@@ -985,6 +995,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   scrollToCase,
   processedBars = 0,
   backtestTotalBars = 0,
+  workflowTimeframes,
 }) => {
   const { t } = useTranslation('backtest');
   const [activeTab, setActiveTab] = useState<TabId>('charts');
@@ -1039,27 +1050,105 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   return (
     <div className={cn('flex flex-col h-full border border-color-terminal-border rounded-lg bg-color-terminal-panel/30', className)}>
       {/* Tab Header */}
-      <div className="flex border-b border-color-terminal-border">
-        {tabs.map((tab) => {
-          const isDisabled = tab.id === 'comparison' && !isCompareEnabled;
-          return (
+      <div className="flex items-center justify-between border-b border-color-terminal-border">
+        {/* Left: Tab Buttons */}
+        <div className="flex">
+          {tabs.map((tab) => {
+            const isDisabled = tab.id === 'comparison' && !isCompareEnabled;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => !isDisabled && setActiveTab(tab.id)}
+                disabled={isDisabled}
+                className={cn(
+                  'flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium uppercase tracking-wider transition-colors border-b-2',
+                  effectiveActiveTab === tab.id
+                    ? 'border-color-terminal-accent-gold text-color-terminal-accent-gold'
+                    : 'border-transparent text-color-terminal-text-muted hover:text-color-terminal-text',
+                  isDisabled && 'opacity-50 cursor-not-allowed hover:text-color-terminal-text-muted'
+                )}
+              >
+                {tab.icon}
+                {t(tab.label)}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Right: TICKET_257 Workflow Timeframe Buttons */}
+        {workflowTimeframes && (
+          <div className="flex items-center gap-1.5 pr-4">
+            {/* Market Analysis */}
             <button
-              key={tab.id}
-              onClick={() => !isDisabled && setActiveTab(tab.id)}
-              disabled={isDisabled}
+              disabled={!workflowTimeframes.analysis}
               className={cn(
-                'flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium uppercase tracking-wider transition-colors border-b-2',
-                effectiveActiveTab === tab.id
-                  ? 'border-color-terminal-accent-gold text-color-terminal-accent-gold'
-                  : 'border-transparent text-color-terminal-text-muted hover:text-color-terminal-text',
-                isDisabled && 'opacity-50 cursor-not-allowed hover:text-color-terminal-text-muted'
+                'px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded border transition-all',
+                workflowTimeframes.analysis
+                  ? 'border-[#64ffda] bg-[#64ffda]/10 text-[#64ffda]'
+                  : 'border-color-terminal-border bg-color-terminal-surface/50 text-color-terminal-text-muted cursor-not-allowed opacity-50'
               )}
             >
-              {tab.icon}
-              {t(tab.label)}
+              {workflowTimeframes.analysis || '-'}
             </button>
-          );
-        })}
+            <span className="text-[9px] text-color-terminal-text-muted uppercase tracking-wider">
+              Market Analysis
+            </span>
+
+            <span className="mx-1 text-color-terminal-border">|</span>
+
+            {/* Entry Filter */}
+            <button
+              disabled={!workflowTimeframes.entryFilter}
+              className={cn(
+                'px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded border transition-all',
+                workflowTimeframes.entryFilter
+                  ? 'border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa]'
+                  : 'border-color-terminal-border bg-color-terminal-surface/50 text-color-terminal-text-muted cursor-not-allowed opacity-50'
+              )}
+            >
+              {workflowTimeframes.entryFilter || '-'}
+            </button>
+            <span className="text-[9px] text-color-terminal-text-muted uppercase tracking-wider">
+              Entry Filter
+            </span>
+
+            <span className="mx-1 text-color-terminal-border">|</span>
+
+            {/* Entry Signal */}
+            <button
+              disabled={!workflowTimeframes.entrySignal}
+              className={cn(
+                'px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded border transition-all',
+                workflowTimeframes.entrySignal
+                  ? 'border-[#60a5fa] bg-[#60a5fa]/10 text-[#60a5fa]'
+                  : 'border-color-terminal-border bg-color-terminal-surface/50 text-color-terminal-text-muted cursor-not-allowed opacity-50'
+              )}
+            >
+              {workflowTimeframes.entrySignal || '-'}
+            </button>
+            <span className="text-[9px] text-color-terminal-text-muted uppercase tracking-wider">
+              Entry Signal
+            </span>
+
+            <span className="mx-1 text-color-terminal-border">|</span>
+
+            {/* Exit Strategy */}
+            <button
+              disabled={!workflowTimeframes.exitStrategy}
+              className={cn(
+                'px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded border transition-all',
+                workflowTimeframes.exitStrategy
+                  ? 'border-[#fbbf24] bg-[#fbbf24]/10 text-[#fbbf24]'
+                  : 'border-color-terminal-border bg-color-terminal-surface/50 text-color-terminal-text-muted cursor-not-allowed opacity-50'
+              )}
+            >
+              {workflowTimeframes.exitStrategy || '-'}
+            </button>
+            <span className="text-[9px] text-color-terminal-text-muted uppercase tracking-wider">
+              Exit Strategy
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Tab Content */}

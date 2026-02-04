@@ -164,7 +164,13 @@ export interface BacktestPageProps {
   /** Cockpit mode: 'indicators' (default) or 'kronos' for different algorithm filtering */
   cockpitMode?: CockpitMode;
   /** TICKET_233: Notify Host when backtest starts (for global status bar) */
-  onBacktestStart?: (taskId: string, strategyName: string) => void;
+  /** TICKET_257: Include workflowTimeframes for result page display */
+  onBacktestStart?: (taskId: string, strategyName: string, workflowTimeframes?: {
+    analysis: string | null;
+    entryFilter: string | null;
+    entrySignal: string | null;
+    exitStrategy: string | null;
+  }) => void;
   /** TICKET_233: Notify Host of backtest progress (for global status bar) */
   onBacktestProgress?: (taskId: string, progress: number) => void;
   /** TICKET_233: Notify Host when backtest completes (for global status bar) */
@@ -1120,8 +1126,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
     if (result.taskId) {
       setCurrentTaskId(result.taskId);
+      // TICKET_257: Build workflowTimeframes from workflow selections
+      const workflowTimeframes = {
+        analysis: workflow.analysisSelections.length > 0 ? workflow.analysisSelections[0].timeframe : null,
+        entryFilter: workflow.preConditionSelections.length > 0 ? workflow.preConditionSelections[0].timeframe : null,
+        entrySignal: workflow.stepSelections.length > 0 ? workflow.stepSelections[0].timeframe : null,
+        exitStrategy: workflow.postConditionSelections.length > 0 ? workflow.postConditionSelections[0].timeframe : null,
+      };
       // TICKET_233: Notify global status
-      onBacktestStart?.(result.taskId, strategyName || 'Backtest');
+      // TICKET_257: Include workflowTimeframes for result page display
+      onBacktestStart?.(result.taskId, strategyName || 'Backtest', workflowTimeframes);
     }
 
     // Wait for completion via Promise
