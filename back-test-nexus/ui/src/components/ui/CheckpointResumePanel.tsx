@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 // Format time distance without external dependency
 const formatTimeAgo = (dateString: string): string => {
@@ -72,34 +73,35 @@ interface CheckpointResumePanelProps {
 
 const DataValidationWarning: React.FC<{
   status: 'file_missing' | 'hash_mismatch' | 'pending';
-}> = ({ status }) => {
-  const messages = {
+  t: (key: string) => string;
+}> = ({ status, t }) => {
+  const messageKeys = {
     file_missing: {
-      title: 'Data File Not Found',
-      description: 'The original data file has been moved or deleted. Cannot resume.',
-      action: 'Please discard this checkpoint and start a new backtest.',
+      title: 'checkpoint.dataNotFound',
+      description: 'checkpoint.dataNotFoundDesc',
+      action: 'checkpoint.dataNotFoundHint',
     },
     hash_mismatch: {
-      title: 'Data File Changed',
-      description: 'The data file has been modified since the checkpoint was created.',
-      action: 'Resuming may produce inconsistent results. Recommend starting fresh.',
+      title: 'checkpoint.dataChanged',
+      description: 'checkpoint.dataChangedDesc',
+      action: 'checkpoint.dataChangedHint',
     },
     pending: {
-      title: 'Validating Data...',
-      description: 'Checking data file integrity.',
+      title: 'checkpoint.validating',
+      description: 'checkpoint.validatingDesc',
       action: null,
     },
   };
 
-  const msg = messages[status];
+  const keys = messageKeys[status];
 
   return (
     <div className={`data-validation-warning ${status}`}>
       <div className="warning-icon">&#x26A0;</div>
       <div className="warning-content">
-        <h4>{msg.title}</h4>
-        <p>{msg.description}</p>
-        {msg.action && <p className="warning-action">{msg.action}</p>}
+        <h4>{t(keys.title)}</h4>
+        <p>{t(keys.description)}</p>
+        {keys.action && <p className="warning-action">{t(keys.action)}</p>}
       </div>
     </div>
   );
@@ -137,6 +139,7 @@ export const CheckpointResumePanel: React.FC<CheckpointResumePanelProps> = ({
   onDiscard,
   isResuming = false,
 }) => {
+  const { t } = useTranslation('backtest');
   const { intermediateResults, dataValidation, progressPercent } = checkpoint;
   const metrics = intermediateResults?.metrics;
   const openPositions = intermediateResults?.openPositions;
@@ -157,34 +160,34 @@ export const CheckpointResumePanel: React.FC<CheckpointResumePanelProps> = ({
     <div className="checkpoint-resume-panel">
       {/* Header */}
       <div className="checkpoint-resume-header">
-        <h3>Checkpoint Available</h3>
+        <h3>{t('checkpoint.available')}</h3>
         <span className="checkpoint-progress">
-          {progressPercent}% completed ({checkpoint.barIndex}/{checkpoint.totalBars} bars)
+          {t('checkpoint.completed', { percent: progressPercent, processed: checkpoint.barIndex, total: checkpoint.totalBars })}
         </span>
       </div>
 
       {/* Saved time */}
-      <div className="checkpoint-time">Saved {timeAgo}</div>
+      <div className="checkpoint-time">{t('checkpoint.saved', { time: timeAgo })}</div>
 
       {/* Data Validation Warning */}
       {dataValidation !== 'valid' && (
-        <DataValidationWarning status={dataValidation} />
+        <DataValidationWarning status={dataValidation} t={t} />
       )}
 
       {/* Intermediate Metrics Summary */}
       {metrics && (
         <div className="checkpoint-metrics-summary">
-          <MetricItem label="PnL" value={formatCurrency(metrics.totalPnl)} />
-          <MetricItem label="Return" value={formatPercent(metrics.totalReturn)} />
-          <MetricItem label="Trades" value={metrics.totalTrades ?? '-'} />
-          <MetricItem label="Win Rate" value={formatPercent(metrics.winRate)} />
+          <MetricItem label={t('checkpoint.pnl')} value={formatCurrency(metrics.totalPnl)} />
+          <MetricItem label={t('checkpoint.return')} value={formatPercent(metrics.totalReturn)} />
+          <MetricItem label={t('checkpoint.trades')} value={metrics.totalTrades ?? '-'} />
+          <MetricItem label={t('checkpoint.winRate')} value={formatPercent(metrics.winRate)} />
         </div>
       )}
 
       {/* Open Positions */}
       {openPositions && openPositions.length > 0 && (
         <div className="checkpoint-open-positions">
-          <h4>Open Positions at Checkpoint</h4>
+          <h4>{t('checkpoint.openPositions')}</h4>
           <PositionList positions={openPositions} />
         </div>
       )}
@@ -196,14 +199,14 @@ export const CheckpointResumePanel: React.FC<CheckpointResumePanelProps> = ({
           onClick={onResume}
           disabled={isResuming || dataValidation !== 'valid'}
         >
-          {isResuming ? 'Resuming...' : 'Resume Backtest'}
+          {isResuming ? t('checkpoint.resuming') : t('checkpoint.resume')}
         </button>
         <button
           className="btn btn-secondary"
           onClick={onDiscard}
           disabled={isResuming}
         >
-          Discard & Start New
+          {t('checkpoint.discardStartNew')}
         </button>
       </div>
 

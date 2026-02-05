@@ -1,0 +1,141 @@
+{
+  "hub": {
+    "title": "策略中心",
+    "newStrategy": "新建策略",
+    "importStrategy": "匯入策略",
+    "exportStrategy": "匯出策略",
+    "deleteStrategy": "刪除策略",
+    "duplicateStrategy": "複製策略",
+    "noStrategies": "未找到策略",
+    "createFirst": "建立您的第一個策略"
+  },
+  "editor": {
+    "save": "儲存策略",
+    "validate": "驗證",
+    "generate": "AI 生成",
+    "preview": "預覽",
+    "configure": "配置"
+  },
+  "services": {
+    "regimeMode": "行情探測器",
+    "indicatorEntry": "指標入場生成器",
+    "kronosPredictor": "克洛諾斯預測器",
+    "aiEntry": "AI 入場",
+    "marketObserver": "市場觀察者",
+    "aiEntryGenerator": "AI 入場生成器",
+    "indicatorExit": "指標退出生成器",
+    "aiLibero": "AI 自由人"
+  },
+  "modes": {
+    "regime": "行情模式",
+    "kronos": "克洛諾斯模式",
+    "trader": "交易員模式",
+    "riskManager": "風險管理",
+    "aiCommand": "AI 指揮中心"
+  },
+  "validation": {
+    "success": "策略驗證通過",
+    "failed": "策略驗證失敗",
+    "missingField": "缺少必填欄位: {{field}}",
+    "invalidValue": "{{field}} 的值無效"
+  },
+  "generation": {
+    "generating": "正在生成策略代碼...",
+    "success": "策略代碼生成成功",
+    "failed": "策略代碼生成失敗"
+  },
+  "errors": {
+    "loadFailed": "載入策略失敗",
+    "saveFailed": "儲存策略失敗",
+    "deleteFailed": "刪除策略失敗",
+    "validationFailed": "策略驗證失敗: {{reason}}"
+  },
+  "namingDialog": {
+    "title": "命名您的策略",
+    "suggestedName": "建議名稱:",
+    "customName": "自訂名稱:",
+    "customNamePlaceholder": "輸入自訂名稱...",
+    "finalName": "最終名稱:",
+    "or": "或",
+    "useThis": "使用此名稱",
+    "cancel": "取消",
+    "confirmGenerate": "確認並生成"
+  },
+  "apiKeyPrompt": {
+    "title": "AI 功能需要設定",
+    "subtitle": "選擇一個選項以啟用 AI 代碼生成",
+    "useOwnKey": "使用您自己的金鑰",
+    "useOwnKeyDesc": "配置來自 Claude、OpenAI 等的 API 金鑰",
+    "payPerUse": "按使用量付費",
+    "keyStoredLocally": "金鑰僅儲存在本機，不會上傳",
+    "configureKey": "配置金鑰",
+    "upgradeToPro": "升級到專業版",
+    "recommended": "推薦",
+    "unlimitedGenerations": "無限 AI 生成",
+    "noApiKeyRequired": "無需 API 金鑰",
+    "prioritySupport": "優先支援和進階功能",
+    "loginUpgrade": "登入並升級",
+    "upgradeNow": "立即升級",
+    "securityNote": "您的 API 金鑰已加密並僅儲存在本機",
+    "maybeLater": "稍後再說"
+  },
+  "llmSettings": {
+    "title": "LLM 提供商設定",
+    "subtitle": "配置用於 AI 代碼生成的 API 金鑰。只有配置了 API 金鑰的提供商才可用。",
+    "apiKeyEmpty": "API 金鑰不能為空",
+    "invalidKeyFormat": "{{provider}} 的 API 金鑰格式無效",
+    "error": "錯誤:",
+    "getApiKey": "取得 API 金鑰",
+    "apiKeyConfigured": "API 金鑰已配置",
+    "apiKeyRequired": "需要 API 金鑰",
+    "selected": "已選擇",
+    "select": "選擇",
+    "updateApiKey": "更新 API 金鑰",
+    "setApiKey": "設定 API 金鑰",
+    "remove": "移除",
+    "model": "模型",
+    "providersConfigured": "個提供商已配置",
+    "configureAtLeastOne": "請配置至少一個提供商以使用 AI 功能",
+    "active": "目前:"
+  },
+  "pluginSettings": {
+    "config": "配置",
+    "secrets": "金鑰",
+    "back": "返回"
+  },
+  "modelSelector": {
+    "title": "模型選擇",
+    "recommended": "推薦",
+    "context": "上下文："
+  },
+  "traderPresets": {
+    "title": "快速預設",
+    "subtitle": "選擇預設配置快速開始。您可以在下方的進階配置中自訂參數。",
+    "baseline": "基準",
+    "baselineDesc": "最大化絕對收益，無額外約束",
+    "monk": "修行者",
+    "monkDesc": "嚴格紀律，穩定性，風險調整後收益",
+    "warrior": "戰士",
+    "warriorDesc": "激進進攻，高槓桿高風險",
+    "bespoke": "定制",
+    "bespokeDesc": "完全根據您的需求定制的策略"
+  },
+  "saveTemplate": {
+    "title": "儲存範本",
+    "templateName": "範本名稱",
+    "description": "描述（可選）",
+    "indicatorsToSave": "要儲存的指標：",
+    "saveTemplate": "儲存範本",
+    "nameRequired": "範本名稱不能為空",
+    "nameTooShort": "名稱至少需要 3 個字元",
+    "nameExists": "已存在同名範本"
+  },
+  "common": {
+    "cancel": "取消",
+    "confirm": "確認",
+    "save": "儲存",
+    "delete": "刪除",
+    "edit": "編輯",
+    "close": "關閉"
+  }
+}

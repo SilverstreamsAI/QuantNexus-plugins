@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 // -----------------------------------------------------------------------------
@@ -60,34 +61,34 @@ export interface ExecutorStatusPanelProps {
 // Status Config
 // -----------------------------------------------------------------------------
 
-const statusConfig: Record<ExecutorStatus, { label: string; colorClass: string; icon: React.ReactNode }> = {
+const statusConfig: Record<ExecutorStatus, { labelKey: string; colorClass: string; icon: React.ReactNode }> = {
   idle: {
-    label: 'Ready',
+    labelKey: 'executorStatus.ready',
     colorClass: 'text-color-terminal-text-muted',
     icon: null,
   },
   pending: {
-    label: 'Starting...',
+    labelKey: 'executorStatus.starting',
     colorClass: 'text-color-terminal-accent-gold',
     icon: <LoaderIcon className="w-5 h-5 animate-spin" />,
   },
   running: {
-    label: 'Executing',
+    labelKey: 'executorStatus.executing',
     colorClass: 'text-color-terminal-accent-gold',
     icon: <LoaderIcon className="w-5 h-5 animate-spin" />,
   },
   completed: {
-    label: 'Completed',
+    labelKey: 'executorStatus.completed',
     colorClass: 'text-green-400',
     icon: <CheckCircleIcon className="w-5 h-5" />,
   },
   failed: {
-    label: 'Failed',
+    labelKey: 'executorStatus.failed',
     colorClass: 'text-red-400',
     icon: <AlertCircleIcon className="w-5 h-5" />,
   },
   cancelled: {
-    label: 'Cancelled',
+    labelKey: 'executorStatus.cancelled',
     colorClass: 'text-yellow-400',
     icon: <AlertCircleIcon className="w-5 h-5" />,
   },
@@ -104,6 +105,7 @@ export const ExecutorStatusPanel: React.FC<ExecutorStatusPanelProps> = ({
   error,
   className,
 }) => {
+  const { t } = useTranslation('backtest');
   const config = statusConfig[status];
   const isRunning = status === 'running' || status === 'pending';
 
@@ -124,7 +126,7 @@ export const ExecutorStatusPanel: React.FC<ExecutorStatusPanelProps> = ({
         </span>
         <div className="flex-1">
           <div className={cn('text-sm font-medium', config.colorClass)}>
-            {config.label}
+            {t(config.labelKey)}
           </div>
           {message && (
             <div className="text-xs text-color-terminal-text-muted mt-0.5">

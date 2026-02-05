@@ -97,7 +97,54 @@
     "executing": "Executing...",
     "cancel": "Cancel",
     "delete": "Delete",
-    "runInBackground": "Run in Background"
+    "runInBackground": "Run in Background",
+    "return": "返回"
+  },
+  "workflowSteps": {
+    "marketAnalysis": "市場分析",
+    "entryFilter": "入場過濾",
+    "entrySignal": "入場信號",
+    "exitStrategy": "退出策略"
+  },
+  "statusBar": {
+    "running": "運行中",
+    "runningBacktests": "運行中的回測",
+    "backtestsRunning": "{{count}} 個回測運行中"
+  },
+  "executorStatus": {
+    "ready": "就緒",
+    "starting": "啟動中...",
+    "executing": "執行中",
+    "completed": "已完成",
+    "failed": "失敗",
+    "cancelled": "已取消"
+  },
+  "checkpoint": {
+    "available": "檢查點可用",
+    "completed": "已完成 {{percent}}% ({{processed}}/{{total}} 根K線)",
+    "saved": "儲存於 {{time}}",
+    "dataNotFound": "資料檔案未找到",
+    "dataNotFoundDesc": "原始資料檔案已被移動或刪除，無法恢復。",
+    "dataNotFoundHint": "請丟棄此檢查點並開始新的回測。",
+    "dataChanged": "資料檔案已更改",
+    "dataChangedDesc": "資料檔案自檢查點建立以來已被修改。",
+    "dataChangedHint": "恢復可能產生不一致的結果，建議重新開始。",
+    "validating": "驗證資料中...",
+    "validatingDesc": "正在檢查資料檔案完整性。",
+    "pnl": "盈虧",
+    "return": "收益率",
+    "trades": "交易",
+    "winRate": "勝率",
+    "openPositions": "檢查點時的持倉",
+    "resume": "恢復回測",
+    "resuming": "恢復中...",
+    "discardStartNew": "丟棄並重新開始",
+    "percentSaved": "已儲存 {{percent}}%",
+    "justNow": "剛剛",
+    "minutesAgo": "{{count}} 分鐘前",
+    "hoursAgo": "{{count}} 小時前",
+    "daysAgo": "{{count}} 天前",
+    "recently": "最近"
   },
   "dialog": {
     "deleteTitle": "Delete History Record",
@@ -119,6 +166,20 @@
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
     "result": "Result"
+  },
+  "cockpitSelector": {
+    "title": "選擇駕駛艙",
+    "subtitle": "選擇回測模式繼續",
+    "indicatorsCockpit": "指標駕駛艙",
+    "indicatorsCockpitDesc": "基於指標的工作流配置回測",
+    "traderCockpit": "交易員駕駛艙",
+    "traderCockpitDesc": "觀察列表 + LLM 交易者回測策略",
+    "aiCockpit": "AI 駕駛艙",
+    "aiCockpitDesc": "AI 驅動的回測分析",
+    "kronosCockpit": "克洛諾斯駕駛艙",
+    "kronosCockpitDesc": "Kronos 時間序列回測整合",
+    "free": "免費",
+    "pro": "專業版"
   },
   "resultPanel": {
     "tabs": {

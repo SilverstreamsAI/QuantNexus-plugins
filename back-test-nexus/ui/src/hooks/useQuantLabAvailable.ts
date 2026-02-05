@@ -51,32 +51,43 @@ export function useQuantLabAvailable(): UseQuantLabAvailableReturn {
   const [error, setError] = useState<string | null>(null);
 
   const checkAvailability = async () => {
+    console.log('[TICKET_267] useQuantLabAvailable: Starting availability check...');
     setIsLoading(true);
     setError(null);
 
     try {
-      // Access the preload API
-      const api = (window as any).quantnexus;
+      // Access the preload API (exposed as electronAPI, not quantnexus)
+      const api = (window as any).electronAPI;
+      console.log('[TICKET_267] useQuantLabAvailable: api.plugin =', api?.plugin);
+      console.log('[TICKET_267] useQuantLabAvailable: api.plugin.isInstalled =', typeof api?.plugin?.isInstalled);
+
       if (!api?.plugin?.isInstalled) {
         // API not available (should not happen in normal operation)
+        console.error('[TICKET_267] useQuantLabAvailable: Plugin API not available');
         setIsAvailable(false);
         setError('Plugin API not available');
         return;
       }
 
+      console.log('[TICKET_267] useQuantLabAvailable: Calling isInstalled for:', QUANT_LAB_PLUGIN_ID);
       const result = await api.plugin.isInstalled(QUANT_LAB_PLUGIN_ID);
+      console.log('[TICKET_267] useQuantLabAvailable: Result =', JSON.stringify(result));
 
       if (result.success) {
+        console.log('[TICKET_267] useQuantLabAvailable: isAvailable =', result.installed);
         setIsAvailable(result.installed);
       } else {
+        console.error('[TICKET_267] useQuantLabAvailable: Check failed:', result.error);
         setIsAvailable(false);
         setError(result.error || 'Failed to check plugin availability');
       }
     } catch (err) {
+      console.error('[TICKET_267] useQuantLabAvailable: Exception:', err);
       setIsAvailable(false);
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setIsLoading(false);
+      console.log('[TICKET_267] useQuantLabAvailable: Check complete');
     }
   };
 

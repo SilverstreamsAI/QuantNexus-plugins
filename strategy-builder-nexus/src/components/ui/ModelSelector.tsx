@@ -9,6 +9,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 // -----------------------------------------------------------------------------
@@ -31,8 +32,6 @@ export interface ModelOption {
 }
 
 export interface ModelSelectorProps {
-  /** Component title (default: "MODEL SELECTION") */
-  title?: string;
   /** Available model options */
   models: ModelOption[];
   /** Currently selected model ID */
@@ -44,22 +43,17 @@ export interface ModelSelectorProps {
 }
 
 // -----------------------------------------------------------------------------
-// Default Title
-// -----------------------------------------------------------------------------
-
-const DEFAULT_TITLE = 'MODEL SELECTION';
-
-// -----------------------------------------------------------------------------
 // Component
 // -----------------------------------------------------------------------------
 
 export const ModelSelector: React.FC<ModelSelectorProps> = ({
-  title = DEFAULT_TITLE,
   models,
   selectedModel,
   onSelect,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  const title = t('modelSelector.title');
   return (
     <div className={cn('flex flex-col gap-4', className)}>
       {/* Title */}
@@ -106,7 +100,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                     'rounded'
                   )}
                 >
-                  Recommended
+                  {t('modelSelector.recommended')}
                 </span>
               )}
 
@@ -129,7 +123,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
               {/* Context Length */}
               <span className="text-[11px] text-color-terminal-text-muted mt-2">
-                Context: {model.maxContext}
+                {t('modelSelector.context')} {model.maxContext}
               </span>
 
               {/* Hidden radio for accessibility */}

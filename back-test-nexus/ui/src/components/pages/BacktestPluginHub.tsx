@@ -9,6 +9,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 // -----------------------------------------------------------------------------
@@ -68,8 +69,8 @@ type CockpitTier = 'free' | 'pro';
 
 interface CockpitConfig {
   id: string;
-  name: string;
-  description: string;
+  nameKey: string;
+  descKey: string;
   icon: React.ElementType;
   tier: CockpitTier;
 }
@@ -99,29 +100,29 @@ export interface BacktestPluginHubProps {
 const COCKPIT_CONFIGS: CockpitConfig[] = [
   {
     id: 'indicators',
-    name: 'INDICATORS COCKPIT',
-    description: 'Indicator-based backtest with workflow configuration',
+    nameKey: 'cockpitSelector.indicatorsCockpit',
+    descKey: 'cockpitSelector.indicatorsCockpitDesc',
     icon: BarChart3Icon,
     tier: 'free',
   },
   {
     id: 'trader',
-    name: 'TRADER COCKPIT',
-    description: 'Watchlist + LLM Trader backtest strategies',
+    nameKey: 'cockpitSelector.traderCockpit',
+    descKey: 'cockpitSelector.traderCockpitDesc',
     icon: TrendingUpIcon,
     tier: 'pro',
   },
   {
     id: 'ai',
-    name: 'AI COCKPIT',
-    description: 'AI-powered backtest analysis',
+    nameKey: 'cockpitSelector.aiCockpit',
+    descKey: 'cockpitSelector.aiCockpitDesc',
     icon: CpuIcon,
     tier: 'pro',
   },
   {
     id: 'kronos',
-    name: 'KRONOS COCKPIT',
-    description: 'Kronos time-series backtest integration',
+    nameKey: 'cockpitSelector.kronosCockpit',
+    descKey: 'cockpitSelector.kronosCockpitDesc',
     icon: ClockIcon,
     tier: 'pro',
   },
@@ -139,9 +140,10 @@ const TIER_COLORS: Record<CockpitTier, string> = {
 interface CockpitCardProps {
   cockpit: CockpitItem;
   onClick: () => void;
+  t: (key: string) => string;
 }
 
-const CockpitCard: React.FC<CockpitCardProps> = ({ cockpit, onClick }) => {
+const CockpitCard: React.FC<CockpitCardProps> = ({ cockpit, onClick, t }) => {
   const Icon = cockpit.icon;
 
   return (
@@ -181,7 +183,7 @@ const CockpitCard: React.FC<CockpitCardProps> = ({ cockpit, onClick }) => {
               TIER_COLORS[cockpit.tier]
             )}
           >
-            {cockpit.tier}
+            {t(`cockpitSelector.${cockpit.tier}`)}
           </span>
 
           {/* Lock Icon */}
@@ -200,12 +202,12 @@ const CockpitCard: React.FC<CockpitCardProps> = ({ cockpit, onClick }) => {
             : 'text-white group-hover:text-color-terminal-accent-teal'
         )}
       >
-        {cockpit.name}
+        {t(cockpit.nameKey)}
       </h3>
 
       {/* Description */}
       <p className="text-[11px] text-color-terminal-text-secondary leading-relaxed">
-        {cockpit.description}
+        {t(cockpit.descKey)}
       </p>
     </div>
   );
@@ -220,6 +222,8 @@ export const BacktestPluginHub: React.FC<BacktestPluginHubProps> = ({
   onLockedClick,
   userHasPro = false,
 }) => {
+  const { t } = useTranslation('backtest');
+
   // TICKET_211: Compute locked state dynamically based on user tier
   // PRO cockpits are locked if user does not have PRO/GOLD plan
   const cockpitItems: CockpitItem[] = COCKPIT_CONFIGS.map((config) => ({
@@ -247,10 +251,10 @@ export const BacktestPluginHub: React.FC<BacktestPluginHubProps> = ({
           {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="text-lg font-black terminal-mono uppercase tracking-[0.2em] text-white mb-2">
-              SELECT COCKPIT
+              {t('cockpitSelector.title')}
             </h1>
             <p className="text-xs text-color-terminal-text-muted">
-              Choose a backtest mode to continue
+              {t('cockpitSelector.subtitle')}
             </p>
           </div>
 
@@ -261,6 +265,7 @@ export const BacktestPluginHub: React.FC<BacktestPluginHubProps> = ({
                 key={cockpit.id}
                 cockpit={cockpit}
                 onClick={() => handleCardClick(cockpit)}
+                t={t}
               />
             ))}
           </div>

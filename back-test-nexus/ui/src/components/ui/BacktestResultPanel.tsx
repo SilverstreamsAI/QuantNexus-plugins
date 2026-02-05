@@ -364,7 +364,7 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
 
   // TICKET_231: Debug sync values
   const isBacktestInProgress = backtestTotalBars > 0 && processedBars > 0 && processedBars < backtestTotalBars;
-  console.debug('[TICKET_231] SingleCaseCharts render:', {
+  console.log('[TICKET_266] SingleCaseCharts render:', {
     processedBars,
     backtestTotalBars,
     isBacktestInProgress,
@@ -982,6 +982,11 @@ export interface BacktestResultPanelProps {
   backtestTotalBars?: number;
   /** TICKET_257: Workflow timeframes for display in tab header */
   workflowTimeframes?: WorkflowTimeframes;
+  /** TICKET_267: Export to Quant Lab */
+  isQuantLabAvailable?: boolean;
+  isQuantLabLoading?: boolean;
+  isExporting?: boolean;
+  onExportToQuantLab?: () => void;
 }
 
 export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
@@ -996,9 +1001,19 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   processedBars = 0,
   backtestTotalBars = 0,
   workflowTimeframes,
+  isQuantLabAvailable = false,
+  isQuantLabLoading = false,
+  isExporting = false,
+  onExportToQuantLab,
 }) => {
   const { t } = useTranslation('backtest');
   const [activeTab, setActiveTab] = useState<TabId>('charts');
+
+  // TICKET_267: Debug log for Export button props
+  useEffect(() => {
+    console.log('[TICKET_267] BacktestResultPanel props: isQuantLabAvailable=' + isQuantLabAvailable + ', isQuantLabLoading=' + isQuantLabLoading + ', isExporting=' + isExporting + ', hasOnExportToQuantLab=' + !!onExportToQuantLab + ', resultsLength=' + results.length);
+  }, [isQuantLabAvailable, isQuantLabLoading, isExporting, onExportToQuantLab, results.length, result]);
+
   // TICKET_151_2: Refs for scrolling in both Charts and Trades tabs
   const scrollToChartsCaseRef = React.useRef<((index: number) => void) | null>(null);
   const scrollToTradesCaseRef = React.useRef<((index: number) => void) | null>(null);
@@ -1029,12 +1044,20 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
 
   // If no results, show empty state
   if (allResults.length === 0) {
+    console.log('[TICKET_267] BacktestResultPanel: EARLY RETURN - no results');
     return (
       <div className={cn('flex items-center justify-center h-full', className)}>
         <div className="text-color-terminal-text-muted">{t('resultPanel.status.noResults')}</div>
       </div>
     );
   }
+
+  // TICKET_267: Log that we are rendering the full panel
+  console.log('[TICKET_267] BacktestResultPanel: Rendering full panel with', allResults.length, 'results');
+
+  // TICKET_267: Log button render condition
+  const shouldShowExportButton = !isQuantLabLoading && isQuantLabAvailable && !!onExportToQuantLab;
+  console.log('[TICKET_267] BacktestResultPanel: Export button condition: isQuantLabLoading=' + isQuantLabLoading + ', isQuantLabAvailable=' + isQuantLabAvailable + ', hasOnExportToQuantLab=' + !!onExportToQuantLab + ', shouldShowExportButton=' + shouldShowExportButton);
 
   // For single result, use the original behavior
   const primaryResult = allResults[0];
@@ -1091,7 +1114,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
               {workflowTimeframes.analysis || '-'}
             </button>
             <span className="text-[9px] text-color-terminal-text-muted uppercase tracking-wider">
-              Market Analysis
+              {t('workflowSteps.marketAnalysis')}
             </span>
 
             <span className="mx-1 text-color-terminal-border">|</span>
@@ -1109,7 +1132,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
               {workflowTimeframes.entryFilter || '-'}
             </button>
             <span className="text-[9px] text-color-terminal-text-muted uppercase tracking-wider">
-              Entry Filter
+              {t('workflowSteps.entryFilter')}
             </span>
 
             <span className="mx-1 text-color-terminal-border">|</span>
@@ -1127,7 +1150,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
               {workflowTimeframes.entrySignal || '-'}
             </button>
             <span className="text-[9px] text-color-terminal-text-muted uppercase tracking-wider">
-              Entry Signal
+              {t('workflowSteps.entrySignal')}
             </span>
 
             <span className="mx-1 text-color-terminal-border">|</span>
@@ -1145,8 +1168,28 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
               {workflowTimeframes.exitStrategy || '-'}
             </button>
             <span className="text-[9px] text-color-terminal-text-muted uppercase tracking-wider">
-              Exit Strategy
+              {t('workflowSteps.exitStrategy')}
             </span>
+
+          </div>
+        )}
+
+        {/* TICKET_267: Export to Quant Lab Button - outside workflowTimeframes condition */}
+        {!isQuantLabLoading && isQuantLabAvailable && onExportToQuantLab && (
+          <div className="flex items-center pr-4">
+            <span className="mx-2 text-color-terminal-border">|</span>
+            <button
+              onClick={onExportToQuantLab}
+              disabled={isExporting}
+              className={cn(
+                'px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded border transition-all',
+                isExporting
+                  ? 'border-color-terminal-border bg-color-terminal-surface/50 text-color-terminal-text-muted cursor-not-allowed'
+                  : 'border-[#22d3ee] bg-[#22d3ee]/20 text-[#22d3ee] hover:bg-[#22d3ee]/30 animate-pulse'
+              )}
+            >
+              {isExporting ? 'EXPORTING...' : 'EXPORT TO QL'}
+            </button>
           </div>
         )}
       </div>

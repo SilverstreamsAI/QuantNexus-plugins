@@ -568,7 +568,6 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
                   {/* Model Selection */}
                   <div className="border border-color-terminal-border rounded-lg bg-color-terminal-surface p-4">
                     <ModelSelector
-                      title="Model Selection"
                       models={KRONOS_MODELS}
                       selectedModel={selectedModel}
                       onSelect={handleModelSelect}

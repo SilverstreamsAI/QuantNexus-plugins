@@ -97,7 +97,54 @@
     "executing": "Executing...",
     "cancel": "Cancel",
     "delete": "Delete",
-    "runInBackground": "Run in Background"
+    "runInBackground": "Run in Background",
+    "return": "돌아가기"
+  },
+  "workflowSteps": {
+    "marketAnalysis": "시장 분석",
+    "entryFilter": "진입 필터",
+    "entrySignal": "진입 신호",
+    "exitStrategy": "청산 전략"
+  },
+  "statusBar": {
+    "running": "실행 중",
+    "runningBacktests": "실행 중인 백테스트",
+    "backtestsRunning": "{{count}} 개 백테스트 실행 중"
+  },
+  "executorStatus": {
+    "ready": "준비 완료",
+    "starting": "시작 중...",
+    "executing": "실행 중",
+    "completed": "완료",
+    "failed": "실패",
+    "cancelled": "취소됨"
+  },
+  "checkpoint": {
+    "available": "체크포인트 사용 가능",
+    "completed": "{{percent}}% 완료 ({{processed}}/{{total}} 봉)",
+    "saved": "{{time}}에 저장됨",
+    "dataNotFound": "데이터 파일을 찾을 수 없음",
+    "dataNotFoundDesc": "원본 데이터 파일이 이동되었거나 삭제되었습니다. 재개할 수 없습니다.",
+    "dataNotFoundHint": "이 체크포인트를 삭제하고 새 백테스트를 시작하세요.",
+    "dataChanged": "데이터 파일이 변경됨",
+    "dataChangedDesc": "체크포인트 생성 이후 데이터 파일이 수정되었습니다.",
+    "dataChangedHint": "재개하면 일관성 없는 결과가 발생할 수 있습니다. 처음부터 시작하는 것을 권장합니다.",
+    "validating": "데이터 검증 중...",
+    "validatingDesc": "데이터 파일 무결성을 확인하고 있습니다.",
+    "pnl": "손익",
+    "return": "수익률",
+    "trades": "거래",
+    "winRate": "승률",
+    "openPositions": "체크포인트 시점의 포지션",
+    "resume": "백테스트 재개",
+    "resuming": "재개 중...",
+    "discardStartNew": "삭제 후 새로 시작",
+    "percentSaved": "{{percent}}% 저장됨",
+    "justNow": "방금",
+    "minutesAgo": "{{count}}분 전",
+    "hoursAgo": "{{count}}시간 전",
+    "daysAgo": "{{count}}일 전",
+    "recently": "최근"
   },
   "dialog": {
     "deleteTitle": "Delete History Record",
@@ -119,6 +166,20 @@
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
     "result": "Result"
+  },
+  "cockpitSelector": {
+    "title": "콕핏 선택",
+    "subtitle": "백테스트 모드를 선택하여 계속",
+    "indicatorsCockpit": "지표 콕핏",
+    "indicatorsCockpitDesc": "지표 기반 워크플로우 구성 백테스트",
+    "traderCockpit": "트레이더 콕핏",
+    "traderCockpitDesc": "관심목록 + LLM 트레이더 백테스트 전략",
+    "aiCockpit": "AI 콕핏",
+    "aiCockpitDesc": "AI 기반 백테스트 분석",
+    "kronosCockpit": "크로노스 콕핏",
+    "kronosCockpitDesc": "Kronos 시계열 백테스트 통합",
+    "free": "무료",
+    "pro": "프로"
   },
   "resultPanel": {
     "tabs": {

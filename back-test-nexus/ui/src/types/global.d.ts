@@ -82,6 +82,7 @@ declare global {
         getAlgorithms: (params: {
           userId: string;
           strategyType: number | number[];
+          signalSourcePrefix?: string;
         }) => Promise<{
           success: boolean;
           data?: any[];

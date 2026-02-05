@@ -97,7 +97,54 @@
     "executing": "Executing...",
     "cancel": "Cancel",
     "delete": "Delete",
-    "runInBackground": "Run in Background"
+    "runInBackground": "Run in Background",
+    "return": "Zurueck"
+  },
+  "workflowSteps": {
+    "marketAnalysis": "Marktanalyse",
+    "entryFilter": "Einstiegsfilter",
+    "entrySignal": "Einstiegssignal",
+    "exitStrategy": "Ausstiegsstrategie"
+  },
+  "statusBar": {
+    "running": "Laufend",
+    "runningBacktests": "Laufende Backtests",
+    "backtestsRunning": "{{count}} Backtest(s) laufend"
+  },
+  "executorStatus": {
+    "ready": "Bereit",
+    "starting": "Starten...",
+    "executing": "Ausfuehren",
+    "completed": "Abgeschlossen",
+    "failed": "Fehlgeschlagen",
+    "cancelled": "Abgebrochen"
+  },
+  "checkpoint": {
+    "available": "Checkpoint verfuegbar",
+    "completed": "{{percent}}% abgeschlossen ({{processed}}/{{total}} Balken)",
+    "saved": "Gespeichert {{time}}",
+    "dataNotFound": "Datendatei nicht gefunden",
+    "dataNotFoundDesc": "Die urspruengliche Datendatei wurde verschoben oder geloescht. Fortsetzen nicht moeglich.",
+    "dataNotFoundHint": "Bitte verwerfen Sie diesen Checkpoint und starten Sie einen neuen Backtest.",
+    "dataChanged": "Datendatei geaendert",
+    "dataChangedDesc": "Die Datendatei wurde seit der Checkpoint-Erstellung geaendert.",
+    "dataChangedHint": "Das Fortsetzen kann zu inkonsistenten Ergebnissen fuehren. Neustart empfohlen.",
+    "validating": "Daten validieren...",
+    "validatingDesc": "Datei-Integritaet wird ueberprueft.",
+    "pnl": "G&V",
+    "return": "Rendite",
+    "trades": "Trades",
+    "winRate": "Gewinnrate",
+    "openPositions": "Offene Positionen am Checkpoint",
+    "resume": "Backtest fortsetzen",
+    "resuming": "Fortsetzen...",
+    "discardStartNew": "Verwerfen & Neu starten",
+    "percentSaved": "{{percent}}% gespeichert",
+    "justNow": "gerade eben",
+    "minutesAgo": "vor {{count}} Minute(n)",
+    "hoursAgo": "vor {{count}} Stunde(n)",
+    "daysAgo": "vor {{count}} Tag(en)",
+    "recently": "kuerzlich"
   },
   "dialog": {
     "deleteTitle": "Delete History Record",
@@ -119,6 +166,20 @@
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
     "result": "Result"
+  },
+  "cockpitSelector": {
+    "title": "COCKPIT AUSWAHLEN",
+    "subtitle": "Wahlen Sie einen Backtest-Modus",
+    "indicatorsCockpit": "INDIKATOREN-COCKPIT",
+    "indicatorsCockpitDesc": "Indikatorbasierter Backtest mit Workflow-Konfiguration",
+    "traderCockpit": "TRADER-COCKPIT",
+    "traderCockpitDesc": "Watchlist + LLM Trader Backtest-Strategien",
+    "aiCockpit": "KI-COCKPIT",
+    "aiCockpitDesc": "KI-gestutzte Backtest-Analyse",
+    "kronosCockpit": "KRONOS-COCKPIT",
+    "kronosCockpitDesc": "Kronos Zeitreihen-Backtest-Integration",
+    "free": "KOSTENLOS",
+    "pro": "PRO"
   },
   "resultPanel": {
     "tabs": {

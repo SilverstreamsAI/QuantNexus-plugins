@@ -148,7 +148,7 @@ type BacktestResolver = {
 };
 
 /** Cockpit mode determines algorithm filtering */
-export type CockpitMode = 'indicators' | 'kronos';
+export type CockpitMode = 'indicators' | 'kronos' | 'trader';
 
 // TICKET_234: Execution state for global store
 export interface ExecutionStateUpdate {
@@ -297,9 +297,20 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<BacktestHistoryItem | null>(null);
 
   // TICKET_264: Export to Quant Lab
-  const { isAvailable: isQuantLabAvailable, isLoading: isQuantLabLoading } = useQuantLabAvailable();
+  const { isAvailable: isQuantLabAvailable, isLoading: isQuantLabLoading, error: quantLabError } = useQuantLabAvailable();
   const { exportWorkflow, isExporting } = useExportToQuantLab();
   const [exportDialogVisible, setExportDialogVisible] = useState(false);
+
+  // TICKET_267: Log QuantLab availability state
+  useEffect(() => {
+    console.log('[TICKET_267] BacktestPage: QuantLab state - isAvailable:', isQuantLabAvailable, 'isLoading:', isQuantLabLoading, 'error:', quantLabError);
+  }, [isQuantLabAvailable, isQuantLabLoading, quantLabError]);
+
+  // TICKET_267: Log render branch state
+  useEffect(() => {
+    const renderBranch = selectedHistoryResult ? 'PAGE41_HISTORY' : isExecuting ? (currentResult ? 'EXECUTING_WITH_RESULT' : 'EXECUTING_NO_RESULT') : backtestResults.length > 0 ? 'COMPLETED_RESULTS' : 'CONFIG_VIEW';
+    console.log('[TICKET_267] BacktestPage: Render branch=' + renderBranch + ', selectedHistoryResult=' + !!selectedHistoryResult + ', isExecuting=' + isExecuting + ', currentResult=' + !!currentResult + ', backtestResultsLength=' + backtestResults.length);
+  }, [selectedHistoryResult, isExecuting, currentResult, backtestResults.length]);
 
   // TICKET_163: Naming dialog state
   const [namingDialogVisible, setNamingDialogVisible] = useState(false);
@@ -643,8 +654,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     // Track completion to prevent incremental updates from overwriting final result
     let isCompleted = false;
 
+    console.log('[TICKET_266] Subscribing to onCompleted, api:', !!api, 'onCompleted:', !!api.onCompleted);
     const unsubCompleted = api.onCompleted((data: any) => {
-      console.debug('[BacktestPage] Backtest completed:', data);
+      console.log('[TICKET_266] onCompleted callback TRIGGERED, data:', data);
       isCompleted = true;
       if (throttleTimer) {
         clearTimeout(throttleTimer);
@@ -653,6 +665,20 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       pendingBuffer.length = 0;
       // TICKET_230: Convert Python snake_case to TypeScript camelCase
       const convertedResult = convertPythonResultToExecutorResult(data.result);
+
+      // TICKET_266: Update processedBars to match totalBars on completion
+      // This ensures isBacktestInProgress becomes false and equity curve displays fully
+      console.log('[TICKET_266] onCompleted: convertedResult.equityCurve.length =', convertedResult.equityCurve.length);
+      setProcessedBars(prev => {
+        const finalCount = Math.max(prev, convertedResult.equityCurve.length);
+        console.log('[TICKET_266] setProcessedBars: prev =', prev, ', finalCount =', finalCount);
+        return finalCount > 0 ? finalCount : prev;
+      });
+      setBacktestTotalBars(prev => {
+        const finalCount = Math.max(prev, convertedResult.equityCurve.length);
+        console.log('[TICKET_266] setBacktestTotalBars: prev =', prev, ', finalCount =', finalCount);
+        return finalCount > 0 ? finalCount : prev;
+      });
       if (pendingBacktestRef.current) {
         pendingBacktestRef.current.resolve(convertedResult);
         pendingBacktestRef.current = null;
@@ -742,7 +768,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         setBacktestTotalBars(latestTotalBars);
       }
 
-      console.debug('[TICKET_227] flushBuffer: setting currentResult', {
+      console.log('[TICKET_266] flushBuffer: setting currentResult', {
         candles: merged.newCandles.length,
         equityPoints: merged.newEquityPoints.length,
         trades: merged.newTrades.length,
@@ -817,6 +843,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     };
 
     return () => {
+      console.log('[TICKET_266] useEffect cleanup - unsubscribing from events');
       cleanupTimer();
       unsubCompleted();
       unsubError();
@@ -878,22 +905,19 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setExportDialogVisible(false);
 
     // Build workflow config from current state
-    const analysisRow = workflowRows.find(r => r.type === 'trendRange' && r.selectedAlgorithmId);
-    const entryRow = workflowRows.find(r => r.type === 'selectSteps' && r.selectedAlgorithmId);
-    const exitRow = workflowRows.find(r => r.type === 'postCondition' && r.selectedAlgorithmId);
-
-    if (!analysisRow || !entryRow) {
-      messageAPI?.error('Missing analysis or entry algorithm');
+    // WorkflowRow has: analysisSelections, preConditionSelections, stepSelections, postConditionSelections
+    const firstRow = workflowRows[0];
+    if (!firstRow) {
+      messageAPI?.error('No workflow configuration found');
       return;
     }
 
-    // Get algorithm details
-    const analysisAlgo = algorithms.trendRange.find(a => a.id === analysisRow.selectedAlgorithmId);
-    const entryAlgo = algorithms.selectSteps.find(a => a.id === entryRow.selectedAlgorithmId);
-    const exitAlgo = exitRow ? algorithms.postCondition.find(a => a.id === exitRow.selectedAlgorithmId) : null;
+    const analysisSelection = firstRow.analysisSelections[0];
+    const entrySelection = firstRow.stepSelections[0];
+    const exitSelection = firstRow.postConditionSelections[0];
 
-    if (!analysisAlgo || !entryAlgo) {
-      messageAPI?.error('Algorithm details not found');
+    if (!analysisSelection || !entrySelection) {
+      messageAPI?.error('Missing analysis or entry algorithm');
       return;
     }
 
@@ -902,33 +926,33 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         name: finalName,
         workflow: {
           analysis: {
-            algorithmId: String(analysisAlgo.id),
-            algorithmName: analysisAlgo.name,
-            algorithmCode: analysisAlgo.code || '',
-            baseClass: analysisAlgo.baseClass || 'RegimeStateBase',
-            timeframe: analysisRow.timeframe || dataConfig.timeframe,
+            algorithmId: String(analysisSelection.id),
+            algorithmName: analysisSelection.strategyName,
+            algorithmCode: analysisSelection.code || '',
+            baseClass: 'RegimeStateBase',
+            timeframe: analysisSelection.timeframe || dataConfig.timeframe || '1d',
             parameters: {},
           },
           entry: {
-            algorithmId: String(entryAlgo.id),
-            algorithmName: entryAlgo.name,
-            algorithmCode: entryAlgo.code || '',
-            baseClass: entryAlgo.baseClass || 'RegimeTrendEntryBase',
-            timeframe: entryRow.timeframe || dataConfig.timeframe,
+            algorithmId: String(entrySelection.id),
+            algorithmName: entrySelection.strategyName,
+            algorithmCode: entrySelection.code || '',
+            baseClass: 'RegimeTrendEntryBase',
+            timeframe: entrySelection.timeframe || dataConfig.timeframe || '1d',
             parameters: {},
           },
-          exit: exitAlgo ? {
-            algorithmId: String(exitAlgo.id),
-            algorithmName: exitAlgo.name,
-            algorithmCode: exitAlgo.code || '',
-            baseClass: exitAlgo.baseClass || 'ExitSignalBase',
-            timeframe: exitRow?.timeframe || dataConfig.timeframe,
+          exit: exitSelection ? {
+            algorithmId: String(exitSelection.id),
+            algorithmName: exitSelection.strategyName,
+            algorithmCode: exitSelection.code || '',
+            baseClass: 'ExitSignalBase',
+            timeframe: exitSelection.timeframe || dataConfig.timeframe || '1d',
             parameters: {},
           } : undefined,
           symbol: dataConfig.symbol,
           dateRange: {
-            start: dataConfig.dateRange.start,
-            end: dataConfig.dateRange.end,
+            start: dataConfig.startDate,
+            end: dataConfig.endDate,
           },
         },
         backtestMetrics: {
@@ -1531,6 +1555,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 isExecuting={false}
                 currentCaseIndex={1}
                 totalCases={1}
+                isQuantLabAvailable={isQuantLabAvailable}
+                isQuantLabLoading={isQuantLabLoading}
+                isExporting={isExporting}
+                onExportToQuantLab={handleExportClick}
               />
             </div>
           ) : /* TICKET_227: Show executing status or completed results */
@@ -1547,6 +1575,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 scrollToCase={scrollToCaseIndex}
                 processedBars={processedBars}
                 backtestTotalBars={backtestTotalBars}
+                isQuantLabAvailable={isQuantLabAvailable}
+                isQuantLabLoading={isQuantLabLoading}
+                isExporting={isExporting}
+                onExportToQuantLab={handleExportClick}
               />
             ) : (
               /* TICKET_227: No incremental data yet (backtrader), show execution status */
@@ -1575,6 +1607,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               totalCases={totalCases}
               onCaseSelect={handleCaseClick}
               scrollToCase={scrollToCaseIndex}
+              isQuantLabAvailable={isQuantLabAvailable}
+              isQuantLabLoading={isQuantLabLoading}
+              isExporting={isExporting}
+              onExportToQuantLab={handleExportClick}
             />
           ) : loading ? (
             <div className="flex items-center justify-center h-64">
@@ -1795,12 +1831,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         context="export"
         contextData={{
           workflowName: currentResult ? `${dataConfig.symbol}_${dataConfig.timeframe}` : undefined,
-          analysisName: workflowRows.find(r => r.type === 'trendRange')?.selectedAlgorithmId
-            ? algorithms.trendRange.find(a => a.id === workflowRows.find(r => r.type === 'trendRange')?.selectedAlgorithmId)?.name
-            : undefined,
-          entryName: workflowRows.find(r => r.type === 'selectSteps')?.selectedAlgorithmId
-            ? algorithms.selectSteps.find(a => a.id === workflowRows.find(r => r.type === 'selectSteps')?.selectedAlgorithmId)?.name
-            : undefined,
+          // Get first analysis algorithm name from workflowRows
+          analysisName: workflowRows[0]?.analysisSelections[0]?.strategyName,
+          // Get first entry signal algorithm name from workflowRows
+          entryName: workflowRows[0]?.stepSelections[0]?.strategyName,
         }}
         onConfirm={handleExportConfirm}
         onCancel={handleExportCancel}

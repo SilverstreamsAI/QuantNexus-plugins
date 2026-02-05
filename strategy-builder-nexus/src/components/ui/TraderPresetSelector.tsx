@@ -10,6 +10,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Scale, User, Triangle, Pencil } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -21,16 +22,12 @@ export type TraderPresetMode = 'baseline' | 'monk' | 'warrior' | 'bespoke';
 
 export interface TraderPresetOption {
   key: TraderPresetMode;
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
   icon: React.ElementType;
 }
 
 export interface TraderPresetSelectorProps {
-  /** Component title */
-  title?: string;
-  /** Section description */
-  description?: string;
   /** Currently selected preset */
   selectedPreset: TraderPresetMode;
   /** Callback when preset selected */
@@ -45,32 +42,29 @@ export interface TraderPresetSelectorProps {
 // Constants
 // -----------------------------------------------------------------------------
 
-const DEFAULT_TITLE = 'QUICK PRESETS';
-const DEFAULT_DESCRIPTION = 'Select a preset configuration to get started quickly. You can customize parameters in Advanced Configuration below.';
-
 const DEFAULT_OPTIONS: TraderPresetOption[] = [
   {
     key: 'baseline',
-    label: 'Baseline',
-    description: 'Maximize absolute returns without extra constraints',
+    labelKey: 'traderPresets.baseline',
+    descriptionKey: 'traderPresets.baselineDesc',
     icon: Scale,
   },
   {
     key: 'monk',
-    label: 'Monk',
-    description: 'Strict discipline, stability, and risk-adjusted returns',
+    labelKey: 'traderPresets.monk',
+    descriptionKey: 'traderPresets.monkDesc',
     icon: User,
   },
   {
     key: 'warrior',
-    label: 'Warrior',
-    description: 'Aggressive assault with high leverage and risk',
+    labelKey: 'traderPresets.warrior',
+    descriptionKey: 'traderPresets.warriorDesc',
     icon: Triangle,
   },
   {
     key: 'bespoke',
-    label: 'Bespoke',
-    description: 'Fully customized strategy tailored to your needs',
+    labelKey: 'traderPresets.bespoke',
+    descriptionKey: 'traderPresets.bespokeDesc',
     icon: Pencil,
   },
 ];
@@ -80,13 +74,12 @@ const DEFAULT_OPTIONS: TraderPresetOption[] = [
 // -----------------------------------------------------------------------------
 
 export const TraderPresetSelector: React.FC<TraderPresetSelectorProps> = ({
-  title = DEFAULT_TITLE,
-  description = DEFAULT_DESCRIPTION,
   selectedPreset,
   onSelect,
   options = DEFAULT_OPTIONS,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const handleSelect = useCallback(
     (key: TraderPresetMode) => {
       onSelect(key);
@@ -122,15 +115,13 @@ export const TraderPresetSelector: React.FC<TraderPresetSelectorProps> = ({
           <path d="M1 12h6m6 0h6" />
           <path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24" />
         </svg>
-        {title}
+        {t('traderPresets.title')}
       </h2>
 
       {/* Description */}
-      {description && (
-        <p className="text-sm text-color-terminal-text-secondary mb-5 leading-relaxed">
-          {description}
-        </p>
-      )}
+      <p className="text-sm text-color-terminal-text-secondary mb-5 leading-relaxed">
+        {t('traderPresets.subtitle')}
+      </p>
 
       {/* Preset Cards Grid - 4 columns on desktop, 2 on tablet, 1 on mobile */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -193,7 +184,7 @@ export const TraderPresetSelector: React.FC<TraderPresetSelectorProps> = ({
                     : 'text-color-terminal-text-muted'
                 )}
               >
-                {option.label}
+                {t(option.labelKey)}
               </span>
 
               {/* Description */}
@@ -206,7 +197,7 @@ export const TraderPresetSelector: React.FC<TraderPresetSelectorProps> = ({
                     : 'text-color-terminal-text-muted'
                 )}
               >
-                {option.description}
+                {t(option.descriptionKey)}
               </span>
             </button>
           );

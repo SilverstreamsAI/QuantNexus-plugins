@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import type { RawIndicatorBlock } from './RawIndicatorSelector';
 
@@ -76,6 +77,7 @@ export const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
   indicators,
   existingNames = [],
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -92,16 +94,16 @@ export const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
   // Validate name
   const validateName = useCallback((value: string): string | null => {
     if (!value.trim()) {
-      return 'Template name is required';
+      return t('saveTemplate.nameRequired');
     }
     if (value.trim().length < 3) {
-      return 'Name must be at least 3 characters';
+      return t('saveTemplate.nameTooShort');
     }
     if (existingNames.includes(value.trim())) {
-      return 'A template with this name already exists';
+      return t('saveTemplate.nameExists');
     }
     return null;
-  }, [existingNames]);
+  }, [existingNames, t]);
 
   // Handle name change
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,7 +169,7 @@ export const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
         <div className="flex items-center gap-2 px-4 py-3 border-b border-color-terminal-border border-l-[3px] border-l-color-terminal-accent-gold bg-color-terminal-panel rounded-t-lg">
           <SaveIcon className="w-[18px] h-[18px] text-color-terminal-accent-gold" />
           <span className="flex-1 font-mono text-xs font-semibold text-color-terminal-text uppercase tracking-wider">
-            Save Template
+            {t('saveTemplate.title')}
           </span>
           <button
             onClick={onClose}
@@ -182,7 +184,7 @@ export const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
           {/* Template Name */}
           <div className="space-y-2">
             <label className="block text-[11px] text-color-terminal-text-muted uppercase tracking-wider">
-              Template Name <span className="text-red-400">*</span>
+              {t('saveTemplate.templateName')} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -208,7 +210,7 @@ export const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
           {/* Description */}
           <div className="space-y-2">
             <label className="block text-[11px] text-color-terminal-text-muted uppercase tracking-wider">
-              Description (optional)
+              {t('saveTemplate.description')}
             </label>
             <textarea
               value={description}
@@ -228,7 +230,7 @@ export const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
           {/* Indicator Count */}
           <div className="pt-2 border-t border-color-terminal-border">
             <div className="text-[11px] text-color-terminal-text-muted">
-              Indicators to save: <span className="text-color-terminal-accent-teal font-bold">{indicators.length}</span>
+              {t('saveTemplate.indicatorsToSave')} <span className="text-color-terminal-accent-teal font-bold">{indicators.length}</span>
             </div>
           </div>
         </div>
@@ -239,7 +241,7 @@ export const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
             onClick={onClose}
             className="min-w-[80px] px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider rounded border border-color-terminal-border bg-transparent text-color-terminal-text-secondary hover:border-color-terminal-text-muted hover:text-color-terminal-text transition-all"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             onClick={handleSave}
@@ -251,7 +253,7 @@ export const SaveTemplateDialog: React.FC<SaveTemplateDialogProps> = ({
                 : 'border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed'
             )}
           >
-            Save Template
+            {t('saveTemplate.saveTemplate')}
           </button>
         </div>
       </div>

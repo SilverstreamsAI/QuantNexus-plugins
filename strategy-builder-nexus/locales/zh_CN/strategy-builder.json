@@ -1,53 +1,141 @@
 {
   "hub": {
-    "title": "Strategy Hub",
-    "newStrategy": "New Strategy",
-    "importStrategy": "Import Strategy",
-    "exportStrategy": "Export Strategy",
-    "deleteStrategy": "Delete Strategy",
-    "duplicateStrategy": "Duplicate Strategy",
-    "noStrategies": "No strategies found",
-    "createFirst": "Create your first strategy"
+    "title": "策略中心",
+    "newStrategy": "新建策略",
+    "importStrategy": "导入策略",
+    "exportStrategy": "导出策略",
+    "deleteStrategy": "删除策略",
+    "duplicateStrategy": "复制策略",
+    "noStrategies": "未找到策略",
+    "createFirst": "创建您的第一个策略"
   },
   "editor": {
-    "save": "Save Strategy",
-    "validate": "Validate",
-    "generate": "Generate with AI",
-    "preview": "Preview",
-    "configure": "Configure"
+    "save": "保存策略",
+    "validate": "验证",
+    "generate": "AI 生成",
+    "preview": "预览",
+    "configure": "配置"
   },
   "services": {
-    "regimeMode": "Regime Detector",
-    "indicatorEntry": "Indicator Entry Generator",
-    "kronosPredictor": "KRONOS Predictor",
-    "aiEntry": "AI Entry",
-    "marketObserver": "Market Observer",
-    "aiEntryGenerator": "AI Entry Generator",
-    "indicatorExit": "Indicator Exit Generator",
-    "aiLibero": "AI Libero"
+    "regimeMode": "行情探测器",
+    "indicatorEntry": "指标入场生成器",
+    "kronosPredictor": "克洛诺斯预测器",
+    "aiEntry": "AI 入场",
+    "marketObserver": "市场观察者",
+    "aiEntryGenerator": "AI 入场生成器",
+    "indicatorExit": "指标退出生成器",
+    "aiLibero": "AI 自由人"
   },
   "modes": {
-    "regime": "REGIME MODE",
-    "kronos": "KRONOS MODE",
-    "trader": "TRADER MODE",
-    "riskManager": "RISK MANAGER",
-    "aiCommand": "AI COMMAND CENTER"
+    "regime": "行情模式",
+    "kronos": "克洛诺斯模式",
+    "trader": "交易员模式",
+    "riskManager": "风险管理",
+    "aiCommand": "AI 指挥中心"
   },
   "validation": {
-    "success": "Strategy validation passed",
-    "failed": "Strategy validation failed",
-    "missingField": "Missing required field: {{field}}",
-    "invalidValue": "Invalid value for {{field}}"
+    "success": "策略验证通过",
+    "failed": "策略验证失败",
+    "missingField": "缺少必填字段: {{field}}",
+    "invalidValue": "{{field}} 的值无效"
   },
   "generation": {
-    "generating": "Generating strategy code...",
-    "success": "Strategy code generated successfully",
-    "failed": "Failed to generate strategy code"
+    "generating": "正在生成策略代码...",
+    "success": "策略代码生成成功",
+    "failed": "策略代码生成失败"
   },
   "errors": {
-    "loadFailed": "Failed to load strategy",
-    "saveFailed": "Failed to save strategy",
-    "deleteFailed": "Failed to delete strategy",
-    "validationFailed": "Strategy validation failed: {{reason}}"
+    "loadFailed": "加载策略失败",
+    "saveFailed": "保存策略失败",
+    "deleteFailed": "删除策略失败",
+    "validationFailed": "策略验证失败: {{reason}}"
+  },
+  "namingDialog": {
+    "title": "命名您的策略",
+    "suggestedName": "建议名称:",
+    "customName": "自定义名称:",
+    "customNamePlaceholder": "输入自定义名称...",
+    "finalName": "最终名称:",
+    "or": "或",
+    "useThis": "使用此名称",
+    "cancel": "取消",
+    "confirmGenerate": "确认并生成"
+  },
+  "apiKeyPrompt": {
+    "title": "AI 功能需要设置",
+    "subtitle": "选择一个选项以启用 AI 代码生成",
+    "useOwnKey": "使用您自己的密钥",
+    "useOwnKeyDesc": "配置来自 Claude、OpenAI 等的 API 密钥",
+    "payPerUse": "按使用量付费",
+    "keyStoredLocally": "密钥仅存储在本地，不会上传",
+    "configureKey": "配置密钥",
+    "upgradeToPro": "升级到专业版",
+    "recommended": "推荐",
+    "unlimitedGenerations": "无限 AI 生成",
+    "noApiKeyRequired": "无需 API 密钥",
+    "prioritySupport": "优先支持和高级功能",
+    "loginUpgrade": "登录并升级",
+    "upgradeNow": "立即升级",
+    "securityNote": "您的 API 密钥已加密并仅存储在本地",
+    "maybeLater": "稍后再说"
+  },
+  "llmSettings": {
+    "title": "LLM 提供商设置",
+    "subtitle": "配置用于 AI 代码生成的 API 密钥。只有配置了 API 密钥的提供商才可用。",
+    "apiKeyEmpty": "API 密钥不能为空",
+    "invalidKeyFormat": "{{provider}} 的 API 密钥格式无效",
+    "error": "错误:",
+    "getApiKey": "获取 API 密钥",
+    "apiKeyConfigured": "API 密钥已配置",
+    "apiKeyRequired": "需要 API 密钥",
+    "selected": "已选择",
+    "select": "选择",
+    "updateApiKey": "更新 API 密钥",
+    "setApiKey": "设置 API 密钥",
+    "remove": "移除",
+    "model": "模型",
+    "providersConfigured": "个提供商已配置",
+    "configureAtLeastOne": "请配置至少一个提供商以使用 AI 功能",
+    "active": "当前:"
+  },
+  "pluginSettings": {
+    "config": "配置",
+    "secrets": "密钥",
+    "back": "返回"
+  },
+  "modelSelector": {
+    "title": "模型选择",
+    "recommended": "推荐",
+    "context": "上下文："
+  },
+  "traderPresets": {
+    "title": "快速预设",
+    "subtitle": "选择预设配置快速开始。您可以在下方的高级配置中自定义参数。",
+    "baseline": "基准",
+    "baselineDesc": "最大化绝对收益，无额外约束",
+    "monk": "修行者",
+    "monkDesc": "严格纪律，稳定性，风险调整后收益",
+    "warrior": "战士",
+    "warriorDesc": "激进进攻，高杠杆高风险",
+    "bespoke": "定制",
+    "bespokeDesc": "完全根据您的需求定制的策略"
+  },
+  "saveTemplate": {
+    "title": "保存模板",
+    "templateName": "模板名称",
+    "description": "描述（可选）",
+    "indicatorsToSave": "要保存的指标：",
+    "saveTemplate": "保存模板",
+    "nameRequired": "模板名称不能为空",
+    "nameTooShort": "名称至少需要 3 个字符",
+    "nameExists": "已存在同名模板"
+  },
+  "common": {
+    "cancel": "取消",
+    "confirm": "确认",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "close": "关闭"
   }
 }

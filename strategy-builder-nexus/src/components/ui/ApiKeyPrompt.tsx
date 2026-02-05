@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Key,
   Crown,
@@ -52,6 +53,8 @@ export function ApiKeyPrompt({
   onDismiss,
   className,
 }: ApiKeyPromptProps): JSX.Element | null {
+  const { t } = useTranslation('strategy-builder');
+
   if (!isOpen) return null;
 
   const isGuest = userTier === null;
@@ -78,12 +81,12 @@ export function ApiKeyPrompt({
         <div className="p-6">
           {/* Title */}
           <h2 className="text-xl font-bold text-center mb-2">
-            AI Features Require Setup
+            {t('apiKeyPrompt.title')}
           </h2>
 
           {/* Subtitle */}
           <p className="text-sm text-color-terminal-text-muted text-center mb-6">
-            Choose one option to enable AI-powered code generation
+            {t('apiKeyPrompt.subtitle')}
           </p>
 
           {/* Two Options Side by Side */}
@@ -96,21 +99,21 @@ export function ApiKeyPrompt({
               </div>
 
               {/* Title */}
-              <h3 className="text-base font-semibold mb-2">Use Your Own Key</h3>
+              <h3 className="text-base font-semibold mb-2">{t('apiKeyPrompt.useOwnKey')}</h3>
 
               {/* Features */}
               <ul className="text-xs text-color-terminal-text-muted space-y-2 mb-4 flex-1">
                 <li className="flex items-start gap-2">
                   <Check className="w-3.5 h-3.5 mt-0.5 text-color-terminal-accent-teal shrink-0" />
-                  <span>Configure API key from Claude, OpenAI, etc.</span>
+                  <span>{t('apiKeyPrompt.useOwnKeyDesc')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="w-3.5 h-3.5 mt-0.5 text-color-terminal-accent-teal shrink-0" />
-                  <span>Pay only for what you use</span>
+                  <span>{t('apiKeyPrompt.payPerUse')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="w-3.5 h-3.5 mt-0.5 text-color-terminal-accent-teal shrink-0" />
-                  <span>Key stored locally, never uploaded</span>
+                  <span>{t('apiKeyPrompt.keyStoredLocally')}</span>
                 </li>
               </ul>
 
@@ -119,7 +122,7 @@ export function ApiKeyPrompt({
                 onClick={onConfigure}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-color-terminal-accent-teal text-black font-medium hover:bg-color-terminal-accent-teal/90 transition-colors"
               >
-                Configure Key
+                {t('apiKeyPrompt.configureKey')}
               </button>
             </div>
 
@@ -127,7 +130,7 @@ export function ApiKeyPrompt({
             <div className="relative rounded-lg border border-color-terminal-accent-gold/30 bg-color-terminal-accent-gold/5 p-5 flex flex-col">
               {/* Popular badge */}
               <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-color-terminal-accent-gold text-black text-[10px] font-bold uppercase tracking-wider rounded-full">
-                Recommended
+                {t('apiKeyPrompt.recommended')}
               </div>
 
               {/* Icon */}
@@ -136,21 +139,21 @@ export function ApiKeyPrompt({
               </div>
 
               {/* Title */}
-              <h3 className="text-base font-semibold mb-2">Upgrade to PRO</h3>
+              <h3 className="text-base font-semibold mb-2">{t('apiKeyPrompt.upgradeToPro')}</h3>
 
               {/* Features */}
               <ul className="text-xs text-color-terminal-text-muted space-y-2 mb-4 flex-1">
                 <li className="flex items-start gap-2">
                   <Check className="w-3.5 h-3.5 mt-0.5 text-color-terminal-accent-gold shrink-0" />
-                  <span>Unlimited AI generations</span>
+                  <span>{t('apiKeyPrompt.unlimitedGenerations')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="w-3.5 h-3.5 mt-0.5 text-color-terminal-accent-gold shrink-0" />
-                  <span>No API key required</span>
+                  <span>{t('apiKeyPrompt.noApiKeyRequired')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="w-3.5 h-3.5 mt-0.5 text-color-terminal-accent-gold shrink-0" />
-                  <span>Priority support & advanced features</span>
+                  <span>{t('apiKeyPrompt.prioritySupport')}</span>
                 </li>
               </ul>
 
@@ -159,7 +162,7 @@ export function ApiKeyPrompt({
                 onClick={isGuest && onLogin ? onLogin : onUpgrade}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-color-terminal-accent-gold text-black font-medium hover:bg-color-terminal-accent-gold/90 transition-colors"
               >
-                {isGuest ? 'Login & Upgrade' : 'Upgrade Now'}
+                {isGuest ? t('apiKeyPrompt.loginUpgrade') : t('apiKeyPrompt.upgradeNow')}
                 <ExternalLink className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -168,7 +171,7 @@ export function ApiKeyPrompt({
           {/* Privacy Notice */}
           <div className="flex items-center justify-center gap-2 text-xs text-color-terminal-text-muted">
             <ShieldCheck className="h-4 w-4 text-color-terminal-accent-teal" />
-            <span>Your API keys are encrypted and stored locally only</span>
+            <span>{t('apiKeyPrompt.securityNote')}</span>
           </div>
 
           {/* Dismiss */}
@@ -177,7 +180,7 @@ export function ApiKeyPrompt({
               onClick={onDismiss}
               className="text-sm text-color-terminal-text-muted hover:text-color-terminal-text transition-colors"
             >
-              Maybe Later
+              {t('apiKeyPrompt.maybeLater')}
             </button>
           </div>
         </div>

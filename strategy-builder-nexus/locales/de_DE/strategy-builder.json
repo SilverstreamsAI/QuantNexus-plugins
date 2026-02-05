@@ -1,0 +1,141 @@
+{
+  "hub": {
+    "title": "Strategie-Hub",
+    "newStrategy": "Neue Strategie",
+    "importStrategy": "Strategie importieren",
+    "exportStrategy": "Strategie exportieren",
+    "deleteStrategy": "Strategie loeschen",
+    "duplicateStrategy": "Strategie duplizieren",
+    "noStrategies": "Keine Strategien gefunden",
+    "createFirst": "Erstellen Sie Ihre erste Strategie"
+  },
+  "editor": {
+    "save": "Strategie speichern",
+    "validate": "Validieren",
+    "generate": "Mit KI generieren",
+    "preview": "Vorschau",
+    "configure": "Konfigurieren"
+  },
+  "services": {
+    "regimeMode": "Regime-Detektor",
+    "indicatorEntry": "Indikator-Einstiegsgenerator",
+    "kronosPredictor": "Kronos-Praediktor",
+    "aiEntry": "KI-Einstieg",
+    "marketObserver": "Marktbeobachter",
+    "aiEntryGenerator": "KI-Einstiegsgenerator",
+    "indicatorExit": "Indikator-Ausstiegsgenerator",
+    "aiLibero": "KI-Libero"
+  },
+  "modes": {
+    "regime": "Regime-Modus",
+    "kronos": "Kronos-Modus",
+    "trader": "Trader-Modus",
+    "riskManager": "Risikomanagement",
+    "aiCommand": "KI-Kommandozentrale"
+  },
+  "validation": {
+    "success": "Strategievalidierung erfolgreich",
+    "failed": "Strategievalidierung fehlgeschlagen",
+    "missingField": "Erforderliches Feld fehlt: {{field}}",
+    "invalidValue": "Ungueltiger Wert fuer {{field}}"
+  },
+  "generation": {
+    "generating": "Strategiecode wird generiert...",
+    "success": "Strategiecode erfolgreich generiert",
+    "failed": "Strategiecode-Generierung fehlgeschlagen"
+  },
+  "errors": {
+    "loadFailed": "Laden der Strategie fehlgeschlagen",
+    "saveFailed": "Speichern der Strategie fehlgeschlagen",
+    "deleteFailed": "Loeschen der Strategie fehlgeschlagen",
+    "validationFailed": "Strategievalidierung fehlgeschlagen: {{reason}}"
+  },
+  "namingDialog": {
+    "title": "Benennen Sie Ihre Strategie",
+    "suggestedName": "Vorgeschlagener Name:",
+    "customName": "Benutzerdefinierter Name:",
+    "customNamePlaceholder": "Benutzerdefinierten Namen eingeben...",
+    "finalName": "Endgueltiger Name:",
+    "or": "oder",
+    "useThis": "Diesen verwenden",
+    "cancel": "Abbrechen",
+    "confirmGenerate": "Bestaetigen & Generieren"
+  },
+  "apiKeyPrompt": {
+    "title": "KI-Funktionen erfordern Einrichtung",
+    "subtitle": "Waehlen Sie eine Option, um KI-gesteuerte Codegenerierung zu aktivieren",
+    "useOwnKey": "Eigenen Schluessel verwenden",
+    "useOwnKeyDesc": "API-Schluessel von Claude, OpenAI usw. konfigurieren",
+    "payPerUse": "Nur fuer das zahlen, was Sie nutzen",
+    "keyStoredLocally": "Schluessel wird lokal gespeichert, nie hochgeladen",
+    "configureKey": "Schluessel konfigurieren",
+    "upgradeToPro": "Auf PRO upgraden",
+    "recommended": "Empfohlen",
+    "unlimitedGenerations": "Unbegrenzte KI-Generierungen",
+    "noApiKeyRequired": "Kein API-Schluessel erforderlich",
+    "prioritySupport": "Prioritaetssupport & erweiterte Funktionen",
+    "loginUpgrade": "Anmelden & Upgraden",
+    "upgradeNow": "Jetzt upgraden",
+    "securityNote": "Ihre API-Schluessel sind verschluesselt und werden nur lokal gespeichert",
+    "maybeLater": "Vielleicht spaeter"
+  },
+  "llmSettings": {
+    "title": "LLM-Anbieter-Einstellungen",
+    "subtitle": "Konfigurieren Sie API-Schluessel fuer KI-gesteuerte Codegenerierung. Nur Anbieter mit konfigurierten API-Schluesseln sind verfuegbar.",
+    "apiKeyEmpty": "API-Schluessel darf nicht leer sein",
+    "invalidKeyFormat": "Ungueltiges API-Schluesselformat fuer {{provider}}",
+    "error": "Fehler:",
+    "getApiKey": "API-Schluessel erhalten",
+    "apiKeyConfigured": "API-Schluessel konfiguriert",
+    "apiKeyRequired": "API-Schluessel erforderlich",
+    "selected": "Ausgewaehlt",
+    "select": "Auswaehlen",
+    "updateApiKey": "API-Schluessel aktualisieren",
+    "setApiKey": "API-Schluessel festlegen",
+    "remove": "Entfernen",
+    "model": "Modell",
+    "providersConfigured": "Anbieter konfiguriert",
+    "configureAtLeastOne": "Konfigurieren Sie mindestens einen Anbieter, um KI-Funktionen zu nutzen",
+    "active": "Aktiv:"
+  },
+  "pluginSettings": {
+    "config": "Konfiguration",
+    "secrets": "Geheimnisse",
+    "back": "Zurueck"
+  },
+  "modelSelector": {
+    "title": "Modellauswahl",
+    "recommended": "Empfohlen",
+    "context": "Kontext:"
+  },
+  "traderPresets": {
+    "title": "Schnellvoreinstellungen",
+    "subtitle": "Waehlen Sie eine Voreinstellung, um schnell zu starten. Sie koennen Parameter in der erweiterten Konfiguration unten anpassen.",
+    "baseline": "Basis",
+    "baselineDesc": "Maximiere absolute Renditen ohne zusaetzliche Einschraenkungen",
+    "monk": "Moench",
+    "monkDesc": "Strenge Disziplin, Stabilitaet und risikobereinigte Renditen",
+    "warrior": "Krieger",
+    "warriorDesc": "Aggressiver Angriff mit hohem Hebel und Risiko",
+    "bespoke": "Massgeschneidert",
+    "bespokeDesc": "Vollstaendig auf Ihre Beduerfnisse zugeschnittene Strategie"
+  },
+  "saveTemplate": {
+    "title": "Vorlage speichern",
+    "templateName": "Vorlagenname",
+    "description": "Beschreibung (optional)",
+    "indicatorsToSave": "Zu speichernde Indikatoren:",
+    "saveTemplate": "Vorlage speichern",
+    "nameRequired": "Vorlagenname ist erforderlich",
+    "nameTooShort": "Name muss mindestens 3 Zeichen haben",
+    "nameExists": "Eine Vorlage mit diesem Namen existiert bereits"
+  },
+  "common": {
+    "cancel": "Abbrechen",
+    "confirm": "Bestaetigen",
+    "save": "Speichern",
+    "delete": "Loeschen",
+    "edit": "Bearbeiten",
+    "close": "Schliessen"
+  }
+}

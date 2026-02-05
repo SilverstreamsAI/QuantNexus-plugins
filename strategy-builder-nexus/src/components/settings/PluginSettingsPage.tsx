@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Key, Sliders, ArrowLeft } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { ConfigTab } from './ConfigTab';
@@ -22,7 +23,7 @@ type SettingsTab = 'config' | 'secrets';
 
 interface TabItem {
   id: SettingsTab;
-  label: string;
+  labelKey: string;
   Icon: React.ElementType;
 }
 
@@ -41,12 +42,12 @@ interface PluginSettingsPageProps {
 const TABS: TabItem[] = [
   {
     id: 'config',
-    label: 'Config',
+    labelKey: 'pluginSettings.config',
     Icon: Sliders,
   },
   {
     id: 'secrets',
-    label: 'Secrets',
+    labelKey: 'pluginSettings.secrets',
     Icon: Key,
   },
 ];
@@ -56,21 +57,23 @@ const TABS: TabItem[] = [
 // =============================================================================
 
 interface TabButtonProps {
-  label: string;
+  labelKey: string;
   Icon: React.ElementType;
   active: boolean;
   isFirst: boolean;
   isLast: boolean;
   onClick: () => void;
+  t: (key: string) => string;
 }
 
 const TabButton: React.FC<TabButtonProps> = ({
-  label,
+  labelKey,
   Icon,
   active,
   isFirst,
   isLast,
   onClick,
+  t,
 }) => {
   return (
     <button
@@ -86,7 +89,7 @@ const TabButton: React.FC<TabButtonProps> = ({
       )}
     >
       <Icon className="w-3 h-3" />
-      <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+      <span className="text-[10px] font-bold uppercase tracking-widest">{t(labelKey)}</span>
     </button>
   );
 };
@@ -118,6 +121,7 @@ interface SettingsHeaderBarProps {
   activeTab: SettingsTab;
   onTabChange: (tab: SettingsTab) => void;
   onBack?: () => void;
+  t: (key: string) => string;
 }
 
 const SettingsHeaderBar: React.FC<SettingsHeaderBarProps> = ({
@@ -125,6 +129,7 @@ const SettingsHeaderBar: React.FC<SettingsHeaderBarProps> = ({
   activeTab,
   onTabChange,
   onBack,
+  t,
 }) => {
   const nameplateText = pluginName.toUpperCase();
 
@@ -139,13 +144,13 @@ const SettingsHeaderBar: React.FC<SettingsHeaderBarProps> = ({
               className="flex items-center gap-1.5 text-color-terminal-text-muted hover:text-color-terminal-accent-teal transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Back</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest">{t('pluginSettings.back')}</span>
             </button>
             <div className="h-4 w-px bg-white/20" />
           </>
         )}
         <span className="text-[10px] font-bold uppercase tracking-widest text-color-terminal-text-muted">
-          Config
+          {t('pluginSettings.config')}
         </span>
       </div>
 
@@ -159,12 +164,13 @@ const SettingsHeaderBar: React.FC<SettingsHeaderBarProps> = ({
         {TABS.map((tab, index) => (
           <TabButton
             key={tab.id}
-            label={tab.label}
+            labelKey={tab.labelKey}
             Icon={tab.Icon}
             active={activeTab === tab.id}
             isFirst={index === 0}
             isLast={index === TABS.length - 1}
             onClick={() => onTabChange(tab.id)}
+            t={t}
           />
         ))}
       </div>
@@ -185,6 +191,7 @@ export function PluginSettingsPage({
   onBack,
   defaultTab = 'config',
 }: PluginSettingsPageProps): JSX.Element {
+  const { t } = useTranslation('strategy-builder');
   // Runtime validation: ensure defaultTab is valid, fallback to 'config'
   const validatedDefaultTab = VALID_TABS.includes(defaultTab) ? defaultTab : 'config';
   const [activeTab, setActiveTab] = useState<SettingsTab>(validatedDefaultTab);
@@ -203,6 +210,7 @@ export function PluginSettingsPage({
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onBack={onBack}
+        t={t}
       />
 
       {/* Tab Content */}

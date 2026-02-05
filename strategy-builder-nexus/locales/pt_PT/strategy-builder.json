@@ -1,0 +1,141 @@
+{
+  "hub": {
+    "title": "Centro de Estrategias",
+    "newStrategy": "Nova Estrategia",
+    "importStrategy": "Importar Estrategia",
+    "exportStrategy": "Exportar Estrategia",
+    "deleteStrategy": "Eliminar Estrategia",
+    "duplicateStrategy": "Duplicar Estrategia",
+    "noStrategies": "Nenhuma estrategia encontrada",
+    "createFirst": "Crie a sua primeira estrategia"
+  },
+  "editor": {
+    "save": "Guardar Estrategia",
+    "validate": "Validar",
+    "generate": "Gerar com IA",
+    "preview": "Pre-visualizacao",
+    "configure": "Configurar"
+  },
+  "services": {
+    "regimeMode": "Detetor de Regime",
+    "indicatorEntry": "Gerador de Entrada por Indicador",
+    "kronosPredictor": "Preditor Kronos",
+    "aiEntry": "Entrada IA",
+    "marketObserver": "Observador de Mercado",
+    "aiEntryGenerator": "Gerador de Entrada IA",
+    "indicatorExit": "Gerador de Saida por Indicador",
+    "aiLibero": "IA Libero"
+  },
+  "modes": {
+    "regime": "Modo Regime",
+    "kronos": "Modo Kronos",
+    "trader": "Modo Trader",
+    "riskManager": "Gestao de Riscos",
+    "aiCommand": "Centro de Comando IA"
+  },
+  "validation": {
+    "success": "Validacao da estrategia bem-sucedida",
+    "failed": "Validacao da estrategia falhou",
+    "missingField": "Campo obrigatorio em falta: {{field}}",
+    "invalidValue": "Valor invalido para {{field}}"
+  },
+  "generation": {
+    "generating": "A gerar codigo da estrategia...",
+    "success": "Codigo da estrategia gerado com sucesso",
+    "failed": "Falha ao gerar codigo da estrategia"
+  },
+  "errors": {
+    "loadFailed": "Falha ao carregar estrategia",
+    "saveFailed": "Falha ao guardar estrategia",
+    "deleteFailed": "Falha ao eliminar estrategia",
+    "validationFailed": "Validacao da estrategia falhou: {{reason}}"
+  },
+  "namingDialog": {
+    "title": "De um nome a sua Estrategia",
+    "suggestedName": "Nome sugerido:",
+    "customName": "Nome personalizado:",
+    "customNamePlaceholder": "Introduza um nome personalizado...",
+    "finalName": "Nome final:",
+    "or": "ou",
+    "useThis": "Usar este",
+    "cancel": "Cancelar",
+    "confirmGenerate": "Confirmar e Gerar"
+  },
+  "apiKeyPrompt": {
+    "title": "As funcionalidades IA requerem configuracao",
+    "subtitle": "Escolha uma opcao para ativar a geracao de codigo com IA",
+    "useOwnKey": "Use a sua propria chave",
+    "useOwnKeyDesc": "Configure a chave API do Claude, OpenAI, etc.",
+    "payPerUse": "Pague apenas pelo que usa",
+    "keyStoredLocally": "Chave armazenada localmente, nunca carregada",
+    "configureKey": "Configurar chave",
+    "upgradeToPro": "Atualizar para PRO",
+    "recommended": "Recomendado",
+    "unlimitedGenerations": "Geracoes IA ilimitadas",
+    "noApiKeyRequired": "Nao e necessaria chave API",
+    "prioritySupport": "Suporte prioritario e funcionalidades avancadas",
+    "loginUpgrade": "Iniciar sessao e atualizar",
+    "upgradeNow": "Atualizar agora",
+    "securityNote": "As suas chaves API sao encriptadas e armazenadas apenas localmente",
+    "maybeLater": "Talvez mais tarde"
+  },
+  "llmSettings": {
+    "title": "Definicoes do Fornecedor LLM",
+    "subtitle": "Configure chaves API para geracao de codigo com IA. Apenas os fornecedores com chaves API configuradas estarao disponiveis.",
+    "apiKeyEmpty": "A chave API nao pode estar vazia",
+    "invalidKeyFormat": "Formato de chave API invalido para {{provider}}",
+    "error": "Erro:",
+    "getApiKey": "Obter chave API",
+    "apiKeyConfigured": "Chave API configurada",
+    "apiKeyRequired": "Chave API necessaria",
+    "selected": "Selecionado",
+    "select": "Selecionar",
+    "updateApiKey": "Atualizar chave API",
+    "setApiKey": "Definir chave API",
+    "remove": "Remover",
+    "model": "Modelo",
+    "providersConfigured": "fornecedores configurados",
+    "configureAtLeastOne": "Configure pelo menos um fornecedor para usar funcionalidades IA",
+    "active": "Ativo:"
+  },
+  "pluginSettings": {
+    "config": "Configuracao",
+    "secrets": "Segredos",
+    "back": "Voltar"
+  },
+  "modelSelector": {
+    "title": "Selecao de Modelo",
+    "recommended": "Recomendado",
+    "context": "Contexto:"
+  },
+  "traderPresets": {
+    "title": "Predefinicoes Rapidas",
+    "subtitle": "Selecione uma configuracao predefinida para comecar rapidamente. Pode personalizar parametros na Configuracao Avancada abaixo.",
+    "baseline": "Base",
+    "baselineDesc": "Maximizar retornos absolutos sem restricoes adicionais",
+    "monk": "Monge",
+    "monkDesc": "Disciplina rigorosa, estabilidade e retornos ajustados ao risco",
+    "warrior": "Guerreiro",
+    "warriorDesc": "Assalto agressivo com alta alavancagem e risco",
+    "bespoke": "Personalizado",
+    "bespokeDesc": "Estrategia totalmente personalizada as suas necessidades"
+  },
+  "saveTemplate": {
+    "title": "Guardar Modelo",
+    "templateName": "Nome do Modelo",
+    "description": "Descricao (opcional)",
+    "indicatorsToSave": "Indicadores a guardar:",
+    "saveTemplate": "Guardar Modelo",
+    "nameRequired": "O nome do modelo e obrigatorio",
+    "nameTooShort": "O nome deve ter pelo menos 3 caracteres",
+    "nameExists": "Ja existe um modelo com este nome"
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Fechar"
+  }
+}

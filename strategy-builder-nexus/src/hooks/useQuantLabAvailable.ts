@@ -55,8 +55,8 @@ export function useQuantLabAvailable(): UseQuantLabAvailableReturn {
     setError(null);
 
     try {
-      // Access the preload API
-      const api = (window as any).quantnexus;
+      // Access the preload API (exposed as electronAPI, not quantnexus)
+      const api = (window as any).electronAPI;
       if (!api?.plugin?.isInstalled) {
         // API not available (should not happen in normal operation)
         setIsAvailable(false);

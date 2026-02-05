@@ -7,9 +7,10 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 // Format time distance without external dependency
-const formatTimeAgo = (dateString: string): string => {
+const formatTimeAgo = (dateString: string, t: (key: string, options?: Record<string, unknown>) => string): string => {
   try {
     const date = new Date(dateString);
     const now = new Date();
@@ -19,13 +20,13 @@ const formatTimeAgo = (dateString: string): string => {
     const diffHour = Math.floor(diffMin / 60);
     const diffDay = Math.floor(diffHour / 24);
 
-    if (diffSec < 60) return 'just now';
-    if (diffMin < 60) return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`;
-    if (diffHour < 24) return `${diffHour} hour${diffHour > 1 ? 's' : ''} ago`;
-    if (diffDay < 7) return `${diffDay} day${diffDay > 1 ? 's' : ''} ago`;
+    if (diffSec < 60) return t('checkpoint.justNow');
+    if (diffMin < 60) return t('checkpoint.minutesAgo', { count: diffMin });
+    if (diffHour < 24) return t('checkpoint.hoursAgo', { count: diffHour });
+    if (diffDay < 7) return t('checkpoint.daysAgo', { count: diffDay });
     return date.toLocaleDateString();
   } catch {
-    return 'recently';
+    return t('checkpoint.recently');
   }
 };
 
@@ -40,7 +41,8 @@ export const CheckpointBadge: React.FC<CheckpointBadgeProps> = ({
   createdAt,
   onClick,
 }) => {
-  const timeAgo = React.useMemo(() => formatTimeAgo(createdAt), [createdAt]);
+  const { t } = useTranslation('backtest');
+  const timeAgo = React.useMemo(() => formatTimeAgo(createdAt, t), [createdAt, t]);
 
   return (
     <div
@@ -55,7 +57,7 @@ export const CheckpointBadge: React.FC<CheckpointBadgeProps> = ({
       }}
     >
       <span className="checkpoint-badge-icon">&#x23F8;</span>
-      <span className="checkpoint-badge-text">{progressPercent}% saved</span>
+      <span className="checkpoint-badge-text">{t('checkpoint.percentSaved', { percent: progressPercent })}</span>
       <span className="checkpoint-badge-time">{timeAgo}</span>
 
       <style>{`

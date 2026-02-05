@@ -94,7 +94,9 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@quantnexus/bridge": "workspace:*"
+    "@quantnexus/bridge": "workspace:*",
+    "react-i18next": "^14.1.0",
+    "i18next": "^23.11.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",

@@ -103,7 +103,54 @@
     "backToConfig": "Back to Config",
     "runInBackground": "Run in Background",
     "exportToQuantLab": "Export to Quant Lab",
-    "exporting": "Exporting..."
+    "exporting": "Exporting...",
+    "return": "Return"
+  },
+  "workflowSteps": {
+    "marketAnalysis": "Market Analysis",
+    "entryFilter": "Entry Filter",
+    "entrySignal": "Entry Signal",
+    "exitStrategy": "Exit Strategy"
+  },
+  "statusBar": {
+    "running": "Running",
+    "runningBacktests": "Running Backtests",
+    "backtestsRunning": "{{count}} backtest(s) running"
+  },
+  "executorStatus": {
+    "ready": "Ready",
+    "starting": "Starting...",
+    "executing": "Executing",
+    "completed": "Completed",
+    "failed": "Failed",
+    "cancelled": "Cancelled"
+  },
+  "checkpoint": {
+    "available": "Checkpoint Available",
+    "completed": "{{percent}}% completed ({{processed}}/{{total}} bars)",
+    "saved": "Saved {{time}}",
+    "dataNotFound": "Data File Not Found",
+    "dataNotFoundDesc": "The original data file has been moved or deleted. Cannot resume.",
+    "dataNotFoundHint": "Please discard this checkpoint and start a new backtest.",
+    "dataChanged": "Data File Changed",
+    "dataChangedDesc": "The data file has been modified since the checkpoint was created.",
+    "dataChangedHint": "Resuming may produce inconsistent results. Recommend starting fresh.",
+    "validating": "Validating Data...",
+    "validatingDesc": "Checking data file integrity.",
+    "pnl": "PnL",
+    "return": "Return",
+    "trades": "Trades",
+    "winRate": "Win Rate",
+    "openPositions": "Open Positions at Checkpoint",
+    "resume": "Resume Backtest",
+    "resuming": "Resuming...",
+    "discardStartNew": "Discard & Start New",
+    "percentSaved": "{{percent}}% saved",
+    "justNow": "just now",
+    "minutesAgo": "{{count}} minute(s) ago",
+    "hoursAgo": "{{count}} hour(s) ago",
+    "daysAgo": "{{count}} day(s) ago",
+    "recently": "recently"
   },
   "dialog": {
     "deleteTitle": "Delete History Record",
@@ -163,6 +210,20 @@
   },
   "notification": {
     "backtestCompleted": "Backtest completed successfully"
+  },
+  "cockpitSelector": {
+    "title": "SELECT COCKPIT",
+    "subtitle": "Choose a backtest mode to continue",
+    "indicatorsCockpit": "INDICATORS COCKPIT",
+    "indicatorsCockpitDesc": "Indicator-based backtest with workflow configuration",
+    "traderCockpit": "TRADER COCKPIT",
+    "traderCockpitDesc": "Watchlist + LLM Trader backtest strategies",
+    "aiCockpit": "AI COCKPIT",
+    "aiCockpitDesc": "AI-powered backtest analysis",
+    "kronosCockpit": "KRONOS COCKPIT",
+    "kronosCockpitDesc": "Kronos time-series backtest integration",
+    "free": "FREE",
+    "pro": "PRO"
   },
   "resultPanel": {
     "tabs": {

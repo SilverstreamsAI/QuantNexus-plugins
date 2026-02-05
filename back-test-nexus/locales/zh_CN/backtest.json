@@ -101,7 +101,54 @@
     "cancel": "取消",
     "delete": "删除",
     "backToConfig": "返回配置",
-    "runInBackground": "后台运行"
+    "runInBackground": "后台运行",
+    "return": "返回"
+  },
+  "workflowSteps": {
+    "marketAnalysis": "市场分析",
+    "entryFilter": "入场过滤",
+    "entrySignal": "入场信号",
+    "exitStrategy": "退出策略"
+  },
+  "statusBar": {
+    "running": "运行中",
+    "runningBacktests": "运行中的回测",
+    "backtestsRunning": "{{count}} 个回测运行中"
+  },
+  "executorStatus": {
+    "ready": "就绪",
+    "starting": "启动中...",
+    "executing": "执行中",
+    "completed": "已完成",
+    "failed": "失败",
+    "cancelled": "已取消"
+  },
+  "checkpoint": {
+    "available": "检查点可用",
+    "completed": "已完成 {{percent}}% ({{processed}}/{{total}} 根K线)",
+    "saved": "保存于 {{time}}",
+    "dataNotFound": "数据文件未找到",
+    "dataNotFoundDesc": "原始数据文件已被移动或删除，无法恢复。",
+    "dataNotFoundHint": "请丢弃此检查点并开始新的回测。",
+    "dataChanged": "数据文件已更改",
+    "dataChangedDesc": "数据文件自检查点创建以来已被修改。",
+    "dataChangedHint": "恢复可能产生不一致的结果，建议重新开始。",
+    "validating": "验证数据中...",
+    "validatingDesc": "正在检查数据文件完整性。",
+    "pnl": "盈亏",
+    "return": "收益率",
+    "trades": "交易",
+    "winRate": "胜率",
+    "openPositions": "检查点时的持仓",
+    "resume": "恢复回测",
+    "resuming": "恢复中...",
+    "discardStartNew": "丢弃并重新开始",
+    "percentSaved": "已保存 {{percent}}%",
+    "justNow": "刚刚",
+    "minutesAgo": "{{count}} 分钟前",
+    "hoursAgo": "{{count}} 小时前",
+    "daysAgo": "{{count}} 天前",
+    "recently": "最近"
   },
   "dialog": {
     "deleteTitle": "删除历史记录",
@@ -161,6 +208,20 @@
   },
   "notification": {
     "backtestCompleted": "回测执行成功"
+  },
+  "cockpitSelector": {
+    "title": "选择驾驶舱",
+    "subtitle": "选择回测模式继续",
+    "indicatorsCockpit": "指标驾驶舱",
+    "indicatorsCockpitDesc": "基于指标的工作流配置回测",
+    "traderCockpit": "交易员驾驶舱",
+    "traderCockpitDesc": "观察列表 + LLM 交易者回测策略",
+    "aiCockpit": "AI 驾驶舱",
+    "aiCockpitDesc": "AI 驱动的回测分析",
+    "kronosCockpit": "克洛诺斯驾驶舱",
+    "kronosCockpitDesc": "Kronos 时间序列回测集成",
+    "free": "免费",
+    "pro": "专业版"
   },
   "resultPanel": {
     "tabs": {

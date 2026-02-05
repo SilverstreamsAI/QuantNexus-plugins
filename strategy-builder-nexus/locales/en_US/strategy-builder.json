@@ -49,5 +49,93 @@
     "saveFailed": "Failed to save strategy",
     "deleteFailed": "Failed to delete strategy",
     "validationFailed": "Strategy validation failed: {{reason}}"
+  },
+  "namingDialog": {
+    "title": "Name Your Strategy",
+    "suggestedName": "Suggested name:",
+    "customName": "Custom name:",
+    "customNamePlaceholder": "Enter your custom name...",
+    "finalName": "Final name:",
+    "or": "or",
+    "useThis": "Use This",
+    "cancel": "Cancel",
+    "confirmGenerate": "Confirm & Generate"
+  },
+  "apiKeyPrompt": {
+    "title": "AI Features Require Setup",
+    "subtitle": "Choose one option to enable AI-powered code generation",
+    "useOwnKey": "Use Your Own Key",
+    "useOwnKeyDesc": "Configure API key from Claude, OpenAI, etc.",
+    "payPerUse": "Pay only for what you use",
+    "keyStoredLocally": "Key stored locally, never uploaded",
+    "configureKey": "Configure Key",
+    "upgradeToPro": "Upgrade to PRO",
+    "recommended": "Recommended",
+    "unlimitedGenerations": "Unlimited AI generations",
+    "noApiKeyRequired": "No API key required",
+    "prioritySupport": "Priority support & advanced features",
+    "loginUpgrade": "Login & Upgrade",
+    "upgradeNow": "Upgrade Now",
+    "securityNote": "Your API keys are encrypted and stored locally only",
+    "maybeLater": "Maybe Later"
+  },
+  "llmSettings": {
+    "title": "LLM Provider Settings",
+    "subtitle": "Configure API keys for AI-powered code generation. Only providers with configured API keys will be available for selection.",
+    "apiKeyEmpty": "API key cannot be empty",
+    "invalidKeyFormat": "Invalid API key format for {{provider}}",
+    "error": "Error:",
+    "getApiKey": "Get API key",
+    "apiKeyConfigured": "API key configured",
+    "apiKeyRequired": "API key required",
+    "selected": "Selected",
+    "select": "Select",
+    "updateApiKey": "Update API Key",
+    "setApiKey": "Set API Key",
+    "remove": "Remove",
+    "model": "Model",
+    "providersConfigured": "providers configured",
+    "configureAtLeastOne": "Configure at least one provider to use AI features",
+    "active": "Active:"
+  },
+  "pluginSettings": {
+    "config": "Config",
+    "secrets": "Secrets",
+    "back": "Back"
+  },
+  "modelSelector": {
+    "title": "MODEL SELECTION",
+    "recommended": "Recommended",
+    "context": "Context:"
+  },
+  "traderPresets": {
+    "title": "QUICK PRESETS",
+    "subtitle": "Select a preset configuration to get started quickly. You can customize parameters in Advanced Configuration below.",
+    "baseline": "Baseline",
+    "baselineDesc": "Maximize absolute returns without extra constraints",
+    "monk": "Monk",
+    "monkDesc": "Strict discipline, stability, and risk-adjusted returns",
+    "warrior": "Warrior",
+    "warriorDesc": "Aggressive assault with high leverage and risk",
+    "bespoke": "Bespoke",
+    "bespokeDesc": "Fully customized strategy tailored to your needs"
+  },
+  "saveTemplate": {
+    "title": "Save Template",
+    "templateName": "Template Name",
+    "description": "Description (optional)",
+    "indicatorsToSave": "Indicators to save:",
+    "saveTemplate": "Save Template",
+    "nameRequired": "Template name is required",
+    "nameTooShort": "Name must be at least 3 characters",
+    "nameExists": "A template with this name already exists"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close"
   }
 }

@@ -1,0 +1,141 @@
+{
+  "hub": {
+    "title": "戦略ハブ",
+    "newStrategy": "新規戦略",
+    "importStrategy": "戦略をインポート",
+    "exportStrategy": "戦略をエクスポート",
+    "deleteStrategy": "戦略を削除",
+    "duplicateStrategy": "戦略を複製",
+    "noStrategies": "戦略が見つかりません",
+    "createFirst": "最初の戦略を作成"
+  },
+  "editor": {
+    "save": "戦略を保存",
+    "validate": "検証",
+    "generate": "AIで生成",
+    "preview": "プレビュー",
+    "configure": "設定"
+  },
+  "services": {
+    "regimeMode": "相場検出器",
+    "indicatorEntry": "インジケーターエントリー生成器",
+    "kronosPredictor": "クロノス予測器",
+    "aiEntry": "AIエントリー",
+    "marketObserver": "マーケットオブザーバー",
+    "aiEntryGenerator": "AIエントリー生成器",
+    "indicatorExit": "インジケーターイグジット生成器",
+    "aiLibero": "AIリベロ"
+  },
+  "modes": {
+    "regime": "相場モード",
+    "kronos": "クロノスモード",
+    "trader": "トレーダーモード",
+    "riskManager": "リスク管理",
+    "aiCommand": "AIコマンドセンター"
+  },
+  "validation": {
+    "success": "戦略の検証に成功しました",
+    "failed": "戦略の検証に失敗しました",
+    "missingField": "必須フィールドが不足しています: {{field}}",
+    "invalidValue": "{{field}} の値が無効です"
+  },
+  "generation": {
+    "generating": "戦略コードを生成中...",
+    "success": "戦略コードの生成に成功しました",
+    "failed": "戦略コードの生成に失敗しました"
+  },
+  "errors": {
+    "loadFailed": "戦略の読み込みに失敗しました",
+    "saveFailed": "戦略の保存に失敗しました",
+    "deleteFailed": "戦略の削除に失敗しました",
+    "validationFailed": "戦略の検証に失敗しました: {{reason}}"
+  },
+  "namingDialog": {
+    "title": "戦略に名前を付ける",
+    "suggestedName": "推奨名:",
+    "customName": "カスタム名:",
+    "customNamePlaceholder": "カスタム名を入力...",
+    "finalName": "最終名:",
+    "or": "または",
+    "useThis": "これを使用",
+    "cancel": "キャンセル",
+    "confirmGenerate": "確認して生成"
+  },
+  "apiKeyPrompt": {
+    "title": "AI機能の設定が必要です",
+    "subtitle": "AIコード生成を有効にするオプションを選択してください",
+    "useOwnKey": "自分のキーを使用",
+    "useOwnKeyDesc": "Claude、OpenAI などの API キーを設定",
+    "payPerUse": "使用した分だけ支払い",
+    "keyStoredLocally": "キーはローカルに保存され、アップロードされません",
+    "configureKey": "キーを設定",
+    "upgradeToPro": "PROにアップグレード",
+    "recommended": "おすすめ",
+    "unlimitedGenerations": "無制限のAI生成",
+    "noApiKeyRequired": "APIキー不要",
+    "prioritySupport": "優先サポートと高度な機能",
+    "loginUpgrade": "ログインしてアップグレード",
+    "upgradeNow": "今すぐアップグレード",
+    "securityNote": "APIキーは暗号化されローカルにのみ保存されます",
+    "maybeLater": "後で"
+  },
+  "llmSettings": {
+    "title": "LLMプロバイダー設定",
+    "subtitle": "AIコード生成用のAPIキーを設定します。APIキーが設定されたプロバイダーのみ利用可能です。",
+    "apiKeyEmpty": "APIキーは空にできません",
+    "invalidKeyFormat": "{{provider}} のAPIキー形式が無効です",
+    "error": "エラー:",
+    "getApiKey": "APIキーを取得",
+    "apiKeyConfigured": "APIキー設定済み",
+    "apiKeyRequired": "APIキーが必要です",
+    "selected": "選択済み",
+    "select": "選択",
+    "updateApiKey": "APIキーを更新",
+    "setApiKey": "APIキーを設定",
+    "remove": "削除",
+    "model": "モデル",
+    "providersConfigured": "個のプロバイダーが設定済み",
+    "configureAtLeastOne": "AI機能を使用するには、少なくとも1つのプロバイダーを設定してください",
+    "active": "現在:"
+  },
+  "pluginSettings": {
+    "config": "設定",
+    "secrets": "シークレット",
+    "back": "戻る"
+  },
+  "modelSelector": {
+    "title": "モデル選択",
+    "recommended": "推奨",
+    "context": "コンテキスト："
+  },
+  "traderPresets": {
+    "title": "クイックプリセット",
+    "subtitle": "プリセット設定を選択してすぐに開始できます。下の詳細設定でパラメータをカスタマイズできます。",
+    "baseline": "ベースライン",
+    "baselineDesc": "追加の制約なしで絶対リターンを最大化",
+    "monk": "モンク",
+    "monkDesc": "厳格な規律、安定性、リスク調整後リターン",
+    "warrior": "ウォリアー",
+    "warriorDesc": "高レバレッジと高リスクで積極的に攻撃",
+    "bespoke": "カスタム",
+    "bespokeDesc": "ニーズに合わせて完全にカスタマイズされた戦略"
+  },
+  "saveTemplate": {
+    "title": "テンプレートを保存",
+    "templateName": "テンプレート名",
+    "description": "説明（任意）",
+    "indicatorsToSave": "保存する指標：",
+    "saveTemplate": "テンプレートを保存",
+    "nameRequired": "テンプレート名は必須です",
+    "nameTooShort": "名前は3文字以上必要です",
+    "nameExists": "同じ名前のテンプレートが既に存在します"
+  },
+  "common": {
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる"
+  }
+}

@@ -97,7 +97,54 @@
     "executing": "Executing...",
     "cancel": "Cancel",
     "delete": "Delete",
-    "runInBackground": "Run in Background"
+    "runInBackground": "Run in Background",
+    "return": "戻る"
+  },
+  "workflowSteps": {
+    "marketAnalysis": "市場分析",
+    "entryFilter": "エントリーフィルター",
+    "entrySignal": "エントリーシグナル",
+    "exitStrategy": "イグジット戦略"
+  },
+  "statusBar": {
+    "running": "実行中",
+    "runningBacktests": "実行中のバックテスト",
+    "backtestsRunning": "{{count}} 件のバックテスト実行中"
+  },
+  "executorStatus": {
+    "ready": "準備完了",
+    "starting": "開始中...",
+    "executing": "実行中",
+    "completed": "完了",
+    "failed": "失敗",
+    "cancelled": "キャンセル済み"
+  },
+  "checkpoint": {
+    "available": "チェックポイント利用可能",
+    "completed": "{{percent}}% 完了 ({{processed}}/{{total}} 本)",
+    "saved": "{{time}} に保存",
+    "dataNotFound": "データファイルが見つかりません",
+    "dataNotFoundDesc": "元のデータファイルが移動または削除されました。再開できません。",
+    "dataNotFoundHint": "このチェックポイントを破棄して新しいバックテストを開始してください。",
+    "dataChanged": "データファイルが変更されました",
+    "dataChangedDesc": "チェックポイント作成以降にデータファイルが変更されました。",
+    "dataChangedHint": "再開すると一貫性のない結果が生じる可能性があります。最初からやり直すことをお勧めします。",
+    "validating": "データ検証中...",
+    "validatingDesc": "データファイルの整合性を確認しています。",
+    "pnl": "損益",
+    "return": "リターン",
+    "trades": "取引",
+    "winRate": "勝率",
+    "openPositions": "チェックポイント時のポジション",
+    "resume": "バックテストを再開",
+    "resuming": "再開中...",
+    "discardStartNew": "破棄して新規開始",
+    "percentSaved": "{{percent}}% 保存済み",
+    "justNow": "たった今",
+    "minutesAgo": "{{count}} 分前",
+    "hoursAgo": "{{count}} 時間前",
+    "daysAgo": "{{count}} 日前",
+    "recently": "最近"
   },
   "dialog": {
     "deleteTitle": "Delete History Record",
@@ -119,6 +166,20 @@
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
     "result": "Result"
+  },
+  "cockpitSelector": {
+    "title": "コックピット選択",
+    "subtitle": "バックテストモードを選択して続行",
+    "indicatorsCockpit": "インジケーターコックピット",
+    "indicatorsCockpitDesc": "指標ベースのワークフロー構成バックテスト",
+    "traderCockpit": "トレーダーコックピット",
+    "traderCockpitDesc": "ウォッチリスト + LLM トレーダーバックテスト戦略",
+    "aiCockpit": "AI コックピット",
+    "aiCockpitDesc": "AIによるバックテスト分析",
+    "kronosCockpit": "クロノスコックピット",
+    "kronosCockpitDesc": "Kronos 時系列バックテスト統合",
+    "free": "無料",
+    "pro": "プロ"
   },
   "resultPanel": {
     "tabs": {

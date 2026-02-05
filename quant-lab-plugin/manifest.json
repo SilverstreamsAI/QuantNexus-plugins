@@ -1,5 +1,7 @@
 {
+  "id": "quant-lab-plugin",
   "name": "alpha-factory",
+  "displayName": "Quant Lab",
   "version": "1.0.0",
   "description": "Alpha Factory plugin for signal combination and evaluation",
   "libraryName": "libalpha_factory",

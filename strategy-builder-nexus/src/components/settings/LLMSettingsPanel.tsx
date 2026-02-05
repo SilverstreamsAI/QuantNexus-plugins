@@ -13,6 +13,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Key,
   Brain,
@@ -62,6 +63,7 @@ interface ProviderCardProps {
   onSelect: (providerId: string) => void;
   onModelChange: (modelId: string) => void;
   onApiKeyChange: (hasKey: boolean) => void;
+  t: (key: string, options?: Record<string, unknown>) => string;
 }
 
 function ProviderCard({
@@ -73,6 +75,7 @@ function ProviderCard({
   onSelect,
   onModelChange,
   onApiKeyChange,
+  t,
 }: ProviderCardProps): JSX.Element {
   const [editing, setEditing] = useState(false);
   const [apiKeyValue, setApiKeyValue] = useState('');
@@ -82,13 +85,13 @@ function ProviderCard({
 
   const handleSaveApiKey = async () => {
     if (!apiKeyValue.trim()) {
-      setError('API key cannot be empty');
+      setError(t('llmSettings.apiKeyEmpty'));
       return;
     }
 
     // Validate pattern if defined
     if (provider.apiKeyPattern && !provider.apiKeyPattern.test(apiKeyValue)) {
-      setError(`Invalid API key format for ${provider.name}`);
+      setError(t('llmSettings.invalidKeyFormat', { provider: provider.name }));
       return;
     }
 
@@ -161,7 +164,7 @@ function ProviderCard({
               )}
             </div>
             <div className="text-xs text-muted-foreground">
-              {hasApiKey ? 'API key configured' : 'API key required'}
+              {hasApiKey ? t('llmSettings.apiKeyConfigured') : t('llmSettings.apiKeyRequired')}
             </div>
           </div>
         </div>
@@ -176,7 +179,7 @@ function ProviderCard({
                 : 'bg-white/5 hover:bg-white/10'
             }`}
           >
-            {isSelected ? 'Selected' : 'Select'}
+            {isSelected ? t('llmSettings.selected') : t('llmSettings.select')}
           </button>
         )}
       </div>
@@ -224,7 +227,7 @@ function ProviderCard({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-xs text-color-terminal-accent-teal hover:underline"
               >
-                Get API key <ExternalLink className="h-3 w-3" />
+                {t('llmSettings.getApiKey')} <ExternalLink className="h-3 w-3" />
               </a>
             )}
           </div>
@@ -235,14 +238,14 @@ function ProviderCard({
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm bg-white/5 hover:bg-white/10 transition-colors"
             >
               <Key className="h-4 w-4" />
-              {hasApiKey ? 'Update API Key' : 'Set API Key'}
+              {hasApiKey ? t('llmSettings.updateApiKey') : t('llmSettings.setApiKey')}
             </button>
             {hasApiKey && (
               <button
                 onClick={handleDeleteApiKey}
                 className="px-3 py-1.5 rounded-lg text-sm text-red-500 hover:bg-red-500/10 transition-colors"
               >
-                Remove
+                {t('llmSettings.remove')}
               </button>
             )}
           </div>
@@ -252,7 +255,7 @@ function ProviderCard({
       {/* Model Selection (only if has API key and is selected) */}
       {hasApiKey && isSelected && (
         <div className="pt-3 border-t border-white/10">
-          <label className="block text-xs text-muted-foreground mb-2">Model</label>
+          <label className="block text-xs text-muted-foreground mb-2">{t('llmSettings.model')}</label>
           <div className="relative">
             <select
               value={selectedModel}
@@ -283,6 +286,7 @@ function ProviderCard({
 // =============================================================================
 
 export function LLMSettingsPanel({ pluginId }: LLMSettingsPanelProps): JSX.Element {
+  const { t } = useTranslation('strategy-builder');
   const [loading, setLoading] = useState(true);
   const [providerStatuses, setProviderStatuses] = useState<ProviderStatus[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string>(DEFAULT_PROVIDER_ID);
@@ -392,10 +396,10 @@ export function LLMSettingsPanel({ pluginId }: LLMSettingsPanelProps): JSX.Eleme
       <div>
         <h3 className="text-lg font-medium flex items-center gap-2">
           <Brain className="h-5 w-5 text-color-terminal-accent-teal" />
-          LLM Provider Settings
+          {t('llmSettings.title')}
         </h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Configure API keys for AI-powered code generation. Only providers with configured API keys will be available for selection.
+          {t('llmSettings.subtitle')}
         </p>
       </div>
 
@@ -404,12 +408,12 @@ export function LLMSettingsPanel({ pluginId }: LLMSettingsPanelProps): JSX.Eleme
         <div className="flex items-center justify-between">
           <div>
             <div className="text-sm font-medium">
-              {configuredCount} of {LLM_PROVIDERS.length} providers configured
+              {configuredCount} / {LLM_PROVIDERS.length} {t('llmSettings.providersConfigured')}
             </div>
             <div className="text-xs text-muted-foreground">
               {configuredCount === 0
-                ? 'Configure at least one provider to use AI features'
-                : `Active: ${LLM_PROVIDERS.find((p) => p.id === selectedProvider)?.name || 'None'}`}
+                ? t('llmSettings.configureAtLeastOne')
+                : `${t('llmSettings.active')} ${LLM_PROVIDERS.find((p) => p.id === selectedProvider)?.name || 'None'}`}
             </div>
           </div>
           {configuredCount === 0 && (
@@ -433,6 +437,7 @@ export function LLMSettingsPanel({ pluginId }: LLMSettingsPanelProps): JSX.Eleme
               onSelect={handleSelectProvider}
               onModelChange={handleModelChange}
               onApiKeyChange={(hasKey) => handleApiKeyChange(provider.id, hasKey)}
+              t={t}
             />
           );
         })}
