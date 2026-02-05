@@ -292,16 +292,17 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({
   t,
 }) => {
   // TICKET_248: Track default timeframe for each column (used when adding new selections)
+  // TICKET_257: Different defaults for different stages (regime=1d, entry/exit=1h)
   const [defaultTimeframes, setDefaultTimeframes] = useState<{
     analysis: TimeframeValue;
     preCondition: TimeframeValue;
     steps: TimeframeValue;
     postCondition: TimeframeValue;
   }>({
-    analysis: '1d',
-    preCondition: '1d',
-    steps: '1d',
-    postCondition: '1d',
+    analysis: '1d',      // Regime detection typically on higher timeframe
+    preCondition: '1h',  // Entry filter on lower timeframe
+    steps: '1h',         // Entry signal on lower timeframe
+    postCondition: '1h', // Exit on lower timeframe
   });
 
   const handleSelectionsChange = useCallback((
