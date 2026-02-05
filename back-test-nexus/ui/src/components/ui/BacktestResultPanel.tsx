@@ -1174,24 +1174,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
           </div>
         )}
 
-        {/* TICKET_267: Export to Quant Lab Button - outside workflowTimeframes condition */}
-        {!isQuantLabLoading && isQuantLabAvailable && onExportToQuantLab && (
-          <div className="flex items-center pr-4">
-            <span className="mx-2 text-color-terminal-border">|</span>
-            <button
-              onClick={onExportToQuantLab}
-              disabled={isExporting}
-              className={cn(
-                'px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded border transition-all',
-                isExporting
-                  ? 'border-color-terminal-border bg-color-terminal-surface/50 text-color-terminal-text-muted cursor-not-allowed'
-                  : 'border-[#22d3ee] bg-[#22d3ee]/20 text-[#22d3ee] hover:bg-[#22d3ee]/30 animate-pulse'
-              )}
-            >
-              {isExporting ? 'EXPORTING...' : 'EXPORT TO QL'}
-            </button>
-          </div>
-        )}
+        {/* TICKET_267: Export button moved to BacktestResultPage footer */}
       </div>
 
       {/* Tab Content */}
