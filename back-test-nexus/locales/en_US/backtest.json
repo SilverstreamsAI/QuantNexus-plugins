@@ -101,7 +101,9 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "backToConfig": "Back to Config",
-    "runInBackground": "Run in Background"
+    "runInBackground": "Run in Background",
+    "exportToQuantLab": "Export to Quant Lab",
+    "exporting": "Exporting..."
   },
   "dialog": {
     "deleteTitle": "Delete History Record",

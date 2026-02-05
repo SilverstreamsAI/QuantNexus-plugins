@@ -1,11 +1,12 @@
 /**
  * NamingDialog Component (component10)
  *
- * Reusable naming dialog for Builder and Backtest contexts.
+ * Reusable naming dialog for Builder, Backtest, and Export contexts.
  * Shows suggested name and allows custom input.
  *
  * @see TICKET_163 - Naming Dialog Design
  * @see TICKET_077 - Silverstream UI Component Library
+ * @see TICKET_264 - Export to Quant Lab context
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -39,7 +40,7 @@ const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
 // Types
 // -----------------------------------------------------------------------------
 
-export type NamingDialogContext = 'builder' | 'backtest';
+export type NamingDialogContext = 'builder' | 'backtest' | 'export';
 
 export interface NamingDialogContextData {
   // Backtest context
@@ -47,6 +48,10 @@ export interface NamingDialogContextData {
   timeframe?: string;
   // Builder context
   algorithm?: string;
+  // Export context (TICKET_264)
+  workflowName?: string;   // Original workflow/backtest name
+  analysisName?: string;   // Analysis algorithm name
+  entryName?: string;      // Entry algorithm name
 }
 
 export interface NamingDialogProps {
@@ -76,6 +81,14 @@ export function generateSuggestedName(
   if (context === 'builder') {
     const algorithm = contextData.algorithm || 'Strategy';
     return `Builder_${algorithm}`;
+  } else if (context === 'export') {
+    // TICKET_264: Export context
+    if (contextData.workflowName) {
+      return `Export_${contextData.workflowName}`;
+    }
+    const analysis = contextData.analysisName || 'Analysis';
+    const entry = contextData.entryName || 'Entry';
+    return `Export_${analysis}_${entry}`;
   } else {
     const symbol = contextData.symbol || 'Unknown';
     const timeframe = contextData.timeframe || '1d';
@@ -103,14 +116,28 @@ export function generateFinalName(baseName: string): string {
  * Get dialog title based on context
  */
 function getDialogTitle(context: NamingDialogContext): string {
-  return context === 'builder' ? 'Name Your Strategy' : 'Name Your Backtest';
+  switch (context) {
+    case 'builder':
+      return 'Name Your Strategy';
+    case 'export':
+      return 'Export to Quant Lab';
+    default:
+      return 'Name Your Backtest';
+  }
 }
 
 /**
  * Get confirm button text based on context
  */
 function getConfirmButtonText(context: NamingDialogContext): string {
-  return context === 'builder' ? 'Confirm & Generate' : 'Confirm & Execute';
+  switch (context) {
+    case 'builder':
+      return 'Confirm & Generate';
+    case 'export':
+      return 'Confirm & Export';
+    default:
+      return 'Confirm & Execute';
+  }
 }
 
 // -----------------------------------------------------------------------------

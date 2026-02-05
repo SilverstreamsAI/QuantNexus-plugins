@@ -37,3 +37,7 @@ export type {
   KronosPredictionRequest,
   UseKronosPredictorReturn,
 } from './useKronosPredictor';
+
+// Quant Lab Availability Hook (TICKET_264)
+export { useQuantLabAvailable } from './useQuantLabAvailable';
+export type { UseQuantLabAvailableReturn } from './useQuantLabAvailable';

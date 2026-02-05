@@ -30,6 +30,8 @@ import {
 import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
 import { convertPythonResultToExecutorResult } from '../../utils/executorResultConverter';
 import { extractUniqueTimeframes } from '../../utils/timeframe-utils';
+// TICKET_264: Export to Quant Lab hooks
+import { useQuantLabAvailable, useExportToQuantLab } from '../../hooks';
 
 // -----------------------------------------------------------------------------
 // Inline SVG Icons (Zone D Action Bar only)
@@ -85,6 +87,15 @@ const RotateCcwIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
     <path d="M3 3v5h5" />
+  </svg>
+);
+
+// TICKET_264: Export icon for Quant Lab export
+const ExportIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="17 8 12 3 7 8" />
+    <line x1="12" y1="3" x2="12" y2="15" />
   </svg>
 );
 
@@ -284,6 +295,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   const [selectedHistoryResult, setSelectedHistoryResult] = useState<ExecutorResult | null>(null);
   // TICKET_162: Selected history item metadata for title display
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<BacktestHistoryItem | null>(null);
+
+  // TICKET_264: Export to Quant Lab
+  const { isAvailable: isQuantLabAvailable, isLoading: isQuantLabLoading } = useQuantLabAvailable();
+  const { exportWorkflow, isExporting } = useExportToQuantLab();
+  const [exportDialogVisible, setExportDialogVisible] = useState(false);
 
   // TICKET_163: Naming dialog state
   const [namingDialogVisible, setNamingDialogVisible] = useState(false);
@@ -848,6 +864,88 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setDataConfig(createDefaultDataConfig());
     setWorkflowRows([createInitialRow()]);
   }, [currentTaskId, executorAPI, messageAPI, clearResultState]);
+
+  // TICKET_264: Export to Quant Lab handlers
+  const handleExportClick = useCallback(() => {
+    setExportDialogVisible(true);
+  }, []);
+
+  const handleExportCancel = useCallback(() => {
+    setExportDialogVisible(false);
+  }, []);
+
+  const handleExportConfirm = useCallback(async (finalName: string) => {
+    setExportDialogVisible(false);
+
+    // Build workflow config from current state
+    const analysisRow = workflowRows.find(r => r.type === 'trendRange' && r.selectedAlgorithmId);
+    const entryRow = workflowRows.find(r => r.type === 'selectSteps' && r.selectedAlgorithmId);
+    const exitRow = workflowRows.find(r => r.type === 'postCondition' && r.selectedAlgorithmId);
+
+    if (!analysisRow || !entryRow) {
+      messageAPI?.error('Missing analysis or entry algorithm');
+      return;
+    }
+
+    // Get algorithm details
+    const analysisAlgo = algorithms.trendRange.find(a => a.id === analysisRow.selectedAlgorithmId);
+    const entryAlgo = algorithms.selectSteps.find(a => a.id === entryRow.selectedAlgorithmId);
+    const exitAlgo = exitRow ? algorithms.postCondition.find(a => a.id === exitRow.selectedAlgorithmId) : null;
+
+    if (!analysisAlgo || !entryAlgo) {
+      messageAPI?.error('Algorithm details not found');
+      return;
+    }
+
+    try {
+      await exportWorkflow({
+        name: finalName,
+        workflow: {
+          analysis: {
+            algorithmId: String(analysisAlgo.id),
+            algorithmName: analysisAlgo.name,
+            algorithmCode: analysisAlgo.code || '',
+            baseClass: analysisAlgo.baseClass || 'RegimeStateBase',
+            timeframe: analysisRow.timeframe || dataConfig.timeframe,
+            parameters: {},
+          },
+          entry: {
+            algorithmId: String(entryAlgo.id),
+            algorithmName: entryAlgo.name,
+            algorithmCode: entryAlgo.code || '',
+            baseClass: entryAlgo.baseClass || 'RegimeTrendEntryBase',
+            timeframe: entryRow.timeframe || dataConfig.timeframe,
+            parameters: {},
+          },
+          exit: exitAlgo ? {
+            algorithmId: String(exitAlgo.id),
+            algorithmName: exitAlgo.name,
+            algorithmCode: exitAlgo.code || '',
+            baseClass: exitAlgo.baseClass || 'ExitSignalBase',
+            timeframe: exitRow?.timeframe || dataConfig.timeframe,
+            parameters: {},
+          } : undefined,
+          symbol: dataConfig.symbol,
+          dateRange: {
+            start: dataConfig.dateRange.start,
+            end: dataConfig.dateRange.end,
+          },
+        },
+        backtestMetrics: {
+          sharpe: currentResult?.metrics?.sharpeRatio || 0,
+          maxDrawdown: currentResult?.metrics?.maxDrawdown || 0,
+          winRate: currentResult?.metrics?.winRate || 0,
+          totalTrades: currentResult?.metrics?.totalTrades || 0,
+          profitFactor: currentResult?.metrics?.profitFactor,
+        },
+      });
+
+      messageAPI?.success(`Exported "${finalName}" to Quant Lab`);
+    } catch (error) {
+      console.error('[BacktestPage] Export error:', error);
+      messageAPI?.error('Failed to export to Quant Lab');
+    }
+  }, [workflowRows, algorithms, dataConfig, currentResult, exportWorkflow, messageAPI]);
 
   // Load algorithms from database on mount
   // TICKET_210: Use combined strategy_type + signal_source filtering
@@ -1556,7 +1654,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             </div>
           ) : /* TICKET_151: Check backtestResults array instead of single result */
           backtestResults.length > 0 ? (
-            /* TICKET_171: Two action buttons - Keep, Discard (left-aligned) */
+            /* TICKET_171: Action buttons - Keep, Discard, Export (left-aligned) */
             <div className="flex justify-start gap-3">
               {/* Keep: preserve result, return to config, preserve config */}
               <button
@@ -1574,6 +1672,22 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 <XIcon className="w-3 h-3" />
                 {t('buttons.discard')}
               </button>
+              {/* TICKET_264: Export to Quant Lab - only shown when plugin is available */}
+              {!isQuantLabLoading && isQuantLabAvailable && (
+                <button
+                  onClick={handleExportClick}
+                  disabled={isExporting}
+                  className={cn(
+                    "flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all",
+                    isExporting
+                      ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
+                      : "border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa] hover:bg-[#a78bfa]/20"
+                  )}
+                >
+                  <ExportIcon className="w-3 h-3" />
+                  {isExporting ? t('buttons.exporting') : t('buttons.exportToQuantLab')}
+                </button>
+              )}
             </div>
           ) : (
             /* TICKET_171: Reset left, Execute right */
@@ -1673,6 +1787,23 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         }}
         onConfirm={handleConfirmNaming}
         onCancel={handleCancelNaming}
+      />
+
+      {/* TICKET_264: Export to Quant Lab naming dialog */}
+      <NamingDialog
+        visible={exportDialogVisible}
+        context="export"
+        contextData={{
+          workflowName: currentResult ? `${dataConfig.symbol}_${dataConfig.timeframe}` : undefined,
+          analysisName: workflowRows.find(r => r.type === 'trendRange')?.selectedAlgorithmId
+            ? algorithms.trendRange.find(a => a.id === workflowRows.find(r => r.type === 'trendRange')?.selectedAlgorithmId)?.name
+            : undefined,
+          entryName: workflowRows.find(r => r.type === 'selectSteps')?.selectedAlgorithmId
+            ? algorithms.selectSteps.find(a => a.id === workflowRows.find(r => r.type === 'selectSteps')?.selectedAlgorithmId)?.name
+            : undefined,
+        }}
+        onConfirm={handleExportConfirm}
+        onCancel={handleExportCancel}
       />
     </div>
   );
