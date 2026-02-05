@@ -39,6 +39,8 @@ export interface RegimeIndicatorEntryConfig {
   llm_provider?: string;
   llm_model?: string;
   storage_mode?: 'local' | 'remote' | 'hybrid';
+  /** TICKET_260: Auto-reverse mode - short condition auto-generated as inverse of long */
+  auto_reverse?: boolean;
 }
 
 export interface IndicatorEntryRule {
@@ -161,6 +163,8 @@ interface ServerRequest {
   locale?: string;
   output_format?: 'v1' | 'v3'; // TICKET_223: V3 framework import format
   storage_mode: 'local' | 'remote' | 'hybrid';
+  /** TICKET_260: Auto-reverse mode */
+  auto_reverse?: boolean;
   regime_indicator_entry_config: {
     longEntryIndicators: ServerIndicatorRule[];
     shortEntryIndicators: ServerIndicatorRule[];
@@ -168,6 +172,8 @@ interface ServerRequest {
     entry_signal_base: string;
     llm_provider?: string;
     llm_model?: string;
+    /** TICKET_260: Auto-reverse mode (also in config for compatibility) */
+    auto_reverse?: boolean;
   };
   llm_provider?: string;
   llm_model?: string;
@@ -225,6 +231,7 @@ function transformRule(rule: IndicatorEntryRule): ServerIndicatorRule | null {
 
 /**
  * Build server request from client config
+ * TICKET_260: Include auto_reverse parameter
  */
 function buildServerRequest(config: RegimeIndicatorEntryConfig): ServerRequest {
   // Transform all rules to server format
@@ -242,12 +249,17 @@ function buildServerRequest(config: RegimeIndicatorEntryConfig): ServerRequest {
   // Generate task_id
   const taskId = `regime_indicator_entry_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
+  // TICKET_260: Default to true if not specified
+  const autoReverse = config.auto_reverse !== false;
+
   return {
     user_id: 1,
     task_id: taskId,
     locale: 'en',
     output_format: 'v3', // TICKET_223: V3 framework import format
     storage_mode: config.storage_mode || 'local',
+    // TICKET_260: Auto-reverse mode (top level)
+    auto_reverse: autoReverse,
     regime_indicator_entry_config: {
       longEntryIndicators: serverRules,
       shortEntryIndicators: [], // TODO: Support from UI
@@ -255,6 +267,8 @@ function buildServerRequest(config: RegimeIndicatorEntryConfig): ServerRequest {
       entry_signal_base: config.entry_signal_base || 'standalone',
       llm_provider: config.llm_provider || 'NONA',
       llm_model: config.llm_model || 'nona-nexus',
+      // TICKET_260: Auto-reverse mode (also in config for compatibility)
+      auto_reverse: autoReverse,
     },
     llm_provider: config.llm_provider || 'NONA',
     llm_model: config.llm_model || 'nona-nexus',

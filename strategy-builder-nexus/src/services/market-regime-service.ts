@@ -32,6 +32,8 @@ export interface MarketRegimeConfig {
   llm_model?: string;
   /** TICKET_200: Storage mode preference - tells server whether to store generated data */
   storage_mode?: 'local' | 'remote' | 'hybrid';
+  /** TICKET_260: Auto-reverse mode - range condition auto-generated as inverse of trend */
+  auto_reverse?: boolean;
 }
 
 export interface MarketRegimeRule {
@@ -55,6 +57,8 @@ export interface MarketRegimeRule {
     category: string;
     params?: Record<string, unknown>;
   };
+  /** TICKET_260: Indicator category for manual mode */
+  category?: 'trend' | 'range';
 }
 
 export interface MarketRegimeResult {
@@ -131,26 +135,16 @@ export function getErrorMessage(result: MarketRegimeResult): string {
 // Request Builder Types
 // -----------------------------------------------------------------------------
 
-interface ServerRule {
-  rule_type: 'template_based' | 'custom_expression' | 'factor_based';
-  indicator?: {
-    slug: string;
-    name: string;
-    params?: Record<string, unknown>;
-  };
-  strategy?: {
-    type: string;
-    logic: {
-      operator: string;
-      threshold_value: string | number;
-    };
-  };
-  expression?: string;
-  factor?: {
-    name: string;
-    category: string;
-    params?: Record<string, unknown>;
-  };
+/**
+ * TICKET_260: Protocol-compliant indicator format
+ * @see TICKET_260_REGIME_DETECTOR_ENTRY_RESPONSIBILITY_CLARIFICATION.md
+ */
+interface ServerIndicator {
+  type: string;
+  name: string;
+  params?: Record<string, unknown>;
+  /** Required when auto_reverse=false */
+  category?: 'trend' | 'range';
 }
 
 interface ServerRequest {
@@ -160,23 +154,26 @@ interface ServerRequest {
   output_format?: 'v1' | 'v3'; // TICKET_223: V3 framework import format
   /** TICKET_200: Storage mode preference - server should not store data if 'local' */
   storage_mode?: 'local' | 'remote' | 'hybrid';
+  /** TICKET_260: Auto-reverse mode */
+  auto_reverse?: boolean;
   analysis_config: {
     regime: Array<{
       case_type: string;
-      enabled: boolean;
+      enabled?: boolean;
       params: {
-        indicators: ServerRule[];
-        strategy_name: string;
-        bespoke_notes?: string;
+        /** TICKET_260: Protocol-compliant indicator array */
+        indicators: ServerIndicator[];
+        factors?: unknown[];
       };
     }>;
     llm_config: {
       prompt: string;
       provider: string;
-      model: string;
+      model?: string;
       api_key?: string; // TICKET_193: BYOK API key
     };
-    rules: ServerRule[];
+    /** TICKET_260: Auto-reverse mode (also at top level for compatibility) */
+    auto_reverse?: boolean;
   };
 }
 
@@ -199,34 +196,34 @@ function mapRegimeToCaseType(regime: string): string {
   return regimeMap[regime] || regime.toUpperCase();
 }
 
-function transformRules(rules: MarketRegimeRule[]): ServerRule[] {
-  return rules.map((rule): ServerRule => {
-    if (rule.rule_type === 'custom_expression') {
-      return {
-        rule_type: 'custom_expression',
-        expression: rule.expression || '',
-      };
-    }
+/**
+ * TICKET_260: Transform rules to protocol-compliant indicator format
+ * @see TICKET_260_REGIME_DETECTOR_ENTRY_RESPONSIBILITY_CLARIFICATION.md
+ */
+function transformToServerIndicators(rules: MarketRegimeRule[], autoReverse: boolean): ServerIndicator[] {
+  return rules
+    .filter((rule) => rule.rule_type === 'template_based' && rule.indicator)
+    .map((rule): ServerIndicator => {
+      const indicator = rule.indicator!;
+      const logic = rule.strategy?.logic;
 
-    if (rule.rule_type === 'factor_based') {
-      return {
-        rule_type: 'factor_based',
-        factor: rule.factor,
-      };
-    }
+      // Build params including threshold if specified
+      const params: Record<string, unknown> = { ...indicator.params };
+      if (logic?.threshold_value !== undefined) {
+        params.threshold = logic.threshold_value;
+      }
+      if (logic?.operator) {
+        params.operator = logic.operator;
+      }
 
-    return {
-      rule_type: 'template_based',
-      indicator: rule.indicator,
-      strategy: {
-        type: rule.strategy?.logic?.type || 'threshold_level',
-        logic: {
-          operator: rule.strategy?.logic?.operator || '>',
-          threshold_value: rule.strategy?.logic?.threshold_value ?? 0,
-        },
-      },
-    };
-  });
+      return {
+        type: indicator.slug,
+        name: indicator.name || indicator.slug,
+        params: Object.keys(params).length > 0 ? params : undefined,
+        // TICKET_260: Include category (default to 'trend' for auto-reverse mode)
+        category: rule.category || (autoReverse ? undefined : 'trend'),
+      };
+    });
 }
 
 function buildPrompt(config: MarketRegimeConfig): string {
@@ -269,11 +266,19 @@ function buildPrompt(config: MarketRegimeConfig): string {
 /**
  * TICKET_193: Build server request with optional API key
  * TICKET_200: Include storage_mode preference
+ * TICKET_260: Include auto_reverse parameter and protocol-compliant format
  */
 function buildServerRequest(config: MarketRegimeConfig, apiKey?: string): ServerRequest {
-  const serverRules = transformRules(config.rules);
+  // TICKET_260: Default to true if not specified
+  const autoReverse = config.auto_reverse !== false;
+  const serverIndicators = transformToServerIndicators(config.rules, autoReverse);
   const prompt = buildPrompt(config);
   const caseType = mapRegimeToCaseType(config.regime);
+
+  // DEBUG: Log transformation for troubleshooting
+  console.info('[MarketRegimeService] Input rules:', config.rules.length);
+  console.info('[MarketRegimeService] Transformed indicators:', serverIndicators.length);
+  console.info('[MarketRegimeService] Indicators:', JSON.stringify(serverIndicators));
 
   return {
     user_id: 1,
@@ -282,14 +287,15 @@ function buildServerRequest(config: MarketRegimeConfig, apiKey?: string): Server
     output_format: 'v3', // TICKET_223: V3 framework import format
     // TICKET_200: Include storage mode preference (defaults to 'local' if not specified)
     storage_mode: config.storage_mode || 'local',
+    // TICKET_260: Auto-reverse mode (top level)
+    auto_reverse: autoReverse,
     analysis_config: {
+      // TICKET_260: Protocol-compliant regime config
       regime: [{
         case_type: caseType,
-        enabled: true,
         params: {
-          indicators: serverRules,
-          strategy_name: config.strategy_name || 'Untitled Strategy',
-          bespoke_notes: config.bespoke_notes,
+          indicators: serverIndicators,
+          factors: [],
         },
       }],
       llm_config: {
@@ -298,7 +304,8 @@ function buildServerRequest(config: MarketRegimeConfig, apiKey?: string): Server
         model: config.llm_model || 'nona-default',
         api_key: apiKey, // TICKET_193: BYOK API key (undefined if not provided)
       },
-      rules: serverRules,
+      // TICKET_260: Auto-reverse mode (also in analysis_config for compatibility)
+      auto_reverse: autoReverse,
     },
   };
 }

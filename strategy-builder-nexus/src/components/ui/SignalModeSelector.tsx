@@ -1,0 +1,117 @@
+/**
+ * SignalModeSelector Component
+ *
+ * Signal mode selector for auto-reverse feature.
+ * Uses SegmentedControl styling from TICKET_077.
+ *
+ * @see TICKET_260 - Regime Detector vs Entry Responsibility Clarification
+ * @see TICKET_077 - Silverstream UI Component Library (SegmentedControl)
+ */
+
+import React from 'react';
+import { cn } from '../../lib/utils';
+
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
+
+/**
+ * Signal mode type
+ * - auto-reverse: Automatically generate reverse condition
+ * - manual: User defines both conditions separately
+ */
+export type SignalMode = 'auto-reverse' | 'manual';
+
+/**
+ * Context type determines description text
+ * - detector: Range = inverse of Trend
+ * - entry: Short = inverse of Long
+ */
+export type SignalModeContext = 'detector' | 'entry';
+
+export interface SignalModeSelectorProps {
+  /** Current signal mode value */
+  value: SignalMode;
+  /** Callback when mode changes */
+  onChange: (mode: SignalMode) => void;
+  /** Context determines description text */
+  context: SignalModeContext;
+  /** Additional CSS classes */
+  className?: string;
+}
+
+// -----------------------------------------------------------------------------
+// Constants
+// -----------------------------------------------------------------------------
+
+const DESCRIPTIONS: Record<SignalModeContext, Record<SignalMode, string>> = {
+  detector: {
+    'auto-reverse': 'Range = inverse of Trend',
+    'manual': 'Define both conditions',
+  },
+  entry: {
+    'auto-reverse': 'Short = inverse of Long',
+    'manual': 'Define both conditions',
+  },
+};
+
+// -----------------------------------------------------------------------------
+// Component
+// -----------------------------------------------------------------------------
+
+export const SignalModeSelector: React.FC<SignalModeSelectorProps> = ({
+  value,
+  onChange,
+  context,
+  className,
+}) => {
+  const description = DESCRIPTIONS[context][value];
+
+  return (
+    <div className={cn('space-y-2', className)}>
+      {/* Label */}
+      <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
+        Signal Mode
+      </label>
+
+      {/* Segmented Control */}
+      <div className="inline-flex border border-dashed border-white/20 rounded">
+        {/* Auto-Reverse Button */}
+        <button
+          type="button"
+          onClick={() => onChange('auto-reverse')}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1.5 transition-all duration-200 rounded-l',
+            'border-r border-dashed border-white/20',
+            value === 'auto-reverse'
+              ? 'bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal'
+              : 'bg-transparent text-color-terminal-text-muted hover:text-color-terminal-accent-teal hover:bg-white/5'
+          )}
+        >
+          <span className="text-[9px] font-bold uppercase tracking-widest">Auto-Reverse</span>
+        </button>
+
+        {/* Manual Button */}
+        <button
+          type="button"
+          onClick={() => onChange('manual')}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1.5 transition-all duration-200 rounded-r',
+            value === 'manual'
+              ? 'bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal'
+              : 'bg-transparent text-color-terminal-text-muted hover:text-color-terminal-accent-teal hover:bg-white/5'
+          )}
+        >
+          <span className="text-[9px] font-bold uppercase tracking-widest">Manual</span>
+        </button>
+      </div>
+
+      {/* Description */}
+      <p className="text-[9px] text-color-terminal-text-muted leading-relaxed">
+        {description}
+      </p>
+    </div>
+  );
+};
+
+export default SignalModeSelector;

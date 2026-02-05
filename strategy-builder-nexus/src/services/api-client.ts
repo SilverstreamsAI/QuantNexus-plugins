@@ -184,15 +184,10 @@ class PluginApiClient {
   }
 
   async post<T extends ApiResponse>(endpoint: string, body?: unknown): Promise<T> {
-    // TICKET_200: Log request payload for debugging
+    // TICKET_260: Log full request payload for debugging
     if (body) {
-      const bodyStr = JSON.stringify(body);
-      log.debug(`Request payload (${bodyStr.length} chars): ${bodyStr.substring(0, 500)}`);
-      // Log storage_mode specifically if present
-      const bodyObj = body as Record<string, unknown>;
-      if (bodyObj.storage_mode) {
-        log.info(`storage_mode: ${bodyObj.storage_mode}`);
-      }
+      const bodyStr = JSON.stringify(body, null, 2);
+      log.info(`Request payload:\n${bodyStr}`);
     }
     return this.request<T>(endpoint, {
       method: 'POST',

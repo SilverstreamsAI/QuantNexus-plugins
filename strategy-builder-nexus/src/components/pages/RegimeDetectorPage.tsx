@@ -27,6 +27,8 @@ import {
   ApiKeyPrompt,
   NamingDialog,
   GenerateContentWrapper,
+  SignalModeSelector,
+  SignalMode,
 } from '../ui';
 
 // TICKET_077_D2: Unified Generate Workflow Hook
@@ -72,12 +74,6 @@ interface RegimeDetectorPageProps {
   /** LLM model setting from plugin config */
   llmModel?: string;
 }
-
-/**
- * Signal mode type for auto-reverse feature
- * @see TICKET_260 - Regime Detector vs Entry Responsibility Clarification
- */
-type SignalMode = 'auto-reverse' | 'manual';
 
 /**
  * Page state passed to workflow config builders
@@ -127,6 +123,8 @@ function buildRulesFromState(state: RegimeDetectorState): MarketRegimeRule[] {
           threshold_value: validThreshold,
         },
       },
+      // TICKET_260: Pass category for manual mode support
+      category: ind.category,
     });
   }
 
@@ -159,6 +157,8 @@ function buildApiConfig(state: RegimeDetectorState, strategyName: string): Marke
     llm_provider: state.llmProvider,
     llm_model: state.llmModel,
     storage_mode: state.storageMode,
+    // TICKET_260: Auto-reverse mode
+    auto_reverse: state.signalMode === 'auto-reverse',
   };
 }
 
@@ -355,41 +355,12 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
           </div>
 
           {/* TICKET_260: Signal Mode Selector */}
-          <div className="space-y-2 mt-6">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Signal Mode
-            </label>
-            <div className="inline-flex border border-dashed border-white/20 rounded">
-              <button
-                onClick={() => setSignalMode('auto-reverse')}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 transition-all duration-200 rounded-l",
-                  "border-r border-dashed border-white/20",
-                  signalMode === 'auto-reverse'
-                    ? "bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal"
-                    : "bg-transparent text-color-terminal-text-muted hover:text-color-terminal-accent-teal hover:bg-white/5"
-                )}
-              >
-                <span className="text-[9px] font-bold uppercase tracking-widest">Auto-Reverse</span>
-              </button>
-              <button
-                onClick={() => setSignalMode('manual')}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 transition-all duration-200 rounded-r",
-                  signalMode === 'manual'
-                    ? "bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal"
-                    : "bg-transparent text-color-terminal-text-muted hover:text-color-terminal-accent-teal hover:bg-white/5"
-                )}
-              >
-                <span className="text-[9px] font-bold uppercase tracking-widest">Manual</span>
-              </button>
-            </div>
-            <p className="text-[9px] text-color-terminal-text-muted leading-relaxed">
-              {signalMode === 'auto-reverse'
-                ? 'Range = inverse of Trend'
-                : 'Define both conditions'}
-            </p>
-          </div>
+          <SignalModeSelector
+            value={signalMode}
+            onChange={setSignalMode}
+            context="detector"
+            className="mt-6"
+          />
         </div>
 
         {/* Right Content Area (Zone C + Zone D) */}

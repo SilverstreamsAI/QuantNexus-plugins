@@ -117,3 +117,7 @@ export type { IndicatorTemplate as UserIndicatorTemplate } from './SaveTemplateD
 // TICKET_077_26: AdvancedConfigPanel for AI Libero (page37)
 export { AdvancedConfigPanel, DEFAULT_PREDICTION_CONFIG, getPresetPredictionConfig } from './AdvancedConfigPanel';
 export type { AdvancedConfigPanelProps, PredictionConfig } from './AdvancedConfigPanel';
+
+// TICKET_260: SignalModeSelector for Regime Detector and Entry pages
+export { SignalModeSelector } from './SignalModeSelector';
+export type { SignalModeSelectorProps, SignalMode, SignalModeContext } from './SignalModeSelector';

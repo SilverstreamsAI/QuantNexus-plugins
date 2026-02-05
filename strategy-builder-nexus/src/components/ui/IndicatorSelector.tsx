@@ -70,6 +70,8 @@ export interface IndicatorBlock {
   templateKey: string | null;
   ruleOperator: string;
   ruleThresholdValue: number;
+  /** TICKET_260: Indicator category for manual mode (trend/range detection) */
+  category?: 'trend' | 'range';
 }
 
 export interface IndicatorSelectorProps {
