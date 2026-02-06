@@ -2,11 +2,12 @@
  * QUANT LAB UI Plugin Entry
  *
  * TICKET_250_11: QUANT LAB UI Plugin
+ * PLUGIN_TICKET_003: Added activate/deactivate for plugin lifecycle
  *
  * Main entry point for the Alpha Factory UI.
  */
 
-import React from 'react';
+import type { PluginModule, PluginContext, PluginApi, Disposable } from '@shared/types';
 
 // Export pages
 export { AlphaFactoryPage } from './pages/AlphaFactory';
@@ -20,6 +21,65 @@ export { SignalTraceViewer } from './components/SignalTraceViewer';
 
 // Export hooks
 export { useAlphaFactory } from './hooks/useAlphaFactory';
+
+// =============================================================================
+// Plugin State
+// =============================================================================
+
+const disposables: Disposable[] = [];
+
+// =============================================================================
+// Plugin Module Export
+// =============================================================================
+
+const plugin: PluginModule = {
+  async activate(context: PluginContext): Promise<PluginApi> {
+    context.log.info('QUANT LAB plugin activating...');
+
+    // Access windowApi from global (injected by host)
+    const windowApi = (globalThis as { nexus?: { window: unknown } }).nexus?.window;
+
+    if (windowApi) {
+      const api = windowApi as {
+        registerTreeDataProvider: (viewId: string, provider: unknown) => Disposable;
+        registerViewProvider: (viewId: string, provider: unknown) => Disposable;
+        setBreadcrumb: (items: unknown[]) => void;
+        openView: (viewId: string, options?: unknown) => Promise<void>;
+      };
+
+      // Register commands
+      context.commands.register('quantLab.openFactory', () => {
+        api.setBreadcrumb([{ id: 'quantLab', label: 'QUANT LAB' }]);
+        api.openView('quantLab.alphaFactory');
+      });
+
+      context.commands.register('quantLab.openSignals', () => {
+        api.setBreadcrumb([{ id: 'quantLab', label: 'QUANT LAB' }, { id: 'signals', label: 'Signal Library' }]);
+        api.openView('quantLab.signalLibrary');
+      });
+    } else {
+      context.log.warn('windowApi not available - running in headless mode');
+    }
+
+    context.log.info('QUANT LAB plugin activated');
+
+    return {
+      activate: async () => {},
+      deactivate: async () => {},
+    };
+  },
+
+  async deactivate(): Promise<void> {
+    // Dispose all registered providers
+    for (const disposable of disposables) {
+      disposable.dispose();
+    }
+    disposables.length = 0;
+    console.info('[QUANT LAB Plugin] Deactivated');
+  },
+};
+
+export default plugin;
 
 // Plugin metadata
 export const pluginInfo = {

@@ -1,11 +1,62 @@
 {
-  "id": "quant-lab-plugin",
-  "name": "alpha-factory",
-  "displayName": "Quant Lab",
+  "$schema": "https://quantnexus.io/schemas/plugin-manifest.json",
+  "id": "com.quantnexus.quant-lab-nexus",
+  "name": "quant-lab-nexus",
+  "displayName": "QUANT LAB",
   "version": "1.0.0",
-  "description": "Alpha Factory plugin for signal combination and evaluation",
-  "libraryName": "libalpha_factory",
-  "dependencies": [],
+  "description": "Alpha Factory - Signal combination and evaluation for multi-strategy quantitative trading",
+  "main": "./ui/quant-lab-nexus/dist/plugins/quant-lab-plugin/ui/quant-lab-nexus/src/index.js",
+  "type": "nexus",
+  "distribution": "marketplace",
+  "lifecycle": {
+    "onInstall": "./scripts/install.js",
+    "onUpgrade": "./scripts/upgrade.js",
+    "onUninstall": "./scripts/uninstall.js"
+  },
+  "category": "execution",
+  "protocols": ["alpha-factory"],
+  "executor": {
+    "libraryName": "libalpha_factory",
+    "pluginType": "alpha-factory"
+  },
+  "hub": {
+    "contributes": ["nona_algorithm"],
+    "consumes": ["nona_algorithm"]
+  },
+  "contributes": {
+    "i18n": {
+      "path": "./locales",
+      "namespaces": ["quant-lab"]
+    },
+    "viewsContainers": {
+      "sidebar": [{
+        "id": "quantLabExplorer",
+        "title": "QUANT LAB",
+        "icon": "resources/quant-lab-icon.svg"
+      }]
+    },
+    "views": {
+      "quantLabExplorer": [{
+        "id": "quantLab.signalLibrary",
+        "name": "Signal Library"
+      }],
+      "workbench": [{
+        "id": "quantLab.alphaFactory",
+        "name": "Alpha Factory"
+      }, {
+        "id": "quantLab.signalTrace",
+        "name": "Signal Trace"
+      }]
+    },
+    "commands": [
+      { "id": "quantLab.run", "title": "Run Alpha Factory", "keybinding": "Ctrl+Shift+A" },
+      { "id": "quantLab.addSignal", "title": "Add Signal Source" },
+      { "id": "quantLab.configure", "title": "Configure Combinator" }
+    ]
+  },
+  "permissions": ["network:internal", "database", "filesystem"],
+  "isolation": "trusted",
+  "activationEvents": ["onCommand:quantLab.*", "onView:quantLab.alphaFactory"],
   "author": "QuantNexus",
   "license": "MIT"
 }
