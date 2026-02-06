@@ -94,9 +94,9 @@ export function useExportToQuantLab(): UseExportToQuantLabReturn {
     setError(null);
 
     try {
-      // Access the preload API
-      const api = (window as any).quantnexus;
-      if (!api?.backtest?.exportToQuantLab) {
+      // Access the preload API (electronAPI exposed by preload)
+      const api = (window as any).electronAPI;
+      if (!api?.executor?.exportToQuantLab) {
         throw new Error('Export API not available');
       }
 
@@ -148,7 +148,7 @@ export function useExportToQuantLab(): UseExportToQuantLabReturn {
         dateRangeEnd: params.workflow.dateRange.end,
       };
 
-      const result = await api.backtest.exportToQuantLab(exportData);
+      const result = await api.executor.exportToQuantLab(exportData);
 
       if (!result.success) {
         throw new Error(result.error || 'Export failed');

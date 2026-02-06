@@ -176,12 +176,24 @@ export interface BacktestPageProps {
   cockpitMode?: CockpitMode;
   /** TICKET_233: Notify Host when backtest starts (for global status bar) */
   /** TICKET_257: Include workflowTimeframes for result page display */
-  onBacktestStart?: (taskId: string, strategyName: string, workflowTimeframes?: {
-    analysis: string | null;
-    entryFilter: string | null;
-    entrySignal: string | null;
-    exitStrategy: string | null;
-  }) => void;
+  /** TICKET_268: Include workflowExportData for Quant Lab export */
+  onBacktestStart?: (
+    taskId: string,
+    strategyName: string,
+    workflowTimeframes?: {
+      analysis: string | null;
+      entryFilter: string | null;
+      entrySignal: string | null;
+      exitStrategy: string | null;
+    },
+    workflowExportData?: {
+      analysis: { algorithmId: string; algorithmName: string; algorithmCode: string; baseClass: string; timeframe: string; parameters: Record<string, unknown> };
+      entry: { algorithmId: string; algorithmName: string; algorithmCode: string; baseClass: string; timeframe: string; parameters: Record<string, unknown> };
+      exit?: { algorithmId: string; algorithmName: string; algorithmCode: string; baseClass: string; timeframe: string; parameters: Record<string, unknown> } | null;
+      symbol: string;
+      dateRange: { start: string; end: string };
+    }
+  ) => void;
   /** TICKET_233: Notify Host of backtest progress (for global status bar) */
   onBacktestProgress?: (taskId: string, progress: number) => void;
   /** TICKET_233: Notify Host when backtest completes (for global status bar) */
@@ -1255,9 +1267,50 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         entrySignal: workflow.stepSelections.length > 0 ? workflow.stepSelections[0].timeframe : null,
         exitStrategy: workflow.postConditionSelections.length > 0 ? workflow.postConditionSelections[0].timeframe : null,
       };
+
+      // TICKET_268: Build workflowExportData for Quant Lab export
+      const analysisSelection = workflow.analysisSelections[0];
+      const entrySelection = workflow.stepSelections[0];
+      const exitSelection = workflow.postConditionSelections[0];
+
+      // TICKET_264_1: Use config parameter instead of dataConfig to avoid stale closure
+      const workflowExportData = analysisSelection && entrySelection ? {
+        analysis: {
+          algorithmId: String(analysisSelection.id),
+          algorithmName: analysisSelection.strategyName,
+          algorithmCode: analysisSelection.code || '',
+          baseClass: 'RegimeStateBase',
+          timeframe: analysisSelection.timeframe || config.timeframe || '1d',
+          parameters: {},
+        },
+        entry: {
+          algorithmId: String(entrySelection.id),
+          algorithmName: entrySelection.strategyName,
+          algorithmCode: entrySelection.code || '',
+          baseClass: 'EntrySignalBase',
+          timeframe: entrySelection.timeframe || config.timeframe || '1d',
+          parameters: {},
+        },
+        exit: exitSelection ? {
+          algorithmId: String(exitSelection.id),
+          algorithmName: exitSelection.strategyName,
+          algorithmCode: exitSelection.code || '',
+          baseClass: 'ExitStrategyBase',
+          timeframe: exitSelection.timeframe || config.timeframe || '1d',
+          parameters: {},
+        } : null,
+        // TICKET_264_1: Use config parameter instead of dataConfig to avoid stale closure
+        symbol: config.symbol,
+        dateRange: {
+          start: config.startDate,
+          end: config.endDate,
+        },
+      } : undefined;
+
       // TICKET_233: Notify global status
       // TICKET_257: Include workflowTimeframes for result page display
-      onBacktestStart?.(result.taskId, strategyName || 'Backtest', workflowTimeframes);
+      // TICKET_268: Include workflowExportData for Quant Lab export
+      onBacktestStart?.(result.taskId, strategyName || 'Backtest', workflowTimeframes, workflowExportData);
     }
 
     // Wait for completion via Promise
