@@ -3,6 +3,7 @@
  *
  * PLUGIN_TICKET_006: Extracted from QuantLabPage.tsx
  * PLUGIN_TICKET_008: Migrated from host to plugin
+ * PLUGIN_TICKET_010: Grid layout (5 per row), pass component details and timeframe change handler
  * Signal Factory (Entry) section: signal chips + combinator selector + lookback input.
  */
 
@@ -20,6 +21,7 @@ interface SignalFactorySectionProps {
   onRemoveSignal: (id: string) => void;
   onMethodChange: (method: string) => void;
   onLookbackChange: (days: number) => void;
+  onTimeframeChange: (signalId: string, component: 'analysis' | 'entry' | 'exit', timeframe: string) => void;
 }
 
 export const SignalFactorySection: React.FC<SignalFactorySectionProps> = ({
@@ -30,6 +32,7 @@ export const SignalFactorySection: React.FC<SignalFactorySectionProps> = ({
   onRemoveSignal,
   onMethodChange,
   onLookbackChange,
+  onTimeframeChange,
 }) => {
   return (
     <section className="p-6 rounded-lg border border-color-terminal-border bg-color-terminal-surface/30">
@@ -38,23 +41,27 @@ export const SignalFactorySection: React.FC<SignalFactorySectionProps> = ({
         SIGNAL FACTORY (Entry)
       </h2>
 
-      {/* Signal Chips Container */}
+      {/* Signal Cards Grid: 5 per row */}
       <div className="min-h-[80px] p-4 rounded-lg border border-dashed border-color-terminal-border bg-color-terminal-surface/20 mb-4">
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-5 gap-3">
           {signals.map(signal => (
             <SignalChip
               key={signal.id}
               name={signal.name}
               onRemove={() => onRemoveSignal(signal.id)}
+              analysis={signal.analysis}
+              entry={signal.entry}
+              exit={signal.exit}
+              onTimeframeChange={(component, timeframe) => onTimeframeChange(signal.id, component, timeframe)}
             />
           ))}
-          {/* Add Button */}
+          {/* Add Button: same height as cards */}
           <button
             onClick={onAddSignal}
-            className="h-10 px-4 rounded-lg border border-dashed border-color-terminal-border hover:border-color-terminal-accent-primary text-color-terminal-text-secondary hover:text-color-terminal-accent-primary transition-colors flex items-center gap-2"
+            className="h-[200px] rounded-lg border border-dashed border-color-terminal-border hover:border-color-terminal-accent-primary text-color-terminal-text-secondary hover:text-color-terminal-accent-primary transition-colors flex flex-col items-center justify-center gap-2"
           >
-            <Plus className="w-4 h-4" />
-            <span className="text-sm">Add Signal</span>
+            <Plus className="w-5 h-5" />
+            <span className="text-xs">Add Signal</span>
           </button>
         </div>
       </div>

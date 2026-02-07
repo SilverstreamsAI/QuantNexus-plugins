@@ -187,7 +187,8 @@ export const SignalSourcePicker: React.FC<SignalSourcePickerProps> = ({
             filteredSources.map((source) => (
               <div
                 key={source.id}
-                className="px-5 py-3 border-b border-color-terminal-border/50 hover:bg-color-terminal-accent-primary/5 transition-colors"
+                className="px-5 py-3 border-b border-color-terminal-border/50 hover:bg-color-terminal-accent-primary/5 transition-colors cursor-pointer"
+                onDoubleClick={() => onSelect(source)}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
