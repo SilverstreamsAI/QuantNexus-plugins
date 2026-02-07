@@ -70,10 +70,16 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
   // Refs to avoid stale closures in debounce timer
   const configIdRef = useRef(configId);
   const configNameRef = useRef(configName);
+  const signalsRef = useRef(signals);
+  const exitsRef = useRef(exits);
   const mountedRef = useRef(false);
+  // Skip auto-save when state changes are from config switching (not user edits)
+  const skipAutoSaveRef = useRef(false);
 
   configIdRef.current = configId;
   configNameRef.current = configName;
+  signalsRef.current = signals;
+  exitsRef.current = exits;
 
   // ---------------------------------------------------------------------------
   // PLUGIN_TICKET_012: Refresh config list from DB
@@ -84,6 +90,21 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     if (response.success && response.data) {
       setConfigList(response.data as ConfigSummary[]);
     }
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // PLUGIN_TICKET_012: Auto-cleanup empty "Untitled" configs
+  // Returns deleted config ID or null
+  // ---------------------------------------------------------------------------
+
+  const cleanupCurrentIfEmpty = useCallback(async (): Promise<string | null> => {
+    const id = configIdRef.current;
+    if (!id) return null;
+    if (configNameRef.current !== 'Untitled') return null;
+    if (signalsRef.current.length > 0 || exitsRef.current.length > 0) return null;
+
+    await window.electronAPI.alphaFactory.deleteConfig(id);
+    return id;
   }, []);
 
   // ---------------------------------------------------------------------------
@@ -118,6 +139,11 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
   useEffect(() => {
     // Skip auto-save before initial load completes
     if (!mountedRef.current) return;
+    // Skip auto-save during config switching / creation (DB already up-to-date)
+    if (skipAutoSaveRef.current) {
+      skipAutoSaveRef.current = false;
+      return;
+    }
     // Nothing to save if no config and no signals
     if (!configIdRef.current && signals.length === 0) return;
 
@@ -167,6 +193,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     });
 
     if (response.success && response.id) {
+      skipAutoSaveRef.current = true;
       setConfigId(response.id);
       setConfigName(name);
       await refreshConfigList();
@@ -178,8 +205,14 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
   // ---------------------------------------------------------------------------
 
   const switchConfig = useCallback(async (id: string) => {
+    // Auto-cleanup: delete current config if empty "Untitled"
+    const cleanedId = await cleanupCurrentIfEmpty();
+
     const response = await window.electronAPI.alphaFactory.loadConfig(id);
     if (!response.success || !response.data) return;
+
+    // Suppress auto-save (DB already has correct data for this config)
+    skipAutoSaveRef.current = true;
 
     const data = response.data;
     setSignals(data.signals as SignalChip[]);
@@ -190,7 +223,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     setConfigId(data.id);
     setConfigName(data.name);
 
-    // Mark as active by re-saving (save-config handler sets is_active=1)
+    // Mark as active in DB (for persistence across restarts)
     await window.electronAPI.alphaFactory.saveConfig({
       id: data.id,
       name: data.name,
@@ -201,14 +234,27 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       exits: data.exits as SignalChip[],
     });
 
-    await refreshConfigList();
-  }, [refreshConfigList]);
+    // Update list locally: remove cleaned config + toggle isActive (preserve order)
+    setConfigList(prev => {
+      let list = prev;
+      if (cleanedId) {
+        list = list.filter(c => c.id !== cleanedId);
+      }
+      return list.map(c => ({
+        ...c,
+        isActive: c.id === id,
+      }));
+    });
+  }, [cleanupCurrentIfEmpty]);
 
   // ---------------------------------------------------------------------------
   // PLUGIN_TICKET_012: Create a new empty config
   // ---------------------------------------------------------------------------
 
   const createNewConfig = useCallback(async () => {
+    // Auto-cleanup: delete current config if empty "Untitled"
+    await cleanupCurrentIfEmpty();
+
     const defaultSignals: SignalChip[] = [];
     const defaultExits: SignalChip[] = [];
 
@@ -222,6 +268,8 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     });
 
     if (response.success && response.id) {
+      // Suppress auto-save (just saved to DB)
+      skipAutoSaveRef.current = true;
       setSignals(defaultSignals);
       setSignalMethod(DEFAULT_SIGNAL_METHOD);
       setLookback(DEFAULT_LOOKBACK);
@@ -231,7 +279,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       setConfigName('Untitled');
       await refreshConfigList();
     }
-  }, [refreshConfigList]);
+  }, [cleanupCurrentIfEmpty, refreshConfigList]);
 
   // ---------------------------------------------------------------------------
   // PLUGIN_TICKET_012: Delete a config
@@ -241,18 +289,16 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     const response = await window.electronAPI.alphaFactory.deleteConfig(id);
     if (!response.success) return;
 
-    await refreshConfigList();
-
     // If deleted the active config, switch to first remaining or reset
     if (id === configIdRef.current) {
       const listResponse = await window.electronAPI.alphaFactory.listConfigs();
       const remaining = (listResponse.success && listResponse.data) ? listResponse.data : [];
 
       if (remaining.length > 0) {
-        // Switch to the most recently updated config
         const next = remaining[0];
         const loadResponse = await window.electronAPI.alphaFactory.loadConfig(next.id);
         if (loadResponse.success && loadResponse.data) {
+          skipAutoSaveRef.current = true;
           const data = loadResponse.data;
           setSignals(data.signals as SignalChip[]);
           setSignalMethod(data.signalMethod);
@@ -271,10 +317,10 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
             exitMethod: data.exitMethod,
             exits: data.exits as SignalChip[],
           });
-          await refreshConfigList();
         }
       } else {
         // No configs left, reset to empty state
+        skipAutoSaveRef.current = true;
         setSignals([]);
         setSignalMethod(DEFAULT_SIGNAL_METHOD);
         setLookback(DEFAULT_LOOKBACK);
@@ -284,6 +330,8 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
         setConfigName('');
       }
     }
+
+    await refreshConfigList();
   }, [refreshConfigList]);
 
   // ---------------------------------------------------------------------------
