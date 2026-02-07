@@ -9,8 +9,13 @@
 
 import type { PluginModule, PluginContext, PluginApi, Disposable } from '@shared/types';
 
+// Export types and constants
+export type { QuantLabSubPage, SignalChip, CombinatorMethod } from './types';
+export { SIGNAL_COMBINATOR_METHODS, EXIT_COMBINATOR_METHODS } from './constants';
+
 // Export pages
-export { AlphaFactoryPage } from './pages/AlphaFactory';
+export { AlphaFactoryPage } from './pages/AlphaFactoryPage';
+export { QuantLabHub } from './pages/QuantLabHub';
 export { SignalLibraryPage } from './pages/SignalLibrary';
 
 // Export components
@@ -18,6 +23,13 @@ export { SignalSourceCard } from './components/SignalSourceCard';
 export { CombinatorConfig } from './components/CombinatorConfig';
 export { SignalFlowCanvas } from './components/SignalFlowCanvas';
 export { SignalTraceViewer } from './components/SignalTraceViewer';
+export { SignalFactorySection } from './components/SignalFactorySection';
+export { ExitFactorySection } from './components/ExitFactorySection';
+export { SignalChip as SignalChipComponent } from './components/SignalChip';
+export { SignalSourcePicker } from './components/SignalSourcePicker';
+export { FeatureCard } from './components/FeatureCard';
+export { FlowDivider } from './components/FlowDivider';
+export { ActionBar } from './components/ActionBar';
 
 // Export hooks
 export { useAlphaFactory } from './hooks/useAlphaFactory';
