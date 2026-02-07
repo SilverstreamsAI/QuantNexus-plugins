@@ -10,7 +10,7 @@
 import type { PluginModule, PluginContext, PluginApi, Disposable } from '@shared/types';
 
 // Export types and constants
-export type { QuantLabSubPage, SignalChip, CombinatorMethod } from './types';
+export type { QuantLabSubPage, SignalChip, CombinatorMethod, ConfigSummary } from './types';
 export { SIGNAL_COMBINATOR_METHODS, EXIT_COMBINATOR_METHODS } from './constants';
 
 // Export pages
@@ -30,6 +30,7 @@ export { SignalSourcePicker } from './components/SignalSourcePicker';
 export { FeatureCard } from './components/FeatureCard';
 export { FlowDivider } from './components/FlowDivider';
 export { ActionBar } from './components/ActionBar';
+export { ConfigSidebar } from './components/ConfigSidebar';
 
 // Export hooks
 export { useAlphaFactory } from './hooks/useAlphaFactory';

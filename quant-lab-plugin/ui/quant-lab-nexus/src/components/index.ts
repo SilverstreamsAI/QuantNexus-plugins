@@ -11,3 +11,8 @@ export { SignalSourcePicker } from './SignalSourcePicker';
 export { FeatureCard } from './FeatureCard';
 export { FlowDivider } from './FlowDivider';
 export { ActionBar } from './ActionBar';
+// PLUGIN_TICKET_012: Config sidebar
+export { ConfigSidebar } from './ConfigSidebar';
+export { ConfigList } from './ConfigList';
+export { ConfigSearch } from './ConfigSearch';
+export { NewConfigButton } from './NewConfigButton';

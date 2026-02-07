@@ -33,3 +33,17 @@ export interface CombinatorMethod {
   name: string;
   description: string;
 }
+
+/**
+ * PLUGIN_TICKET_012: Summary item for config sidebar list.
+ * Maps to alpha-factory:list-configs IPC response shape.
+ */
+export interface ConfigSummary {
+  id: string;
+  name: string;
+  signalMethod: string;
+  signalCount: number;
+  exitCount: number;
+  isActive: boolean;
+  updatedAt: string;
+}

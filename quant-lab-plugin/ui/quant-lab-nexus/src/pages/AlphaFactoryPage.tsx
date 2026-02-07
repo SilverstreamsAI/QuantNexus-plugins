@@ -7,9 +7,10 @@
  * PLUGIN_TICKET_008: Migrated from host to plugin
  * PLUGIN_TICKET_010: Populate component details, timeframe change handler
  * PLUGIN_TICKET_011: Config persistence delegated to useAlphaFactoryConfig hook
+ * PLUGIN_TICKET_012: Config sidebar for multi-config management
  *
+ * Layout: ConfigSidebar (left) + Content Area (right).
  * Composes SignalFactorySection + FlowDivider + ExitFactorySection + ActionBar.
- * Manages signals, exits, combinator selections state.
  */
 
 import React, { useState, useCallback } from 'react';
@@ -19,6 +20,7 @@ import { ExitFactorySection } from '../components/ExitFactorySection';
 import { FlowDivider } from '../components/FlowDivider';
 import { ActionBar } from '../components/ActionBar';
 import { SignalSourcePicker, SignalSourceItem } from '../components/SignalSourcePicker';
+import { ConfigSidebar } from '../components/ConfigSidebar';
 import { useAlphaFactoryConfig } from '../hooks/useAlphaFactoryConfig';
 
 export const AlphaFactoryPage: React.FC = () => {
@@ -29,6 +31,13 @@ export const AlphaFactoryPage: React.FC = () => {
     exits, setExits,
     exitMethod, setExitMethod,
     saveAs,
+    // PLUGIN_TICKET_012: Sidebar props
+    configId,
+    configList,
+    isLoadingList,
+    switchConfig,
+    createNewConfig,
+    deleteConfig,
   } = useAlphaFactoryConfig();
 
   const [pickerVisible, setPickerVisible] = useState(false);
@@ -104,44 +113,57 @@ export const AlphaFactoryPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex-1 overflow-auto p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <SignalFactorySection
-          signals={signals}
-          method={signalMethod}
-          lookback={lookback}
-          onAddSignal={handleAddSignal}
-          onRemoveSignal={handleRemoveSignal}
-          onMethodChange={setSignalMethod}
-          onLookbackChange={setLookback}
-          onTimeframeChange={handleTimeframeChange}
-        />
+    <div className="flex flex-1 min-h-0">
+      {/* PLUGIN_TICKET_012: Config Sidebar */}
+      <ConfigSidebar
+        configs={configList}
+        activeConfigId={configId}
+        onNewConfig={createNewConfig}
+        onSelectConfig={switchConfig}
+        onDeleteConfig={deleteConfig}
+        isLoading={isLoadingList}
+      />
 
-        {/* PLUGIN_TICKET_007: Modal renders via portal, placed at page level */}
-        <SignalSourcePicker
-          visible={pickerVisible}
-          onSelect={handleSelectSignalSource}
-          onClose={() => setPickerVisible(false)}
-          excludeIds={signals.map(s => s.id)}
-        />
+      {/* Content Area */}
+      <div className="flex-1 overflow-auto p-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <SignalFactorySection
+            signals={signals}
+            method={signalMethod}
+            lookback={lookback}
+            onAddSignal={handleAddSignal}
+            onRemoveSignal={handleRemoveSignal}
+            onMethodChange={setSignalMethod}
+            onLookbackChange={setLookback}
+            onTimeframeChange={handleTimeframeChange}
+          />
 
-        <FlowDivider />
+          {/* PLUGIN_TICKET_007: Modal renders via portal, placed at page level */}
+          <SignalSourcePicker
+            visible={pickerVisible}
+            onSelect={handleSelectSignalSource}
+            onClose={() => setPickerVisible(false)}
+            excludeIds={signals.map(s => s.id)}
+          />
 
-        <ExitFactorySection
-          exits={exits}
-          method={exitMethod}
-          onAddExit={handleAddExit}
-          onRemoveExit={handleRemoveExit}
-          onMethodChange={setExitMethod}
-        />
+          <FlowDivider />
 
-        <FlowDivider />
+          <ExitFactorySection
+            exits={exits}
+            method={exitMethod}
+            onAddExit={handleAddExit}
+            onRemoveExit={handleRemoveExit}
+            onMethodChange={setExitMethod}
+          />
 
-        <ActionBar
-          onValidate={handleValidate}
-          onSaveAs={saveAs}
-          onRunBacktest={handleRunBacktest}
-        />
+          <FlowDivider />
+
+          <ActionBar
+            onValidate={handleValidate}
+            onSaveAs={saveAs}
+            onRunBacktest={handleRunBacktest}
+          />
+        </div>
       </div>
     </div>
   );
