@@ -23,6 +23,28 @@ export const SIGNAL_COMBINATOR_METHODS: CombinatorMethod[] = [
   { id: 'regime_based', name: 'Regime Based', description: 'Regime-dependent weights' },
 ];
 
+/**
+ * TICKET_276: Factor combinator methods for Alpha Factory Factor layer.
+ */
+export const FACTOR_COMBINATOR_METHODS: CombinatorMethod[] = [
+  { id: 'equal_weight', name: 'Equal Weight', description: 'Simple average of all factor scores' },
+  { id: 'ic_weighted', name: 'IC Weighted', description: 'Weight by historical Information Coefficient' },
+  { id: 'regression', name: 'Statistical Regression', description: 'OLS regression on factor scores' },
+  { id: 'pca', name: 'PCA Composite', description: 'Principal Component Analysis composite score' },
+];
+
+/**
+ * TICKET_276: Factor category filter options.
+ */
+export const FACTOR_CATEGORIES = [
+  { value: 'momentum', label: 'Momentum' },
+  { value: 'mean_reversion', label: 'Mean Reversion' },
+  { value: 'volatility', label: 'Volatility' },
+  { value: 'value', label: 'Value' },
+  { value: 'quality', label: 'Quality' },
+  { value: 'statistical', label: 'Statistical Arbitrage' },
+] as const;
+
 export const EXIT_COMBINATOR_METHODS: CombinatorMethod[] = [
   { id: 'any', name: 'Any', description: 'Any rule triggers exit (conservative)' },
   { id: 'all', name: 'All', description: 'All rules must trigger (aggressive)' },

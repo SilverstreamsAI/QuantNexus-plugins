@@ -18,6 +18,7 @@ import {
   ExecutorResult,
   DataConfig,
   SignalChip,
+  FactorChip,
   ExitRules,
 } from '../types';
 
@@ -35,6 +36,10 @@ interface UseAlphaFactoryBacktestParams {
   lookback: number;
   exitMethod: string;
   exitRules: ExitRules;
+  // TICKET_276: Factor layer
+  factors: FactorChip[];
+  factorMethod: string;
+  factorLookback: number;
   dataConfig: DataConfig;
 }
 
@@ -44,6 +49,9 @@ export function useAlphaFactoryBacktest({
   lookback,
   exitMethod,
   exitRules,
+  factors,
+  factorMethod,
+  factorLookback,
   dataConfig,
 }: UseAlphaFactoryBacktestParams): UseAlphaFactoryBacktestReturn {
   const [status, setStatus] = useState<BacktestStatus>('idle');
@@ -141,9 +149,9 @@ export function useAlphaFactoryBacktest({
     const api = window.electronAPI;
     console.log('[AlphaFactoryBacktest] runBacktest called, signals:', signals.length, 'symbol:', dataConfig.symbol);
 
-    // Validate inputs
-    if (signals.length === 0) {
-      setError('No signals selected');
+    // Validate inputs - TICKET_276: Hybrid model allows either signals or factors
+    if (signals.length === 0 && factors.length === 0) {
+      setError('No signals or factors selected');
       setStatus('error');
       return;
     }
@@ -225,6 +233,10 @@ export function useAlphaFactoryBacktest({
         lookback,
         exitMethod,
         exitRules,
+        // TICKET_276: Factor layer
+        factorIds: factors.map((f) => f.id),
+        factorMethod,
+        factorLookback,
       });
 
       if (!genResult.success || !genResult.strategyPath) {
@@ -241,7 +253,7 @@ export function useAlphaFactoryBacktest({
 
       const backtestResult = await api.executor.runBacktest({
         strategyPath: genResult.strategyPath,
-        strategyName: `AlphaFactory_${signals.length}sig_${signalMethod}`,
+        strategyName: `AlphaFactory_${signals.length}sig_${factors.length}fac_${signalMethod}`,
         symbol: dataConfig.symbol,
         interval: uniqueTimeframes[0] || '1d',
         startTime,
@@ -380,7 +392,7 @@ export function useAlphaFactoryBacktest({
       setStatus('error');
       cleanupSubscriptions();
     }
-  }, [signals, signalMethod, lookback, exitMethod, exitRules, dataConfig, cleanupSubscriptions, flushBuffer]);
+  }, [signals, signalMethod, lookback, exitMethod, exitRules, factors, factorMethod, factorLookback, dataConfig, cleanupSubscriptions, flushBuffer]);
 
   return { status, progress, result, error, runBacktest };
 }

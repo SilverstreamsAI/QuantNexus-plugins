@@ -32,6 +32,39 @@ interface ElectronAPI {
     }>;
   };
 
+  // TICKET_276: Factor Library API (read-only from backend)
+  factor: {
+    list: (params?: { source?: string; category?: string; limit?: number; offset?: number }) => Promise<{
+      success: boolean;
+      data?: Array<{
+        id: string;
+        name: string;
+        category: string;
+        source: string;
+        formula: string | null;
+        ic: number | null;
+        icir: number | null;
+        sharpe: number | null;
+      }>;
+      error?: string;
+    }>;
+    detail: (factorId: string) => Promise<{
+      success: boolean;
+      data?: {
+        id: string;
+        name: string;
+        category: string;
+        source: string;
+        formula: string | null;
+        code: string | null;
+        ic: number | null;
+        icir: number | null;
+        sharpe: number | null;
+      };
+      error?: string;
+    }>;
+  };
+
   // PLUGIN_TICKET_015: Subset of data API used by Alpha Factory
   data: {
     // Returns array directly (not {success, data} wrapper)
@@ -130,6 +163,10 @@ interface ElectronAPI {
       exitMethod: string;
       // TICKET_275: ExitRules object or legacy SignalChip[] array
       exits: import('../types').ExitRules | import('../types').SignalChip[];
+      // TICKET_276: Factor layer fields
+      factors?: import('../types').FactorChip[];
+      factorMethod?: string;
+      factorLookback?: number;
     }) => Promise<{
       success: boolean;
       id?: string;
@@ -147,6 +184,10 @@ interface ElectronAPI {
         exitMethod: string;
         // TICKET_275: Raw parsed value (format detection done in hook)
         exits: unknown;
+        // TICKET_276: Factor layer fields
+        factors: import('../types').FactorChip[];
+        factorMethod: string;
+        factorLookback: number;
         createdAt: string;
         updatedAt: string;
       } | null;
@@ -160,6 +201,7 @@ interface ElectronAPI {
         name: string;
         signalMethod: string;
         signalCount: number;
+        factorCount: number;
         exitCount: number;
         isActive: boolean;
         updatedAt: string;
@@ -179,6 +221,10 @@ interface ElectronAPI {
       lookback: number;
       exitMethod: string;
       exitRules: import('../types').ExitRules;
+      // TICKET_276: Factor layer
+      factorIds?: string[];
+      factorMethod?: string;
+      factorLookback?: number;
     }) => Promise<{
       success: boolean;
       taskId?: string;

@@ -18,15 +18,17 @@
  */
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { SignalChip, DataConfig } from '../types';
+import { SignalChip, FactorChip, DataConfig } from '../types';
 import { DEFAULT_DATA_CONFIG } from '../constants';
 import { SignalFactorySection } from '../components/SignalFactorySection';
+import { FactorFactorySection } from '../components/FactorFactorySection';
 import { ExitFactorySection } from '../components/ExitFactorySection';
 import { FlowDivider } from '../components/FlowDivider';
 import { ActionBar } from '../components/ActionBar';
 import { DataConfigPanel } from '../components/DataConfigPanel';
 import { ResultSection } from '../components/ResultSection';
 import { SignalSourcePicker, SignalSourceItem } from '../components/SignalSourcePicker';
+import { FactorSourcePicker } from '../components/FactorSourcePicker';
 import { ConfigSidebar } from '../components/ConfigSidebar';
 import { useAlphaFactoryConfig } from '../hooks/useAlphaFactoryConfig';
 import { useAlphaFactoryBacktest } from '../hooks/useAlphaFactoryBacktest';
@@ -38,6 +40,10 @@ export const AlphaFactoryPage: React.FC = () => {
     lookback, setLookback,
     exitRules, setExitRules,
     exitMethod, setExitMethod,
+    // TICKET_276: Factor layer
+    factors, setFactors,
+    factorMethod, setFactorMethod,
+    factorLookback, setFactorLookback,
     saveAs,
     // PLUGIN_TICKET_012: Sidebar props
     configId,
@@ -58,11 +64,16 @@ export const AlphaFactoryPage: React.FC = () => {
     lookback,
     exitMethod,
     exitRules,
+    // TICKET_276: Factor layer
+    factors,
+    factorMethod,
+    factorLookback,
     dataConfig,
   });
 
   const isRunning = status === 'loading_data' || status === 'generating' || status === 'running';
-  const canRun = signals.length > 0 && !!dataConfig.symbol && !!dataConfig.startDate && !!dataConfig.endDate;
+  // TICKET_276: Hybrid model allows either signals > 0 OR factors > 0 (or both)
+  const canRun = (signals.length > 0 || factors.length > 0) && !!dataConfig.symbol && !!dataConfig.startDate && !!dataConfig.endDate;
 
   // PLUGIN_TICKET_016: Auto-scroll to result section when backtest starts
   const resultRef = useRef<HTMLDivElement>(null);
@@ -74,11 +85,27 @@ export const AlphaFactoryPage: React.FC = () => {
 
   // TICKET_275: picker only for signals now (exit uses built-in rules)
   const [pickerVisible, setPickerVisible] = useState(false);
+  // TICKET_276: Factor picker state
+  const [factorPickerVisible, setFactorPickerVisible] = useState(false);
 
   // Signal handlers - PLUGIN_TICKET_007: open picker instead of creating placeholder
   const handleAddSignal = useCallback(() => {
     setPickerVisible(true);
   }, []);
+
+  // TICKET_276: Factor handlers
+  const handleAddFactor = useCallback(() => {
+    setFactorPickerVisible(true);
+  }, []);
+
+  const handleSelectFactor = useCallback((factor: FactorChip) => {
+    setFactors(prev => [...prev, factor]);
+    setFactorPickerVisible(false);
+  }, [setFactors]);
+
+  const handleRemoveFactor = useCallback((id: string) => {
+    setFactors(prev => prev.filter(f => f.id !== id));
+  }, [setFactors]);
 
   // Build SignalChip from SignalSourceItem
   const buildChipFromSource = useCallback((source: SignalSourceItem): SignalChip => ({
@@ -172,6 +199,27 @@ export const AlphaFactoryPage: React.FC = () => {
             onSelect={handleSelectSource}
             onClose={() => setPickerVisible(false)}
             excludeIds={signals.map(s => s.id)}
+          />
+
+          <FlowDivider />
+
+          {/* TICKET_276: Factor Factory Section */}
+          <FactorFactorySection
+            factors={factors}
+            method={factorMethod}
+            lookback={factorLookback}
+            onAddFactor={handleAddFactor}
+            onRemoveFactor={handleRemoveFactor}
+            onMethodChange={setFactorMethod}
+            onLookbackChange={setFactorLookback}
+          />
+
+          {/* TICKET_276: Factor picker modal */}
+          <FactorSourcePicker
+            visible={factorPickerVisible}
+            onSelect={handleSelectFactor}
+            onClose={() => setFactorPickerVisible(false)}
+            excludeIds={factors.map(f => f.id)}
           />
 
           <FlowDivider />

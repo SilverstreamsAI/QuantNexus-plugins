@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { SignalChip, ExitRules, ConfigSummary } from '../types';
+import { SignalChip, FactorChip, ExitRules, ConfigSummary } from '../types';
 import { DEFAULT_EXIT_RULES } from '../constants';
 
 // -----------------------------------------------------------------------------
@@ -20,6 +20,9 @@ import { DEFAULT_EXIT_RULES } from '../constants';
 const DEFAULT_SIGNAL_METHOD = 'sharpe_weighted';
 const DEFAULT_LOOKBACK = 60;
 const DEFAULT_EXIT_METHOD = 'any';
+// TICKET_276: Factor layer defaults
+const DEFAULT_FACTOR_METHOD = 'equal_weight';
+const DEFAULT_FACTOR_LOOKBACK = 60;
 
 // -----------------------------------------------------------------------------
 // Format detection helper
@@ -62,6 +65,13 @@ interface UseAlphaFactoryConfigReturn {
   setExitRules: React.Dispatch<React.SetStateAction<ExitRules>>;
   exitMethod: string;
   setExitMethod: React.Dispatch<React.SetStateAction<string>>;
+  // TICKET_276: Factor layer
+  factors: FactorChip[];
+  setFactors: React.Dispatch<React.SetStateAction<FactorChip[]>>;
+  factorMethod: string;
+  setFactorMethod: React.Dispatch<React.SetStateAction<string>>;
+  factorLookback: number;
+  setFactorLookback: React.Dispatch<React.SetStateAction<number>>;
   configName: string;
   saveAs: () => Promise<void>;
 
@@ -86,6 +96,10 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
   // TICKET_275: ExitRules object instead of SignalChip[]
   const [exitRules, setExitRules] = useState<ExitRules>({ ...DEFAULT_EXIT_RULES });
   const [exitMethod, setExitMethod] = useState(DEFAULT_EXIT_METHOD);
+  // TICKET_276: Factor layer state
+  const [factors, setFactors] = useState<FactorChip[]>([]);
+  const [factorMethod, setFactorMethod] = useState(DEFAULT_FACTOR_METHOD);
+  const [factorLookback, setFactorLookback] = useState(DEFAULT_FACTOR_LOOKBACK);
   const [configId, setConfigId] = useState<string | undefined>();
   const [configName, setConfigName] = useState('');
 
@@ -98,6 +112,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
   const configNameRef = useRef(configName);
   const signalsRef = useRef(signals);
   const exitRulesRef = useRef(exitRules);
+  const factorsRef = useRef(factors);
   const mountedRef = useRef(false);
   // Skip auto-save when state changes are from config switching (not user edits)
   const skipAutoSaveRef = useRef(false);
@@ -106,6 +121,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
   configNameRef.current = configName;
   signalsRef.current = signals;
   exitRulesRef.current = exitRules;
+  factorsRef.current = factors;
 
   // ---------------------------------------------------------------------------
   // PLUGIN_TICKET_012: Refresh config list from DB
@@ -127,7 +143,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     const id = configIdRef.current;
     if (!id) return null;
     if (configNameRef.current !== 'Untitled') return null;
-    if (signalsRef.current.length > 0) return null;
+    if (signalsRef.current.length > 0 || factorsRef.current.length > 0) return null;
 
     await window.electronAPI.alphaFactory.deleteConfig(id);
     return id;
@@ -147,6 +163,10 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
         // TICKET_275: format detection
         setExitRules(parseExitRules(response.data.exits));
         setExitMethod(response.data.exitMethod);
+        // TICKET_276: Factor layer
+        setFactors((response.data.factors as FactorChip[]) || []);
+        setFactorMethod(response.data.factorMethod || DEFAULT_FACTOR_METHOD);
+        setFactorLookback(response.data.factorLookback ?? DEFAULT_FACTOR_LOOKBACK);
         setConfigId(response.data.id);
         setConfigName(response.data.name);
       }
@@ -171,8 +191,8 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       skipAutoSaveRef.current = false;
       return;
     }
-    // Nothing to save if no config and no signals
-    if (!configIdRef.current && signals.length === 0) return;
+    // Nothing to save if no config and no signals/factors
+    if (!configIdRef.current && signals.length === 0 && factors.length === 0) return;
 
     const timer = setTimeout(async () => {
       const name = configNameRef.current || 'Default';
@@ -185,6 +205,10 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
         signals,
         exitMethod,
         exits: exitRules,
+        // TICKET_276: Factor layer
+        factors,
+        factorMethod,
+        factorLookback,
       });
 
       if (response.success && response.id) {
@@ -198,7 +222,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [signals, signalMethod, lookback, exitRules, exitMethod, refreshConfigList]);
+  }, [signals, signalMethod, lookback, exitRules, exitMethod, factors, factorMethod, factorLookback, refreshConfigList]);
 
   // ---------------------------------------------------------------------------
   // Save As: prompt for name, create new config
@@ -217,6 +241,10 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       signals,
       exitMethod,
       exits: exitRules,
+      // TICKET_276: Factor layer
+      factors,
+      factorMethod,
+      factorLookback,
     });
 
     if (response.success && response.id) {
@@ -225,7 +253,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       setConfigName(name);
       await refreshConfigList();
     }
-  }, [signalMethod, lookback, signals, exitMethod, exitRules, refreshConfigList]);
+  }, [signalMethod, lookback, signals, exitMethod, exitRules, factors, factorMethod, factorLookback, refreshConfigList]);
 
   // ---------------------------------------------------------------------------
   // PLUGIN_TICKET_012: Switch to a different config
@@ -248,6 +276,10 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     // TICKET_275: format detection
     setExitRules(parseExitRules(data.exits));
     setExitMethod(data.exitMethod);
+    // TICKET_276: Factor layer
+    setFactors((data.factors as FactorChip[]) || []);
+    setFactorMethod(data.factorMethod || DEFAULT_FACTOR_METHOD);
+    setFactorLookback(data.factorLookback ?? DEFAULT_FACTOR_LOOKBACK);
     setConfigId(data.id);
     setConfigName(data.name);
 
@@ -260,6 +292,10 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       signals: data.signals as SignalChip[],
       exitMethod: data.exitMethod,
       exits: parseExitRules(data.exits),
+      // TICKET_276: Factor layer
+      factors: (data.factors as FactorChip[]) || [],
+      factorMethod: data.factorMethod || DEFAULT_FACTOR_METHOD,
+      factorLookback: data.factorLookback ?? DEFAULT_FACTOR_LOOKBACK,
     });
 
     // Update list locally: remove cleaned config + toggle isActive (preserve order)
@@ -284,6 +320,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     await cleanupCurrentIfEmpty();
 
     const defaultSignals: SignalChip[] = [];
+    const defaultFactors: FactorChip[] = [];
     const defaultRules = { ...DEFAULT_EXIT_RULES };
 
     const response = await window.electronAPI.alphaFactory.saveConfig({
@@ -293,6 +330,10 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       signals: defaultSignals,
       exitMethod: DEFAULT_EXIT_METHOD,
       exits: defaultRules,
+      // TICKET_276: Factor layer
+      factors: defaultFactors,
+      factorMethod: DEFAULT_FACTOR_METHOD,
+      factorLookback: DEFAULT_FACTOR_LOOKBACK,
     });
 
     if (response.success && response.id) {
@@ -303,6 +344,10 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       setLookback(DEFAULT_LOOKBACK);
       setExitRules(defaultRules);
       setExitMethod(DEFAULT_EXIT_METHOD);
+      // TICKET_276: Reset factor state
+      setFactors(defaultFactors);
+      setFactorMethod(DEFAULT_FACTOR_METHOD);
+      setFactorLookback(DEFAULT_FACTOR_LOOKBACK);
       setConfigId(response.id);
       setConfigName('Untitled');
       await refreshConfigList();
@@ -334,6 +379,10 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
           // TICKET_275: format detection
           setExitRules(parseExitRules(data.exits));
           setExitMethod(data.exitMethod);
+          // TICKET_276: Factor layer
+          setFactors((data.factors as FactorChip[]) || []);
+          setFactorMethod(data.factorMethod || DEFAULT_FACTOR_METHOD);
+          setFactorLookback(data.factorLookback ?? DEFAULT_FACTOR_LOOKBACK);
           setConfigId(data.id);
           setConfigName(data.name);
           // Mark as active
@@ -345,6 +394,9 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
             signals: data.signals as SignalChip[],
             exitMethod: data.exitMethod,
             exits: parseExitRules(data.exits),
+            factors: (data.factors as FactorChip[]) || [],
+            factorMethod: data.factorMethod || DEFAULT_FACTOR_METHOD,
+            factorLookback: data.factorLookback ?? DEFAULT_FACTOR_LOOKBACK,
           });
         }
       } else {
@@ -355,6 +407,10 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
         setLookback(DEFAULT_LOOKBACK);
         setExitRules({ ...DEFAULT_EXIT_RULES });
         setExitMethod(DEFAULT_EXIT_METHOD);
+        // TICKET_276: Reset factor state
+        setFactors([]);
+        setFactorMethod(DEFAULT_FACTOR_METHOD);
+        setFactorLookback(DEFAULT_FACTOR_LOOKBACK);
         setConfigId(undefined);
         setConfigName('');
       }
@@ -378,6 +434,13 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     setExitRules,
     exitMethod,
     setExitMethod,
+    // TICKET_276: Factor layer
+    factors,
+    setFactors,
+    factorMethod,
+    setFactorMethod,
+    factorLookback,
+    setFactorLookback,
     configName,
     saveAs,
     // PLUGIN_TICKET_012

@@ -35,6 +35,21 @@ export interface CombinatorMethod {
 }
 
 /**
+ * TICKET_276: Factor chip for Alpha Factory Factor layer.
+ * Read-only factor data from backend (desktop-api.silvonastream.com).
+ */
+export interface FactorChip {
+  id: string;          // factor_id from backend
+  name: string;
+  category: string;    // momentum, mean_reversion, volatility, etc.
+  source: string;      // library, mined, custom
+  formula: string | null;
+  ic: number | null;
+  icir: number | null;
+  sharpe: number | null;
+}
+
+/**
  * PLUGIN_TICKET_012: Summary item for config sidebar list.
  * Maps to alpha-factory:list-configs IPC response shape.
  */
@@ -43,6 +58,7 @@ export interface ConfigSummary {
   name: string;
   signalMethod: string;
   signalCount: number;
+  factorCount: number;   // TICKET_276: Factor layer count
   exitCount: number;
   isActive: boolean;
   updatedAt: string;
