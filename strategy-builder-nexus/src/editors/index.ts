@@ -18,6 +18,7 @@ import { MarketObserverPage } from '../components/pages/MarketObserverPage';
 import { TraderAIEntryPage } from '../components/pages/TraderAIEntryPage';
 import { AILiberoPage } from '../components/pages/AILiberoPage';
 import { AIStrategyStudioPage } from '../components/pages/AIStrategyStudioPage';
+import { IndicatorExitPage } from '../components/pages/IndicatorExitPage';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -82,6 +83,10 @@ export const EDITOR_PROVIDERS: Record<string, EditorProvider> = {
   // TICKET_077_19: AI Strategy Studio Page (page38) - AI Strategy Studio Mode
   'strategy.aiStrategyStudio': {
     component: AIStrategyStudioPage,
+  },
+  // TICKET_274: Indicator Exit Generator (Risk Manager)
+  'strategy.indicatorExit': {
+    component: IndicatorExitPage,
   },
 };
 

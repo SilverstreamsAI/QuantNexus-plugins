@@ -1,0 +1,669 @@
+/**
+ * IndicatorExitPage Component (Risk Manager)
+ *
+ * Risk Override Exit Generator page following TICKET_077 layout specification.
+ * Zones: A (Header), B (Sidebar), C (Content), D (Action Bar)
+ *
+ * Generates Python risk override rules (Layer 1) that operate above
+ * the Alpha Factory combinator. Users configure emergency protection,
+ * NOT daily exit logic - normal exit is implicit in the combinator.
+ *
+ * TICKET_077_D2: Uses unified useGenerateWorkflow hook
+ *
+ * @see TICKET_274 - Indicator Exit Generator Page (Risk Manager)
+ * @see TICKET_247 - Alpha Factory Architecture (Simons-style)
+ * @see TICKET_077 - Silverstream UI Component Library
+ */
+
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Settings, Play, Loader2, RotateCcw, Plus, ShieldAlert, OctagonX, Shield } from 'lucide-react';
+import { cn } from '../../lib/utils';
+import {
+  CodeDisplay,
+  ApiKeyPrompt,
+  NamingDialog,
+  GenerateContentWrapper,
+  PresetButtonGroup,
+  PortalDropdown,
+} from '../ui';
+import { RiskOverrideRuleCard } from '../ui/RiskOverrideRuleCard';
+import { HardSafetyConfig } from '../ui/HardSafetyConfig';
+
+// Hooks
+import {
+  useGenerateWorkflow,
+  GenerateWorkflowConfig,
+  GenerationResult,
+} from '../../hooks';
+
+// Services
+import {
+  executeRiskOverrideExit,
+  validateRiskOverrideExitConfig,
+  getExitErrorMessage,
+  EXIT_ERROR_CODE_MESSAGES,
+  RISK_RULE_TYPES,
+  RULE_DEFAULTS,
+  MAX_RISK_RULES,
+} from '../../services/risk-override-exit-service';
+import type {
+  RiskOverrideExitConfig,
+  RiskOverrideExitResult,
+  RiskOverrideRule,
+  RiskRuleType,
+  IndicatorExitState,
+} from '../../services/risk-override-exit-service';
+import {
+  buildRiskOverrideExitRequest,
+  extractClassName,
+} from '../../services/algorithm-storage-service';
+import type { AlgorithmSaveRequest } from '../../services/algorithm-storage-service';
+
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
+
+interface IndicatorExitPageProps {
+  onSettingsClick?: () => void;
+  pageTitle?: string;
+  llmProvider?: string;
+  llmModel?: string;
+}
+
+// Rule type descriptions for Add Rule dropdown
+const RULE_DESCRIPTIONS: Record<string, string> = {
+  circuit_breaker: 'Force close on position loss threshold',
+  time_limit: 'Force close after max holding period',
+  regime_detection: 'Override when market regime changes',
+  drawdown_limit: 'Portfolio-level drawdown protection',
+  indicator_guard: 'Override on indicator extreme values',
+};
+
+// Direction presets for PresetButtonGroup (full variant with descriptions)
+const DIRECTION_PRESETS = [
+  { id: 'long', label: 'Long', description: 'Protect long positions only' },
+  { id: 'short', label: 'Short', description: 'Protect short positions only' },
+  { id: 'both', label: 'Both', description: 'Protect all positions' },
+];
+
+// -----------------------------------------------------------------------------
+// Rule Factory
+// -----------------------------------------------------------------------------
+
+let ruleIdCounter = 0;
+
+function createRule(type: RiskRuleType, priority: number): RiskOverrideRule {
+  const id = `rule-${Date.now()}-${++ruleIdCounter}`;
+  const base = { id, enabled: true, priority };
+
+  switch (type) {
+    case 'circuit_breaker':
+      return {
+        ...base,
+        type: 'circuit_breaker',
+        triggerPnlPercent: RULE_DEFAULTS.circuit_breaker.triggerPnlPercent,
+        scope: 'per_position',
+        action: 'close_all',
+        cooldownBars: RULE_DEFAULTS.circuit_breaker.cooldownBars,
+      };
+    case 'time_limit':
+      return {
+        ...base,
+        type: 'time_limit',
+        maxHolding: RULE_DEFAULTS.time_limit.maxHolding,
+        unit: RULE_DEFAULTS.time_limit.unit,
+        decay: 'none',
+        action: 'close_all',
+      };
+    case 'regime_detection':
+      return {
+        ...base,
+        type: 'regime_detection',
+        indicator: { name: '', parameters: {} },
+        condition: '>',
+        threshold: RULE_DEFAULTS.regime_detection.threshold,
+        action: 'reduce_all',
+        reducePercent: RULE_DEFAULTS.regime_detection.reducePercent,
+        recovery: 'auto',
+      };
+    case 'drawdown_limit':
+      return {
+        ...base,
+        type: 'drawdown_limit',
+        maxDrawdownPercent: RULE_DEFAULTS.drawdown_limit.maxDrawdownPercent,
+        action: 'halt_trading',
+        recovery: 'auto',
+      };
+    case 'indicator_guard':
+      return {
+        ...base,
+        type: 'indicator_guard',
+        indicator: { name: '', parameters: {} },
+        condition: '>',
+        threshold: RULE_DEFAULTS.indicator_guard.threshold,
+        appliesTo: 'both',
+        action: 'close_position',
+      };
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Workflow Config Builders
+// -----------------------------------------------------------------------------
+
+function buildApiConfig(state: IndicatorExitState, strategyName: string): RiskOverrideExitConfig {
+  return {
+    strategy_name: strategyName,
+    direction: state.direction,
+    rules: state.rules,
+    hard_safety: {
+      max_loss_percent: state.hardSafety.maxLossPercent,
+    },
+    llm_provider: state.llmProvider,
+    llm_model: state.llmModel,
+    storage_mode: state.storageMode,
+  };
+}
+
+function buildStorageRequestFromResult(
+  result: GenerationResult,
+  state: IndicatorExitState,
+  strategyName: string
+): AlgorithmSaveRequest {
+  return buildRiskOverrideExitRequest(
+    {
+      strategy_name: strategyName,
+      strategy_code: result.strategy_code || '',
+      class_name: extractClassName(result.strategy_code || ''),
+    },
+    {
+      direction: state.direction,
+      rules: state.rules,
+      hard_safety: { max_loss_percent: state.hardSafety.maxLossPercent },
+      llm_provider: state.llmProvider,
+      llm_model: state.llmModel,
+    }
+  );
+}
+
+// -----------------------------------------------------------------------------
+// IndicatorExitPage Component
+// -----------------------------------------------------------------------------
+
+export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
+  onSettingsClick,
+  pageTitle,
+  llmProvider = 'NONA',
+  llmModel = 'nona-fast',
+}) => {
+  // ---------------------------------------------------------------------------
+  // Page-specific State
+  // ---------------------------------------------------------------------------
+
+  const [direction, setDirection] = useState<'long' | 'short' | 'both'>('both');
+  const [rules, setRules] = useState<RiskOverrideRule[]>([]);
+  const [hardSafetyMaxLoss, setHardSafetyMaxLoss] = useState<number>(RULE_DEFAULTS.hard_safety.maxLossPercent);
+  const [storageMode, setStorageMode] = useState<'local' | 'remote' | 'hybrid'>('local');
+
+  // Add Rule dropdown
+  const addRuleRef = useRef<HTMLButtonElement>(null);
+  const [addRuleOpen, setAddRuleOpen] = useState(false);
+
+  // Load storage mode from plugin config
+  useEffect(() => {
+    const loadStorageMode = async () => {
+      try {
+        const configResult = await window.electronAPI.plugin.getConfig('com.quantnexus.strategy-builder-nexus');
+        if (configResult.success && configResult.config) {
+          const mode = configResult.config['strategy.dataSource'] as string || 'local';
+          setStorageMode(mode as 'local' | 'remote' | 'hybrid');
+        }
+      } catch (e) {
+        console.error('[IndicatorExit] Failed to load storage mode:', e);
+      }
+    };
+    loadStorageMode();
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Rule Management
+  // ---------------------------------------------------------------------------
+
+  const handleAddRule = useCallback((type: RiskRuleType) => {
+    if (rules.length >= MAX_RISK_RULES) return;
+    const newRule = createRule(type, rules.length + 1);
+    setRules(prev => [...prev, newRule]);
+    setAddRuleOpen(false);
+  }, [rules.length]);
+
+  const handleUpdateRule = useCallback((index: number, updatedRule: RiskOverrideRule) => {
+    setRules(prev => {
+      const next = [...prev];
+      next[index] = updatedRule;
+      return next;
+    });
+  }, []);
+
+  const handleDeleteRule = useCallback((index: number) => {
+    setRules(prev => {
+      const next = prev.filter((_, i) => i !== index);
+      // Re-assign priorities
+      return next.map((r, i) => ({ ...r, priority: i + 1 }));
+    });
+  }, []);
+
+  const handleToggleRule = useCallback((index: number, enabled: boolean) => {
+    setRules(prev => {
+      const next = [...prev];
+      next[index] = { ...next[index], enabled };
+      return next;
+    });
+  }, []);
+
+  const handleMoveUp = useCallback((index: number) => {
+    if (index <= 0) return;
+    setRules(prev => {
+      const next = [...prev];
+      [next[index - 1], next[index]] = [next[index], next[index - 1]];
+      return next.map((r, i) => ({ ...r, priority: i + 1 }));
+    });
+  }, []);
+
+  const handleMoveDown = useCallback((index: number) => {
+    setRules(prev => {
+      if (index >= prev.length - 1) return prev;
+      const next = [...prev];
+      [next[index], next[index + 1]] = [next[index + 1], next[index]];
+      return next.map((r, i) => ({ ...r, priority: i + 1 }));
+    });
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Workflow Configuration
+  // ---------------------------------------------------------------------------
+
+  const currentState: IndicatorExitState = useMemo(() => ({
+    direction,
+    rules,
+    hardSafety: { maxLossPercent: hardSafetyMaxLoss },
+    storageMode,
+    llmProvider,
+    llmModel,
+  }), [direction, rules, hardSafetyMaxLoss, storageMode, llmProvider, llmModel]);
+
+  // Validation items (enabled rules)
+  const enabledRules = useMemo(() => rules.filter(r => r.enabled), [rules]);
+
+  const workflowConfig = useMemo((): GenerateWorkflowConfig<RiskOverrideExitConfig, IndicatorExitState> => ({
+    pageId: 'indicator-exit-page',
+    llmProvider,
+    llmModel,
+    defaultStrategyName: 'New Risk Override Strategy',
+    validationErrorMessage: 'At least one enabled risk override rule is required',
+    buildConfig: buildApiConfig,
+    validateConfig: validateRiskOverrideExitConfig,
+    executeApi: executeRiskOverrideExit as (config: RiskOverrideExitConfig) => Promise<GenerationResult>,
+    buildStorageRequest: buildStorageRequestFromResult,
+    errorMessages: EXIT_ERROR_CODE_MESSAGES,
+    getErrorMessage: (result) => getExitErrorMessage(result as unknown as RiskOverrideExitResult),
+  }), [llmProvider, llmModel]);
+
+  // ---------------------------------------------------------------------------
+  // Unified Generate Workflow Hook
+  // ---------------------------------------------------------------------------
+
+  const { state, actions, llmAccess, codeDisplayRef } = useGenerateWorkflow(
+    workflowConfig,
+    { onSettingsClick },
+    currentState,
+    enabledRules
+  );
+
+  // ---------------------------------------------------------------------------
+  // Handlers
+  // ---------------------------------------------------------------------------
+
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    actions.setStrategyName(e.target.value);
+  }, [actions]);
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
+
+  return (
+    <div className="h-full flex flex-col bg-color-terminal-bg text-color-terminal-text">
+      {/* ================================================================== */}
+      {/* Zone A: Page Header                                                */}
+      {/* ================================================================== */}
+      <div className="flex-shrink-0 px-6 py-2 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
+        <div>
+          <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
+            {pageTitle || 'Risk Manager - Exit Override Rules'}
+          </h1>
+          <p className="text-[10px] text-color-terminal-text-muted mt-0.5">
+            Configure emergency protection above the combinator layer
+          </p>
+        </div>
+        <button
+          onClick={onSettingsClick}
+          className="p-2 text-color-terminal-text-muted hover:text-color-terminal-text hover:bg-white/5 rounded transition-all"
+        >
+          <Settings className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* ================================================================ */}
+        {/* Zone B: Strategy Sidebar                                         */}
+        {/* ================================================================ */}
+        <div className="w-56 flex-shrink-0 border-r border-color-terminal-border bg-color-terminal-panel/30 p-4 overflow-y-auto">
+          <div className="space-y-3">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
+              Current Strategy
+            </label>
+            <input
+              type="text"
+              value={state.strategyName}
+              onChange={handleNameChange}
+              placeholder="Strategy Name"
+              className="w-full px-3 py-2 text-xs border rounded focus:outline-none"
+              style={{
+                backgroundColor: '#112240',
+                borderColor: '#233554',
+                color: '#e6f1ff',
+              }}
+            />
+            {/* Status Indicator */}
+            <div className="flex items-center gap-2 text-[10px]">
+              <div
+                className={cn(
+                  'w-1.5 h-1.5 rounded-full',
+                  state.isSaved ? 'bg-color-terminal-accent-teal' : 'bg-color-terminal-text-muted'
+                )}
+              />
+              <span
+                className={cn(
+                  state.isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
+                )}
+              >
+                {state.isSaved ? 'Saved' : 'Unsaved'}
+              </span>
+            </div>
+          </div>
+
+          {/* Architecture Summary */}
+          <div className="mt-6 space-y-3">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
+              Configuration
+            </label>
+
+            {/* Direction */}
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-color-terminal-text-muted">Direction</span>
+              <span className="px-1.5 py-0.5 rounded bg-color-terminal-accent-primary/20 text-color-terminal-accent-primary font-medium uppercase">
+                {direction}
+              </span>
+            </div>
+
+            {/* Active Rules */}
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-color-terminal-text-muted">Active Rules</span>
+              <span className={cn(
+                'px-1.5 py-0.5 rounded font-medium',
+                enabledRules.length > 0
+                  ? 'bg-color-terminal-accent-teal/20 text-color-terminal-accent-teal'
+                  : 'bg-color-terminal-text-muted/20 text-color-terminal-text-muted'
+              )}>
+                {enabledRules.length} / {rules.length}
+              </span>
+            </div>
+
+            {/* Hard Safety */}
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-color-terminal-text-muted">Hard Safety</span>
+              <span className="px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 font-medium">
+                {hardSafetyMaxLoss}%
+              </span>
+            </div>
+          </div>
+
+          {/* Mini Architecture Diagram */}
+          <div className="mt-6 p-3 rounded border border-color-terminal-border/50 bg-color-terminal-bg/50">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-2">
+              Exit Architecture
+            </label>
+            <div className="space-y-1.5 text-[10px]">
+              <div className="text-color-terminal-text-muted">
+                L0: Combinator
+              </div>
+              <div className="text-color-terminal-text-muted pl-2">
+                &#8595;
+              </div>
+              <div className="text-color-terminal-accent-primary font-medium">
+                L1: Risk Override ({enabledRules.length})
+              </div>
+              <div className="text-color-terminal-text-muted pl-2">
+                &#8595;
+              </div>
+              <div className="text-red-400 font-medium">
+                L2: Hard Safety
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Content Area (Zone C + Zone D) */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* ============================================================== */}
+          {/* Zone C: Variable Content Area                                   */}
+          {/* ============================================================== */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <GenerateContentWrapper
+              isGenerating={state.isGenerating}
+              loadingMessage="Generating risk override exit code..."
+            >
+              {/* Direction Selector */}
+              <div className="mb-8">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-3">
+                  Direction
+                </label>
+                <PresetButtonGroup
+                  presets={DIRECTION_PRESETS}
+                  activePreset={direction}
+                  onSelect={(id) => setDirection(id as 'long' | 'short' | 'both')}
+                  variant="full"
+                />
+              </div>
+
+              {/* ======================================================== */}
+              {/* Layer 1: Risk Override Rules                               */}
+              {/* ======================================================== */}
+              <div className="mb-8">
+                {/* Section Header */}
+                <div className="flex items-center gap-2 mb-1 pb-2 border-b border-color-terminal-border/30">
+                  <ShieldAlert className="w-4 h-4 text-color-terminal-accent-primary" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-color-terminal-text">
+                    Layer 1: Risk Override Rules
+                  </span>
+                  <span className={cn(
+                    'ml-auto text-[10px] px-2 py-0.5 rounded font-medium',
+                    enabledRules.length > 0
+                      ? 'bg-color-terminal-accent-teal/20 text-color-terminal-accent-teal'
+                      : 'bg-color-terminal-text-muted/20 text-color-terminal-text-muted'
+                  )}>
+                    {enabledRules.length} enabled / {rules.length} total
+                  </span>
+                </div>
+
+                {/* Rule Execution Info */}
+                <p className="text-[10px] text-color-terminal-text-muted mb-4 mt-2">
+                  Rules evaluated in priority order each bar. First triggered rule executes, remaining skipped.
+                </p>
+
+                {/* Rule List or Empty State */}
+                {rules.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Shield className="w-10 h-10 text-color-terminal-text-muted/30 mb-3" />
+                    <p className="text-xs text-color-terminal-text-muted mb-1">
+                      No risk override rules configured
+                    </p>
+                    <p className="text-[10px] text-color-terminal-text-muted/70 mb-4">
+                      Add rules to protect against combinator failure scenarios
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 mb-4">
+                    {rules.map((rule, index) => (
+                      <RiskOverrideRuleCard
+                        key={rule.id}
+                        rule={rule}
+                        onChange={(updated) => handleUpdateRule(index, updated)}
+                        onDelete={() => handleDeleteRule(index)}
+                        onToggle={(enabled) => handleToggleRule(index, enabled)}
+                        onMoveUp={index > 0 ? () => handleMoveUp(index) : undefined}
+                        onMoveDown={index < rules.length - 1 ? () => handleMoveDown(index) : undefined}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Add Rule Button */}
+                {rules.length < MAX_RISK_RULES && (
+                  <div className="relative">
+                    <button
+                      ref={addRuleRef}
+                      onClick={() => setAddRuleOpen(!addRuleOpen)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-xs font-medium border border-dashed border-color-terminal-border rounded-lg hover:border-color-terminal-accent-primary/50 hover:bg-white/5 text-color-terminal-text-muted hover:text-color-terminal-text transition-all w-full justify-center"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add Rule
+                    </button>
+                    <PortalDropdown
+                      isOpen={addRuleOpen}
+                      triggerRef={addRuleRef}
+                      onClose={() => setAddRuleOpen(false)}
+                      maxHeight={320}
+                    >
+                      {RISK_RULE_TYPES.map(rt => (
+                        <button
+                          key={rt.value}
+                          onClick={() => handleAddRule(rt.value as RiskRuleType)}
+                          className="w-full px-3 py-2.5 text-left hover:bg-white/10 transition-colors"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className={cn(
+                              'w-2 h-2 rounded-full flex-shrink-0',
+                              rt.color === 'red' && 'bg-red-500',
+                              rt.color === 'teal' && 'bg-teal-500',
+                              rt.color === 'warning' && 'bg-amber-500',
+                              rt.color === 'primary' && 'bg-blue-500',
+                            )} />
+                            <span className="text-xs text-[#e6f1ff] font-medium">{rt.label}</span>
+                          </div>
+                          <p className="text-[10px] text-color-terminal-text-muted ml-4 mt-0.5">
+                            {RULE_DESCRIPTIONS[rt.value]}
+                          </p>
+                        </button>
+                      ))}
+                    </PortalDropdown>
+                  </div>
+                )}
+              </div>
+
+              {/* ======================================================== */}
+              {/* Layer 2: Hard Safety Net                                   */}
+              {/* ======================================================== */}
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-color-terminal-border/30">
+                  <OctagonX className="w-4 h-4 text-red-400" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-color-terminal-text">
+                    Layer 2: Hard Safety Net
+                  </span>
+                  <span className="ml-auto text-[10px] px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-medium">
+                    Always Active
+                  </span>
+                </div>
+                <HardSafetyConfig
+                  maxLossPercent={hardSafetyMaxLoss}
+                  onChange={setHardSafetyMaxLoss}
+                />
+              </div>
+            </GenerateContentWrapper>
+
+            {/* ============================================================ */}
+            {/* Result Display Area - CodeDisplay                             */}
+            {/* (Outside wrapper - always visible during generation)          */}
+            {/* ============================================================ */}
+            {(state.generateResult || state.isGenerating) && (
+              <div ref={codeDisplayRef} className="mt-8">
+                <CodeDisplay
+                  code={state.generateResult?.code || ''}
+                  state={actions.getCodeDisplayState()}
+                  errorMessage={state.generateResult?.error}
+                  title="GENERATED RISK OVERRIDE CODE"
+                  showLineNumbers={true}
+                  maxHeight="400px"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* ============================================================== */}
+          {/* Zone D: Action Bar                                              */}
+          {/* ============================================================== */}
+          <div className="flex-shrink-0 border-t border-color-terminal-border bg-color-terminal-surface/50 p-4">
+            <button
+              onClick={actions.handleStartGenerate}
+              disabled={state.isGenerating}
+              className={cn(
+                "w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all",
+                state.isGenerating
+                  ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
+                  : "border-color-terminal-accent-gold bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20"
+              )}
+            >
+              {state.isGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Generating...
+                </>
+              ) : actions.hasResult ? (
+                <>
+                  <RotateCcw className="w-4 h-4" />
+                  Regenerate
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" />
+                  Generate Exit Strategy
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* TICKET_190: API Key Prompt */}
+      <ApiKeyPrompt
+        isOpen={llmAccess.showPrompt}
+        userTier={llmAccess.userTier}
+        onConfigure={llmAccess.openSettings}
+        onUpgrade={llmAccess.triggerUpgrade}
+        onLogin={llmAccess.triggerLogin}
+        onDismiss={llmAccess.closePrompt}
+      />
+
+      {/* TICKET_199: Naming Dialog */}
+      <NamingDialog
+        visible={state.namingDialogVisible}
+        contextData={{ algorithm: 'RiskOverride' }}
+        onConfirm={actions.handleConfirmNaming}
+        onCancel={actions.handleCancelNaming}
+      />
+    </div>
+  );
+};
+
+export default IndicatorExitPage;

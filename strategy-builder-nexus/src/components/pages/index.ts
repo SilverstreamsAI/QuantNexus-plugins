@@ -25,3 +25,6 @@ export { AILiberoPage } from './AILiberoPage';
 // page38: AI Strategy Studio
 export { AIStrategyStudioPage } from './AIStrategyStudioPage';
 export type { AIStrategyStudioPageProps } from './AIStrategyStudioPage';
+
+// TICKET_274: Indicator Exit Generator (Risk Manager)
+export { IndicatorExitPage } from './IndicatorExitPage';

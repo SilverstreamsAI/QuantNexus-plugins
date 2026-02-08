@@ -121,3 +121,25 @@ export type { AdvancedConfigPanelProps, PredictionConfig } from './AdvancedConfi
 // TICKET_260: SignalModeSelector for Regime Detector and Entry pages
 export { SignalModeSelector } from './SignalModeSelector';
 export type { SignalModeSelectorProps, SignalMode, SignalModeContext } from './SignalModeSelector';
+
+// TICKET_274: Risk Override Exit Components (Risk Manager)
+export { CircuitBreakerConfig } from './CircuitBreakerConfig';
+export type { CircuitBreakerConfigProps } from './CircuitBreakerConfig';
+
+export { TimeLimitConfig } from './TimeLimitConfig';
+export type { TimeLimitConfigProps } from './TimeLimitConfig';
+
+export { RegimeDetectionConfig } from './RegimeDetectionConfig';
+export type { RegimeDetectionConfigProps } from './RegimeDetectionConfig';
+
+export { DrawdownLimitConfig } from './DrawdownLimitConfig';
+export type { DrawdownLimitConfigProps } from './DrawdownLimitConfig';
+
+export { IndicatorGuardConfig } from './IndicatorGuardConfig';
+export type { IndicatorGuardConfigProps } from './IndicatorGuardConfig';
+
+export { HardSafetyConfig } from './HardSafetyConfig';
+export type { HardSafetyConfigProps } from './HardSafetyConfig';
+
+export { RiskOverrideRuleCard } from './RiskOverrideRuleCard';
+export type { RiskOverrideRuleCardProps } from './RiskOverrideRuleCard';

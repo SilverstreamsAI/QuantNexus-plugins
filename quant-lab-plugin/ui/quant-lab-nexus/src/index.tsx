@@ -33,7 +33,7 @@ export { ActionBar } from './components/ActionBar';
 export { ConfigSidebar } from './components/ConfigSidebar';
 
 // Export hooks
-export { useAlphaFactory } from './hooks/useAlphaFactory';
+export { useAlphaFactoryBacktest } from './hooks/useAlphaFactoryBacktest';
 
 // =============================================================================
 // Plugin State

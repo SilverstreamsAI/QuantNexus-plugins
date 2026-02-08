@@ -3,13 +3,15 @@
  *
  * PLUGIN_TICKET_011: Centralized config persistence for Alpha Factory.
  * PLUGIN_TICKET_012: Enhanced with config list, switch, create, delete for sidebar.
+ * TICKET_275: exits -> exitRules (ExitRules object), format detection on load.
  *
  * Owns all config state, auto-loads on mount, debounced auto-save (500ms),
  * auto-creates "Default" config on first signal addition.
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { SignalChip, ConfigSummary } from '../types';
+import { SignalChip, ExitRules, ConfigSummary } from '../types';
+import { DEFAULT_EXIT_RULES } from '../constants';
 
 // -----------------------------------------------------------------------------
 // Default state values
@@ -18,6 +20,30 @@ import { SignalChip, ConfigSummary } from '../types';
 const DEFAULT_SIGNAL_METHOD = 'sharpe_weighted';
 const DEFAULT_LOOKBACK = 60;
 const DEFAULT_EXIT_METHOD = 'any';
+
+// -----------------------------------------------------------------------------
+// Format detection helper
+// -----------------------------------------------------------------------------
+
+/**
+ * TICKET_275: Detect if parsed exits data is new ExitRules format or legacy format.
+ * New format: object with all 5 rule keys (circuitBreaker, timeLimit, regimeDetection,
+ *             drawdownLimit, correlationCap). Discriminator: `timeLimit` key is unique
+ *             to new schema (old schema used `trailingStop`/`timeCutoff`).
+ * Legacy: old schema object or SignalChip[] array -> fall back to defaults.
+ */
+function parseExitRules(raw: unknown): ExitRules {
+  if (
+    raw &&
+    typeof raw === 'object' &&
+    !Array.isArray(raw) &&
+    'timeLimit' in raw
+  ) {
+    return raw as ExitRules;
+  }
+  // Legacy schema, array format, or invalid: use defaults
+  return { ...DEFAULT_EXIT_RULES };
+}
 
 // -----------------------------------------------------------------------------
 // Return type
@@ -31,8 +57,9 @@ interface UseAlphaFactoryConfigReturn {
   setSignalMethod: React.Dispatch<React.SetStateAction<string>>;
   lookback: number;
   setLookback: React.Dispatch<React.SetStateAction<number>>;
-  exits: SignalChip[];
-  setExits: React.Dispatch<React.SetStateAction<SignalChip[]>>;
+  // TICKET_275: exitRules replaces exits
+  exitRules: ExitRules;
+  setExitRules: React.Dispatch<React.SetStateAction<ExitRules>>;
   exitMethod: string;
   setExitMethod: React.Dispatch<React.SetStateAction<string>>;
   configName: string;
@@ -56,9 +83,8 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
   const [signals, setSignals] = useState<SignalChip[]>([]);
   const [signalMethod, setSignalMethod] = useState(DEFAULT_SIGNAL_METHOD);
   const [lookback, setLookback] = useState(DEFAULT_LOOKBACK);
-  const [exits, setExits] = useState<SignalChip[]>([
-    { id: '1', name: 'TrailingStop' },
-  ]);
+  // TICKET_275: ExitRules object instead of SignalChip[]
+  const [exitRules, setExitRules] = useState<ExitRules>({ ...DEFAULT_EXIT_RULES });
   const [exitMethod, setExitMethod] = useState(DEFAULT_EXIT_METHOD);
   const [configId, setConfigId] = useState<string | undefined>();
   const [configName, setConfigName] = useState('');
@@ -71,7 +97,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
   const configIdRef = useRef(configId);
   const configNameRef = useRef(configName);
   const signalsRef = useRef(signals);
-  const exitsRef = useRef(exits);
+  const exitRulesRef = useRef(exitRules);
   const mountedRef = useRef(false);
   // Skip auto-save when state changes are from config switching (not user edits)
   const skipAutoSaveRef = useRef(false);
@@ -79,7 +105,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
   configIdRef.current = configId;
   configNameRef.current = configName;
   signalsRef.current = signals;
-  exitsRef.current = exits;
+  exitRulesRef.current = exitRules;
 
   // ---------------------------------------------------------------------------
   // PLUGIN_TICKET_012: Refresh config list from DB
@@ -101,7 +127,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     const id = configIdRef.current;
     if (!id) return null;
     if (configNameRef.current !== 'Untitled') return null;
-    if (signalsRef.current.length > 0 || exitsRef.current.length > 0) return null;
+    if (signalsRef.current.length > 0) return null;
 
     await window.electronAPI.alphaFactory.deleteConfig(id);
     return id;
@@ -118,7 +144,8 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
         setSignals(response.data.signals as SignalChip[]);
         setSignalMethod(response.data.signalMethod);
         setLookback(response.data.lookback);
-        setExits(response.data.exits as SignalChip[]);
+        // TICKET_275: format detection
+        setExitRules(parseExitRules(response.data.exits));
         setExitMethod(response.data.exitMethod);
         setConfigId(response.data.id);
         setConfigName(response.data.name);
@@ -157,7 +184,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
         lookback,
         signals,
         exitMethod,
-        exits,
+        exits: exitRules,
       });
 
       if (response.success && response.id) {
@@ -171,7 +198,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [signals, signalMethod, lookback, exits, exitMethod, refreshConfigList]);
+  }, [signals, signalMethod, lookback, exitRules, exitMethod, refreshConfigList]);
 
   // ---------------------------------------------------------------------------
   // Save As: prompt for name, create new config
@@ -189,7 +216,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       lookback,
       signals,
       exitMethod,
-      exits,
+      exits: exitRules,
     });
 
     if (response.success && response.id) {
@@ -198,7 +225,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       setConfigName(name);
       await refreshConfigList();
     }
-  }, [signalMethod, lookback, signals, exitMethod, exits, refreshConfigList]);
+  }, [signalMethod, lookback, signals, exitMethod, exitRules, refreshConfigList]);
 
   // ---------------------------------------------------------------------------
   // PLUGIN_TICKET_012: Switch to a different config
@@ -218,7 +245,8 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     setSignals(data.signals as SignalChip[]);
     setSignalMethod(data.signalMethod);
     setLookback(data.lookback);
-    setExits(data.exits as SignalChip[]);
+    // TICKET_275: format detection
+    setExitRules(parseExitRules(data.exits));
     setExitMethod(data.exitMethod);
     setConfigId(data.id);
     setConfigName(data.name);
@@ -231,7 +259,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       lookback: data.lookback,
       signals: data.signals as SignalChip[],
       exitMethod: data.exitMethod,
-      exits: data.exits as SignalChip[],
+      exits: parseExitRules(data.exits),
     });
 
     // Update list locally: remove cleaned config + toggle isActive (preserve order)
@@ -256,7 +284,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     await cleanupCurrentIfEmpty();
 
     const defaultSignals: SignalChip[] = [];
-    const defaultExits: SignalChip[] = [];
+    const defaultRules = { ...DEFAULT_EXIT_RULES };
 
     const response = await window.electronAPI.alphaFactory.saveConfig({
       name: 'Untitled',
@@ -264,7 +292,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       lookback: DEFAULT_LOOKBACK,
       signals: defaultSignals,
       exitMethod: DEFAULT_EXIT_METHOD,
-      exits: defaultExits,
+      exits: defaultRules,
     });
 
     if (response.success && response.id) {
@@ -273,7 +301,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       setSignals(defaultSignals);
       setSignalMethod(DEFAULT_SIGNAL_METHOD);
       setLookback(DEFAULT_LOOKBACK);
-      setExits(defaultExits);
+      setExitRules(defaultRules);
       setExitMethod(DEFAULT_EXIT_METHOD);
       setConfigId(response.id);
       setConfigName('Untitled');
@@ -303,7 +331,8 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
           setSignals(data.signals as SignalChip[]);
           setSignalMethod(data.signalMethod);
           setLookback(data.lookback);
-          setExits(data.exits as SignalChip[]);
+          // TICKET_275: format detection
+          setExitRules(parseExitRules(data.exits));
           setExitMethod(data.exitMethod);
           setConfigId(data.id);
           setConfigName(data.name);
@@ -315,7 +344,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
             lookback: data.lookback,
             signals: data.signals as SignalChip[],
             exitMethod: data.exitMethod,
-            exits: data.exits as SignalChip[],
+            exits: parseExitRules(data.exits),
           });
         }
       } else {
@@ -324,7 +353,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
         setSignals([]);
         setSignalMethod(DEFAULT_SIGNAL_METHOD);
         setLookback(DEFAULT_LOOKBACK);
-        setExits([]);
+        setExitRules({ ...DEFAULT_EXIT_RULES });
         setExitMethod(DEFAULT_EXIT_METHOD);
         setConfigId(undefined);
         setConfigName('');
@@ -345,8 +374,8 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     setSignalMethod,
     lookback,
     setLookback,
-    exits,
-    setExits,
+    exitRules,
+    setExitRules,
     exitMethod,
     setExitMethod,
     configName,

@@ -35,6 +35,7 @@ interface SignalSourcePickerProps {
   onSelect: (source: SignalSourceItem) => void;
   onClose: () => void;
   excludeIds?: string[];
+  usageType?: 'signal' | 'exit'; // TICKET_273: filter by usage type
 }
 
 export const SignalSourcePicker: React.FC<SignalSourcePickerProps> = ({
@@ -42,6 +43,7 @@ export const SignalSourcePicker: React.FC<SignalSourcePickerProps> = ({
   onSelect,
   onClose,
   excludeIds = [],
+  usageType,
 }) => {
   const [sources, setSources] = useState<SignalSourceItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -57,7 +59,7 @@ export const SignalSourcePicker: React.FC<SignalSourcePickerProps> = ({
     setSearchQuery('');
 
     window.electronAPI.signalSource
-      .list()
+      .list(usageType ? { usageType } : undefined)
       .then((result) => {
         if (result.success && result.data) {
           setSources(result.data);
@@ -71,7 +73,7 @@ export const SignalSourcePicker: React.FC<SignalSourcePickerProps> = ({
       .finally(() => {
         setLoading(false);
       });
-  }, [visible]);
+  }, [visible, usageType]);
 
   // Escape key to close
   useEffect(() => {
@@ -132,7 +134,7 @@ export const SignalSourcePicker: React.FC<SignalSourcePickerProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-color-terminal-border">
           <h3 className="text-sm font-semibold text-color-terminal-accent-primary uppercase tracking-wide">
-            Select Signal Source
+            {usageType === 'exit' ? 'Select Exit Source' : 'Select Signal Source'}
           </h3>
           <button
             onClick={onClose}
@@ -148,7 +150,7 @@ export const SignalSourcePicker: React.FC<SignalSourcePickerProps> = ({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-color-terminal-text-secondary" />
             <input
               type="text"
-              placeholder="Search signals..."
+              placeholder={usageType === 'exit' ? 'Search exit sources...' : 'Search signals...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoFocus
@@ -176,8 +178,10 @@ export const SignalSourcePicker: React.FC<SignalSourcePickerProps> = ({
               <Database className="w-8 h-8 mx-auto mb-2 text-color-terminal-text-secondary/50" />
               <p className="text-sm text-color-terminal-text-secondary">
                 {sources.length === 0
-                  ? 'No exported signals yet. Export a backtest result from Strategy Builder first.'
-                  : 'No matching signals found.'}
+                  ? usageType === 'exit'
+                    ? 'No exported exit sources yet. Export a backtest with exit strategy first.'
+                    : 'No exported signals yet. Export a backtest result from Strategy Builder first.'
+                  : 'No matching sources found.'}
               </p>
             </div>
           )}

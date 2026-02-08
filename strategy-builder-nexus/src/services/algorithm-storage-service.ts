@@ -49,6 +49,7 @@ export enum SignalSource {
   WATCHLIST = 'watchlist',                          // Trader Mode > Market Observer
   LLMTRADER = 'llmtrader',                          // Trader Mode > AI Entry Generator
   AI_LIBERO = 'aiLibero',                           // Agent Mode > AI Libero (TICKET_077_26)
+  RISK_OVERRIDE = 'risk_override',                   // Risk Manager > Risk Override Exit (TICKET_274)
 }
 
 // =============================================================================
@@ -947,6 +948,67 @@ export function buildAILiberoRequest(
       prediction_config: config.prediction_config,
       prompt: config.prompt,
       indicator_context: config.indicators.filter(i => i.indicatorSlug),
+    },
+  };
+}
+
+// -----------------------------------------------------------------------------
+// Risk Override Exit Request Builder (TICKET_274)
+// -----------------------------------------------------------------------------
+
+export interface RiskOverrideExitResult {
+  strategy_name: string;
+  strategy_code: string;
+  class_name: string;
+  created_at?: string;
+}
+
+export interface RiskOverrideExitStorageConfig {
+  user_id?: string;
+  direction: 'long' | 'short' | 'both';
+  rules: unknown[];
+  hard_safety: { max_loss_percent: number };
+  llm_provider?: string;
+  llm_model?: string;
+}
+
+/**
+ * Build save request for Risk Override Exit (TICKET_274)
+ * Risk override rules that operate above the Alpha Factory combinator.
+ * Saved with usage_type='exit' for Exit Factory integration.
+ */
+export function buildRiskOverrideExitRequest(
+  result: RiskOverrideExitResult,
+  config: RiskOverrideExitStorageConfig
+): AlgorithmSaveRequest {
+  return {
+    strategy_name: result.strategy_name,
+    code: result.strategy_code,
+    user_id: config.user_id || 'default',
+    strategy_type: StrategyType.TYPE_EXIT_SIGNAL,  // TYPE_EXIT_SIGNAL = 6
+    storage_mode: StorageMode.LOCAL,
+    classification_metadata: {
+      signal_source: SignalSource.RISK_OVERRIDE,  // 'risk_override'
+      strategy_role: 'exit_override',
+      trading_style: 'risk_management',
+      strategy_composition: 'composite',
+      class_name: result.class_name,
+      components: {
+        risk_override: {
+          direction: config.direction,
+          rule_count: config.rules.length,
+          hard_safety: config.hard_safety,
+          llm_provider: config.llm_provider,
+          llm_model: config.llm_model,
+        },
+      },
+      tags: ['exit', 'risk_override', config.direction],
+      created_at: result.created_at || new Date().toISOString(),
+    },
+    strategy_rules: {
+      direction: config.direction,
+      rules: config.rules,
+      hard_safety: config.hard_safety,
     },
   };
 }

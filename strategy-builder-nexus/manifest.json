@@ -306,6 +306,12 @@
         "displayName": "AI Strategy Studio",
         "serviceIds": ["ai_strategy_studio"],
         "selector": [{ "resourceScheme": "strategy" }]
+      },
+      {
+        "viewType": "strategy.indicatorExit",
+        "displayName": "Indicator Exit Generator",
+        "serviceIds": ["indicator_exit_generator"],
+        "selector": [{ "resourceScheme": "strategy" }]
       }
     ],
     "commands": [

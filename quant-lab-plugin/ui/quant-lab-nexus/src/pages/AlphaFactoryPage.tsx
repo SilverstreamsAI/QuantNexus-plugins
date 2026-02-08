@@ -8,27 +8,35 @@
  * PLUGIN_TICKET_010: Populate component details, timeframe change handler
  * PLUGIN_TICKET_011: Config persistence delegated to useAlphaFactoryConfig hook
  * PLUGIN_TICKET_012: Config sidebar for multi-config management
+ * PLUGIN_TICKET_015: Data config + backtest execution integration
+ * TICKET_275: Exit Factory rewritten to built-in risk override panel (no exit picker)
+ *
+ * PLUGIN_TICKET_016: Replace BacktestResultPanel with full ResultSection
  *
  * Layout: ConfigSidebar (left) + Content Area (right).
- * Composes SignalFactorySection + FlowDivider + ExitFactorySection + ActionBar.
+ * Composes SignalFactorySection + FlowDivider + ExitFactorySection + DataConfigPanel + ActionBar + ResultSection.
  */
 
-import React, { useState, useCallback } from 'react';
-import { SignalChip } from '../types';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { SignalChip, DataConfig } from '../types';
+import { DEFAULT_DATA_CONFIG } from '../constants';
 import { SignalFactorySection } from '../components/SignalFactorySection';
 import { ExitFactorySection } from '../components/ExitFactorySection';
 import { FlowDivider } from '../components/FlowDivider';
 import { ActionBar } from '../components/ActionBar';
+import { DataConfigPanel } from '../components/DataConfigPanel';
+import { ResultSection } from '../components/ResultSection';
 import { SignalSourcePicker, SignalSourceItem } from '../components/SignalSourcePicker';
 import { ConfigSidebar } from '../components/ConfigSidebar';
 import { useAlphaFactoryConfig } from '../hooks/useAlphaFactoryConfig';
+import { useAlphaFactoryBacktest } from '../hooks/useAlphaFactoryBacktest';
 
 export const AlphaFactoryPage: React.FC = () => {
   const {
     signals, setSignals,
     signalMethod, setSignalMethod,
     lookback, setLookback,
-    exits, setExits,
+    exitRules, setExitRules,
     exitMethod, setExitMethod,
     saveAs,
     // PLUGIN_TICKET_012: Sidebar props
@@ -40,6 +48,31 @@ export const AlphaFactoryPage: React.FC = () => {
     deleteConfig,
   } = useAlphaFactoryConfig();
 
+  // PLUGIN_TICKET_015: Data config state
+  const [dataConfig, setDataConfig] = useState<DataConfig>(DEFAULT_DATA_CONFIG);
+
+  // PLUGIN_TICKET_015: Backtest hook
+  const { status, progress, result, error, runBacktest } = useAlphaFactoryBacktest({
+    signals,
+    signalMethod,
+    lookback,
+    exitMethod,
+    exitRules,
+    dataConfig,
+  });
+
+  const isRunning = status === 'loading_data' || status === 'generating' || status === 'running';
+  const canRun = signals.length > 0 && !!dataConfig.symbol && !!dataConfig.startDate && !!dataConfig.endDate;
+
+  // PLUGIN_TICKET_016: Auto-scroll to result section when backtest starts
+  const resultRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (status !== 'idle') {
+      resultRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [status]);
+
+  // TICKET_275: picker only for signals now (exit uses built-in rules)
   const [pickerVisible, setPickerVisible] = useState(false);
 
   // Signal handlers - PLUGIN_TICKET_007: open picker instead of creating placeholder
@@ -47,32 +80,35 @@ export const AlphaFactoryPage: React.FC = () => {
     setPickerVisible(true);
   }, []);
 
+  // Build SignalChip from SignalSourceItem
+  const buildChipFromSource = useCallback((source: SignalSourceItem): SignalChip => ({
+    id: source.id,
+    name: source.name,
+    analysis: {
+      algorithmName: source.analysis_algorithm_name,
+      timeframe: source.analysis_timeframe,
+    },
+    entry: {
+      algorithmName: source.entry_algorithm_name,
+      timeframe: source.entry_timeframe,
+    },
+    exit: source.exit_algorithm_name && source.exit_timeframe
+      ? {
+          algorithmName: source.exit_algorithm_name,
+          timeframe: source.exit_timeframe,
+        }
+      : undefined,
+    sharpe: source.backtest_sharpe,
+    winRate: source.backtest_win_rate,
+    totalTrades: source.backtest_total_trades,
+  }), []);
+
   // PLUGIN_TICKET_010: Populate component details from SignalSourceItem
-  const handleSelectSignalSource = useCallback((source: SignalSourceItem) => {
-    const chip: SignalChip = {
-      id: source.id,
-      name: source.name,
-      analysis: {
-        algorithmName: source.analysis_algorithm_name,
-        timeframe: source.analysis_timeframe,
-      },
-      entry: {
-        algorithmName: source.entry_algorithm_name,
-        timeframe: source.entry_timeframe,
-      },
-      exit: source.exit_algorithm_name && source.exit_timeframe
-        ? {
-            algorithmName: source.exit_algorithm_name,
-            timeframe: source.exit_timeframe,
-          }
-        : undefined,
-      sharpe: source.backtest_sharpe,
-      winRate: source.backtest_win_rate,
-      totalTrades: source.backtest_total_trades,
-    };
+  const handleSelectSource = useCallback((source: SignalSourceItem) => {
+    const chip = buildChipFromSource(source);
     setSignals(prev => [...prev, chip]);
     setPickerVisible(false);
-  }, [setSignals]);
+  }, [buildChipFromSource, setSignals]);
 
   const handleRemoveSignal = useCallback((id: string) => {
     setSignals(prev => prev.filter(s => s.id !== id));
@@ -93,24 +129,14 @@ export const AlphaFactoryPage: React.FC = () => {
     }));
   }, [setSignals]);
 
-  // Exit handlers
-  const handleAddExit = useCallback(() => {
-    const newId = String(Date.now());
-    setExits(prev => [...prev, { id: newId, name: `Exit_${prev.length + 1}` }]);
-  }, [setExits]);
-
-  const handleRemoveExit = useCallback((id: string) => {
-    setExits(prev => prev.filter(e => e.id !== id));
-  }, [setExits]);
-
   // Action handlers
   const handleValidate = useCallback(() => {
     // TODO: Implement validation
   }, []);
 
   const handleRunBacktest = useCallback(() => {
-    // TODO: Implement run backtest
-  }, []);
+    runBacktest();
+  }, [runBacktest]);
 
   return (
     <div className="flex flex-1 min-h-0">
@@ -139,30 +165,57 @@ export const AlphaFactoryPage: React.FC = () => {
           />
 
           {/* PLUGIN_TICKET_007: Modal renders via portal, placed at page level */}
+          {/* TICKET_275: Picker only for signals (usageType='signal' always) */}
           <SignalSourcePicker
             visible={pickerVisible}
-            onSelect={handleSelectSignalSource}
+            usageType="signal"
+            onSelect={handleSelectSource}
             onClose={() => setPickerVisible(false)}
             excludeIds={signals.map(s => s.id)}
           />
 
           <FlowDivider />
 
+          {/* TICKET_275: Risk override panel replaces card grid */}
           <ExitFactorySection
-            exits={exits}
-            method={exitMethod}
-            onAddExit={handleAddExit}
-            onRemoveExit={handleRemoveExit}
+            exitRules={exitRules}
+            exitMethod={exitMethod}
+            onExitRulesChange={setExitRules}
             onMethodChange={setExitMethod}
           />
 
           <FlowDivider />
 
+          {/* PLUGIN_TICKET_015: Data Configuration */}
+          <DataConfigPanel
+            value={dataConfig}
+            onChange={setDataConfig}
+            disabled={isRunning}
+          />
+
           <ActionBar
             onValidate={handleValidate}
             onSaveAs={saveAs}
             onRunBacktest={handleRunBacktest}
+            isRunning={isRunning}
+            canRun={canRun}
           />
+
+          {/* PLUGIN_TICKET_016: Full result section */}
+          <div ref={resultRef}>
+            <ResultSection
+              status={status}
+              progress={progress}
+              result={result}
+              error={error}
+              signals={signals}
+              signalMethod={signalMethod}
+              lookback={lookback}
+              exitRules={exitRules}
+              exitMethod={exitMethod}
+              dataConfig={dataConfig}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -25,11 +25,98 @@ interface SignalSourceRecord {
 
 interface ElectronAPI {
   signalSource: {
-    list: () => Promise<{
+    list: (filter?: { usageType?: 'signal' | 'exit' }) => Promise<{
       success: boolean;
       data?: SignalSourceRecord[];
       error?: string;
     }>;
+  };
+
+  // PLUGIN_TICKET_015: Subset of data API used by Alpha Factory
+  data: {
+    // Returns array directly (not {success, data} wrapper)
+    searchSymbols: (query: string) => Promise<Array<{
+      symbol: string;
+      name?: string;
+      exchange?: string;
+      startTime?: string;
+      endTime?: string;
+    }>>;
+    ensure: (config: {
+      symbol: string;
+      startDate: string;
+      endDate: string;
+      interval: string;
+      provider?: string;
+    }) => Promise<{
+      success: boolean;
+      dataPath?: string;
+      error?: string;
+    }>;
+    ensureMultiTimeframe: (config: {
+      symbol: string;
+      startDate: string;
+      endDate: string;
+      timeframes: string[];
+      provider?: string;
+    }) => Promise<{
+      success: boolean;
+      dataPath?: string;
+      dataFeeds?: Record<string, { dataPath: string }>;
+      error?: string;
+    }>;
+  };
+
+  // PLUGIN_TICKET_015: Subset of executor API used by Alpha Factory
+  executor: {
+    runBacktest: (config: {
+      strategyPath: string;
+      strategyName?: string;
+      symbol: string;
+      interval: string;
+      startTime: number;
+      endTime: number;
+      dataPath?: string;
+      dataSourceType?: string;
+      dataFeeds?: Array<{ interval: string; dataPath: string }>;
+      initialCapital?: number;
+      orderSize?: number;
+      orderSizeUnit?: string;
+    }) => Promise<{
+      success: boolean;
+      taskId?: string;
+      error?: string;
+    }>;
+    onProgress: (callback: (data: {
+      taskId: string;
+      percent: number;
+      message: string;
+    }) => void) => () => void;
+    onCompleted: (callback: (data: {
+      taskId: string;
+      result: {
+        success: boolean;
+        metrics?: {
+          totalPnl: number;
+          totalReturn: number;
+          sharpeRatio: number;
+          maxDrawdown: number;
+          totalTrades: number;
+          winRate: number;
+        };
+      };
+    }) => void) => () => void;
+    onError: (callback: (data: {
+      taskId: string;
+      error: string;
+    }) => void) => () => void;
+    onIncrement: (callback: (data: {
+      taskId: string;
+      increment: {
+        processedBars: number;
+        totalBars: number;
+      };
+    }) => void) => () => void;
   };
 
   // PLUGIN_TICKET_011: Alpha Factory config persistence
@@ -41,7 +128,8 @@ interface ElectronAPI {
       lookback: number;
       signals: import('../types').SignalChip[];
       exitMethod: string;
-      exits: import('../types').SignalChip[];
+      // TICKET_275: ExitRules object or legacy SignalChip[] array
+      exits: import('../types').ExitRules | import('../types').SignalChip[];
     }) => Promise<{
       success: boolean;
       id?: string;
@@ -57,7 +145,8 @@ interface ElectronAPI {
         lookback: number;
         signals: import('../types').SignalChip[];
         exitMethod: string;
-        exits: import('../types').SignalChip[];
+        // TICKET_275: Raw parsed value (format detection done in hook)
+        exits: unknown;
         createdAt: string;
         updatedAt: string;
       } | null;
@@ -80,6 +169,20 @@ interface ElectronAPI {
 
     deleteConfig: (id: string) => Promise<{
       success: boolean;
+      error?: string;
+    }>;
+
+    // PLUGIN_TICKET_015: Generate strategy and return path
+    run: (request: {
+      signalIds: string[];
+      signalMethod: string;
+      lookback: number;
+      exitMethod: string;
+      exitRules: import('../types').ExitRules;
+    }) => Promise<{
+      success: boolean;
+      taskId?: string;
+      strategyPath?: string;
       error?: string;
     }>;
   };

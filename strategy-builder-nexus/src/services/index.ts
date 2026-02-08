@@ -71,6 +71,40 @@ export type {
 } from './kronos-ai-entry-service';
 
 // =============================================================================
+// Risk Override Exit Service (TICKET_274) - Risk Manager Exit Generation
+// =============================================================================
+
+export {
+  executeRiskOverrideExit,
+  validateRiskOverrideExitConfig,
+  getExitErrorMessage,
+  EXIT_ERROR_CODE_MESSAGES,
+  MAX_RISK_RULES,
+  RISK_RULE_TYPES,
+  CB_SCOPES,
+  RULE_ACTIONS,
+  TIME_UNITS,
+  DECAY_SCHEDULES,
+  RECOVERY_MODES,
+  INDICATOR_CONDITIONS,
+  DIRECTION_OPTIONS,
+  RULE_DEFAULTS,
+} from './risk-override-exit-service';
+
+export type {
+  RiskOverrideExitConfig,
+  RiskOverrideExitResult,
+  RiskOverrideRule,
+  RiskRuleType,
+  CircuitBreakerRule,
+  TimeLimitRule,
+  RegimeDetectionRule,
+  DrawdownLimitRule,
+  IndicatorGuardRule,
+  IndicatorExitState,
+} from './risk-override-exit-service';
+
+// =============================================================================
 // Algorithm Storage Service (TICKET_077_D1) - NEW Centralized Service
 // =============================================================================
 
@@ -88,6 +122,7 @@ export {
   buildEntrySignalRequest,
   buildKronosPredictorRequest,
   buildKronosAIEntryRequest,
+  buildRiskOverrideExitRequest,
   extractClassName,
 } from './algorithm-storage-service';
 
@@ -109,6 +144,9 @@ export type {
   // TICKET_211: Kronos AI Entry storage types
   KronosAIEntryResult as StorageKronosAIEntryResult,
   KronosAIEntryConfig as StorageKronosAIEntryConfig,
+  // TICKET_274: Risk Override Exit storage types
+  RiskOverrideExitResult as StorageRiskOverrideExitResult,
+  RiskOverrideExitStorageConfig,
 } from './algorithm-storage-service';
 
 // =============================================================================

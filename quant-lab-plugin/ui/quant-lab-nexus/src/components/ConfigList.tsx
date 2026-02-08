@@ -117,7 +117,7 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
           ].join(' ')}
         >
           <Layers className="w-3 h-3" />
-          <span>{config.exitCount} exit{config.exitCount !== 1 ? 's' : ''}</span>
+          <span>{config.exitCount} rule{config.exitCount !== 1 ? 's' : ''} active</span>
         </div>
 
         <button

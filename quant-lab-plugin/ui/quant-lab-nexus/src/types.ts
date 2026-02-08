@@ -47,3 +47,129 @@ export interface ConfigSummary {
   isActive: boolean;
   updatedAt: string;
 }
+
+/**
+ * TICKET_275: Built-in risk override rules for Exit Factory.
+ * Each rule has an enabled toggle and type-specific parameters.
+ */
+
+export interface CircuitBreakerRule {
+  enabled: boolean;
+  triggerPnl: number;
+  cooldownBars: number;
+  action: 'close_all' | 'reduce_to';
+  reduceToPercent?: number;
+}
+
+export interface TimeLimitRule {
+  enabled: boolean;
+  maxHolding: number;
+  unit: 'hours' | 'bars';
+  action: 'close_all' | 'reduce_to';
+}
+
+export interface RegimeDetectionRule {
+  enabled: boolean;
+  indicator: 'ATR' | 'VIX' | 'RealizedVol';
+  period: number;
+  threshold: number;
+  action: 'reduce_all' | 'close_all' | 'halt_new_entry';
+  reducePercent?: number;
+}
+
+export interface DrawdownLimitRule {
+  enabled: boolean;
+  maxDrawdown: number;
+  action: 'reduce_all' | 'close_all' | 'halt_trading';
+}
+
+export interface CorrelationCapRule {
+  enabled: boolean;
+  maxCorrelation: number;
+  lookbackDays: number;
+  action: 'skip_entry' | 'reduce_half';
+}
+
+export interface HardSafetyRule {
+  maxLossPercent: number;
+}
+
+export interface ExitRules {
+  circuitBreaker: CircuitBreakerRule;
+  timeLimit: TimeLimitRule;
+  regimeDetection: RegimeDetectionRule;
+  drawdownLimit: DrawdownLimitRule;
+  correlationCap: CorrelationCapRule;
+  hardSafety: HardSafetyRule;
+}
+
+/**
+ * PLUGIN_TICKET_015: Alpha Factory backtest data configuration
+ */
+export type OrderSizeUnit = 'cash' | 'percent' | 'shares';
+
+export interface DataConfig {
+  symbol: string;
+  startDate: string;
+  endDate: string;
+  initialCapital: number;
+  orderSize: number;
+  orderSizeUnit: OrderSizeUnit;
+}
+
+export type BacktestStatus = 'idle' | 'loading_data' | 'generating' | 'running' | 'completed' | 'error';
+
+export interface BacktestResultSummary {
+  taskId: string;
+  totalReturn: number;
+  sharpeRatio: number;
+  maxDrawdown: number;
+  winRate: number;
+  totalTrades: number;
+}
+
+/**
+ * PLUGIN_TICKET_016: Executor result types for full result display.
+ * Adapted from back-test-nexus BacktestResultPanel.tsx (lines 20-70) minus Candle type.
+ */
+export interface ExecutorMetrics {
+  totalPnl: number;
+  totalReturn: number;
+  sharpeRatio: number;
+  maxDrawdown: number;
+  totalTrades: number;
+  winningTrades: number;
+  losingTrades: number;
+  winRate: number;
+  profitFactor: number;
+}
+
+export interface ExecutorTrade {
+  entryTime: number;
+  exitTime: number;
+  symbol: string;
+  side: string;
+  entryPrice: number;
+  exitPrice: number;
+  quantity: number;
+  pnl: number;
+  commission: number;
+  reason: string;
+}
+
+export interface EquityPoint {
+  timestamp: number;
+  equity: number;
+  drawdown: number;
+}
+
+export interface ExecutorResult {
+  success: boolean;
+  errorMessage?: string;
+  startTime: number;
+  endTime: number;
+  executionTimeMs: number;
+  metrics: ExecutorMetrics;
+  equityCurve: EquityPoint[];
+  trades: ExecutorTrade[];
+}
