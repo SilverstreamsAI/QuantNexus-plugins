@@ -50,7 +50,7 @@ export const TradesTable: React.FC<TradesTableProps> = ({ trades }) => {
                 <td className="py-2 pr-4 text-color-terminal-text-muted">{index + 1}</td>
                 <td className="py-2 pr-4 text-color-terminal-text tabular-nums">{formatDate(safeNum(trade.entryTime))}</td>
                 <td className="py-2 pr-4 text-color-terminal-text tabular-nums">{formatDate(safeNum(trade.exitTime))}</td>
-                <td className={`py-2 pr-4 font-medium ${trade.side === 'BUY' ? 'text-green-400' : 'text-red-400'}`}>
+                <td className={`py-2 pr-4 font-medium ${/buy|long/i.test(trade.side) ? 'text-green-400' : 'text-red-400'}`}>
                   {trade.side || '-'}
                 </td>
                 <td className="py-2 pr-4 text-right text-color-terminal-text tabular-nums">

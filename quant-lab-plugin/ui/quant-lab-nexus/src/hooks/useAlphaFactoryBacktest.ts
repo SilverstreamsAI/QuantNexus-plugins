@@ -55,9 +55,75 @@ export function useAlphaFactoryBacktest({
   const activeTaskIdRef = useRef<string | null>(null);
   // Track cleanup functions for event subscriptions
   const cleanupRef = useRef<Array<() => void>>([]);
+  // PLUGIN_TICKET_017: Throttled buffer for real-time incremental updates
+  const pendingBufferRef = useRef<any[]>([]);
+  const throttleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isCompletedRef = useRef(false);
+
+  // PLUGIN_TICKET_017: Flush buffered increments into result state
+  const flushBuffer = useCallback(() => {
+    const buffer = pendingBufferRef.current;
+    if (isCompletedRef.current || buffer.length === 0) return;
+
+    const merged = buffer.reduce((acc, inc) => ({
+      newEquityPoints: acc.newEquityPoints.concat(inc.newEquityPoints || []),
+      newTrades: acc.newTrades.concat(inc.newTrades || []),
+      currentMetrics: inc.currentMetrics,
+    }), {
+      newEquityPoints: [] as any[],
+      newTrades: [] as any[],
+      currentMetrics: buffer[0].currentMetrics,
+    });
+
+    buffer.length = 0;
+
+    setResult(prev => {
+      if (!prev) {
+        return {
+          success: true,
+          startTime: 0,
+          endTime: 0,
+          executionTimeMs: 0,
+          metrics: {
+            totalPnl: merged.currentMetrics?.totalPnl || 0,
+            totalReturn: merged.currentMetrics?.totalReturn || 0,
+            sharpeRatio: 0,
+            maxDrawdown: 0,
+            totalTrades: merged.currentMetrics?.totalTrades || 0,
+            winningTrades: merged.currentMetrics?.winningTrades || 0,
+            losingTrades: merged.currentMetrics?.losingTrades || 0,
+            winRate: merged.currentMetrics?.winRate || 0,
+            profitFactor: 0,
+          },
+          equityCurve: merged.newEquityPoints,
+          trades: merged.newTrades,
+        };
+      }
+
+      return {
+        ...prev,
+        metrics: {
+          ...prev.metrics,
+          totalPnl: merged.currentMetrics?.totalPnl ?? prev.metrics.totalPnl,
+          totalReturn: merged.currentMetrics?.totalReturn ?? prev.metrics.totalReturn,
+          totalTrades: merged.currentMetrics?.totalTrades ?? prev.metrics.totalTrades,
+          winningTrades: merged.currentMetrics?.winningTrades ?? prev.metrics.winningTrades,
+          losingTrades: merged.currentMetrics?.losingTrades ?? prev.metrics.losingTrades,
+          winRate: merged.currentMetrics?.winRate ?? prev.metrics.winRate,
+        },
+        equityCurve: [...prev.equityCurve, ...merged.newEquityPoints],
+        trades: [...prev.trades, ...merged.newTrades],
+      };
+    });
+  }, []);
 
   // Cleanup subscriptions
   const cleanupSubscriptions = useCallback(() => {
+    if (throttleTimerRef.current) {
+      clearTimeout(throttleTimerRef.current);
+      throttleTimerRef.current = null;
+    }
+    pendingBufferRef.current.length = 0;
     for (const unsub of cleanupRef.current) {
       unsub();
     }
@@ -94,6 +160,7 @@ export function useAlphaFactoryBacktest({
 
     // Reset state
     console.log('[AlphaFactoryBacktest] Setting status: loading_data');
+    isCompletedRef.current = false;
     setStatus('loading_data');
     setProgress(0);
     setResult(null);
@@ -204,10 +271,20 @@ export function useAlphaFactoryBacktest({
       });
       cleanupRef.current.push(unsubProgress);
 
+      // PLUGIN_TICKET_017: Throttled buffer for real-time result accumulation
+      const THROTTLE_MS = 100;
       const unsubIncrement = api.executor.onIncrement((data) => {
-        if (data.taskId === taskId && data.increment.totalBars > 0) {
+        if (data.taskId !== taskId) return;
+        if (data.increment.totalBars > 0) {
           const pct = (data.increment.processedBars / data.increment.totalBars) * 100;
           setProgress(20 + (pct * 0.8));
+        }
+        pendingBufferRef.current.push(data.increment);
+        if (!throttleTimerRef.current) {
+          throttleTimerRef.current = setTimeout(() => {
+            throttleTimerRef.current = null;
+            flushBuffer();
+          }, THROTTLE_MS);
         }
       });
       cleanupRef.current.push(unsubIncrement);
@@ -215,6 +292,14 @@ export function useAlphaFactoryBacktest({
       const unsubCompleted = api.executor.onCompleted((data) => {
         console.log('[AlphaFactoryBacktest] onCompleted received, data.taskId:', data.taskId, 'expected:', taskId);
         if (data.taskId !== taskId) return;
+
+        // PLUGIN_TICKET_017: Stop buffer processing on completion
+        isCompletedRef.current = true;
+        if (throttleTimerRef.current) {
+          clearTimeout(throttleTimerRef.current);
+          throttleTimerRef.current = null;
+        }
+        pendingBufferRef.current.length = 0;
 
         // PLUGIN_TICKET_016: Store full ExecutorResult (metrics + equityCurve + trades)
         const r = data.result as {
@@ -246,15 +331,25 @@ export function useAlphaFactoryBacktest({
 
         if (r?.success && r.metrics) {
           console.log('[AlphaFactoryBacktest] Setting completed result:', r.metrics.totalReturn, r.metrics.sharpeRatio);
-          setResult({
-            success: r.success,
-            errorMessage: r.errorMessage,
-            startTime: r.startTime ?? 0,
-            endTime: r.endTime ?? 0,
-            executionTimeMs: r.executionTimeMs ?? 0,
-            metrics: r.metrics,
-            equityCurve: r.equityCurve ?? [],
-            trades: r.trades ?? [],
+          // PLUGIN_TICKET_017: Preserve accumulated data from incremental updates
+          setResult(prev => {
+            const finalResult: ExecutorResult = {
+              success: r.success,
+              errorMessage: r.errorMessage,
+              startTime: r.startTime ?? 0,
+              endTime: r.endTime ?? 0,
+              executionTimeMs: r.executionTimeMs ?? 0,
+              metrics: r.metrics!,
+              equityCurve: r.equityCurve ?? [],
+              trades: r.trades ?? [],
+            };
+            if (!prev) return finalResult;
+            return {
+              ...finalResult,
+              equityCurve: prev.equityCurve.length > finalResult.equityCurve.length
+                ? prev.equityCurve : finalResult.equityCurve,
+              trades: prev.trades.length > 0 ? prev.trades : finalResult.trades,
+            };
           });
           setStatus('completed');
           setProgress(100);
@@ -285,7 +380,7 @@ export function useAlphaFactoryBacktest({
       setStatus('error');
       cleanupSubscriptions();
     }
-  }, [signals, signalMethod, lookback, exitMethod, exitRules, dataConfig, cleanupSubscriptions]);
+  }, [signals, signalMethod, lookback, exitMethod, exitRules, dataConfig, cleanupSubscriptions, flushBuffer]);
 
   return { status, progress, result, error, runBacktest };
 }

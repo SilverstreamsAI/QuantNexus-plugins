@@ -48,7 +48,7 @@ export const ResultSection: React.FC<ResultSectionProps> = ({
     const label = STATUS_LABELS[status] || 'Processing...';
     const pct = Math.min(Math.max(progress, 0), 100);
 
-    return (
+    const progressBar = (
       <div className="rounded-lg border border-color-terminal-border p-4 space-y-3"
            style={{ backgroundColor: 'rgba(10, 25, 47, 0.7)' }}>
         <div className="flex items-center justify-between">
@@ -66,6 +66,28 @@ export const ResultSection: React.FC<ResultSectionProps> = ({
         </div>
       </div>
     );
+
+    // PLUGIN_TICKET_017: Render real-time charts during running status when data exists
+    if (status === 'running' && result) {
+      return (
+        <div className="space-y-4">
+          {progressBar}
+          <SignalSummaryHeader
+            signals={signals}
+            signalMethod={signalMethod}
+            lookback={lookback}
+            exitRules={exitRules}
+            exitMethod={exitMethod}
+            dataConfig={dataConfig}
+          />
+          <MetricSummaryRow metrics={result.metrics} />
+          <EquityCurveChart equityCurve={result.equityCurve} />
+          <TradesTable trades={result.trades} />
+        </div>
+      );
+    }
+
+    return progressBar;
   }
 
   // Error state
