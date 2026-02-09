@@ -52,7 +52,7 @@ export const FactorSourcePicker: React.FC<FactorSourcePickerProps> = ({
     setSearchQuery('');
     setCategoryFilter('all');
 
-    window.electronAPI.factor
+    window.electronAPI.factor.local
       .list()
       .then((result) => {
         if (result.success && result.data) {

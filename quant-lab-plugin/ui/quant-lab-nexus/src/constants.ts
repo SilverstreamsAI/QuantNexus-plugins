@@ -35,14 +35,18 @@ export const FACTOR_COMBINATOR_METHODS: CombinatorMethod[] = [
 
 /**
  * TICKET_276: Factor category filter options.
+ * TICKET_279: Updated to match backend Factor Library API values.
  */
 export const FACTOR_CATEGORIES = [
   { value: 'momentum', label: 'Momentum' },
   { value: 'mean_reversion', label: 'Mean Reversion' },
   { value: 'volatility', label: 'Volatility' },
   { value: 'value', label: 'Value' },
-  { value: 'quality', label: 'Quality' },
-  { value: 'statistical', label: 'Statistical Arbitrage' },
+  { value: 'volume', label: 'Volume' },
+  { value: 'technical', label: 'Technical' },
+  { value: 'pattern', label: 'Pattern' },
+  { value: 'cycle', label: 'Cycle' },
+  { value: 'statistic', label: 'Statistic' },
 ] as const;
 
 export const EXIT_COMBINATOR_METHODS: CombinatorMethod[] = [

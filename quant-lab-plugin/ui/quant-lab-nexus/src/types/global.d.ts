@@ -32,37 +32,75 @@ interface ElectronAPI {
     }>;
   };
 
-  // TICKET_276: Factor Library API (read-only from backend)
+  // TICKET_278: Factor Mining API (task-based async via nona_server)
   factor: {
-    list: (params?: { source?: string; category?: string; limit?: number; offset?: number }) => Promise<{
-      success: boolean;
-      data?: Array<{
-        id: string;
-        name: string;
-        category: string;
-        source: string;
-        formula: string | null;
-        ic: number | null;
-        icir: number | null;
-        sharpe: number | null;
+    mining: {
+      start: (params: { loopCount: number; hypothesisSource: string; maxDuration?: string }) => Promise<{
+        success: boolean;
+        data?: { taskId: string; taskType: string; status: string; createdAt: string };
+        error?: string;
       }>;
-      error?: string;
-    }>;
-    detail: (factorId: string) => Promise<{
+      startFromReports: (params: { reportUrls: string[]; maxReports?: number; maxDuration?: string }) => Promise<{
+        success: boolean;
+        data?: { taskId: string; taskType: string; status: string; createdAt: string };
+        error?: string;
+      }>;
+      uploadReports: (params: { filePaths: string[]; maxReports?: number; maxDuration?: string }) => Promise<{
+        success: boolean;
+        data?: { taskId: string; taskType: string; status: string; createdAt: string };
+        error?: string;
+      }>;
+      resume: (sessionId: string) => Promise<{
+        success: boolean;
+        data?: { taskId: string; taskType: string; status: string; createdAt: string };
+        error?: string;
+      }>;
+    };
+    results: (taskId: string) => Promise<{
       success: boolean;
       data?: {
-        id: string;
-        name: string;
-        category: string;
-        source: string;
-        formula: string | null;
-        code: string | null;
-        ic: number | null;
-        icir: number | null;
-        sharpe: number | null;
+        taskId: string;
+        status: string;
+        factors: Array<{ name: string; ic: number; icir: number; formula: string }>;
+        bestIc: number;
+        bestIcir: number;
       };
       error?: string;
     }>;
+    sessions: {
+      list: (params?: { status?: string; resumableOnly?: boolean }) => Promise<{
+        success: boolean;
+        data?: unknown[];
+        error?: string;
+      }>;
+      detail: (sessionId: string) => Promise<{
+        success: boolean;
+        data?: unknown;
+        error?: string;
+      }>;
+    };
+    // TICKET_279: Sync factors from Factor Library API to local cache
+    sync: () => Promise<{
+      success: boolean;
+      data?: { synced: number };
+      error?: string;
+    }>;
+    local: {
+      list: (params?: { source?: string; category?: string }) => Promise<{
+        success: boolean;
+        data?: Array<{
+          id: string;
+          name: string;
+          category: string;
+          source: string;
+          formula: string | null;
+          ic: number | null;
+          icir: number | null;
+          sharpe: number | null;
+        }>;
+        error?: string;
+      }>;
+    };
   };
 
   // PLUGIN_TICKET_015: Subset of data API used by Alpha Factory

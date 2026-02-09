@@ -75,6 +75,17 @@ export const AlphaFactoryPage: React.FC = () => {
   // TICKET_276: Hybrid model allows either signals > 0 OR factors > 0 (or both)
   const canRun = (signals.length > 0 || factors.length > 0) && !!dataConfig.symbol && !!dataConfig.startDate && !!dataConfig.endDate;
 
+  // TICKET_279: Sync factors from Factor Library API on page mount
+  useEffect(() => {
+    window.electronAPI.factor.sync()
+      .then((result) => {
+        if (!result.success) {
+          console.warn('Factor sync failed, using local cache:', result.error);
+        }
+      })
+      .catch(() => { /* graceful degradation: use local cache */ });
+  }, []);
+
   // PLUGIN_TICKET_016: Auto-scroll to result section when backtest starts
   const resultRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
