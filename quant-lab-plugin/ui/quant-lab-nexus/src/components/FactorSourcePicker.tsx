@@ -18,6 +18,7 @@ interface BackendFactorItem {
   name: string;
   category: string;
   source: string;
+  factor_type: string; // TICKET_281: 'time_series' | 'cross_sectional'
   formula: string | null;
   ic: number | null;
   icir: number | null;
@@ -53,7 +54,7 @@ export const FactorSourcePicker: React.FC<FactorSourcePickerProps> = ({
     setCategoryFilter('all');
 
     window.electronAPI.factor.local
-      .list()
+      .list({ factor_type: 'time_series' })
       .then((result) => {
         if (result.success && result.data) {
           setFactors(result.data);
@@ -96,6 +97,7 @@ export const FactorSourcePicker: React.FC<FactorSourcePickerProps> = ({
         name: item.name,
         category: item.category,
         source: item.source,
+        factor_type: (item.factor_type as 'time_series' | 'cross_sectional') || 'time_series',
         formula: item.formula,
         ic: item.ic,
         icir: item.icir,

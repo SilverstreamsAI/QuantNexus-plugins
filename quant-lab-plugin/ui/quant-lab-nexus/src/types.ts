@@ -43,6 +43,7 @@ export interface FactorChip {
   name: string;
   category: string;    // momentum, mean_reversion, volatility, etc.
   source: string;      // library, mined, custom
+  factor_type: 'time_series' | 'cross_sectional'; // TICKET_281
   formula: string | null;
   ic: number | null;
   icir: number | null;

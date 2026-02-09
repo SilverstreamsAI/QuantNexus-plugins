@@ -86,13 +86,14 @@ interface ElectronAPI {
       error?: string;
     }>;
     local: {
-      list: (params?: { source?: string; category?: string }) => Promise<{
+      list: (params?: { source?: string; category?: string; factor_type?: string }) => Promise<{
         success: boolean;
         data?: Array<{
           id: string;
           name: string;
           category: string;
           source: string;
+          factor_type: string; // TICKET_281: 'time_series' | 'cross_sectional'
           formula: string | null;
           ic: number | null;
           icir: number | null;
