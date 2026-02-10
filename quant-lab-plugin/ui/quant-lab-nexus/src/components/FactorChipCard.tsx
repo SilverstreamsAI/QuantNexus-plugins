@@ -8,10 +8,12 @@
 
 import React from 'react';
 import { X } from 'lucide-react';
+import { TRANSLATION_STATUS_META } from '../constants';
 
 interface FactorChipCardProps {
   name: string;
   category: string;
+  translationStatus?: string | null;
   ic: number | null;
   icir: number | null;
   sharpe: number | null;
@@ -26,13 +28,18 @@ const formatMetric = (val: number | null, decimals = 3): string => {
 export const FactorChipCard: React.FC<FactorChipCardProps> = ({
   name,
   category,
+  translationStatus,
   ic,
   icir,
   sharpe,
   onRemove,
 }) => {
+  const statusMeta = translationStatus
+    ? TRANSLATION_STATUS_META[translationStatus as keyof typeof TRANSLATION_STATUS_META]
+    : null;
+
   return (
-    <div className="h-[140px] rounded-lg border border-amber-500/50 hover:border-amber-500 bg-color-terminal-surface transition-colors flex flex-col overflow-hidden">
+    <div className="h-[170px] rounded-lg border border-amber-500/50 hover:border-amber-500 bg-color-terminal-surface transition-colors flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex items-center px-2 py-1.5 bg-amber-600 flex-shrink-0">
         <span className="text-[11px] font-medium text-white truncate" title={name}>
@@ -42,10 +49,15 @@ export const FactorChipCard: React.FC<FactorChipCardProps> = ({
 
       {/* Metrics */}
       <div className="px-2 pt-2 pb-1 flex-1 bg-white/5">
-        <div className="mb-1.5">
+        <div className="mb-1.5 flex gap-1 flex-wrap">
           <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase bg-amber-500/15 text-amber-400">
             {category}
           </span>
+          {statusMeta && (
+            <span className={`px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase ${statusMeta.bgClass} ${statusMeta.textClass}`}>
+              {statusMeta.label}
+            </span>
+          )}
         </div>
         <div className="space-y-0.5 text-[10px] text-color-terminal-text-secondary">
           <div className="flex justify-between">

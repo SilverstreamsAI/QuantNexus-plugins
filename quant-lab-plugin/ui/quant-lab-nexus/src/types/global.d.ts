@@ -95,6 +95,9 @@ interface ElectronAPI {
           source: string;
           factor_type: string; // TICKET_281: 'time_series' | 'cross_sectional'
           formula: string | null;
+          translation_status: string | null;                    // TICKET_285
+          qlib_expr: string | null;                             // TICKET_285
+          cs_pipeline: import('../types').PipelineStep[] | null; // TICKET_285
           ic: number | null;
           icir: number | null;
           sharpe: number | null;
@@ -102,6 +105,36 @@ interface ElectronAPI {
         error?: string;
       }>;
     };
+  };
+
+  // TICKET_286/287: Factor Engine Registry API
+  factorEngine: {
+    registry: () => Promise<{
+      success: boolean;
+      data?: Array<{
+        engine_id: string;
+        display_name: string;
+        description: string | null;
+        python_package: string | null;
+        factor_count: number;
+        examples: string | null;
+        builtin: number;
+        installed: number;
+        version: string | null;
+        installed_at: string | null;
+      }>;
+      error?: string;
+    }>;
+    install: (engineId: string) => Promise<{
+      success: boolean;
+      data?: { engineId: string; factorsSeeded: number };
+      error?: string;
+    }>;
+    uninstall: (engineId: string) => Promise<{
+      success: boolean;
+      data?: { engineId: string; factorsRemoved: number };
+      error?: string;
+    }>;
   };
 
   // PLUGIN_TICKET_015: Subset of data API used by Alpha Factory

@@ -10,8 +10,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Search, Plus, BarChart3 } from 'lucide-react';
-import { FactorChip } from '../types';
-import { FACTOR_CATEGORIES } from '../constants';
+import { FactorChip, PipelineStep } from '../types';
+import { FACTOR_CATEGORIES, TRANSLATION_STATUS_META } from '../constants';
 
 interface BackendFactorItem {
   id: string;
@@ -20,6 +20,9 @@ interface BackendFactorItem {
   source: string;
   factor_type: string; // TICKET_281: 'time_series' | 'cross_sectional'
   formula: string | null;
+  translation_status: string | null; // TICKET_285
+  qlib_expr: string | null;         // TICKET_285
+  cs_pipeline: PipelineStep[] | null; // TICKET_285
   ic: number | null;
   icir: number | null;
   sharpe: number | null;
@@ -99,6 +102,9 @@ export const FactorSourcePicker: React.FC<FactorSourcePickerProps> = ({
         source: item.source,
         factor_type: (item.factor_type as 'time_series' | 'cross_sectional') || 'time_series',
         formula: item.formula,
+        translation_status: item.translation_status as FactorChip['translation_status'],
+        qlib_expr: item.qlib_expr,
+        cs_pipeline: item.cs_pipeline,
         ic: item.ic,
         icir: item.icir,
         sharpe: item.sharpe,
@@ -232,6 +238,11 @@ export const FactorSourcePicker: React.FC<FactorSourcePickerProps> = ({
                       <span className="px-1.5 py-0.5 rounded bg-color-terminal-accent-primary/10 text-color-terminal-accent-primary">
                         {factor.category}
                       </span>
+                      {factor.translation_status && TRANSLATION_STATUS_META[factor.translation_status as keyof typeof TRANSLATION_STATUS_META] && (
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${TRANSLATION_STATUS_META[factor.translation_status as keyof typeof TRANSLATION_STATUS_META].bgClass} ${TRANSLATION_STATUS_META[factor.translation_status as keyof typeof TRANSLATION_STATUS_META].textClass}`}>
+                          {TRANSLATION_STATUS_META[factor.translation_status as keyof typeof TRANSLATION_STATUS_META].label}
+                        </span>
+                      )}
                       <span>IC: {formatNumber(factor.ic)}</span>
                       <span>ICIR: {formatNumber(factor.icir)}</span>
                       <span>Sharpe: {formatNumber(factor.sharpe, 2)}</span>

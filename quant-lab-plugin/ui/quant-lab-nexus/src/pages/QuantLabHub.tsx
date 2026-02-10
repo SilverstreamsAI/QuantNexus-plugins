@@ -7,14 +7,15 @@
  */
 
 import React from 'react';
-import { FlaskConical, Layers } from 'lucide-react';
+import { FlaskConical, Layers, Cpu } from 'lucide-react';
 import { FeatureCard } from '../components/FeatureCard';
 
 interface QuantLabHubProps {
   onNavigateToFactory: () => void;
+  onNavigateToEngineStore: () => void;
 }
 
-export const QuantLabHub: React.FC<QuantLabHubProps> = ({ onNavigateToFactory }) => {
+export const QuantLabHub: React.FC<QuantLabHubProps> = ({ onNavigateToFactory, onNavigateToEngineStore }) => {
   return (
     <div className="flex-1 overflow-auto p-6">
       <div className="max-w-4xl mx-auto">
@@ -34,12 +35,18 @@ export const QuantLabHub: React.FC<QuantLabHubProps> = ({ onNavigateToFactory })
         </div>
 
         {/* Feature Cards */}
-        <div className="grid grid-cols-1 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-4 mb-8">
           <FeatureCard
             icon={Layers}
             title="Signal Factory"
             description="Create and manage multiple signal sources for alpha generation"
             onClick={onNavigateToFactory}
+          />
+          <FeatureCard
+            icon={Cpu}
+            title="Engine Store"
+            description="Install and manage factor evaluation engines"
+            onClick={onNavigateToEngineStore}
           />
         </div>
 

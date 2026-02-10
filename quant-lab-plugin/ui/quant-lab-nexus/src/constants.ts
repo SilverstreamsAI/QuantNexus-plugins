@@ -49,6 +49,16 @@ export const FACTOR_CATEGORIES = [
   { value: 'statistic', label: 'Statistic' },
 ] as const;
 
+/**
+ * TICKET_285: Translation status display metadata.
+ * Maps translation_status values to UI label and Tailwind color classes.
+ */
+export const TRANSLATION_STATUS_META = {
+  ok:          { label: 'Evaluable',   textClass: 'text-emerald-400', bgClass: 'bg-emerald-500/15' },
+  structured:  { label: 'Pipeline',    textClass: 'text-blue-400',    bgClass: 'bg-blue-500/15' },
+  unsupported: { label: 'Unsupported', textClass: 'text-gray-400',    bgClass: 'bg-gray-500/15' },
+} as const;
+
 export const EXIT_COMBINATOR_METHODS: CombinatorMethod[] = [
   { id: 'any', name: 'Any', description: 'Any rule triggers exit (conservative)' },
   { id: 'all', name: 'All', description: 'All rules must trigger (aggressive)' },

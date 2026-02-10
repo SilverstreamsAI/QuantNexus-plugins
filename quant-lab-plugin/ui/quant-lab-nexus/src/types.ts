@@ -5,7 +5,7 @@
  * PLUGIN_TICKET_008: Migrated from host to plugin
  */
 
-export type QuantLabSubPage = 'hub' | 'factory';
+export type QuantLabSubPage = 'hub' | 'factory' | 'engineStore';
 
 /**
  * PLUGIN_TICKET_010: Component detail for each slot (Analysis/Entry/Exit)
@@ -35,6 +35,38 @@ export interface CombinatorMethod {
 }
 
 /**
+ * TICKET_285: Translation status for factor expressions.
+ */
+export type TranslationStatus = 'ok' | 'structured' | 'unsupported';
+
+/**
+ * TICKET_285: CS pipeline step types for cross-sectional factor execution plans.
+ */
+export interface CsOpStep {
+  step: number;
+  type: 'cs_op';
+  op: 'rank' | 'scale' | 'neutralize';
+  input: string;
+  groupby?: string;
+}
+
+export interface TsOpStep {
+  step: number;
+  type: 'ts_op';
+  op: 'decay_linear';
+  input: string;
+  window: number;
+}
+
+export interface QlibExprStep {
+  step: number;
+  type: 'qlib_expr';
+  expr: string;
+}
+
+export type PipelineStep = CsOpStep | TsOpStep | QlibExprStep;
+
+/**
  * TICKET_276: Factor chip for Alpha Factory Factor layer.
  * Read-only factor data from backend (desktop-api.silvonastream.com).
  */
@@ -45,6 +77,9 @@ export interface FactorChip {
   source: string;      // library, mined, custom
   factor_type: 'time_series' | 'cross_sectional'; // TICKET_281
   formula: string | null;
+  translation_status?: TranslationStatus | null; // TICKET_285
+  qlib_expr?: string | null;                     // TICKET_285
+  cs_pipeline?: PipelineStep[] | null;           // TICKET_285
   ic: number | null;
   icir: number | null;
   sharpe: number | null;
@@ -54,6 +89,23 @@ export interface FactorChip {
  * PLUGIN_TICKET_012: Summary item for config sidebar list.
  * Maps to alpha-factory:list-configs IPC response shape.
  */
+/**
+ * TICKET_286/287: Factor Engine info for Engine Store UI.
+ * Maps to factor_engine_registry table rows.
+ */
+export interface FactorEngineInfo {
+  engineId: string;
+  displayName: string;
+  description: string | null;
+  pythonPackage: string | null;
+  factorCount: number;
+  examples: string | null;
+  builtin: boolean;
+  installed: boolean;
+  version: string | null;
+  installedAt: string | null;
+}
+
 export interface ConfigSummary {
   id: string;
   name: string;

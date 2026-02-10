@@ -47,6 +47,7 @@ export const FactorFactorySection: React.FC<FactorFactorySectionProps> = ({
               key={factor.id}
               name={factor.name}
               category={factor.category}
+              translationStatus={factor.translation_status}
               ic={factor.ic}
               icir={factor.icir}
               sharpe={factor.sharpe}
@@ -56,7 +57,7 @@ export const FactorFactorySection: React.FC<FactorFactorySectionProps> = ({
           {/* Add Button */}
           <button
             onClick={onAddFactor}
-            className="h-[140px] rounded-lg border border-dashed border-color-terminal-border hover:border-amber-400 text-color-terminal-text-secondary hover:text-amber-400 transition-colors flex flex-col items-center justify-center gap-2"
+            className="h-[170px] rounded-lg border border-dashed border-color-terminal-border hover:border-amber-400 text-color-terminal-text-secondary hover:text-amber-400 transition-colors flex flex-col items-center justify-center gap-2"
           >
             <Plus className="w-5 h-5" />
             <span className="text-xs">Add Factor</span>

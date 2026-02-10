@@ -17,6 +17,7 @@ export { SIGNAL_COMBINATOR_METHODS, EXIT_COMBINATOR_METHODS } from './constants'
 export { AlphaFactoryPage } from './pages/AlphaFactoryPage';
 export { QuantLabHub } from './pages/QuantLabHub';
 export { SignalLibraryPage } from './pages/SignalLibrary';
+export { EngineStorePage } from './pages/EngineStorePage';
 
 // Export components
 export { SignalSourceCard } from './components/SignalSourceCard';

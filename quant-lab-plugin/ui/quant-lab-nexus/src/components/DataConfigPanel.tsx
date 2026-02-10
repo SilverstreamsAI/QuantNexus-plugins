@@ -13,6 +13,22 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { DataConfig, OrderSizeUnit } from '../types';
 
+/**
+ * TICKET_077_D4: Inline error hint for search inputs.
+ * Local copy to avoid cross-boundary import from desktop app.
+ */
+const SearchErrorHint: React.FC<{ error: string | null; visible: boolean }> = ({ error, visible }) => {
+  if (!visible || !error) return null;
+  return (
+    <div
+      className="absolute z-50 w-full mt-1 rounded border border-red-500/30 shadow-lg px-3 py-2.5 text-sm terminal-mono text-red-400"
+      style={{ backgroundColor: '#0a192f' }}
+    >
+      {error}
+    </div>
+  );
+};
+
 // =============================================================================
 // Sub-components (inline)
 // =============================================================================
@@ -109,6 +125,7 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
   const [searchResults, setSearchResults] = useState<SymbolSearchResult[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   useEffect(() => {
     setQuery(value.symbol);
@@ -118,10 +135,12 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
     setQuery(q);
     if (q.length < 2) {
       setSearchResults([]);
+      setSearchError(null);
       setShowResults(false);
       return;
     }
     setIsSearching(true);
+    setSearchError(null);
     try {
       // data:searchSymbols returns array directly (not {success, data} wrapper)
       const results = await window.electronAPI.data.searchSymbols(q);
@@ -137,7 +156,17 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
       setSearchResults(mapped);
       setShowResults(mapped.length > 0);
     } catch (err) {
-      console.error('Symbol search failed:', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      // TICKET_289: Show contextual error in dropdown area
+      if (msg.includes('401')) {
+        setSearchError('Please log in to search symbols');
+        // TICKET_201: Highlight login button in BreadcrumbBar
+        window.dispatchEvent(new Event('nexus:auth-required'));
+      } else {
+        setSearchError('Service unavailable');
+      }
+      setSearchResults([]);
+      setShowResults(true);
     } finally {
       setIsSearching(false);
     }
@@ -191,7 +220,9 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
               <div className="w-4 h-4 border-2 border-color-terminal-accent-primary border-t-transparent rounded-full animate-spin" />
             </div>
           )}
-          {showResults && searchResults.length > 0 && (
+          {/* TICKET_289 + TICKET_077_D4: Search error feedback */}
+          <SearchErrorHint error={searchError} visible={showResults} />
+          {showResults && !searchError && searchResults.length > 0 && (
             <div className="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded border border-color-terminal-border shadow-lg"
                  style={{ backgroundColor: '#0a192f' }}>
               {searchResults.map((r) => (
