@@ -26,6 +26,7 @@ export interface DataSourceOption {
   id: string;
   name: string;
   status: 'connected' | 'disconnected' | 'error';
+  requiresAuth: boolean;
 }
 
 export interface SymbolSearchResult {
@@ -80,6 +81,9 @@ export interface BacktestDataConfigPanelProps {
 
   /** Additional class names */
   className?: string;
+
+  /** TICKET_293: Whether user is currently authenticated */
+  isAuthenticated?: boolean;
 }
 
 // =============================================================================
@@ -454,6 +458,7 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
   errors = {},
   disabled = false,
   className,
+  isAuthenticated = false,
 }) => {
   const { t } = useTranslation('backtest');
 
@@ -468,10 +473,11 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
 
   // Prepare data source options
   // TICKET_166: Show name only, use gray color for disconnected
+  // TICKET_293: Disable auth-required providers when not authenticated
   const dataSourceOptions = dataSources.map((ds) => ({
     value: ds.id,
     label: ds.name,
-    disabled: ds.status !== 'connected',
+    disabled: ds.status !== 'connected' || (ds.requiresAuth && !isAuthenticated),
   }));
 
   // Handlers

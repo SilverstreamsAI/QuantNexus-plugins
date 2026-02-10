@@ -286,7 +286,12 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
   // Component 8: Data configuration state
   const [dataConfig, setDataConfig] = useState<BacktestDataConfig>(createDefaultDataConfig());
-  const [dataSources, setDataSources] = useState<DataSourceOption[]>([]);
+  // TICKET_292: Sync initial values prevent blank <select> before async listProviders() returns
+  // TICKET_293: Include requiresAuth for auth-aware UI gating
+  const [dataSources, setDataSources] = useState<DataSourceOption[]>([
+    { id: 'clickhouse', name: 'ClickHouse', status: 'disconnected', requiresAuth: true },
+    { id: 'yfinance', name: 'Yahoo Finance', status: 'disconnected', requiresAuth: false },
+  ]);
   const [dataConfigErrors, setDataConfigErrors] = useState<Partial<Record<keyof BacktestDataConfig, string>>>({});
   // TICKET_143: Separate execution error from field errors
   const [executeError, setExecuteError] = useState<string | null>(null);
@@ -1078,35 +1083,49 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     return () => unsubscribe();
   }, []);
 
-  // TICKET_139: Load data sources when auth state changes
+  // TICKET_139 + TICKET_292: Load data sources dynamically from backend
   useEffect(() => {
     async function loadDataSources() {
       try {
         const api = (window as any).electronAPI;
-        if (!api?.data?.checkConnection) {
+        if (!api?.data?.listProviders) {
           console.warn('[BacktestPage] Data API not available, using defaults');
           setDataSources([
-            { id: 'clickhouse', name: 'ClickHouse', status: 'disconnected' },
+            { id: 'clickhouse', name: 'ClickHouse', status: 'disconnected', requiresAuth: true },
           ]);
           return;
         }
 
-        // Check ClickHouse connection status
-        const clickhouseStatus = await api.data.checkConnection('clickhouse');
+        // TICKET_292: Dynamic provider discovery from DataProviderManager
+        // TICKET_293: Extract requiresAuth from capabilities for auth-aware UI gating
+        const providers = await api.data.listProviders();
+        const sources: DataSourceOption[] = providers.map((p: { id: string; name: string; status: string; capabilities?: { requiresAuth?: boolean } }) => ({
+          id: p.id,
+          name: p.name,
+          status: p.status as DataSourceOption['status'],
+          requiresAuth: p.capabilities?.requiresAuth ?? false,
+        }));
 
-        const providers: DataSourceOption[] = [
-          {
-            id: 'clickhouse',
-            name: 'ClickHouse',
-            status: clickhouseStatus.connected ? 'connected' : 'disconnected',
-          },
-        ];
-        setDataSources(providers);
-        console.log('[BacktestPage] Data sources loaded, ClickHouse:', clickhouseStatus.connected ? 'connected' : 'disconnected');
+        setDataSources(sources);
+
+        // TICKET_293: Auto-switch away from auth-required provider when not authenticated
+        if (!isAuthenticated) {
+          setDataConfig(prev => {
+            const currentSource = sources.find(s => s.id === prev.dataSource);
+            if (currentSource?.requiresAuth) {
+              const fallback = sources.find(s => !s.requiresAuth);
+              if (fallback) {
+                return { ...prev, dataSource: fallback.id };
+              }
+            }
+            return prev;
+          });
+        }
+        console.log('[BacktestPage] Data sources loaded:', sources.map((s: DataSourceOption) => `${s.name}(${s.status})`).join(', '));
       } catch (error) {
         console.error('[BacktestPage] Failed to load data sources:', error);
         setDataSources([
-          { id: 'clickhouse', name: 'ClickHouse', status: 'error' },
+          { id: 'clickhouse', name: 'ClickHouse', status: 'error', requiresAuth: true },
         ]);
       }
     }
@@ -1705,6 +1724,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 onSymbolSearch={handleSymbolSearch}
                 errors={dataConfigErrors}
                 disabled={isExecuting}
+                isAuthenticated={isAuthenticated}
               />
 
               {/* Component 7: Workflow Row Selector */}
