@@ -12,7 +12,7 @@
  */
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Settings, Play, Loader2, RotateCcw } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
   RegimeSelector,
@@ -29,6 +29,7 @@ import {
   GenerateContentWrapper,
   SignalModeSelector,
   SignalMode,
+  GenerateActionBar,
 } from '../ui';
 
 // TICKET_077_D2: Unified Generate Workflow Hook
@@ -431,38 +432,14 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
             )}
           </div>
 
-          {/* ============================================================== */}
-          {/* Zone D: Action Bar                                              */}
-          {/* ============================================================== */}
-          <div className="flex-shrink-0 border-t border-color-terminal-border bg-color-terminal-surface/50 p-4">
-            <button
-              onClick={actions.handleStartGenerate}
-              disabled={state.isGenerating}
-              className={cn(
-                "w-full flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold uppercase tracking-wider border rounded transition-all",
-                state.isGenerating
-                  ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
-                  : "border-color-terminal-accent-gold bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20"
-              )}
-            >
-              {state.isGenerating ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating...
-                </>
-              ) : actions.hasResult ? (
-                <>
-                  <RotateCcw className="w-4 h-4" />
-                  Regenerate
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4" />
-                  Start Generate
-                </>
-              )}
-            </button>
-          </div>
+          {/* Zone D: Action Bar (TICKET_298) */}
+          <GenerateActionBar
+            isGenerating={state.isGenerating}
+            hasResult={actions.hasResult}
+            onGenerate={actions.handleStartGenerate}
+            generateLabel="Start Generate"
+            generatingLabel="Generating..."
+          />
         </div>
       </div>
 

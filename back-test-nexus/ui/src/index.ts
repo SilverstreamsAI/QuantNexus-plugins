@@ -153,7 +153,6 @@ class BacktestPluginImpl implements BacktestPlugin {
       const api = windowApi as {
         registerTreeDataProvider: (viewId: string, provider: unknown) => Disposable;
         registerViewProvider: (viewId: string, provider: unknown) => Disposable;
-        setBreadcrumb: (items: unknown[]) => void;
         openView: (viewId: string, options?: unknown) => Promise<void>;
       };
 
@@ -164,8 +163,8 @@ class BacktestPluginImpl implements BacktestPlugin {
       this.context.log.info('BacktestTreeDataProvider registered');
 
       // Command: backtest.openWorkflow
+      // TICKET_300_1: setBreadcrumb removed - breadcrumbs derived from VIEW_REGISTRY by Host
       this.context.commands.register('backtest.openWorkflow', () => {
-        api.setBreadcrumb([{ id: 'backtest', label: 'BACKTEST WORKFLOW' }]);
         api.openView('backtest.workflow');
       });
     } else {

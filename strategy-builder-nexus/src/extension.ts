@@ -72,7 +72,6 @@ export async function activate(context: PluginContext): Promise<PluginApi> {
     registerTreeDataProvider: (viewId: string, provider: unknown) => Disposable;
     registerViewProvider: (viewId: string, provider: unknown) => Disposable;
     registerCustomEditorProvider: (viewType: string, provider: unknown) => Disposable;
-    setBreadcrumb: (items: unknown[]) => void;
     openView: (viewId: string, options?: unknown) => Promise<void>;
     openEditor: (resourceUri: string, viewType: string) => Promise<void>;
   };
@@ -123,8 +122,8 @@ export async function activate(context: PluginContext): Promise<PluginApi> {
   // ---------------------------------------------------------------------------
 
   // Command: Open Hub
+  // TICKET_300_1: setBreadcrumb removed - breadcrumbs derived from VIEW_REGISTRY by Host
   context.commands.register('strategy.openHub', () => {
-    api.setBreadcrumb([{ id: 'hub', label: 'STRATEGY HUB' }]);
     api.openView('strategy.hub');
   });
 
@@ -234,18 +233,14 @@ interface StrategyNode {
   resourceUri?: string;
 }
 
+// TICKET_300_1: setBreadcrumb removed - breadcrumbs derived from VIEW_REGISTRY by Host
 type WindowApiType = {
-  setBreadcrumb: (items: { id: string; label: string }[]) => void;
   openView: (viewId: string, options?: Record<string, unknown>) => Promise<void>;
   openEditor: (resourceUri: string, viewType: string) => Promise<void>;
 };
 
 function handleNodeSelect(node: StrategyNode, api: WindowApiType) {
-  // Build breadcrumb path
-  const breadcrumb = buildBreadcrumbPath(node);
-  api.setBreadcrumb(breadcrumb);
-
-  // Open appropriate view or editor
+  // Open appropriate view or editor based on node level
   switch (node.level) {
     case 1:
       api.openView('strategy.hub');
@@ -262,18 +257,4 @@ function handleNodeSelect(node: StrategyNode, api: WindowApiType) {
   }
 }
 
-function buildBreadcrumbPath(node: StrategyNode): { id: string; label: string }[] {
-  const path: { id: string; label: string }[] = [];
-
-  // Always start with hub
-  if (node.level >= 1) {
-    path.push({ id: 'hub', label: 'STRATEGY HUB' });
-  }
-
-  // Add current node if not hub
-  if (node.level > 1) {
-    path.push({ id: node.id, label: node.label });
-  }
-
-  return path;
-}
+// TICKET_300_1: buildBreadcrumbPath removed - breadcrumbs derived from VIEW_REGISTRY by Host

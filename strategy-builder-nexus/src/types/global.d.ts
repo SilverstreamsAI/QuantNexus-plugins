@@ -398,6 +398,8 @@ declare global {
       showConfirm(message: string, options?: { title?: string }): Promise<boolean>;
       showNotification(message: string, type?: 'info' | 'success' | 'warning' | 'error'): void;
       openExternal?(url: string): void; // TICKET_190
+      openView(viewId: string, options?: Record<string, unknown>): Promise<void>; // TICKET_298
+      // TICKET_300_1: setBreadcrumb removed - breadcrumbs derived from VIEW_REGISTRY by Host
     };
   } | undefined;
 }

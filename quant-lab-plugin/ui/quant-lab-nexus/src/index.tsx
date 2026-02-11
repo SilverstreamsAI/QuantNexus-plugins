@@ -57,18 +57,16 @@ const plugin: PluginModule = {
       const api = windowApi as {
         registerTreeDataProvider: (viewId: string, provider: unknown) => Disposable;
         registerViewProvider: (viewId: string, provider: unknown) => Disposable;
-        setBreadcrumb: (items: unknown[]) => void;
         openView: (viewId: string, options?: unknown) => Promise<void>;
       };
 
       // Register commands
+      // TICKET_300_1: setBreadcrumb removed - breadcrumbs derived from VIEW_REGISTRY by Host
       context.commands.register('quantLab.openFactory', () => {
-        api.setBreadcrumb([{ id: 'quantLab', label: 'QUANT LAB' }]);
         api.openView('quantLab.alphaFactory');
       });
 
       context.commands.register('quantLab.openSignals', () => {
-        api.setBreadcrumb([{ id: 'quantLab', label: 'QUANT LAB' }, { id: 'signals', label: 'Signal Library' }]);
         api.openView('quantLab.signalLibrary');
       });
     } else {
