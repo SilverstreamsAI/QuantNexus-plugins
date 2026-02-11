@@ -475,6 +475,14 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
   // K-line chart rendering
   const renderKLineChart = () => {
     if (!candles || candles.length === 0) {
+      if (isExecuting) {
+        // TICKET_302: Empty Structure - show spinner while waiting for candle data
+        return (
+          <div className="flex items-center justify-center h-full">
+            <SpinnerIcon className="w-8 h-8 text-color-terminal-accent-teal" />
+          </div>
+        );
+      }
       return (
         <div className="flex items-center justify-center h-full text-color-terminal-text-muted text-xs">
           {t('resultPanel.charts.noKlineData')}
@@ -1042,9 +1050,10 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
     ? results
     : (result ? [result] : []);
 
-  // If no results, show empty state
-  if (allResults.length === 0) {
-    console.log('[TICKET_267] BacktestResultPanel: EARLY RETURN - no results');
+  // TICKET_302: Empty Structure pattern - when isExecuting with no data yet,
+  // render panel with empty result so chart structure is visible immediately.
+  // Only show "no results" when NOT executing.
+  if (allResults.length === 0 && !isExecuting) {
     return (
       <div className={cn('flex items-center justify-center h-full', className)}>
         <div className="text-color-terminal-text-muted">{t('resultPanel.status.noResults')}</div>
@@ -1052,16 +1061,40 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
     );
   }
 
+  // TICKET_302: When executing but no data yet, use empty result for chart structure
+  const effectiveResults: ExecutorResult[] = allResults.length > 0
+    ? allResults
+    : [{
+        success: true,
+        startTime: 0,
+        endTime: 0,
+        executionTimeMs: 0,
+        metrics: {
+          totalPnl: 0,
+          totalReturn: 0,
+          sharpeRatio: 0,
+          maxDrawdown: 0,
+          totalTrades: 0,
+          winningTrades: 0,
+          losingTrades: 0,
+          winRate: 0,
+          profitFactor: 0,
+        },
+        equityCurve: [],
+        trades: [],
+        candles: [],
+      }];
+
   // TICKET_267: Log that we are rendering the full panel
-  console.log('[TICKET_267] BacktestResultPanel: Rendering full panel with', allResults.length, 'results');
+  console.log('[TICKET_267] BacktestResultPanel: Rendering full panel with', effectiveResults.length, 'results');
 
   // TICKET_267: Log button render condition
   const shouldShowExportButton = !isQuantLabLoading && isQuantLabAvailable && !!onExportToQuantLab;
   console.log('[TICKET_267] BacktestResultPanel: Export button condition: isQuantLabLoading=' + isQuantLabLoading + ', isQuantLabAvailable=' + isQuantLabAvailable + ', hasOnExportToQuantLab=' + !!onExportToQuantLab + ', shouldShowExportButton=' + shouldShowExportButton);
 
   // For single result, use the original behavior
-  const primaryResult = allResults[0];
-  const hasMultipleResults = allResults.length > 1;
+  const primaryResult = effectiveResults[0];
+  const hasMultipleResults = effectiveResults.length > 1;
 
   // TICKET_151: Dynamic tabs - add comparison tab when multiple results
   const tabs = hasMultipleResults ? [comparisonTab, ...baseTabs] : baseTabs;
@@ -1181,12 +1214,12 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
       <div className="flex-1 overflow-hidden">
         {/* TICKET_151: Comparison tab for multiple results */}
         {effectiveActiveTab === 'comparison' && hasMultipleResults && (
-          <ComparisonTab results={allResults} />
+          <ComparisonTab results={effectiveResults} />
         )}
         {/* TICKET_151_2: Trades tab with vertical stacking (same as Charts) */}
         {effectiveActiveTab === 'trades' && (
           <TradesTab
-            results={allResults}
+            results={effectiveResults}
             currentCaseIndex={currentCaseIndex}
             isExecuting={isExecuting}
             totalCases={totalCases}
@@ -1195,7 +1228,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
         )}
         {effectiveActiveTab === 'charts' && (
           <ChartsTab
-            results={allResults}
+            results={effectiveResults}
             currentCaseIndex={currentCaseIndex}
             isExecuting={isExecuting}
             totalCases={totalCases}
