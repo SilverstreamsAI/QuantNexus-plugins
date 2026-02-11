@@ -10,7 +10,7 @@
  * - Row 3: Initial Capital + Order Size + Unit
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { DataConfig, OrderSizeUnit } from '../types';
 
 /**
@@ -126,6 +126,8 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
   const [showResults, setShowResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setQuery(value.symbol);
@@ -155,6 +157,7 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
         : [];
       setSearchResults(mapped);
       setShowResults(mapped.length > 0);
+      setHighlightedIndex(-1);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       // TICKET_289: Show contextual error in dropdown area
@@ -185,7 +188,36 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
     onChange({ ...value, ...updates });
     setQuery(result.symbol);
     setShowResults(false);
+    setHighlightedIndex(-1);
   }, [value, onChange]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showResults || searchResults.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex((prev) => {
+        const next = prev < searchResults.length - 1 ? prev + 1 : 0;
+        listRef.current?.children[next]?.scrollIntoView({ block: 'nearest' });
+        return next;
+      });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex((prev) => {
+        const next = prev > 0 ? prev - 1 : searchResults.length - 1;
+        listRef.current?.children[next]?.scrollIntoView({ block: 'nearest' });
+        return next;
+      });
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (highlightedIndex >= 0 && highlightedIndex < searchResults.length) {
+        handleSymbolSelect(searchResults[highlightedIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      setShowResults(false);
+      setHighlightedIndex(-1);
+    }
+  }, [showResults, searchResults, highlightedIndex, handleSymbolSelect]);
 
   const update = useCallback((field: keyof DataConfig, v: string | number) => {
     onChange({ ...value, [field]: v });
@@ -208,7 +240,8 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
             type="text"
             value={query}
             onChange={(e) => handleSymbolSearch(e.target.value)}
-            onBlur={() => setTimeout(() => setShowResults(false), 200)}
+            onKeyDown={handleKeyDown}
+            onBlur={() => { setTimeout(() => setShowResults(false), 200); setHighlightedIndex(-1); }}
             onFocus={() => query.length >= 2 && searchResults.length > 0 && setShowResults(true)}
             placeholder="Search symbol..."
             disabled={disabled}
@@ -223,15 +256,21 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
           {/* TICKET_289 + TICKET_077_D4: Search error feedback */}
           <SearchErrorHint error={searchError} visible={showResults} />
           {showResults && !searchError && searchResults.length > 0 && (
-            <div className="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded border border-color-terminal-border shadow-lg"
+            <div ref={listRef}
+                 className="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded border border-color-terminal-border shadow-lg"
                  style={{ backgroundColor: '#0a192f' }}>
-              {searchResults.map((r) => (
+              {searchResults.map((r, idx) => (
                 <button
                   key={r.symbol}
                   type="button"
-                  className="w-full px-3 py-2 text-left text-sm terminal-mono hover:bg-color-terminal-accent-primary/10 transition-colors"
-                  style={{ color: '#e6f1ff' }}
+                  className="w-full px-3 py-2 text-left text-sm terminal-mono transition-colors"
+                  style={{
+                    color: '#e6f1ff',
+                    backgroundColor: idx === highlightedIndex ? 'rgba(100, 255, 218, 0.15)' : undefined,
+                    borderLeft: idx === highlightedIndex ? '3px solid #64ffda' : '3px solid transparent',
+                  }}
                   onMouseDown={(e) => e.preventDefault()}
+                  onMouseEnter={() => setHighlightedIndex(idx)}
                   onClick={() => handleSymbolSelect(r)}
                 >
                   <span className="font-medium">{r.symbol}</span>

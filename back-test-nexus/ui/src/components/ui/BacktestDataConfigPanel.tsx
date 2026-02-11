@@ -250,6 +250,8 @@ const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
   const [searchResults, setSearchResults] = useState<SymbolSearchResult[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [query, setQuery] = useState(value);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const listRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setQuery(value);
@@ -270,6 +272,7 @@ const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
         const results = await onSearch(q);
         setSearchResults(results);
         setShowResults(results.length > 0);
+        setHighlightedIndex(-1);
       } catch (err) {
         console.error('Symbol search failed:', err);
         setSearchResults([]);
@@ -284,7 +287,36 @@ const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
     onChange(result.symbol);
     setQuery(result.symbol);
     setShowResults(false);
+    setHighlightedIndex(-1);
     onSelect?.(result);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showResults || searchResults.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex((prev) => {
+        const next = prev < searchResults.length - 1 ? prev + 1 : 0;
+        listRef.current?.children[next]?.scrollIntoView({ block: 'nearest' });
+        return next;
+      });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex((prev) => {
+        const next = prev > 0 ? prev - 1 : searchResults.length - 1;
+        listRef.current?.children[next]?.scrollIntoView({ block: 'nearest' });
+        return next;
+      });
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (highlightedIndex >= 0 && highlightedIndex < searchResults.length) {
+        handleSelectResult(searchResults[highlightedIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      setShowResults(false);
+      setHighlightedIndex(-1);
+    }
   };
 
   return (
@@ -297,7 +329,8 @@ const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
           type="text"
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
-          onBlur={() => setTimeout(() => setShowResults(false), 200)}
+          onKeyDown={handleKeyDown}
+          onBlur={() => { setTimeout(() => setShowResults(false), 200); setHighlightedIndex(-1); }}
           onFocus={() => query.length >= 2 && searchResults.length > 0 && setShowResults(true)}
           placeholder={placeholder}
           disabled={disabled}
@@ -325,6 +358,7 @@ const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
       {/* Search Results Dropdown */}
       {showResults && searchResults.length > 0 && (
         <div
+          ref={listRef}
           className="absolute top-full left-0 right-0 mt-1 max-h-60 overflow-y-auto z-10 rounded border shadow-lg"
           style={{
             backgroundColor: '#112240',
@@ -335,7 +369,12 @@ const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
             <button
               key={idx}
               onClick={() => handleSelectResult(result)}
-              className="w-full px-3 py-2 text-left hover:bg-color-terminal-accent-primary/10 transition-colors"
+              onMouseEnter={() => setHighlightedIndex(idx)}
+              className="w-full px-3 py-2 text-left transition-colors"
+              style={{
+                backgroundColor: idx === highlightedIndex ? 'rgba(100, 255, 218, 0.15)' : undefined,
+                borderLeft: idx === highlightedIndex ? '3px solid #64ffda' : '3px solid transparent',
+              }}
             >
               <div className="flex items-center justify-between">
                 <span className="text-sm font-bold text-color-terminal-accent-primary terminal-mono">
