@@ -27,6 +27,27 @@
       "path": "./locales",
       "namespaces": ["backtest"]
     },
+    "configuration": {
+      "title": "Backtest Nexus Settings",
+      "properties": {
+        "alpaca.apiKeyId": {
+          "type": "string",
+          "default": "",
+          "description": "Alpaca Markets API Key ID",
+          "secret": true,
+          "category": "Data Providers",
+          "order": 1
+        },
+        "alpaca.apiSecretKey": {
+          "type": "string",
+          "default": "",
+          "description": "Alpaca Markets API Secret Key",
+          "secret": true,
+          "category": "Data Providers",
+          "order": 2
+        }
+      }
+    },
     "backtestEngines": [{
       "id": "nexus.backtrader",
       "name": "Backtrader Engine",
