@@ -452,7 +452,11 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
       );
       if (result.success && result.data) {
         if (result.data.valid) {
-          onTestResultChange({ status: 'success', message: 'Verified' });
+          // TICKET_311: Show key type (Paper/Live) for Alpaca
+          const keyTypeLabel = result.data.keyType
+            ? ` (${result.data.keyType === 'paper' ? 'Paper' : 'Live'})`
+            : '';
+          onTestResultChange({ status: 'success', message: `Verified${keyTypeLabel}` });
         } else {
           onTestResultChange({ status: 'error', message: result.data.error || 'Invalid API key' });
           setTimeout(() => onTestResultChange({ status: 'idle' }), 5000);
