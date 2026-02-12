@@ -547,6 +547,18 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
     onChange({ ...value, [field]: newValue });
   };
 
+  // TICKET_314: Cascading reset - clear dependent fields when data source changes
+  const handleDataSourceChange = useCallback((newDataSource: string) => {
+    if (newDataSource === value.dataSource) return;
+    onChange({
+      ...value,
+      dataSource: newDataSource,
+      symbol: '',
+      startDate: '',
+      endDate: '',
+    });
+  }, [value, onChange]);
+
   /**
    * Handle symbol selection from search results.
    * Auto-populate startDate and endDate from backend data availability.
@@ -622,7 +634,7 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
           <SelectField
             label={t('config.dataSource')}
             value={value.dataSource || DEFAULT_DATA_SOURCE}
-            onChange={(v) => handleChange('dataSource', v)}
+            onChange={handleDataSourceChange}
             options={dataSourceOptions}
             error={errors.dataSource}
             disabled={disabled}

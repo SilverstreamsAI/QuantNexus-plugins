@@ -12,6 +12,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import { getCandleColor, isCandleProcessed, CANDLE_COLOR_UNPROCESSED } from '../../utils/chart-utils';
+import { formatDateTime, formatNumber } from '@shared/utils/format-locale';
 
 // -----------------------------------------------------------------------------
 // Types (matching ExecutorResult from useExecutor hook)
@@ -113,7 +114,7 @@ const formatCurrency = (value: number | null | undefined): string => {
   // Cap display at reasonable range
   const capped = Math.max(-1e12, Math.min(1e12, value));
   const sign = capped >= 0 ? '+' : '';
-  return `${sign}$${Math.abs(capped).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `${sign}$${formatNumber(Math.abs(capped), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
 const formatPercent = (value: number | null | undefined): string => {
@@ -130,13 +131,7 @@ const formatRatio = (value: number | null | undefined): string => {
 };
 
 const formatDate = (timestamp: number): string => {
-  return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return formatDateTime(timestamp);
 };
 
 const getColorClass = (value: number | null | undefined): string => {
@@ -455,7 +450,7 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
             {t('resultPanel.charts.equityCurve')}
           </span>
           <span className={cn('text-xs tabular-nums font-medium', pnl >= 0 ? 'text-green-400' : 'text-red-400')}>
-            ${endEquity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({formatPercent(startEquity > 0 ? (pnl / startEquity) * 100 : 0)})
+            ${formatNumber(endEquity, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({formatPercent(startEquity > 0 ? (pnl / startEquity) * 100 : 0)})
           </span>
         </div>
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ height: equityHeight - 32 }} preserveAspectRatio="none">

@@ -16,9 +16,10 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@shared/types": ["../../apps/desktop/src/shared/types/index.ts"]
+      "@shared/types": ["../../apps/desktop/src/shared/types/index.ts"],
+      "@shared/utils/*": ["../../apps/desktop/src/shared/utils/*"]
     }
   },
-  "include": ["src/**/*", "src/types/**/*.d.ts", "assets/**/*.json", "../../apps/desktop/src/shared/types/**/*"],
+  "include": ["src/**/*", "src/types/**/*.d.ts", "assets/**/*.json", "../../apps/desktop/src/shared/types/**/*", "../../apps/desktop/src/shared/utils/**/*"],
   "exclude": ["node_modules", "dist"]
 }

@@ -10,6 +10,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Search, Plus, Database } from 'lucide-react';
+import { formatDate as sharedFormatDate } from '@shared/utils/format-locale';
 
 export interface SignalSourceItem {
   id: string;
@@ -114,7 +115,7 @@ export const SignalSourcePicker: React.FC<SignalSourcePickerProps> = ({
 
   const formatDate = (iso: string): string => {
     try {
-      return new Date(iso).toLocaleDateString();
+      return sharedFormatDate(iso);
     } catch {
       return iso;
     }

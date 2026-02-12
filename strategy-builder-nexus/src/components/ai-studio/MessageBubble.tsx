@@ -10,6 +10,7 @@
 import React, { useMemo } from 'react';
 import { User, Bot, Info, Copy, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { formatTimestamp } from '@shared/utils/format-locale';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -80,17 +81,6 @@ const MESSAGE_CONFIG: Record<MessageType, {
     animationClass: 'animate-in fade-in zoom-in-95',
   },
 };
-
-// -----------------------------------------------------------------------------
-// Helper Functions
-// -----------------------------------------------------------------------------
-
-/**
- * Format timestamp for display
- */
-function formatTime(date: Date): string {
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
 
 // -----------------------------------------------------------------------------
 // Sub-components
@@ -221,7 +211,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             </span>
             {showTimestamp && message.timestamp && (
               <span className="text-[10px] text-color-terminal-text-muted">
-                {formatTime(message.timestamp)}
+                {formatTimestamp(message.timestamp)}
               </span>
             )}
           </div>

@@ -31,6 +31,7 @@ import {
 import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
 import { convertPythonResultToExecutorResult } from '../../utils/executorResultConverter';
 import { extractUniqueTimeframes } from '../../utils/timeframe-utils';
+import { formatDateTime } from '@shared/utils/format-locale';
 import type { TimeframeValue } from '../ui/TimeframeDropdown';
 // TICKET_264: Export to Quant Lab hooks
 import { useQuantLabAvailable, useExportToQuantLab } from '../../hooks';
@@ -430,13 +431,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           orderSize: record.order_size,
           orderSizeUnit: record.order_size_unit,
           // Timestamp with time
-          createdAt: new Date(record.created_at).toLocaleString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-          }),
+          createdAt: formatDateTime(record.created_at),
           status: 'completed' as const,
         }));
         setHistoryItems(items);

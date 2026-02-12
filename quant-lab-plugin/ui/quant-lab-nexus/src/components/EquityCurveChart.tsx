@@ -9,6 +9,7 @@
 import React from 'react';
 import { EquityPoint } from '../types';
 import { formatPercent } from '../utils/format-utils';
+import { formatNumber } from '@shared/utils/format-locale';
 
 interface EquityCurveChartProps {
   equityCurve: EquityPoint[];
@@ -79,7 +80,7 @@ export const EquityCurveChart: React.FC<EquityCurveChartProps> = ({ equityCurve 
           EQUITY CURVE
         </span>
         <span className={`text-xs tabular-nums font-medium ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-          ${endEquity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({formatPercent(returnPct)})
+          ${formatNumber(endEquity, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({formatPercent(returnPct)})
         </span>
       </div>
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ height: 168 }} preserveAspectRatio="none">

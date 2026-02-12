@@ -3,13 +3,16 @@
  *
  * PLUGIN_TICKET_016: Pure format functions for result display.
  * Adapted from back-test-nexus BacktestResultPanel.tsx (lines 111-152).
+ * TICKET_315: Locale-aware formatting via shared utility.
  */
+
+import { formatDateTime, formatNumber } from '@shared/utils/format-locale';
 
 export const formatCurrency = (value: number | null | undefined): string => {
   if (value == null || !Number.isFinite(value)) return '$0.00';
   const capped = Math.max(-1e12, Math.min(1e12, value));
   const sign = capped >= 0 ? '+' : '';
-  return `${sign}$${Math.abs(capped).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `${sign}$${formatNumber(Math.abs(capped), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
 export const formatPercent = (value: number | null | undefined): string => {
@@ -25,13 +28,7 @@ export const formatRatio = (value: number | null | undefined): string => {
 };
 
 export const formatDate = (timestamp: number): string => {
-  return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return formatDateTime(timestamp);
 };
 
 export const getColorClass = (value: number | null | undefined): string => {
