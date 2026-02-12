@@ -64,3 +64,7 @@ export {
   type CheckpointBadgeInfo,
   type BacktestHistorySidebarProps,
 } from './BacktestHistorySidebar';
+
+// TICKET_308: PageHeader for Zone A (title + settings gear)
+export { PageHeader } from './PageHeader';
+export type { PageHeaderProps } from './PageHeader';

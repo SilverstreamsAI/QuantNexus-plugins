@@ -23,6 +23,8 @@ export interface TimeframeDropdownProps {
   value: TimeframeValue;
   /** Callback when timeframe changes */
   onChange: (timeframe: TimeframeValue) => void;
+  /** TICKET_305: Restrict to provider-supported timeframes */
+  allowedValues?: TimeframeValue[];
   /** Color theme (matches paired WorkflowDropdown) */
   theme?: ColorTheme;
   /** Whether dropdown is disabled */
@@ -99,6 +101,7 @@ const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
 export const TimeframeDropdown: React.FC<TimeframeDropdownProps> = ({
   value,
   onChange,
+  allowedValues,
   theme = 'blue',
   disabled = false,
   className,
@@ -110,12 +113,17 @@ export const TimeframeDropdown: React.FC<TimeframeDropdownProps> = ({
 
   const themeColors = THEME_COLORS[theme];
 
+  // TICKET_305: Filter options by provider capabilities
+  const filteredOptions = allowedValues
+    ? TIMEFRAME_OPTIONS.filter(opt => allowedValues.includes(opt.value))
+    : TIMEFRAME_OPTIONS;
+
   // Update dropdown position
   const updatePosition = useCallback(() => {
     if (!buttonRef.current) return;
 
     const rect = buttonRef.current.getBoundingClientRect();
-    const dropdownHeight = TIMEFRAME_OPTIONS.length * 32 + 8; // Approximate height
+    const dropdownHeight = filteredOptions.length * 32 + 8; // Approximate height
     const spaceBelow = window.innerHeight - rect.bottom - 4;
     const shouldOpenUpward = spaceBelow < dropdownHeight && rect.top > spaceBelow;
 
@@ -205,7 +213,7 @@ export const TimeframeDropdown: React.FC<TimeframeDropdownProps> = ({
               minWidth: 64,
             }}
           >
-            {TIMEFRAME_OPTIONS.map((option) => {
+            {filteredOptions.map((option) => {
               const isSelected = value === option.value;
               return (
                 <button

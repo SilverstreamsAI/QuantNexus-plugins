@@ -62,6 +62,8 @@ export interface WorkflowRowSelectorProps {
   disableConditions?: boolean;
   /** TICKET_077_20: Permanently disable Market Analysis button (for Trader cockpit) */
   disableAnalysis?: boolean;
+  /** TICKET_305: Restrict timeframe options to provider-supported intervals */
+  allowedIntervals?: TimeframeValue[];
   /** Additional class names */
   className?: string;
 }
@@ -105,6 +107,8 @@ interface SelectionChipsProps {
   onTimeframeChange: (id: number, timeframe: TimeframeValue) => void;
   theme: ColorTheme;
   disabled?: boolean;
+  /** TICKET_305: Restrict timeframe options */
+  allowedIntervals?: TimeframeValue[];
 }
 
 const SelectionChips: React.FC<SelectionChipsProps> = ({
@@ -113,6 +117,7 @@ const SelectionChips: React.FC<SelectionChipsProps> = ({
   onTimeframeChange,
   theme,
   disabled,
+  allowedIntervals,
 }) => {
   if (selections.length === 0) return null;
 
@@ -137,6 +142,7 @@ const SelectionChips: React.FC<SelectionChipsProps> = ({
           <TimeframeDropdown
             value={sel.timeframe}
             onChange={(tf) => onTimeframeChange(sel.id, tf)}
+            allowedValues={allowedIntervals}
             theme={theme}
             disabled={disabled}
             className="!min-w-[40px] !px-1 !py-0.5 !text-[9px] !border-0 !bg-transparent"
@@ -174,6 +180,8 @@ interface AlgorithmSelectorWithTimeframeProps {
   /** Current timeframe for new selections */
   defaultTimeframe: TimeframeValue;
   onDefaultTimeframeChange: (timeframe: TimeframeValue) => void;
+  /** TICKET_305: Restrict timeframe options */
+  allowedIntervals?: TimeframeValue[];
 }
 
 const AlgorithmSelectorWithTimeframe: React.FC<AlgorithmSelectorWithTimeframeProps> = ({
@@ -188,6 +196,7 @@ const AlgorithmSelectorWithTimeframe: React.FC<AlgorithmSelectorWithTimeframePro
   searchPlaceholder,
   defaultTimeframe,
   onDefaultTimeframeChange,
+  allowedIntervals,
 }) => {
   // Handle algorithm selection change
   const handleAlgorithmChange = useCallback((selectedIds: number[]) => {
@@ -241,6 +250,7 @@ const AlgorithmSelectorWithTimeframe: React.FC<AlgorithmSelectorWithTimeframePro
         <TimeframeDropdown
           value={defaultTimeframe}
           onChange={onDefaultTimeframeChange}
+          allowedValues={allowedIntervals}
           theme={theme}
           disabled={disabled}
         />
@@ -265,6 +275,7 @@ const AlgorithmSelectorWithTimeframe: React.FC<AlgorithmSelectorWithTimeframePro
         onTimeframeChange={handleTimeframeChange}
         theme={theme}
         disabled={disabled}
+        allowedIntervals={allowedIntervals}
       />
     </div>
   );
@@ -281,6 +292,8 @@ interface WorkflowRowItemProps {
   disableConditions?: boolean;
   disableAnalysis?: boolean;
   t: (key: string) => string;
+  /** TICKET_305: Restrict timeframe options */
+  allowedIntervals?: TimeframeValue[];
 }
 
 const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({
@@ -290,6 +303,7 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({
   disableConditions,
   disableAnalysis,
   t,
+  allowedIntervals,
 }) => {
   // TICKET_248: Track default timeframe for each column (used when adding new selections)
   // TICKET_257: Different defaults for different stages (regime=1d, entry/exit=1h)
@@ -361,6 +375,7 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({
             searchPlaceholder={t('workflowSelector.search')}
             defaultTimeframe={defaultTimeframes.analysis}
             onDefaultTimeframeChange={(tf) => handleDefaultTimeframeChange('analysis', tf)}
+            allowedIntervals={allowedIntervals}
           />
         </div>
 
@@ -377,6 +392,7 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({
             showSearch={false}
             defaultTimeframe={defaultTimeframes.preCondition}
             onDefaultTimeframeChange={(tf) => handleDefaultTimeframeChange('preCondition', tf)}
+            allowedIntervals={allowedIntervals}
           />
         </div>
 
@@ -393,6 +409,7 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({
             searchPlaceholder={t('workflowSelector.search')}
             defaultTimeframe={defaultTimeframes.steps}
             onDefaultTimeframeChange={(tf) => handleDefaultTimeframeChange('steps', tf)}
+            allowedIntervals={allowedIntervals}
           />
         </div>
 
@@ -409,6 +426,7 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({
             showSearch={false}
             defaultTimeframe={defaultTimeframes.postCondition}
             onDefaultTimeframeChange={(tf) => handleDefaultTimeframeChange('postCondition', tf)}
+            allowedIntervals={allowedIntervals}
           />
         </div>
       </div>
@@ -428,6 +446,7 @@ export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
   maxRows = 10,
   disableConditions = false,
   disableAnalysis = false,
+  allowedIntervals,
   className,
 }) => {
   const { t } = useTranslation('backtest');
@@ -477,6 +496,7 @@ export const WorkflowRowSelector: React.FC<WorkflowRowSelectorProps> = ({
           disableConditions={disableConditions}
           disableAnalysis={disableAnalysis}
           t={t}
+          allowedIntervals={allowedIntervals}
         />
       ))}
     </div>

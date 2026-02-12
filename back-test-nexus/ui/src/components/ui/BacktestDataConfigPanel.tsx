@@ -27,6 +27,10 @@ export interface DataSourceOption {
   name: string;
   status: 'connected' | 'disconnected' | 'error';
   requiresAuth: boolean;
+  /** TICKET_305: Provider-supported intervals in UI notation */
+  intervals?: string[];
+  /** TICKET_305: Max lookback per interval (e.g. { '1m': '7d' }) */
+  maxLookback?: Record<string, string>;
 }
 
 export interface SymbolSearchResult {
@@ -84,6 +88,12 @@ export interface BacktestDataConfigPanelProps {
 
   /** TICKET_293: Whether user is currently authenticated */
   isAuthenticated?: boolean;
+
+  /** TICKET_305: Max lookback constraints per interval from current provider */
+  maxLookback?: Record<string, string>;
+
+  /** TICKET_305 Phase 3: Most restrictive lookback in days across selected timeframes */
+  mostRestrictiveLookbackDays?: number;
 }
 
 // =============================================================================
@@ -498,10 +508,23 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
   disabled = false,
   className,
   isAuthenticated = false,
+  maxLookback,
+  mostRestrictiveLookbackDays,
 }) => {
   const { t } = useTranslation('backtest');
 
   // TICKET_248: timeframeOptions removed - timeframe now set at stage-level in WorkflowRowSelector
+
+  // TICKET_305 Phase 3: Real-time lookback warning
+  const lookbackWarning = useMemo(() => {
+    if (!mostRestrictiveLookbackDays || !value.startDate || !value.endDate) return null;
+    const startMs = new Date(value.startDate).getTime();
+    const endMs = new Date(value.endDate).getTime();
+    if (isNaN(startMs) || isNaN(endMs) || endMs <= startMs) return null;
+    const selectedDays = Math.ceil((endMs - startMs) / (1000 * 60 * 60 * 24));
+    if (selectedDays <= mostRestrictiveLookbackDays) return null;
+    return `Selected range (${selectedDays}d) exceeds max lookback (${mostRestrictiveLookbackDays}d)`;
+  }, [mostRestrictiveLookbackDays, value.startDate, value.endDate]);
 
   // Generate order size unit options with translations
   const orderSizeUnits = useMemo(() => [
@@ -528,8 +551,9 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
    * Handle symbol selection from search results.
    * Auto-populate startDate and endDate from backend data availability.
    * TICKET_143: Include symbol in updates to avoid race condition with stale closure.
+   * TICKET_305 Phase 2: If dates not in search result, call getSymbolDateRange API.
    */
-  const handleSymbolSelect = useCallback((result: SymbolSearchResult) => {
+  const handleSymbolSelect = useCallback(async (result: SymbolSearchResult) => {
     const updates: Partial<BacktestDataConfig> = {
       symbol: result.symbol,
     };
@@ -550,7 +574,39 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
       }
     }
 
+    // TICKET_305 Phase 2: Update symbol immediately (non-blocking)
     onChange({ ...value, ...updates });
+
+    // If dates not available from search result, fetch via separate API call
+    if (!updates.startDate || !updates.endDate) {
+      try {
+        const api = (window as any).electronAPI;
+        if (api?.data?.getSymbolDateRange) {
+          const dateRange = await api.data.getSymbolDateRange(result.symbol, value.dataSource);
+          const dateUpdates: Partial<BacktestDataConfig> = {};
+
+          if (dateRange?.startTime && !updates.startDate) {
+            const sd = dateRange.startTime.split(' ')[0];
+            if (sd && /^\d{4}-\d{2}-\d{2}$/.test(sd)) {
+              dateUpdates.startDate = sd;
+            }
+          }
+          if (dateRange?.endTime && !updates.endDate) {
+            const ed = dateRange.endTime.split(' ')[0];
+            if (ed && /^\d{4}-\d{2}-\d{2}$/.test(ed)) {
+              dateUpdates.endDate = ed;
+            }
+          }
+
+          if (Object.keys(dateUpdates).length > 0) {
+            onChange({ ...value, ...updates, ...dateUpdates });
+          }
+        }
+      } catch (error) {
+        // Non-fatal: user can manually set dates
+        console.warn('[BacktestDataConfigPanel] Failed to fetch symbol date range:', error);
+      }
+    }
   }, [value, onChange]);
 
   return (
@@ -602,6 +658,18 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
             disabled={disabled}
           />
         </div>
+        {/* TICKET_305: Max lookback hint per interval */}
+        {maxLookback && Object.keys(maxLookback).length > 0 && (
+          <div className="text-[10px] text-color-terminal-text/50 terminal-mono mt-1">
+            {Object.entries(maxLookback).map(([tf, lb]) => `${tf}:${lb}`).join(' | ')}
+          </div>
+        )}
+        {/* TICKET_305 Phase 3: Amber lookback warning */}
+        {lookbackWarning && (
+          <div className="text-[10px] text-amber-400 terminal-mono mt-1">
+            {lookbackWarning}
+          </div>
+        )}
 
         {/* Row 3: Initial Capital + Order Size */}
         <div className="grid grid-cols-2 gap-4">

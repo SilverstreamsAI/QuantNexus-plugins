@@ -8,7 +8,7 @@
  * @see TICKET_077_COMPONENT8 - BacktestDataConfigPanel Design
  */
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import {
@@ -26,10 +26,12 @@ import {
   CheckpointResumePanel,
   BacktestHistorySidebar,
   type BacktestHistoryItem,
+  PageHeader,
 } from '../ui';
 import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
 import { convertPythonResultToExecutorResult } from '../../utils/executorResultConverter';
 import { extractUniqueTimeframes } from '../../utils/timeframe-utils';
+import type { TimeframeValue } from '../ui/TimeframeDropdown';
 // TICKET_264: Export to Quant Lab hooks
 import { useQuantLabAvailable, useExportToQuantLab } from '../../hooks';
 
@@ -204,6 +206,10 @@ export interface BacktestPageProps {
   onResultsUpdate?: (results: ExecutorResult[]) => void;
   /** TICKET_234: Notify Host when execution state updates (for global store) */
   onExecutionStateUpdate?: (state: ExecutionStateUpdate) => void;
+  /** TICKET_308: Page title for PageHeader Zone A */
+  pageTitle?: string;
+  /** TICKET_308: Settings gear click handler for PageHeader Zone A */
+  onSettingsClick?: () => void;
 }
 
 // -----------------------------------------------------------------------------
@@ -261,6 +267,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   onCurrentResultUpdate,
   onResultsUpdate,
   onExecutionStateUpdate,
+  pageTitle,
+  onSettingsClick,
 }) => {
   const { t } = useTranslation('backtest');
 
@@ -1099,11 +1107,17 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         // TICKET_292: Dynamic provider discovery from DataProviderManager
         // TICKET_293: Extract requiresAuth from capabilities for auth-aware UI gating
         const providers = await api.data.listProviders();
-        const sources: DataSourceOption[] = providers.map((p: { id: string; name: string; status: string; capabilities?: { requiresAuth?: boolean } }) => ({
+        // TICKET_305: Extract intervals + maxLookback from provider capabilities
+        const sources: DataSourceOption[] = providers.map((p: {
+          id: string; name: string; status: string;
+          capabilities?: { requiresAuth?: boolean; intervals?: string[]; maxLookback?: Record<string, string> }
+        }) => ({
           id: p.id,
           name: p.name,
           status: p.status as DataSourceOption['status'],
           requiresAuth: p.capabilities?.requiresAuth ?? false,
+          intervals: p.capabilities?.intervals,
+          maxLookback: p.capabilities?.maxLookback,
         }));
 
         setDataSources(sources);
@@ -1134,6 +1148,37 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     loadDataSources();
   }, [isAuthenticated]);
 
+  // TICKET_305: Derive provider capability constraints for current data source
+  const currentProvider = useMemo(
+    () => dataSources.find(s => s.id === dataConfig.dataSource),
+    [dataSources, dataConfig.dataSource]
+  );
+  const allowedIntervals = currentProvider?.intervals as TimeframeValue[] | undefined;
+  const maxLookback = currentProvider?.maxLookback;
+
+  // TICKET_305 Phase 3: Derive most restrictive lookback (in days) across selected timeframes
+  const mostRestrictiveLookbackDays = useMemo(() => {
+    if (!maxLookback) return undefined;
+
+    const timeframes = extractUniqueTimeframes(workflowRows);
+    if (timeframes.length === 0) return undefined;
+
+    let minDays: number | undefined;
+    for (const tf of timeframes) {
+      const lb = maxLookback[tf];
+      if (!lb) continue;
+      // Parse lookback string: '7d' -> 7, '60d' -> 60, '730d' -> 730
+      const match = lb.match(/^(\d+)d$/);
+      if (match) {
+        const days = parseInt(match[1], 10);
+        if (minDays === undefined || days < minDays) {
+          minDays = days;
+        }
+      }
+    }
+    return minDays;
+  }, [maxLookback, workflowRows]);
+
   // Symbol search handler
   // TICKET_121 + TICKET_045: Use real backend API instead of mock data
   const handleSymbolSearch = useCallback(async (query: string): Promise<SymbolSearchResult[]> => {
@@ -1145,7 +1190,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         return [];
       }
 
-      const results = await api.data.searchSymbols(query);
+      const results = await api.data.searchSymbols(query, dataConfig.dataSource);
 
       // Transform backend response to SymbolSearchResult format
       return results.map((r: any) => ({
@@ -1161,7 +1206,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       // Return empty array on error
       return [];
     }
-  }, []);
+  }, [dataConfig.dataSource]);
 
   // TICKET_173: Helper to check if a workflow has content (moved from Host Shell)
   const hasWorkflowContent = useCallback((workflow: WorkflowRow): boolean => {
@@ -1362,6 +1407,27 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       errors.endDate = 'End date must be after start date';
     }
 
+    // TICKET_305 Phase 3: Validate date range against maxLookback for selected timeframes
+    if (config.startDate && config.endDate && maxLookback) {
+      const timeframes = extractUniqueTimeframes(workflowRows);
+      const startMs = new Date(config.startDate).getTime();
+      const endMs = new Date(config.endDate).getTime();
+      const selectedDays = Math.ceil((endMs - startMs) / (1000 * 60 * 60 * 24));
+
+      for (const tf of timeframes) {
+        const lb = maxLookback[tf];
+        if (!lb) continue;
+        const match = lb.match(/^(\d+)d$/);
+        if (match) {
+          const maxDays = parseInt(match[1], 10);
+          if (selectedDays > maxDays) {
+            errors.startDate = `${tf} interval: max ${lb} lookback (${selectedDays}d selected)`;
+            break;
+          }
+        }
+      }
+    }
+
     if (config.initialCapital <= 0) {
       errors.initialCapital = 'Initial capital must be positive';
     }
@@ -1372,7 +1438,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
     setDataConfigErrors(errors);
     return Object.keys(errors).length === 0;
-  }, []);
+  }, [maxLookback, workflowRows]);
 
   // TICKET_163: Show naming dialog instead of direct execute
   const handleShowNamingDialog = useCallback(() => {
@@ -1543,30 +1609,38 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   }, []);
 
   return (
-    <div className="h-full flex bg-color-terminal-bg text-color-terminal-text">
-      {/* Zone B: History Sidebar - TICKET_077_18 Modularized */}
-      <BacktestHistorySidebar
-        isExecuting={isExecuting}
-        currentCaseIndex={currentCaseIndex}
-        totalCases={totalCases}
-        resultsCount={backtestResults.length}
-        historyItems={historyItems}
-        historyLoading={historyLoading}
-        checkpointInfo={checkpointInfo ? {
-          taskId: checkpointInfo.taskId,
-          progressPercent: checkpointInfo.progressPercent,
-        } : null}
-        showCheckpointPanel={showCheckpointPanel}
-        onHistoryItemClick={handleHistoryItemClick}
-        onDeleteClick={handleDeleteClick}
-        onCaseClick={handleCaseClick}
-        onShowCheckpointPanel={() => setShowCheckpointPanel(true)}
+    <div className="h-full flex flex-col bg-color-terminal-bg text-color-terminal-text">
+      {/* Zone A: Page Header - TICKET_308 (full width, above sidebar + content) */}
+      <PageHeader
+        title={pageTitle || 'Backtest Nexus'}
+        onSettingsClick={onSettingsClick}
       />
 
-      {/* Zone C + Zone D */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Zone C: Config or Result based on state */}
-        <div className="flex-1 overflow-y-auto p-6">
+      {/* Zone B + C + D */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Zone B: History Sidebar - TICKET_077_18 Modularized */}
+        <BacktestHistorySidebar
+          isExecuting={isExecuting}
+          currentCaseIndex={currentCaseIndex}
+          totalCases={totalCases}
+          resultsCount={backtestResults.length}
+          historyItems={historyItems}
+          historyLoading={historyLoading}
+          checkpointInfo={checkpointInfo ? {
+            taskId: checkpointInfo.taskId,
+            progressPercent: checkpointInfo.progressPercent,
+          } : null}
+          showCheckpointPanel={showCheckpointPanel}
+          onHistoryItemClick={handleHistoryItemClick}
+          onDeleteClick={handleDeleteClick}
+          onCaseClick={handleCaseClick}
+          onShowCheckpointPanel={() => setShowCheckpointPanel(true)}
+        />
+
+        {/* Zone C + Zone D */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Zone C: Config or Result based on state */}
+          <div className="flex-1 overflow-y-auto p-6">
           {/* TICKET_162: Show selected history result (page41) */}
           {selectedHistoryResult ? (
             <div className="h-full flex flex-col">
@@ -1725,6 +1799,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 errors={dataConfigErrors}
                 disabled={isExecuting}
                 isAuthenticated={isAuthenticated}
+                maxLookback={maxLookback}
+                mostRestrictiveLookbackDays={mostRestrictiveLookbackDays}
               />
 
               {/* Component 7: Workflow Row Selector */}
@@ -1736,6 +1812,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 maxRows={10}
                 disableConditions={true}
                 disableAnalysis={cockpitMode === 'trader'}
+                allowedIntervals={allowedIntervals}
               />
             </div>
           )}
@@ -1840,6 +1917,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               </button>
             </div>
           )}
+          </div>
         </div>
       </div>
 

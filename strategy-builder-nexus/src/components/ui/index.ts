@@ -147,3 +147,7 @@ export type { RiskOverrideRuleCardProps } from './RiskOverrideRuleCard';
 // TICKET_298: GenerateActionBar for Builder Pages
 export { GenerateActionBar } from './GenerateActionBar';
 export type { GenerateActionBarProps } from './GenerateActionBar';
+
+// TICKET_308: PageHeader for Zone A (title + settings gear)
+export { PageHeader } from './PageHeader';
+export type { PageHeaderProps } from './PageHeader';
