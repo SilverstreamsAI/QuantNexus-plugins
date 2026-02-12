@@ -17,6 +17,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
+import { getDateFormatHint } from '@shared/utils/format-locale';
 
 // =============================================================================
 // Types
@@ -654,7 +655,7 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
         {/* Row 2: Start Date + End Date (TICKET_248: Timeframe moved to stage-level) */}
         <div className="grid grid-cols-2 gap-4">
           <InputField
-            label={t('config.startDate')}
+            label={`${t('config.startDate')} (${getDateFormatHint()})`}
             type="date"
             value={value.startDate}
             onChange={(v) => handleChange('startDate', v)}
@@ -662,7 +663,7 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
             disabled={disabled}
           />
           <InputField
-            label={t('config.endDate')}
+            label={`${t('config.endDate')} (${getDateFormatHint()})`}
             type="date"
             value={value.endDate}
             onChange={(v) => handleChange('endDate', v)}

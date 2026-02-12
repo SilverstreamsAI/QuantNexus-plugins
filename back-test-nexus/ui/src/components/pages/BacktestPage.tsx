@@ -244,8 +244,8 @@ const createInitialRow = (): WorkflowRow => ({
 const createDefaultDataConfig = (): BacktestDataConfig => ({
   symbol: '',
   dataSource: 'clickhouse',
-  startDate: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-  endDate: new Date().toISOString().split('T')[0],
+  startDate: '',
+  endDate: '',
   initialCapital: 10000,
   orderSize: 100,
   orderSizeUnit: 'percent',
