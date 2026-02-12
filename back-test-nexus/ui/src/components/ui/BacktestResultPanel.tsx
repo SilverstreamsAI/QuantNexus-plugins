@@ -15,6 +15,83 @@ import { getCandleColor, isCandleProcessed, CANDLE_COLOR_UNPROCESSED } from '../
 import { formatDateTime, formatNumber } from '@shared/utils/format-locale';
 
 // -----------------------------------------------------------------------------
+// TICKET_317: Large Dataset Rendering Utilities
+// -----------------------------------------------------------------------------
+
+const MAX_RENDER_POINTS = 2000;
+
+/** Loop-based min/max to avoid V8 call stack limit on Math.min(...spread) */
+function safeMinMax<T>(arr: T[], accessor: (item: T) => number): { min: number; max: number } {
+  if (arr.length === 0) return { min: 0, max: 0 };
+  let min = accessor(arr[0]);
+  let max = min;
+  for (let i = 1; i < arr.length; i++) {
+    const v = accessor(arr[i]);
+    if (v < min) min = v;
+    if (v > max) max = v;
+  }
+  return { min, max };
+}
+
+/** Min-Max bucket aggregation for OHLC candles (preserves price extremes per bucket) */
+function downsampleOHLC(candles: Candle[], maxPoints: number): Candle[] {
+  if (candles.length <= maxPoints) return candles;
+  const bucketSize = candles.length / maxPoints;
+  const result: Candle[] = [];
+  for (let i = 0; i < maxPoints; i++) {
+    const start = Math.floor(i * bucketSize);
+    const end = Math.min(Math.floor((i + 1) * bucketSize), candles.length);
+    let low = candles[start].low;
+    let high = candles[start].high;
+    for (let j = start + 1; j < end; j++) {
+      if (candles[j].low < low) low = candles[j].low;
+      if (candles[j].high > high) high = candles[j].high;
+    }
+    result.push({
+      timestamp: candles[start].timestamp,
+      open: candles[start].open,
+      high,
+      low,
+      close: candles[end - 1].close,
+      volume: 0,
+    });
+  }
+  return result;
+}
+
+/** Largest-Triangle-Three-Buckets downsampling for line charts */
+function downsampleLTTB<T>(data: T[], maxPoints: number, accessor: (item: T) => number): T[] {
+  if (data.length <= maxPoints) return data;
+  const result: T[] = [data[0]];
+  const bucketSize = (data.length - 2) / (maxPoints - 2);
+  let prevSelected = 0;
+  for (let i = 1; i < maxPoints - 1; i++) {
+    const bucketStart = Math.floor((i - 1) * bucketSize) + 1;
+    const bucketEnd = Math.min(Math.floor(i * bucketSize) + 1, data.length - 1);
+    const nextBucketStart = Math.floor(i * bucketSize) + 1;
+    const nextBucketEnd = Math.min(Math.floor((i + 1) * bucketSize) + 1, data.length - 1);
+    // Average of next bucket
+    let avgY = 0;
+    for (let j = nextBucketStart; j < nextBucketEnd; j++) avgY += accessor(data[j]);
+    avgY /= (nextBucketEnd - nextBucketStart) || 1;
+    const avgX = (nextBucketStart + nextBucketEnd - 1) / 2;
+    // Find point in current bucket with largest triangle area
+    let maxArea = -1;
+    let bestIdx = bucketStart;
+    const ax = prevSelected;
+    const ay = accessor(data[prevSelected]);
+    for (let j = bucketStart; j < bucketEnd; j++) {
+      const area = Math.abs((ax - avgX) * (accessor(data[j]) - ay) - (ax - j) * (avgY - ay));
+      if (area > maxArea) { maxArea = area; bestIdx = j; }
+    }
+    result.push(data[bestIdx]);
+    prevSelected = bestIdx;
+  }
+  result.push(data[data.length - 1]);
+  return result;
+}
+
+// -----------------------------------------------------------------------------
 // Types (matching ExecutorResult from useExecutor hook)
 // -----------------------------------------------------------------------------
 
@@ -414,8 +491,10 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
       );
     }
 
-    const minEquity = Math.min(...displayEquityCurve.map(p => p.equity)) * 0.98;
-    const maxEquity = Math.max(...displayEquityCurve.map(p => p.equity)) * 1.02;
+    // TICKET_317: Loop-based min/max to avoid stack overflow on large datasets
+    const { min: rawMin, max: rawMax } = safeMinMax(displayEquityCurve, p => p.equity);
+    const minEquity = rawMin * 0.98;
+    const maxEquity = rawMax * 1.02;
     const range = maxEquity - minEquity || 1;
 
     const width = 100;
@@ -424,19 +503,28 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
     // This ensures equity curve only spans the same X range as processed candles
     const totalXPoints = candles?.length || displayEquityCurve.length;
 
-    // Equity line (using filtered and limited data)
-    const equityPoints = displayEquityCurve.map((point, index) => {
-      const x = (index / (totalXPoints - 1)) * width;
+    // TICKET_317: Downsample equity curve for SVG rendering
+    const renderCurve = downsampleLTTB(displayEquityCurve, MAX_RENDER_POINTS, p => p.equity);
+    // Map downsampled indices back to original positions for correct X placement
+    const originalIndices = new Map<EquityPoint, number>();
+    for (let i = 0; i < displayEquityCurve.length; i++) originalIndices.set(displayEquityCurve[i], i);
+
+    // Equity line (using downsampled data)
+    const equityPoints = renderCurve.map((point) => {
+      const origIdx = originalIndices.get(point) ?? 0;
+      const x = (origIdx / (totalXPoints - 1)) * width;
       const y = height - ((point.equity - minEquity) / range) * height;
       return `${x},${y}`;
     }).join(' ');
 
     // Area fill
-    const areaPath = `M 0,${height} ` + displayEquityCurve.map((point, index) => {
-      const x = (index / (totalXPoints - 1)) * width;
+    const lastOrigIdx = originalIndices.get(renderCurve[renderCurve.length - 1]) ?? (displayEquityCurve.length - 1);
+    const areaPath = `M 0,${height} ` + renderCurve.map((point) => {
+      const origIdx = originalIndices.get(point) ?? 0;
+      const x = (origIdx / (totalXPoints - 1)) * width;
       const y = height - ((point.equity - minEquity) / range) * height;
       return `L ${x},${y}`;
-    }).join(' ') + ` L ${(displayEquityCurve.length - 1) / (totalXPoints - 1) * width},${height} Z`;
+    }).join(' ') + ` L ${lastOrigIdx / (totalXPoints - 1) * width},${height} Z`;
 
     const startEquity = displayEquityCurve[0]?.equity || 0;
     const endEquity = displayEquityCurve[displayEquityCurve.length - 1]?.equity || 0;
@@ -490,11 +578,17 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
     const margin = { top: 5, bottom: 15 };
     const chartHeight = viewHeight - margin.top - margin.bottom;
 
-    const minPrice = Math.min(...candles.map(c => c.low)) * 0.998;
-    const maxPrice = Math.max(...candles.map(c => c.high)) * 1.002;
+    // TICKET_317: Loop-based min/max to avoid stack overflow on large datasets
+    const { min: rawMinPrice, max: rawMaxPrice } = safeMinMax(candles, c => c.low);
+    const { max: rawMaxHigh } = safeMinMax(candles, c => c.high);
+    const minPrice = rawMinPrice * 0.998;
+    const maxPrice = rawMaxHigh * 1.002;
     const priceRange = maxPrice - minPrice || 1;
 
-    const candleWidth = viewWidth / candles.length;
+    // TICKET_317: Downsample candles for SVG rendering
+    const renderCandles = downsampleOHLC(candles, MAX_RENDER_POINTS);
+
+    const candleWidth = viewWidth / renderCandles.length;
     const bodyWidth = candleWidth * 0.7;
 
     const priceToY = (price: number) => margin.top + chartHeight - ((price - minPrice) / priceRange) * chartHeight;
@@ -524,13 +618,14 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
             />
           ))}
 
-          {/* Candles - TICKET_231: Gray-to-color transition based on processedBars */}
-          {candles.map((candle, i) => {
+          {/* Candles - TICKET_317: Render downsampled candles */}
+          {renderCandles.map((candle, i) => {
             const x = i * candleWidth + candleWidth / 2;
             const isUp = candle.close >= candle.open;
-            // TICKET_231/255: Use centralized color logic for gray-to-color transition
-            // When backtest is complete (!isExecuting), all candles should be colored
-            const isProcessed = !isExecuting || isCandleProcessed(i, processedBars, backtestTotalBars);
+            // TICKET_231/255: For downsampled candles, use bucket position ratio for processed check
+            const bucketRatio = candles.length / renderCandles.length;
+            const origIdx = Math.floor(i * bucketRatio);
+            const isProcessed = !isExecuting || isCandleProcessed(origIdx, processedBars, backtestTotalBars);
             const color = getCandleColor(isUp, isProcessed);
             const bodyTop = priceToY(Math.max(candle.open, candle.close));
             const bodyBottom = priceToY(Math.min(candle.open, candle.close));
@@ -565,12 +660,14 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
             .slice(0, 50)
             .map((trade, i) => {
             const tradeTime = trade.entryTime;
-            const candleIndex = candles.findIndex((c, idx) =>
+            // TICKET_317: Map trade to downsampled candle index via original index ratio
+            const origCandleIndex = candles.findIndex((c, idx) =>
               c.timestamp <= tradeTime && (idx === candles.length - 1 || candles[idx + 1].timestamp > tradeTime)
             );
-            if (candleIndex < 0) return null;
+            if (origCandleIndex < 0) return null;
 
-            const x = candleIndex * candleWidth + candleWidth / 2;
+            const dsIndex = Math.floor(origCandleIndex / (candles.length / renderCandles.length));
+            const x = Math.min(dsIndex, renderCandles.length - 1) * candleWidth + candleWidth / 2;
             const y = priceToY(trade.entryPrice);
             const isBuy = trade.side.toLowerCase().includes('buy');
 
@@ -873,8 +970,10 @@ const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
       );
     }
 
-    const minEquity = Math.min(...allEquities) * 0.98;
-    const maxEquity = Math.max(...allEquities) * 1.02;
+    // TICKET_317: Loop-based min/max to avoid stack overflow on large datasets
+    const { min: rawOverlayMin, max: rawOverlayMax } = safeMinMax(allEquities, v => v);
+    const minEquity = rawOverlayMin * 0.98;
+    const maxEquity = rawOverlayMax * 1.02;
     const range = maxEquity - minEquity || 1;
 
     return (
@@ -888,8 +987,14 @@ const ComparisonTab: React.FC<ComparisonTabProps> = ({ results }) => {
               const validCurve = (r.equityCurve || []).filter(p => Number.isFinite(p.equity));
               if (validCurve.length < 2) return null;
 
-              const points = validCurve.map((point, idx) => {
-                const x = (idx / (validCurve.length - 1)) * width;
+              // TICKET_317: Downsample each overlay curve for SVG rendering
+              const renderCurve = downsampleLTTB(validCurve, MAX_RENDER_POINTS, p => p.equity);
+              const overlayIndices = new Map<EquityPoint, number>();
+              for (let i = 0; i < validCurve.length; i++) overlayIndices.set(validCurve[i], i);
+
+              const points = renderCurve.map((point) => {
+                const origIdx = overlayIndices.get(point) ?? 0;
+                const x = (origIdx / (validCurve.length - 1)) * width;
                 const y = 100 - ((point.equity - minEquity) / range) * 100;
                 return `${x},${y}`;
               }).join(' ');

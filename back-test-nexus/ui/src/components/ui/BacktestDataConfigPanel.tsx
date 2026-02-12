@@ -263,33 +263,60 @@ const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
   const [query, setQuery] = useState(value);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const listRef = React.useRef<HTMLDivElement>(null);
+  const requestIdRef = React.useRef(0);
+  const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     setQuery(value);
   }, [value]);
 
+  // TICKET_316: Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  // TICKET_316: Debounce (300ms) + Sequence ID to fix race condition
   const handleSearch = useCallback(
-    async (q: string) => {
+    (q: string) => {
       setQuery(q);
+
+      // Increment to invalidate any in-flight request
+      const currentId = ++requestIdRef.current;
+
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
 
       if (!onSearch || q.length < 2) {
         setSearchResults([]);
         setShowResults(false);
+        setIsSearching(false);
         return;
       }
 
       setIsSearching(true);
-      try {
-        const results = await onSearch(q);
-        setSearchResults(results);
-        setShowResults(results.length > 0);
-        setHighlightedIndex(-1);
-      } catch (err) {
-        console.error('Symbol search failed:', err);
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
+      debounceTimerRef.current = setTimeout(async () => {
+        try {
+          const results = await onSearch(q);
+          // Discard if a newer request was issued while awaiting
+          if (currentId !== requestIdRef.current) return;
+          setSearchResults(results);
+          setShowResults(results.length > 0);
+          setHighlightedIndex(-1);
+        } catch (err) {
+          if (currentId !== requestIdRef.current) return;
+          console.error('Symbol search failed:', err);
+          setSearchResults([]);
+        } finally {
+          if (currentId === requestIdRef.current) {
+            setIsSearching(false);
+          }
+        }
+      }, 300);
     },
     [onSearch]
   );
