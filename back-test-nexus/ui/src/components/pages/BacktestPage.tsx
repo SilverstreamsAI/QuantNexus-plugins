@@ -207,6 +207,8 @@ export interface BacktestPageProps {
   onResultsUpdate?: (results: ExecutorResult[]) => void;
   /** TICKET_234: Notify Host when execution state updates (for global store) */
   onExecutionStateUpdate?: (state: ExecutionStateUpdate) => void;
+  /** TICKET_327: Notify Host when execution begins (before data download) */
+  onExecutionBegin?: (strategyName: string) => void;
   /** TICKET_308: Page title for PageHeader Zone A */
   pageTitle?: string;
   /** TICKET_308: Settings gear click handler for PageHeader Zone A */
@@ -268,6 +270,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   onCurrentResultUpdate,
   onResultsUpdate,
   onExecutionStateUpdate,
+  onExecutionBegin,
   pageTitle,
   onSettingsClick,
 }) => {
@@ -1493,6 +1496,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setTotalCases(activeWorkflows.length);
     setCurrentCaseIndex(0);
 
+    // TICKET_327: Notify Host before download starts so it can navigate to result page
+    // and show pipeline DOWNLOAD phase while data is being fetched
+    onExecutionBegin?.(strategyName);
+
     try {
       // Step 1: Ensure data is available
       const dataApi = dataAPI || (window as any).electronAPI?.data;
@@ -1596,7 +1603,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       setExecuteError(error instanceof Error ? error.message : 'Execution failed');
       setIsExecuting(false);
     }
-  }, [dataConfig, workflowRows, hasWorkflowContent, findDuplicateWorkflows, runSingleBacktest, dataAPI, messageAPI]);
+  }, [dataConfig, workflowRows, hasWorkflowContent, findDuplicateWorkflows, runSingleBacktest, dataAPI, messageAPI, onExecutionBegin]);
 
   // TICKET_163: Handle naming dialog cancel
   const handleCancelNaming = useCallback(() => {
@@ -1703,41 +1710,25 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               />
             </div>
           ) : /* TICKET_227: Show executing status or completed results */
+          /* TICKET_326_1: Empty Structure pattern -- always render BacktestResultPanel
+             when executing, even before first INCREMENT. BacktestResultPanel internally
+             handles empty state via effectiveResults (TICKET_302). */
           isExecuting ? (
-            /* TICKET_227: During execution, show status panel with real-time data if available */
-            currentResult ? (
-              <BacktestResultPanel
-                results={[currentResult]}
-                className="h-full"
-                isExecuting={isExecuting}
-                currentCaseIndex={currentCaseIndex}
-                totalCases={totalCases}
-                onCaseSelect={handleCaseClick}
-                scrollToCase={scrollToCaseIndex}
-                processedBars={processedBars}
-                backtestTotalBars={backtestTotalBars}
-                isQuantLabAvailable={isQuantLabAvailable}
-                isQuantLabLoading={isQuantLabLoading}
-                isExporting={isExporting}
-                onExportToQuantLab={handleExportClick}
-              />
-            ) : (
-              /* TICKET_227: No incremental data yet (backtrader), show execution status */
-              /* TICKET_228: Use executorProgress for actual execution progress */
-              <div className="h-full flex flex-col items-center justify-center">
-                <ExecutorStatusPanel
-                  status="running"
-                  progress={executorProgress}
-                  message={totalCases > 1
-                    ? `Running backtest ${currentCaseIndex}/${totalCases}...`
-                    : 'Running backtest...'
-                  }
-                />
-                <div className="mt-4 text-xs text-color-terminal-text-muted">
-                  Real-time chart will appear when data is available
-                </div>
-              </div>
-            )
+            <BacktestResultPanel
+              results={currentResult ? [currentResult] : []}
+              className="h-full"
+              isExecuting={isExecuting}
+              currentCaseIndex={currentCaseIndex}
+              totalCases={totalCases}
+              onCaseSelect={handleCaseClick}
+              scrollToCase={scrollToCaseIndex}
+              processedBars={processedBars}
+              backtestTotalBars={backtestTotalBars}
+              isQuantLabAvailable={isQuantLabAvailable}
+              isQuantLabLoading={isQuantLabLoading}
+              isExporting={isExporting}
+              onExportToQuantLab={handleExportClick}
+            />
           ) : backtestResults.length > 0 ? (
             /* Component 9: Backtest Result Panel - pass all results for comparison */
             <BacktestResultPanel
