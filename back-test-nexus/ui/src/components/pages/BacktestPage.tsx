@@ -245,7 +245,7 @@ const createInitialRow = (): WorkflowRow => ({
 // TICKET_248: timeframe removed - now set at stage-level in WorkflowRowSelector
 const createDefaultDataConfig = (): BacktestDataConfig => ({
   symbol: '',
-  dataSource: 'clickhouse',
+  dataSource: 'yfinance',
   startDate: '',
   endDate: '',
   initialCapital: 10000,
@@ -1087,19 +1087,18 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
   // TICKET_077_COMPONENT8: Two-phase provider loading
   // Phase 1: Sync metadata (instant) -> all providers with status='checking'
-  // Phase 2: Async connection checks -> real statuses
+  // Phase 2: TICKET_332 Progressive per-provider events -> each provider enables independently
   useEffect(() => {
-    async function loadDataSources() {
-      const api = (window as any).electronAPI;
+    const api = (window as any).electronAPI;
 
-      // Phase 1: Sync provider list (no connection checks, instant)
-      try {
-        if (api?.data?.getProviderList) {
-          const providers = await api.data.getProviderList();
-          const syncSources: DataSourceOption[] = providers.map((p: {
-            id: string; name: string;
-            capabilities?: { requiresAuth?: boolean; intervals?: string[]; maxLookback?: Record<string, string> }
-          }) => ({
+    // Phase 1: Sync provider list (no connection checks, instant)
+    try {
+      if (api?.data?.getProviderList) {
+        api.data.getProviderList().then((providers: Array<{
+          id: string; name: string;
+          capabilities?: { requiresAuth?: boolean; intervals?: string[]; maxLookback?: Record<string, string> }
+        }>) => {
+          const syncSources: DataSourceOption[] = providers.map((p) => ({
             id: p.id,
             name: p.name,
             status: 'checking' as const,
@@ -1109,54 +1108,72 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           }));
           setDataSources(syncSources);
           console.log('[BacktestPage] Phase 1: Provider list loaded:', syncSources.map((s: DataSourceOption) => s.name).join(', '));
-        }
-      } catch (error) {
-        console.error('[BacktestPage] Phase 1 failed:', error);
+        }).catch((error: unknown) => {
+          console.error('[BacktestPage] Phase 1 failed:', error);
+        });
       }
-
-      // Phase 2: Async connection status check
-      try {
-        if (!api?.data?.listProviders) {
-          console.warn('[BacktestPage] listProviders API not available');
-          return;
-        }
-
-        const providers = await api.data.listProviders();
-        // TICKET_305: Extract intervals + maxLookback from provider capabilities
-        const sources: DataSourceOption[] = providers.map((p: {
-          id: string; name: string; status: string;
-          capabilities?: { requiresAuth?: boolean; intervals?: string[]; maxLookback?: Record<string, string> }
-        }) => ({
-          id: p.id,
-          name: p.name,
-          status: p.status as DataSourceOption['status'],
-          requiresAuth: p.capabilities?.requiresAuth ?? false,
-          intervals: p.capabilities?.intervals,
-          maxLookback: p.capabilities?.maxLookback,
-        }));
-
-        setDataSources(sources);
-
-        // TICKET_293: Auto-switch away from auth-required provider when not authenticated
-        if (!isAuthenticated) {
-          setDataConfig(prev => {
-            const currentSource = sources.find(s => s.id === prev.dataSource);
-            if (currentSource?.requiresAuth) {
-              const fallback = sources.find(s => !s.requiresAuth);
-              if (fallback) {
-                return { ...prev, dataSource: fallback.id };
-              }
-            }
-            return prev;
-          });
-        }
-        console.log('[BacktestPage] Phase 2: Connection statuses updated:', sources.map((s: DataSourceOption) => `${s.name}(${s.status})`).join(', '));
-      } catch (error) {
-        console.error('[BacktestPage] Phase 2 failed:', error);
-      }
+    } catch (error) {
+      console.error('[BacktestPage] Phase 1 failed:', error);
     }
 
-    loadDataSources();
+    // Phase 2: TICKET_332 Progressive per-provider status events
+    let unsubProviderStatus: (() => void) | undefined;
+    try {
+      if (api?.data?.onProviderStatus) {
+        unsubProviderStatus = api.data.onProviderStatus((event: {
+          id: string;
+          status: 'connected' | 'disconnected' | 'error';
+          latencyMs?: number;
+          error?: string;
+        }) => {
+          setDataSources(prev => prev.map(ds =>
+            ds.id === event.id
+              ? { ...ds, status: event.status, latencyMs: event.latencyMs }
+              : ds
+          ));
+
+          // TICKET_293: Auto-switch away from auth-required provider when not authenticated
+          if (!isAuthenticated && (event.status === 'connected')) {
+            setDataConfig(prev => {
+              const currentSource = prev.dataSource;
+              if (currentSource === event.id) return prev;
+              return prev;
+            });
+          }
+
+          console.log(`[BacktestPage] Phase 2: ${event.id} -> ${event.status}${event.latencyMs !== undefined ? ` (${event.latencyMs}ms)` : ''}`);
+        });
+
+        // Trigger the progressive check
+        api.data.checkProvidersProgressive().catch((error: unknown) => {
+          console.error('[BacktestPage] Progressive check trigger failed:', error);
+        });
+      } else if (api?.data?.listProviders) {
+        // Fallback: legacy blocking check if progressive API not available
+        api.data.listProviders().then((providers: Array<{
+          id: string; name: string; status: string;
+          capabilities?: { requiresAuth?: boolean; intervals?: string[]; maxLookback?: Record<string, string> }
+        }>) => {
+          const sources: DataSourceOption[] = providers.map((p) => ({
+            id: p.id,
+            name: p.name,
+            status: p.status as DataSourceOption['status'],
+            requiresAuth: p.capabilities?.requiresAuth ?? false,
+            intervals: p.capabilities?.intervals,
+            maxLookback: p.capabilities?.maxLookback,
+          }));
+          setDataSources(sources);
+        }).catch((error: unknown) => {
+          console.error('[BacktestPage] Phase 2 fallback failed:', error);
+        });
+      }
+    } catch (error) {
+      console.error('[BacktestPage] Phase 2 failed:', error);
+    }
+
+    return () => {
+      if (unsubProviderStatus) unsubProviderStatus();
+    };
   }, [isAuthenticated]);
 
   // TICKET_305: Derive provider capability constraints for current data source
