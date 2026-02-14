@@ -29,7 +29,6 @@ import {
   PageHeader,
 } from '../ui';
 import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
-import { convertPythonResultToExecutorResult } from '../../utils/executorResultConverter';
 import { extractUniqueTimeframes } from '../../utils/timeframe-utils';
 import { formatDateTime } from '@shared/utils/format-locale';
 import type { TimeframeValue } from '../ui/TimeframeDropdown';
@@ -685,9 +684,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         clearTimeout(throttleTimer);
         throttleTimer = null;
       }
+      // TICKET_338 Fix 2: Flush remaining increments before clearing buffer
+      if (pendingBuffer.length > 0) {
+        flushBuffer();
+      }
       pendingBuffer.length = 0;
-      // TICKET_230: Convert Python snake_case to TypeScript camelCase
-      const convertedResult = convertPythonResultToExecutorResult(data.result);
+      // TICKET_338 Fix 1: C++ executor result is already camelCase matching ExecutorResult.
+      // convertPythonResultToExecutorResult was for pre-V3 Python snake_case output -- no longer needed.
+      const convertedResult = data.result as ExecutorResult;
 
       // TICKET_266: Update processedBars to match totalBars on completion
       // This ensures isBacktestInProgress becomes false and equity curve displays fully
