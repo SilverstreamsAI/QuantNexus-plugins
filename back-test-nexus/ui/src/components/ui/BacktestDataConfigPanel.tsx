@@ -26,7 +26,7 @@ import { getDateFormatHint } from '@shared/utils/format-locale';
 export interface DataSourceOption {
   id: string;
   name: string;
-  status: 'connected' | 'disconnected' | 'error';
+  status: 'connected' | 'disconnected' | 'error' | 'checking';
   requiresAuth: boolean;
   /** TICKET_305: Provider-supported intervals in UI notation */
   intervals?: string[];
@@ -567,7 +567,7 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
   const dataSourceOptions = dataSources.map((ds) => ({
     value: ds.id,
     label: ds.name,
-    disabled: ds.status !== 'connected' || (ds.requiresAuth && !isAuthenticated),
+    disabled: ds.status === 'disconnected' || ds.status === 'error' || (ds.requiresAuth && !isAuthenticated),
   }));
 
   // Handlers

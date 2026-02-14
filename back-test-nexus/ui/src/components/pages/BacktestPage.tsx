@@ -298,12 +298,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
   // Component 8: Data configuration state
   const [dataConfig, setDataConfig] = useState<BacktestDataConfig>(createDefaultDataConfig());
-  // TICKET_292: Sync initial values prevent blank <select> before async listProviders() returns
-  // TICKET_293: Include requiresAuth for auth-aware UI gating
-  const [dataSources, setDataSources] = useState<DataSourceOption[]>([
-    { id: 'clickhouse', name: 'ClickHouse', status: 'disconnected', requiresAuth: true },
-    { id: 'yfinance', name: 'Yahoo Finance', status: 'disconnected', requiresAuth: false },
-  ]);
+  // TICKET_077_COMPONENT8: Empty initial state, populated by two-phase loading
+  const [dataSources, setDataSources] = useState<DataSourceOption[]>([]);
   const [dataConfigErrors, setDataConfigErrors] = useState<Partial<Record<keyof BacktestDataConfig, string>>>({});
   // TICKET_143: Separate execution error from field errors
   const [executeError, setExecuteError] = useState<string | null>(null);
@@ -1089,21 +1085,42 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     return () => unsubscribe();
   }, []);
 
-  // TICKET_139 + TICKET_292: Load data sources dynamically from backend
+  // TICKET_077_COMPONENT8: Two-phase provider loading
+  // Phase 1: Sync metadata (instant) -> all providers with status='checking'
+  // Phase 2: Async connection checks -> real statuses
   useEffect(() => {
     async function loadDataSources() {
+      const api = (window as any).electronAPI;
+
+      // Phase 1: Sync provider list (no connection checks, instant)
       try {
-        const api = (window as any).electronAPI;
+        if (api?.data?.getProviderList) {
+          const providers = await api.data.getProviderList();
+          const syncSources: DataSourceOption[] = providers.map((p: {
+            id: string; name: string;
+            capabilities?: { requiresAuth?: boolean; intervals?: string[]; maxLookback?: Record<string, string> }
+          }) => ({
+            id: p.id,
+            name: p.name,
+            status: 'checking' as const,
+            requiresAuth: p.capabilities?.requiresAuth ?? false,
+            intervals: p.capabilities?.intervals,
+            maxLookback: p.capabilities?.maxLookback,
+          }));
+          setDataSources(syncSources);
+          console.log('[BacktestPage] Phase 1: Provider list loaded:', syncSources.map((s: DataSourceOption) => s.name).join(', '));
+        }
+      } catch (error) {
+        console.error('[BacktestPage] Phase 1 failed:', error);
+      }
+
+      // Phase 2: Async connection status check
+      try {
         if (!api?.data?.listProviders) {
-          console.warn('[BacktestPage] Data API not available, using defaults');
-          setDataSources([
-            { id: 'clickhouse', name: 'ClickHouse', status: 'disconnected', requiresAuth: true },
-          ]);
+          console.warn('[BacktestPage] listProviders API not available');
           return;
         }
 
-        // TICKET_292: Dynamic provider discovery from DataProviderManager
-        // TICKET_293: Extract requiresAuth from capabilities for auth-aware UI gating
         const providers = await api.data.listProviders();
         // TICKET_305: Extract intervals + maxLookback from provider capabilities
         const sources: DataSourceOption[] = providers.map((p: {
@@ -1133,16 +1150,12 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             return prev;
           });
         }
-        console.log('[BacktestPage] Data sources loaded:', sources.map((s: DataSourceOption) => `${s.name}(${s.status})`).join(', '));
+        console.log('[BacktestPage] Phase 2: Connection statuses updated:', sources.map((s: DataSourceOption) => `${s.name}(${s.status})`).join(', '));
       } catch (error) {
-        console.error('[BacktestPage] Failed to load data sources:', error);
-        setDataSources([
-          { id: 'clickhouse', name: 'ClickHouse', status: 'error', requiresAuth: true },
-        ]);
+        console.error('[BacktestPage] Phase 2 failed:', error);
       }
     }
 
-    // Always load on mount, and reload when isAuthenticated changes to true
     loadDataSources();
   }, [isAuthenticated]);
 
