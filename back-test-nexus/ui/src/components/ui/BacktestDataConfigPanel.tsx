@@ -861,7 +861,7 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
             dataSource={value.dataSource}
             error={errors.symbol}
             disabled={disabled}
-            placeholder={t('config.searchSymbol')}
+            placeholder={value.dataSource === 'baostock' ? '600...' : t('config.searchSymbol')}
           />
         </div>
 
