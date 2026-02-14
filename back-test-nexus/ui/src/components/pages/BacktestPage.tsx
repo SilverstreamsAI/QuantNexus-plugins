@@ -306,6 +306,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
   // TICKET_139: Track auth state to refresh ClickHouse connection on login
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // TICKET_334: Ref for isAuthenticated so provider effect callback reads latest value
+  // without requiring isAuthenticated in the effect dependency array
+  const isAuthRef = useRef(isAuthenticated);
+  isAuthRef.current = isAuthenticated;
 
   // TICKET_151_1: Track which case to scroll to in Charts tab
   const [scrollToCaseIndex, setScrollToCaseIndex] = useState<number | undefined>(undefined);
@@ -1133,7 +1137,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           ));
 
           // TICKET_293: Auto-switch away from auth-required provider when not authenticated
-          if (!isAuthenticated && (event.status === 'connected')) {
+          if (!isAuthRef.current && (event.status === 'connected')) {
             setDataConfig(prev => {
               const currentSource = prev.dataSource;
               if (currentSource === event.id) return prev;
@@ -1174,7 +1178,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     return () => {
       if (unsubProviderStatus) unsubProviderStatus();
     };
-  }, [isAuthenticated]);
+  }, []);
 
   // TICKET_305: Derive provider capability constraints for current data source
   const currentProvider = useMemo(
