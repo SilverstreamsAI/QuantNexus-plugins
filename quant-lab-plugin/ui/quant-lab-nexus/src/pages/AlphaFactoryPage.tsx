@@ -120,7 +120,7 @@ export const AlphaFactoryPage: React.FC = () => {
   }, []);
 
   // PLUGIN_TICKET_015: Backtest hook
-  const { status, progress, result, error, runBacktest } = useAlphaFactoryBacktest({
+  const { status, progress, result, error, timeframeStatus, runBacktest } = useAlphaFactoryBacktest({
     signals,
     signalMethod,
     lookback,
@@ -326,6 +326,7 @@ export const AlphaFactoryPage: React.FC = () => {
               exitRules={exitRules}
               exitMethod={exitMethod}
               dataConfig={dataConfig}
+              timeframeStatus={timeframeStatus}
             />
           </div>
         </div>

@@ -180,6 +180,8 @@ interface ElectronAPI {
       dataFeeds?: Record<string, { dataPath: string }>;
       error?: string;
     }>;
+    // TICKET_077_P3: Data download progress events
+    onProgress: (callback: (event: unknown, data: unknown) => void) => () => void;
   };
 
   // PLUGIN_TICKET_015: Subset of executor API used by Alpha Factory

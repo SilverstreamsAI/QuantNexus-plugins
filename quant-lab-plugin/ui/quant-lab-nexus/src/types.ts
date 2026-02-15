@@ -244,3 +244,15 @@ export interface ExecutorResult {
   equityCurve: EquityPoint[];
   trades: ExecutorTrade[];
 }
+
+/**
+ * TICKET_077_P3: Per-timeframe download status for Alpha Factory backtest.
+ */
+export interface TimeframeDownloadStatus {
+  timeframe: string;
+  state: 'pending' | 'completed' | 'downloading' | 'error';
+  /** Latest single-line progress message */
+  message?: string;
+  /** TICKET_077_P3: Rolling buffer of recent progress messages (CMD-style console) */
+  messageBuffer?: string[];
+}

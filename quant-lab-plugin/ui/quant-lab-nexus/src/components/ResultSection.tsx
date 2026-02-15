@@ -12,11 +12,12 @@
  */
 
 import React from 'react';
-import { BacktestStatus, ExecutorResult, SignalChip, ExitRules, DataConfig } from '../types';
+import { BacktestStatus, ExecutorResult, SignalChip, ExitRules, DataConfig, TimeframeDownloadStatus } from '../types';
 import { SignalSummaryHeader } from './SignalSummaryHeader';
 import { MetricSummaryRow } from './MetricSummaryRow';
 import { EquityCurveChart } from './EquityCurveChart';
 import { TradesTable } from './TradesTable';
+import { TimeframeDownloadList } from './TimeframeDownloadList';
 
 interface ResultSectionProps {
   status: BacktestStatus;
@@ -29,6 +30,8 @@ interface ResultSectionProps {
   exitRules: ExitRules;
   exitMethod: string;
   dataConfig: DataConfig;
+  // TICKET_077_P3: Per-timeframe download status
+  timeframeStatus: TimeframeDownloadStatus[];
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -40,6 +43,7 @@ const STATUS_LABELS: Record<string, string> = {
 export const ResultSection: React.FC<ResultSectionProps> = ({
   status, progress, result, error,
   signals, signalMethod, lookback, exitRules, exitMethod, dataConfig,
+  timeframeStatus,
 }) => {
   if (status === 'idle') return null;
 
@@ -66,6 +70,16 @@ export const ResultSection: React.FC<ResultSectionProps> = ({
         </div>
       </div>
     );
+
+    // TICKET_077_P3: Show per-timeframe download list during loading_data phase
+    if (status === 'loading_data' && timeframeStatus.length > 0) {
+      return (
+        <div className="space-y-3">
+          <TimeframeDownloadList timeframeStatus={timeframeStatus} />
+          {progressBar}
+        </div>
+      );
+    }
 
     // PLUGIN_TICKET_017: Render real-time charts during running status when data exists
     if (status === 'running' && result) {

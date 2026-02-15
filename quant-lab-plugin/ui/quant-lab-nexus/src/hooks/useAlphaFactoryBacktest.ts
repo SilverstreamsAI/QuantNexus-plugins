@@ -20,6 +20,7 @@ import {
   SignalChip,
   FactorChip,
   ExitRules,
+  TimeframeDownloadStatus,
 } from '../types';
 
 interface UseAlphaFactoryBacktestReturn {
@@ -27,6 +28,7 @@ interface UseAlphaFactoryBacktestReturn {
   progress: number;
   result: ExecutorResult | null;
   error: string | null;
+  timeframeStatus: TimeframeDownloadStatus[];
   runBacktest: () => Promise<void>;
 }
 
@@ -58,6 +60,8 @@ export function useAlphaFactoryBacktest({
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<ExecutorResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // TICKET_077_P3: Per-timeframe download status
+  const [timeframeStatus, setTimeframeStatus] = useState<TimeframeDownloadStatus[]>([]);
 
   // Track active task for event filtering
   const activeTaskIdRef = useRef<string | null>(null);
@@ -173,6 +177,7 @@ export function useAlphaFactoryBacktest({
     setProgress(0);
     setResult(null);
     setError(null);
+    setTimeframeStatus([]);
     cleanupSubscriptions();
 
     try {
@@ -188,6 +193,68 @@ export function useAlphaFactoryBacktest({
         uniqueTimeframes.push('1d');
       }
 
+      // TICKET_077_P3: Initialize per-timeframe status and subscribe to data:progress
+      setTimeframeStatus(uniqueTimeframes.map(tf => ({ timeframe: tf, state: 'pending' })));
+
+      const CONSOLE_MAX_LINES = 8;
+
+      /** Append a message to the rolling buffer of the active timeframe */
+      const appendMessage = (
+        prev: TimeframeDownloadStatus[],
+        targetIdx: number,
+        msg: string,
+        newState?: 'downloading',
+      ): TimeframeDownloadStatus[] =>
+        prev.map((tf, idx) => {
+          if (idx < targetIdx) {
+            return tf.state === 'completed' ? tf : { ...tf, state: 'completed', message: undefined, messageBuffer: undefined };
+          }
+          if (idx === targetIdx) {
+            const buf = [...(tf.messageBuffer || []).slice(-(CONSOLE_MAX_LINES - 1)), msg];
+            return { ...tf, state: newState || tf.state, message: msg, messageBuffer: buf };
+          }
+          return tf;
+        });
+
+      const unsubDataProgress = api.data.onProgress((_event: unknown, data: unknown) => {
+        const d = data as {
+          phase?: string;
+          currentChunk?: number;
+          totalChunks?: number;
+          message?: string;
+        };
+        if (!d || !d.phase) return;
+
+        if (d.phase === 'multi_timeframe_loading' && d.currentChunk && d.totalChunks) {
+          const activeIdx = d.currentChunk - 1;
+          setTimeframeStatus(prev => appendMessage(prev, activeIdx, d.message || '', 'downloading'));
+        } else if (d.phase === 'downloading' && d.message) {
+          setTimeframeStatus(prev => {
+            let dlIdx = prev.findIndex(tf => tf.state === 'downloading');
+            if (dlIdx < 0) {
+              dlIdx = prev.findIndex(tf => tf.state === 'pending');
+              if (dlIdx < 0) return prev;
+            }
+            return appendMessage(prev, dlIdx, d.message!, 'downloading');
+          });
+        } else if (d.phase === 'caching' && d.message) {
+          // Merging / caching phase messages go to active timeframe
+          setTimeframeStatus(prev => {
+            let dlIdx = prev.findIndex(tf => tf.state === 'downloading');
+            if (dlIdx < 0) {
+              dlIdx = prev.findIndex(tf => tf.state === 'pending');
+              if (dlIdx < 0) return prev;
+            }
+            return appendMessage(prev, dlIdx, d.message!, 'downloading');
+          });
+        } else if (d.phase === 'complete') {
+          setTimeframeStatus(prev => prev.map(tf => ({
+            ...tf, state: 'completed', message: undefined, messageBuffer: undefined,
+          })));
+        }
+      });
+      cleanupRef.current.push(unsubDataProgress);
+
       // Step 2: Ensure data is available
       let dataPath = '';
       let dataFeeds: Array<{ interval: string; dataPath: string }> | undefined;
@@ -198,6 +265,7 @@ export function useAlphaFactoryBacktest({
           startDate: dataConfig.startDate,
           endDate: dataConfig.endDate,
           timeframes: uniqueTimeframes,
+          provider: dataConfig.dataSource,
         });
         if (!dataResult.success) {
           throw new Error(dataResult.error || 'Failed to load market data');
@@ -215,12 +283,18 @@ export function useAlphaFactoryBacktest({
           startDate: dataConfig.startDate,
           endDate: dataConfig.endDate,
           interval: primaryTimeframe,
+          provider: dataConfig.dataSource,
         });
         if (!dataResult.success) {
           throw new Error(dataResult.error || 'Failed to load market data');
         }
         dataPath = dataResult.dataPath || '';
       }
+
+      // TICKET_077_P3: Mark all timeframes completed after data loading
+      setTimeframeStatus(prev => prev.map(tf => ({
+        ...tf, state: 'completed', message: undefined, messageBuffer: undefined,
+      })));
 
       // Step 3: Generate strategy code
       console.log('[AlphaFactoryBacktest] Data loaded, dataPath:', dataPath, 'dataFeeds:', dataFeeds?.length);
@@ -394,5 +468,5 @@ export function useAlphaFactoryBacktest({
     }
   }, [signals, signalMethod, lookback, exitMethod, exitRules, factors, factorMethod, factorLookback, dataConfig, cleanupSubscriptions, flushBuffer]);
 
-  return { status, progress, result, error, runBacktest };
+  return { status, progress, result, error, timeframeStatus, runBacktest };
 }
