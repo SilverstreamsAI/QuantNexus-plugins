@@ -1,0 +1,16 @@
+{
+  "$schema": "https://quantnexus.io/schemas/plugin-manifest.json",
+  "id": "com.quantnexus.data-plugin",
+  "name": "data-plugin",
+  "displayName": "Data Foundation",
+  "version": "1.0.0",
+  "description": "Foundation plugin providing shared data source components and types",
+  "type": "nexus",
+  "tier": 0,
+  "distribution": "bundled",
+  "main": "./ui/data-nexus/dist/plugins/data-plugin/ui/data-nexus/src/index.js",
+  "category": "data",
+  "permissions": ["network:internal", "database"],
+  "isolation": "trusted",
+  "activationEvents": ["onStartup"]
+}

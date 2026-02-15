@@ -137,10 +137,20 @@ interface ElectronAPI {
     }>;
   };
 
-  // PLUGIN_TICKET_015: Subset of data API used by Alpha Factory
+  // PLUGIN_TICKET_018: Auth API for data source auth awareness
+  auth?: {
+    getState: () => Promise<{ success: boolean; data?: { isAuthenticated: boolean } }>;
+    onStateChanged: (callback: (data: { isAuthenticated: boolean }) => void) => () => void;
+  };
+
+  // PLUGIN_TICKET_015 + PLUGIN_TICKET_018: Data API used by Alpha Factory
   data: {
-    // Returns array directly (not {success, data} wrapper)
-    searchSymbols: (query: string) => Promise<Array<{
+    // PLUGIN_TICKET_018: Provider list and progressive status check
+    getProviderList: () => Promise<Array<{ id: string; name: string; capabilities?: { requiresAuth?: boolean; intervals?: string[]; maxLookback?: Record<string, string> } }>>;
+    checkProvidersProgressive: () => Promise<{ success: boolean; error?: string }>;
+    onProviderStatus: (callback: (event: { id: string; status: 'connected' | 'disconnected' | 'error'; latencyMs?: number; error?: string }) => void) => () => void;
+    // PLUGIN_TICKET_018: searchSymbols now accepts optional provider
+    searchSymbols: (query: string, provider?: string) => Promise<Array<{
       symbol: string;
       name?: string;
       exchange?: string;

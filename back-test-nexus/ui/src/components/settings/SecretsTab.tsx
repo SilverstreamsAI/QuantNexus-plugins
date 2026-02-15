@@ -12,7 +12,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '../../lib/utils';
-import { DATA_PROVIDERS, getProviderBySecretKey } from '../../config/data-providers';
+// PLUGIN_TICKET_018: Data provider config from Tier 0 data-plugin
+import { DATA_PROVIDERS, getProviderBySecretKey } from '@plugins/data-plugin/config/data-providers';
 
 // =============================================================================
 // Inline SVG Icons (avoid lucide-react dependency in plugin)

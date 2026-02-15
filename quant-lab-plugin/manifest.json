@@ -7,7 +7,11 @@
   "description": "Alpha Factory - Signal combination and evaluation for multi-strategy quantitative trading",
   "main": "./ui/quant-lab-nexus/dist/plugins/quant-lab-plugin/ui/quant-lab-nexus/src/index.js",
   "type": "nexus",
+  "tier": 1,
   "distribution": "marketplace",
+  "dependencies": {
+    "plugins": ["data-plugin"]
+  },
   "lifecycle": {
     "onInstall": "./scripts/install.js",
     "onUpgrade": "./scripts/upgrade.js",

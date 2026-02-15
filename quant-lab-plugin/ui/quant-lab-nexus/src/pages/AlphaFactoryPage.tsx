@@ -18,6 +18,7 @@
  */
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import type { DataSourceOption } from '@plugins/data-plugin/index';
 import { SignalChip, FactorChip, DataConfig } from '../types';
 import { DEFAULT_DATA_CONFIG } from '../constants';
 import { SignalFactorySection } from '../components/SignalFactorySection';
@@ -56,6 +57,67 @@ export const AlphaFactoryPage: React.FC = () => {
 
   // PLUGIN_TICKET_015: Data config state
   const [dataConfig, setDataConfig] = useState<DataConfig>(DEFAULT_DATA_CONFIG);
+
+  // PLUGIN_TICKET_018: Data source state + two-phase loading
+  const [dataSources, setDataSources] = useState<DataSourceOption[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const api = window.electronAPI;
+    // Phase 1: Sync metadata (instant, status='checking')
+    api.data.getProviderList().then((providers: Array<{
+      id: string; name: string;
+      capabilities?: { requiresAuth?: boolean; intervals?: string[]; maxLookback?: Record<string, string> }
+    }>) => {
+      const syncSources: DataSourceOption[] = providers.map((p) => ({
+        id: p.id,
+        name: p.name,
+        status: 'checking' as const,
+        requiresAuth: p.capabilities?.requiresAuth ?? false,
+        intervals: p.capabilities?.intervals,
+        maxLookback: p.capabilities?.maxLookback,
+      }));
+      setDataSources(syncSources);
+    }).catch((error: unknown) => {
+      console.error('[AlphaFactoryPage] Phase 1 failed:', error);
+    });
+
+    // Phase 2: TICKET_332 Progressive per-provider status events
+    const unsubscribe = api.data.onProviderStatus((event: {
+      id: string;
+      status: 'connected' | 'disconnected' | 'error';
+      latencyMs?: number;
+    }) => {
+      setDataSources((prev) =>
+        prev.map((ds) =>
+          ds.id === event.id
+            ? { ...ds, status: event.status, latencyMs: event.latencyMs }
+            : ds
+        )
+      );
+    });
+    api.data.checkProvidersProgressive();
+
+    // Auth state
+    let unsubAuth: (() => void) | undefined;
+    if (api.auth) {
+      api.auth.getState().then((result: { success: boolean; data?: { isAuthenticated: boolean } }) => {
+        if (result.success && result.data) {
+          setIsAuthenticated(result.data.isAuthenticated);
+        }
+      });
+
+      // Subscribe to auth state changes
+      unsubAuth = api.auth.onStateChanged((data: { isAuthenticated: boolean }) => {
+        setIsAuthenticated(data.isAuthenticated);
+      });
+    }
+
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+      if (typeof unsubAuth === 'function') unsubAuth();
+    };
+  }, []);
 
   // PLUGIN_TICKET_015: Backtest hook
   const { status, progress, result, error, runBacktest } = useAlphaFactoryBacktest({
@@ -239,6 +301,8 @@ export const AlphaFactoryPage: React.FC = () => {
             value={dataConfig}
             onChange={setDataConfig}
             disabled={isRunning}
+            dataSources={dataSources}
+            isAuthenticated={isAuthenticated}
           />
 
           <ActionBar

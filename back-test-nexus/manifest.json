@@ -6,6 +6,10 @@
   "version": "1.2.0",
   "description": "Strategy backtesting with workflow UI, Python engine, and results visualization",
   "type": "nexus",
+  "tier": 1,
+  "dependencies": {
+    "plugins": ["data-plugin"]
+  },
   "lifecycle": {
     "onInstall": "./scripts/install.js",
     "onUpgrade": "./scripts/upgrade.js",

@@ -17,7 +17,8 @@
     "allowSyntheticDefaultImports": true,
     "paths": {
       "@shared/types": ["../../../../apps/desktop/src/shared/types/index.ts"],
-      "@shared/utils/*": ["../../../../apps/desktop/src/shared/utils/*"]
+      "@shared/utils/*": ["../../../../apps/desktop/src/shared/utils/*"],
+      "@plugins/data-plugin/*": ["../../../data-plugin/ui/data-nexus/src/*"]
     }
   },
   "include": ["src/**/*", "../../../../apps/desktop/src/shared/types/**/*", "../../../../apps/desktop/src/shared/utils/**/*"],

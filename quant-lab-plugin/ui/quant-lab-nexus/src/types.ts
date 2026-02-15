@@ -178,6 +178,8 @@ export interface ExitRules {
 export type OrderSizeUnit = 'cash' | 'percent' | 'shares';
 
 export interface DataConfig {
+  /** PLUGIN_TICKET_018: Data source provider ID (was hardcoded to ClickHouse) */
+  dataSource: string;
   symbol: string;
   startDate: string;
   endDate: string;

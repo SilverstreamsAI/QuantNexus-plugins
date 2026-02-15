@@ -168,6 +168,7 @@ export const TIME_UNITS = [
  * PLUGIN_TICKET_015: Default data configuration for Alpha Factory backtest.
  */
 export const DEFAULT_DATA_CONFIG: DataConfig = {
+  dataSource: 'yfinance',
   symbol: '',
   startDate: '',
   endDate: '',

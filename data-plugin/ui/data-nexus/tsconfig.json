@@ -15,12 +15,10 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "noImplicitAny": false,
     "paths": {
-      "@shared/*": ["../../../apps/desktop/src/shared/*"],
-      "@plugins/data-plugin/*": ["../../../data-plugin/ui/data-nexus/src/*"]
+      "@shared/*": ["../../../../apps/desktop/src/shared/*"]
     }
   },
-  "include": ["src/**/*", "../../../apps/desktop/src/shared/**/*"],
+  "include": ["src/**/*", "../../../../apps/desktop/src/shared/**/*"],
   "exclude": ["node_modules", "dist"]
 }

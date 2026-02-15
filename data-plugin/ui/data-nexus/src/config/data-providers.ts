@@ -1,6 +1,7 @@
 /**
  * Data Provider Configuration
  *
+ * PLUGIN_TICKET_018: Extracted from back-test-nexus to Tier 0 data-plugin.
  * TICKET_308: Data provider credential definitions for SecretsTab.
  * Maps manifest secret keys to validation provider IDs.
  *

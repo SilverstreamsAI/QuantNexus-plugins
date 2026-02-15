@@ -2,16 +2,18 @@
  * DataConfigPanel Component
  *
  * PLUGIN_TICKET_015: Simplified data configuration panel for Alpha Factory backtest.
- * Adapted from back-test-nexus/BacktestDataConfigPanel (590 lines -> ~200 lines).
+ * PLUGIN_TICKET_018: Data Source selector added from Tier 0 data-plugin.
  *
- * Layout: 3 rows
- * - Row 1: Symbol search
+ * Layout: 4 rows
+ * - Row 1: Data Source + Symbol search
  * - Row 2: Start Date + End Date
  * - Row 3: Initial Capital + Order Size + Unit
  */
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { DataConfig, OrderSizeUnit } from '../types';
+import { DataSourceSelectField, DEFAULT_DATA_SOURCE } from '@plugins/data-plugin/index';
+import type { DataSourceOption } from '@plugins/data-plugin/index';
 
 /**
  * TICKET_077_D4: Inline error hint for search inputs.
@@ -112,6 +114,10 @@ interface DataConfigPanelProps {
   value: DataConfig;
   onChange: (config: DataConfig) => void;
   disabled?: boolean;
+  /** PLUGIN_TICKET_018: Available data sources from Tier 0 data-plugin */
+  dataSources?: DataSourceOption[];
+  /** PLUGIN_TICKET_018: Whether user is currently authenticated */
+  isAuthenticated?: boolean;
 }
 
 const ORDER_UNIT_OPTIONS = [
@@ -120,7 +126,7 @@ const ORDER_UNIT_OPTIONS = [
   { value: 'shares', label: 'Shares' },
 ];
 
-export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChange, disabled }) => {
+export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChange, disabled, dataSources = [], isAuthenticated = false }) => {
   const [query, setQuery] = useState(value.symbol);
   const [searchResults, setSearchResults] = useState<SymbolSearchResult[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -128,55 +134,107 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
   const [searchError, setSearchError] = useState<string | null>(null);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const listRef = useRef<HTMLDivElement>(null);
+  const requestIdRef = useRef(0);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     setQuery(value.symbol);
   }, [value.symbol]);
 
-  const handleSymbolSearch = useCallback(async (q: string) => {
+  // TICKET_331: Clear cached search results when data source changes
+  useEffect(() => {
+    setSearchResults([]);
+    setShowResults(false);
+  }, [value.dataSource]);
+
+  // TICKET_316: Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  // PLUGIN_TICKET_018: Cascading reset when data source changes
+  const handleDataSourceChange = useCallback((newDataSource: string) => {
+    if (newDataSource === value.dataSource) return;
+    onChange({
+      ...value,
+      dataSource: newDataSource,
+      symbol: '',
+      startDate: '',
+      endDate: '',
+    });
+    setSearchResults([]);
+    setSearchError(null);
+    setShowResults(false);
+  }, [value, onChange]);
+
+  // TICKET_316: Debounce (300ms) + Sequence ID to fix race condition
+  const handleSymbolSearch = useCallback((q: string) => {
     setQuery(q);
+
+    // Increment to invalidate any in-flight request
+    const currentId = ++requestIdRef.current;
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
     if (q.length < 2) {
       setSearchResults([]);
       setSearchError(null);
       setShowResults(false);
+      setIsSearching(false);
       return;
     }
+
     setIsSearching(true);
     setSearchError(null);
-    try {
-      // data:searchSymbols returns array directly (not {success, data} wrapper)
-      const results = await window.electronAPI.data.searchSymbols(q);
-      const mapped: SymbolSearchResult[] = Array.isArray(results)
-        ? results.map((r: Record<string, unknown>) => ({
-            symbol: (r.symbol as string) || q,
-            name: (r.name as string) || undefined,
-            exchange: (r.exchange as string) || undefined,
-            startTime: (r.startTime as string) || undefined,
-            endTime: (r.endTime as string) || undefined,
-          }))
-        : [];
-      setSearchResults(mapped);
-      setShowResults(mapped.length > 0);
-      setHighlightedIndex(-1);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      // TICKET_289: Show contextual error in dropdown area
-      if (msg.includes('401')) {
-        setSearchError('Please log in to search symbols');
-        // TICKET_201: Highlight login button in BreadcrumbBar
-        window.dispatchEvent(new Event('nexus:auth-required'));
-      } else {
-        setSearchError('Service unavailable');
-      }
-      setSearchResults([]);
-      setShowResults(true);
-    } finally {
-      setIsSearching(false);
-    }
-  }, []);
 
-  const handleSymbolSelect = useCallback((result: SymbolSearchResult) => {
+    debounceTimerRef.current = setTimeout(async () => {
+      try {
+        // PLUGIN_TICKET_018: Pass current data source to symbol search
+        const results = await window.electronAPI.data.searchSymbols(q, value.dataSource);
+        // Discard if a newer request was issued while awaiting
+        if (currentId !== requestIdRef.current) return;
+        const mapped: SymbolSearchResult[] = Array.isArray(results)
+          ? results.map((r: Record<string, unknown>) => ({
+              symbol: (r.symbol as string) || q,
+              name: (r.name as string) || undefined,
+              exchange: (r.exchange as string) || undefined,
+              startTime: (r.startTime as string) || undefined,
+              endTime: (r.endTime as string) || undefined,
+            }))
+          : [];
+        setSearchResults(mapped);
+        setShowResults(mapped.length > 0);
+        setHighlightedIndex(-1);
+      } catch (err) {
+        if (currentId !== requestIdRef.current) return;
+        const msg = err instanceof Error ? err.message : String(err);
+        // TICKET_289: Show contextual error in dropdown area
+        if (msg.includes('401')) {
+          setSearchError('Please log in to search symbols');
+          // TICKET_201: Highlight login button in BreadcrumbBar
+          window.dispatchEvent(new Event('nexus:auth-required'));
+        } else {
+          setSearchError('Service unavailable');
+        }
+        setSearchResults([]);
+        setShowResults(true);
+      } finally {
+        if (currentId === requestIdRef.current) {
+          setIsSearching(false);
+        }
+      }
+    }, 300);
+  }, [value.dataSource]);
+
+  const handleSymbolSelect = useCallback(async (result: SymbolSearchResult) => {
     const updates: Partial<DataConfig> = { symbol: result.symbol };
+    // Phase 1: Parse dates from search result
     if (result.startTime) {
       const d = result.startTime.split(' ')[0];
       if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) updates.startDate = d;
@@ -189,6 +247,34 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
     setQuery(result.symbol);
     setShowResults(false);
     setHighlightedIndex(-1);
+
+    // PLUGIN_TICKET_019 Phase 2: Fallback API when dates missing from search result
+    if (!updates.startDate || !updates.endDate) {
+      try {
+        const api = (window as any).electronAPI;
+        if (api?.data?.getSymbolDateRange) {
+          const dateRange = await api.data.getSymbolDateRange(result.symbol, value.dataSource);
+          const dateUpdates: Partial<DataConfig> = {};
+          if (dateRange?.startTime && !updates.startDate) {
+            const sd = dateRange.startTime.split(' ')[0];
+            if (sd && /^\d{4}-\d{2}-\d{2}$/.test(sd)) {
+              dateUpdates.startDate = sd;
+            }
+          }
+          if (dateRange?.endTime && !updates.endDate) {
+            const ed = dateRange.endTime.split(' ')[0];
+            if (ed && /^\d{4}-\d{2}-\d{2}$/.test(ed)) {
+              dateUpdates.endDate = ed;
+            }
+          }
+          if (Object.keys(dateUpdates).length > 0) {
+            onChange({ ...value, ...updates, ...dateUpdates });
+          }
+        }
+      } catch (error) {
+        console.warn('[DataConfigPanel] Failed to fetch symbol date range:', error);
+      }
+    }
   }, [value, onChange]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -230,7 +316,16 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
         Data Configuration
       </h3>
 
-      {/* Row 1: Symbol Search */}
+      {/* Row 1: Data Source + Symbol Search */}
+      <div className="grid grid-cols-2 gap-4">
+        <DataSourceSelectField
+          label="Data Source"
+          value={value.dataSource || DEFAULT_DATA_SOURCE}
+          onChange={handleDataSourceChange}
+          dataSources={dataSources}
+          isAuthenticated={isAuthenticated}
+          disabled={disabled}
+        />
       <div className="flex flex-col gap-1 relative">
         <label className="text-[10px] uppercase tracking-wider text-color-terminal-text-muted terminal-mono">
           Symbol
@@ -280,6 +375,7 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {/* Row 2: Start Date + End Date */}
