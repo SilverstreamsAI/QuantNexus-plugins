@@ -206,8 +206,9 @@ export interface BacktestPageProps {
   onResultsUpdate?: (results: ExecutorResult[]) => void;
   /** TICKET_234: Notify Host when execution state updates (for global store) */
   onExecutionStateUpdate?: (state: ExecutionStateUpdate) => void;
-  /** TICKET_327: Notify Host when execution begins (before data download) */
-  onExecutionBegin?: (strategyName: string) => void;
+  /** TICKET_327: Notify Host when execution begins (before data download)
+   *  TICKET_352_5: Includes caller-generated taskId for immediate tab creation */
+  onExecutionBegin?: (strategyName: string, taskId: string) => void;
   /** TICKET_308: Page title for PageHeader Zone A */
   pageTitle?: string;
   /** TICKET_308: Settings gear click handler for PageHeader Zone A */
@@ -1283,7 +1284,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     dataResult: any,
     caseIndex: number,
     totalWorkflows: number,
-    strategyName?: string
+    strategyName?: string,
+    taskId?: string,  // TICKET_352_5: Caller-generated task ID
   ): Promise<ExecutorResult> => {
     const api = executorAPI || (window as any).electronAPI?.executor;
     const startTime = Math.floor(new Date(config.startDate).getTime() / 1000);
@@ -1326,6 +1328,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     // Build executor request inline (TICKET_173: replaces toExecutorRequest import)
     // TICKET_248 Phase 2: Include dataFeeds for multi-timeframe support
     const executorRequest: any = {
+      taskId,  // TICKET_352_5: Caller-generated task ID
       strategyPath: genResult.strategyPath,
       strategyName,
       symbol: config.symbol,
@@ -1534,9 +1537,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setTotalCases(activeWorkflows.length);
     setCurrentCaseIndex(0);
 
+    // TICKET_352_5: Generate taskId immediately (caller-generated ID pattern)
+    // This decouples tab creation from the async data download + strategy generation chain
+    const taskId = crypto.randomUUID();
+
     // TICKET_327: Notify Host before download starts so it can navigate to result page
     // and show pipeline DOWNLOAD phase while data is being fetched
-    onExecutionBegin?.(strategyName);
+    // TICKET_352_5: Pass taskId so Host can create tab immediately
+    onExecutionBegin?.(strategyName, taskId);
 
     try {
       // Step 1: Ensure data is available
@@ -1609,13 +1617,15 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         setExecutorProgress(0);  // TICKET_228: Reset progress for each case
 
         try {
+          // TICKET_352_5: Pass caller-generated taskId for first case
           const result = await runSingleBacktest(
             workflow,
             dataConfig,
             dataResult,
             i + 1,
             activeWorkflows.length,
-            strategyName
+            strategyName,
+            i === 0 ? taskId : undefined,
           );
 
           results.push(result);
