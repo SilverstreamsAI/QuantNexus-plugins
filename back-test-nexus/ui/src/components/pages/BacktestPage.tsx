@@ -20,7 +20,6 @@ import {
   type DataSourceOption,
   type SymbolSearchResult,
   BacktestResultPanel,
-  ExecutorStatusPanel,
   type ExecutorResult,
   NamingDialog,
   CheckpointResumePanel,
@@ -69,35 +68,11 @@ const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-// TICKET_171: Check icon for Keep button
-const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12" />
-  </svg>
-);
-
-// TICKET_171: X icon for Discard button
-const XIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
-
 // TICKET_171: Reset icon for config page
 const RotateCcwIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
     <path d="M3 3v5h5" />
-  </svg>
-);
-
-// TICKET_264: Export icon for Quant Lab export
-const ExportIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-    <polyline points="17 8 12 3 7 8" />
-    <line x1="12" y1="3" x2="12" y2="15" />
   </svg>
 );
 
@@ -143,24 +118,8 @@ interface MessageAPI {
   confirm: (msg: string, options?: { title?: string; okText?: string; cancelText?: string }) => Promise<boolean>;
 }
 
-// TICKET_173: Backtest resolver for pending promises
-type BacktestResolver = {
-  resolve: (result: ExecutorResult) => void;
-  reject: (error: Error) => void;
-};
-
 /** Cockpit mode determines algorithm filtering */
 export type CockpitMode = 'indicators' | 'kronos' | 'trader';
-
-// TICKET_234: Execution state for global store
-export interface ExecutionStateUpdate {
-  isExecuting: boolean;
-  currentCaseIndex: number;
-  totalCases: number;
-  executorProgress: number;
-  processedBars?: number;
-  totalBars?: number;
-}
 
 // TICKET_173: API types from Host (use any to avoid type dependency on Host types)
 export interface BacktestPageProps {
@@ -196,16 +155,6 @@ export interface BacktestPageProps {
       dateRange: { start: string; end: string };
     }
   ) => void;
-  /** TICKET_233: Notify Host of backtest progress (for global status bar) */
-  onBacktestProgress?: (taskId: string, progress: number) => void;
-  /** TICKET_233: Notify Host when backtest completes (for global status bar) */
-  onBacktestComplete?: (taskId: string, success: boolean) => void;
-  /** TICKET_234: Notify Host when current result updates (for global store) */
-  onCurrentResultUpdate?: (result: ExecutorResult | null) => void;
-  /** TICKET_234: Notify Host when results array updates (for global store) */
-  onResultsUpdate?: (results: ExecutorResult[]) => void;
-  /** TICKET_234: Notify Host when execution state updates (for global store) */
-  onExecutionStateUpdate?: (state: ExecutionStateUpdate) => void;
   /** TICKET_327: Notify Host when execution begins (before data download)
    *  TICKET_352_5: Includes caller-generated taskId for immediate tab creation */
   onExecutionBegin?: (strategyName: string, taskId: string) => void;
@@ -265,11 +214,6 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   resetKey = 0,
   cockpitMode = 'indicators',
   onBacktestStart,
-  onBacktestProgress,
-  onBacktestComplete,
-  onCurrentResultUpdate,
-  onResultsUpdate,
-  onExecutionStateUpdate,
   onExecutionBegin,
   pageTitle,
   onSettingsClick,
@@ -277,18 +221,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   const { t } = useTranslation('backtest');
 
   // TICKET_173: State moved from Host Shell
-  const [backtestResults, setBacktestResults] = useState<ExecutorResult[]>([]);
-  const [currentResult, setCurrentResult] = useState<ExecutorResult | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
   const [currentCaseIndex, setCurrentCaseIndex] = useState(0);
   const [totalCases, setTotalCases] = useState(0);
-  // TICKET_228: Track executor progress from progress events
-  const [executorProgress, setExecutorProgress] = useState(0);
-  // TICKET_231: Track processed bars for synchronized candle/equity display
-  const [processedBars, setProcessedBars] = useState(0);
-  const [backtestTotalBars, setBacktestTotalBars] = useState(0);
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
-  const pendingBacktestRef = useRef<BacktestResolver | null>(null);
   // TICKET_153_1: History from SQLite
   const [historyItems, setHistoryItems] = useState<BacktestHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -337,9 +273,9 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
   // TICKET_267: Log render branch state
   useEffect(() => {
-    const renderBranch = selectedHistoryResult ? 'PAGE41_HISTORY' : isExecuting ? (currentResult ? 'EXECUTING_WITH_RESULT' : 'EXECUTING_NO_RESULT') : backtestResults.length > 0 ? 'COMPLETED_RESULTS' : 'CONFIG_VIEW';
-    console.log('[TICKET_267] BacktestPage: Render branch=' + renderBranch + ', selectedHistoryResult=' + !!selectedHistoryResult + ', isExecuting=' + isExecuting + ', currentResult=' + !!currentResult + ', backtestResultsLength=' + backtestResults.length);
-  }, [selectedHistoryResult, isExecuting, currentResult, backtestResults.length]);
+    const renderBranch = selectedHistoryResult ? 'PAGE41_HISTORY' : isExecuting ? 'EXECUTING' : 'CONFIG_VIEW';
+    console.log('[TICKET_267] BacktestPage: Render branch=' + renderBranch + ', selectedHistoryResult=' + !!selectedHistoryResult + ', isExecuting=' + isExecuting);
+  }, [selectedHistoryResult, isExecuting]);
 
   // TICKET_163: Naming dialog state
   const [namingDialogVisible, setNamingDialogVisible] = useState(false);
@@ -354,17 +290,12 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
   // TICKET_173: Determine if viewing results (execution or history)
   // TICKET_227: Switch to result view when backtest starts (real-time display)
-  const isResultView = isExecuting || backtestResults.length > 0 || hasHistoryResult;
+  const isResultView = isExecuting || hasHistoryResult;
 
   // TICKET_173: Centralized state reset helper
   const clearResultState = useCallback(() => {
-    setBacktestResults([]);
-    setCurrentResult(null);
     setCurrentCaseIndex(0);
     setTotalCases(0);
-    setExecutorProgress(0);  // TICKET_228: Reset executor progress
-    setProcessedBars(0);     // TICKET_231: Reset processed bars
-    setBacktestTotalBars(0); // TICKET_231: Reset total bars
     setHasHistoryResult(false);
     setCurrentTaskId(null);
   }, []);
@@ -375,34 +306,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     console.debug('[TICKET_227] isResultView changed:', {
       isResultView,
       isExecuting,
-      hasCurrentResult: !!currentResult,
-      backtestResultsLength: backtestResults.length,
       hasHistoryResult,
     });
     onResultViewChange?.(isResultView);
-  }, [isResultView, onResultViewChange, isExecuting, currentResult, backtestResults.length, hasHistoryResult]);
-
-  // TICKET_234: Notify Host when currentResult changes (for global store)
-  useEffect(() => {
-    onCurrentResultUpdate?.(currentResult);
-  }, [currentResult, onCurrentResultUpdate]);
-
-  // TICKET_234: Notify Host when backtestResults array changes (for global store)
-  useEffect(() => {
-    onResultsUpdate?.(backtestResults);
-  }, [backtestResults, onResultsUpdate]);
-
-  // TICKET_234: Notify Host when execution state changes (for global store)
-  useEffect(() => {
-    onExecutionStateUpdate?.({
-      isExecuting,
-      currentCaseIndex,
-      totalCases,
-      executorProgress,
-      processedBars,
-      totalBars: backtestTotalBars,
-    });
-  }, [isExecuting, currentCaseIndex, totalCases, executorProgress, processedBars, backtestTotalBars, onExecutionStateUpdate]);
+  }, [isResultView, onResultViewChange, isExecuting, hasHistoryResult]);
 
   // TICKET_151_1: Handle case selection from History panel
   const handleCaseClick = useCallback((index: number) => {
@@ -597,7 +504,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setIsExecuting(true);
     setTotalCases(1);
     setCurrentCaseIndex(1);
-    setExecutorProgress(0);  // TICKET_228: Reset progress for resume
+
 
     try {
       messageAPI?.info('Resuming backtest from checkpoint...');
@@ -646,10 +553,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     }
   }, [checkpointInfo, messageAPI]);
 
-  // Load history on mount and when results change
+  // Load history on mount
   useEffect(() => {
     loadHistory();
-  }, [loadHistory, backtestResults.length]);
+  }, [loadHistory]);
 
   // TICKET_176_1: Check for checkpoint on mount
   useEffect(() => {
@@ -669,217 +576,6 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     }
   }, [resetKey, clearResultState]);
 
-  // TICKET_173: Subscribe to executor events (moved from Host Shell)
-  useEffect(() => {
-    const api = executorAPI || (window as any).electronAPI?.executor;
-    if (!api) return;
-
-    // Track completion to prevent incremental updates from overwriting final result
-    let isCompleted = false;
-
-    console.log('[TICKET_266] Subscribing to onCompleted, api:', !!api, 'onCompleted:', !!api.onCompleted);
-    const unsubCompleted = api.onCompleted((data: any) => {
-      console.log('[TICKET_266] onCompleted callback TRIGGERED, data:', data);
-      isCompleted = true;
-      if (throttleTimer) {
-        clearTimeout(throttleTimer);
-        throttleTimer = null;
-      }
-      // TICKET_338 Fix 2: Flush remaining increments before clearing buffer
-      if (pendingBuffer.length > 0) {
-        flushBuffer();
-      }
-      pendingBuffer.length = 0;
-      // TICKET_338 Fix 1: C++ executor result is already camelCase matching ExecutorResult.
-      // convertPythonResultToExecutorResult was for pre-V3 Python snake_case output -- no longer needed.
-      const convertedResult = data.result as ExecutorResult;
-
-      // TICKET_266: Update processedBars to match totalBars on completion
-      // This ensures isBacktestInProgress becomes false and equity curve displays fully
-      console.log('[TICKET_266] onCompleted: convertedResult.equityCurve.length =', convertedResult.equityCurve.length);
-      setProcessedBars(prev => {
-        const finalCount = Math.max(prev, convertedResult.equityCurve.length);
-        console.log('[TICKET_266] setProcessedBars: prev =', prev, ', finalCount =', finalCount);
-        return finalCount > 0 ? finalCount : prev;
-      });
-      setBacktestTotalBars(prev => {
-        const finalCount = Math.max(prev, convertedResult.equityCurve.length);
-        console.log('[TICKET_266] setBacktestTotalBars: prev =', prev, ', finalCount =', finalCount);
-        return finalCount > 0 ? finalCount : prev;
-      });
-      if (pendingBacktestRef.current) {
-        pendingBacktestRef.current.resolve(convertedResult);
-        pendingBacktestRef.current = null;
-      }
-      // TICKET_234_4: Preserve accumulated data from incremental updates
-      // Python final result may not include candles/trades, so we must preserve them
-      setCurrentResult(prev => {
-        if (!prev) return convertedResult;
-
-        return {
-          ...convertedResult,
-          // Preserve candles from incremental accumulation
-          candles: prev.candles.length > 0 ? prev.candles : convertedResult.candles,
-          // Preserve equity curve if final result has fewer points
-          equityCurve: prev.equityCurve.length > convertedResult.equityCurve.length
-            ? prev.equityCurve
-            : convertedResult.equityCurve,
-          // TICKET_234_4: Preserve trades from incremental accumulation
-          trades: prev.trades.length > 0 ? prev.trades : convertedResult.trades,
-        };
-      });
-      // TICKET_233: Notify global status
-      if (data.taskId) {
-        onBacktestComplete?.(data.taskId, true);
-      }
-    });
-
-    const unsubError = api.onError((data: any) => {
-      console.error('[BacktestPage] Backtest error:', data);
-      if (pendingBacktestRef.current) {
-        pendingBacktestRef.current.reject(new Error(data.error));
-        pendingBacktestRef.current = null;
-      }
-      setIsExecuting(false);
-      messageAPI?.error(`Backtest failed: ${data.error}`);
-      // TICKET_233: Notify global status
-      if (data.taskId) {
-        onBacktestComplete?.(data.taskId, false);
-      }
-    });
-
-    const unsubProgress = api.onProgress((data: any) => {
-      console.debug('[BacktestPage] Backtest progress:', data);
-      // TICKET_228: Update executor progress from progress events
-      if (typeof data?.percent === 'number') {
-        setExecutorProgress(data.percent);
-        // TICKET_233: Notify global status
-        if (data.taskId) {
-          onBacktestProgress?.(data.taskId, data.percent);
-        }
-      }
-    });
-
-    // Throttled buffer for incremental updates
-    type IncrementData = any;
-    const pendingBuffer: IncrementData[] = [];
-    let throttleTimer: ReturnType<typeof setTimeout> | null = null;
-    const THROTTLE_MS = 100;
-
-    const flushBuffer = () => {
-      if (isCompleted || pendingBuffer.length === 0) return;
-
-      // TICKET_231: Get processedBars and totalBars from last increment
-      const lastIncrement = pendingBuffer[pendingBuffer.length - 1];
-      const latestProcessedBars = lastIncrement?.processedBars ?? 0;
-      const latestTotalBars = lastIncrement?.totalBars ?? 0;
-
-      const merged = pendingBuffer.reduce((acc, inc) => ({
-        newCandles: acc.newCandles.concat(inc.newCandles || []),
-        newEquityPoints: acc.newEquityPoints.concat(inc.newEquityPoints || []),
-        newTrades: acc.newTrades.concat(inc.newTrades || []),
-        currentMetrics: inc.currentMetrics,
-      }), {
-        newCandles: [] as any[],
-        newEquityPoints: [] as any[],
-        newTrades: [] as any[],
-        currentMetrics: pendingBuffer[0].currentMetrics,
-      });
-
-      pendingBuffer.length = 0;
-
-      // TICKET_231: Update processed bars for synchronized display
-      if (latestProcessedBars > 0) {
-        setProcessedBars(latestProcessedBars);
-      }
-      if (latestTotalBars > 0) {
-        setBacktestTotalBars(latestTotalBars);
-      }
-
-      console.log('[TICKET_266] flushBuffer: setting currentResult', {
-        candles: merged.newCandles.length,
-        equityPoints: merged.newEquityPoints.length,
-        trades: merged.newTrades.length,
-        processedBars: latestProcessedBars,
-        totalBars: latestTotalBars,
-      });
-      setCurrentResult(prev => {
-        if (!prev) {
-          return {
-            success: true,
-            startTime: 0,
-            endTime: 0,
-            executionTimeMs: 0,
-            metrics: {
-              totalPnl: merged.currentMetrics.totalPnl || 0,
-              totalReturn: merged.currentMetrics.totalReturn || 0,
-              sharpeRatio: 0,
-              maxDrawdown: 0,
-              totalTrades: merged.currentMetrics.totalTrades || 0,
-              winningTrades: merged.currentMetrics.winningTrades || 0,
-              losingTrades: merged.currentMetrics.losingTrades || 0,
-              winRate: merged.currentMetrics.winRate || 0,
-              profitFactor: 0,
-            },
-            equityCurve: merged.newEquityPoints,
-            trades: merged.newTrades,
-            candles: merged.newCandles,
-          } as ExecutorResult;
-        }
-
-        return {
-          ...prev,
-          metrics: {
-            ...prev.metrics,
-            totalPnl: merged.currentMetrics.totalPnl ?? prev.metrics.totalPnl,
-            totalReturn: merged.currentMetrics.totalReturn ?? prev.metrics.totalReturn,
-            totalTrades: merged.currentMetrics.totalTrades ?? prev.metrics.totalTrades,
-            winningTrades: merged.currentMetrics.winningTrades ?? prev.metrics.winningTrades,
-            losingTrades: merged.currentMetrics.losingTrades ?? prev.metrics.losingTrades,
-            winRate: merged.currentMetrics.winRate ?? prev.metrics.winRate,
-          },
-          equityCurve: [...prev.equityCurve, ...merged.newEquityPoints],
-          trades: [...prev.trades, ...merged.newTrades],
-          candles: merged.newCandles.length > 0 ? [...prev.candles, ...merged.newCandles] : prev.candles,
-        };
-      });
-    };
-
-    const unsubIncrement = api.onIncrement((data: any) => {
-      // TICKET_231: Debug increment data structure
-      console.debug('[TICKET_231] onIncrement received:', {
-        hasIncrement: !!data.increment,
-        processedBars: data.increment?.processedBars,
-        totalBars: data.increment?.totalBars,
-        equityCount: data.increment?.newEquityPoints?.length,
-        candlesCount: data.increment?.newCandles?.length,
-      });
-      pendingBuffer.push(data.increment);
-      if (!throttleTimer) {
-        throttleTimer = setTimeout(() => {
-          throttleTimer = null;
-          flushBuffer();
-        }, THROTTLE_MS);
-      }
-    });
-
-    const cleanupTimer = () => {
-      if (throttleTimer) {
-        clearTimeout(throttleTimer);
-        flushBuffer();
-      }
-    };
-
-    return () => {
-      console.log('[TICKET_266] useEffect cleanup - unsubscribing from events');
-      cleanupTimer();
-      unsubCompleted();
-      unsubError();
-      unsubProgress();
-      unsubIncrement();
-    };
-  }, [executorAPI, messageAPI, onBacktestComplete, onBacktestProgress]);
-
   // TICKET_173: Action button handlers (moved from Host Shell)
   const handleNewBacktest = useCallback(() => {
     clearResultState();
@@ -892,33 +588,6 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       setShowCheckpointPanel(true);
     }
   }, [clearResultState, checkpointInfo]);
-
-  const handleKeepResult = useCallback(() => {
-    clearResultState();
-  }, [clearResultState]);
-
-  const handleDiscardResult = useCallback(async () => {
-    if (currentTaskId) {
-      try {
-        const api = executorAPI || (window as any).electronAPI?.executor;
-        const result = await api?.deleteHistoryResult(currentTaskId);
-        if (result?.success) {
-          console.debug('[BacktestPage] Deleted backtest result:', currentTaskId);
-        } else {
-          console.error('[BacktestPage] Failed to delete result:', result?.error);
-          messageAPI?.error('Failed to delete backtest result');
-        }
-      } catch (error) {
-        console.error('[BacktestPage] Error deleting result:', error);
-        messageAPI?.error('Failed to delete backtest result');
-      }
-    }
-    clearResultState();
-    setSelectedHistoryResult(null);
-    setSelectedHistoryItem(null);
-    setDataConfig(createDefaultDataConfig());
-    setWorkflowRows([createInitialRow()]);
-  }, [currentTaskId, executorAPI, messageAPI, clearResultState]);
 
   // TICKET_264: Export to Quant Lab handlers
   const handleExportClick = useCallback(() => {
@@ -984,11 +653,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           },
         },
         backtestMetrics: {
-          sharpe: currentResult?.metrics?.sharpeRatio || 0,
-          maxDrawdown: currentResult?.metrics?.maxDrawdown || 0,
-          winRate: currentResult?.metrics?.winRate || 0,
-          totalTrades: currentResult?.metrics?.totalTrades || 0,
-          profitFactor: currentResult?.metrics?.profitFactor,
+          sharpe: selectedHistoryResult?.metrics?.sharpeRatio || 0,
+          maxDrawdown: selectedHistoryResult?.metrics?.maxDrawdown || 0,
+          winRate: selectedHistoryResult?.metrics?.winRate || 0,
+          totalTrades: selectedHistoryResult?.metrics?.totalTrades || 0,
+          profitFactor: selectedHistoryResult?.metrics?.profitFactor,
         },
       });
 
@@ -997,7 +666,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       console.error('[BacktestPage] Export error:', error);
       messageAPI?.error('Failed to export to Quant Lab');
     }
-  }, [workflowRows, algorithms, dataConfig, currentResult, exportWorkflow, messageAPI]);
+  }, [workflowRows, dataConfig, selectedHistoryResult, exportWorkflow, messageAPI]);
 
   // Load algorithms from database on mount
   // TICKET_210: Use combined strategy_type + signal_source filtering
@@ -1286,7 +955,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     totalWorkflows: number,
     strategyName?: string,
     taskId?: string,  // TICKET_352_5: Caller-generated task ID
-  ): Promise<ExecutorResult> => {
+  ): Promise<void> => {
     const api = executorAPI || (window as any).electronAPI?.executor;
     const startTime = Math.floor(new Date(config.startDate).getTime() / 1000);
     const endTime = Math.floor(new Date(config.endDate).getTime() / 1000);
@@ -1323,7 +992,6 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
     // Run backtest
     messageAPI?.info(`Running backtest (${caseIndex}/${totalWorkflows})...`);
-    setCurrentResult(null);
 
     // Build executor request inline (TICKET_173: replaces toExecutorRequest import)
     // TICKET_248 Phase 2: Include dataFeeds for multi-timeframe support
@@ -1415,11 +1083,6 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       // TICKET_268: Include workflowExportData for Quant Lab export
       onBacktestStart?.(result.taskId, strategyName || 'Backtest', workflowTimeframes, workflowExportData);
     }
-
-    // Wait for completion via Promise
-    return new Promise<ExecutorResult>((resolve, reject) => {
-      pendingBacktestRef.current = { resolve, reject };
-    });
   }, [executorAPI, messageAPI, onBacktestStart]);
 
   // Validate data configuration
@@ -1530,9 +1193,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       }
     }
 
-    // Clear previous results and set executing state
-    setBacktestResults([]);
-    setCurrentResult(null);
+    // Set executing state
     setIsExecuting(true);
     setTotalCases(activeWorkflows.length);
     setCurrentCaseIndex(0);
@@ -1608,17 +1269,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
       console.debug('[BacktestPage] Data loaded:', dataResult);
 
-      // Execute each workflow sequentially
-      const results: ExecutorResult[] = [];
-
+      // Execute each workflow - submit to executor queue (fire-and-forget)
       for (let i = 0; i < activeWorkflows.length; i++) {
         const workflow = activeWorkflows[i];
         setCurrentCaseIndex(i + 1);
-        setExecutorProgress(0);  // TICKET_228: Reset progress for each case
 
         try {
           // TICKET_352_5: Pass caller-generated taskId for first case
-          const result = await runSingleBacktest(
+          await runSingleBacktest(
             workflow,
             dataConfig,
             dataResult,
@@ -1627,23 +1285,12 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             strategyName,
             i === 0 ? taskId : undefined,
           );
-
-          results.push(result);
-          setBacktestResults([...results]);
-          messageAPI?.success(`Backtest ${i + 1}/${activeWorkflows.length} completed!`);
         } catch (error) {
           console.error(`[BacktestPage] Backtest ${i + 1} failed:`, error);
           messageAPI?.error(`Backtest ${i + 1} failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
 
-      // Final state
-      if (results.length > 0) {
-        setBacktestResults(results);
-        messageAPI?.success(`All ${results.length} backtest(s) completed!`);
-      } else {
-        messageAPI?.error('All backtests failed');
-      }
       setIsExecuting(false);
     } catch (error) {
       messageAPI?.error('Failed to execute backtest. Please check the logs.');
@@ -1673,7 +1320,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           isExecuting={isExecuting}
           currentCaseIndex={currentCaseIndex}
           totalCases={totalCases}
-          resultsCount={backtestResults.length}
+          resultsCount={0}
           historyItems={historyItems}
           historyLoading={historyLoading}
           checkpointInfo={checkpointInfo ? {
@@ -1757,41 +1404,6 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 onExportToQuantLab={handleExportClick}
               />
             </div>
-          ) : /* TICKET_227: Show executing status or completed results */
-          /* TICKET_326_1: Empty Structure pattern -- always render BacktestResultPanel
-             when executing, even before first INCREMENT. BacktestResultPanel internally
-             handles empty state via effectiveResults (TICKET_302). */
-          isExecuting ? (
-            <BacktestResultPanel
-              results={currentResult ? [currentResult] : []}
-              className="h-full"
-              isExecuting={isExecuting}
-              currentCaseIndex={currentCaseIndex}
-              totalCases={totalCases}
-              onCaseSelect={handleCaseClick}
-              scrollToCase={scrollToCaseIndex}
-              processedBars={processedBars}
-              backtestTotalBars={backtestTotalBars}
-              isQuantLabAvailable={isQuantLabAvailable}
-              isQuantLabLoading={isQuantLabLoading}
-              isExporting={isExporting}
-              onExportToQuantLab={handleExportClick}
-            />
-          ) : backtestResults.length > 0 ? (
-            /* Component 9: Backtest Result Panel - pass all results for comparison */
-            <BacktestResultPanel
-              results={backtestResults}
-              className="h-full"
-              isExecuting={isExecuting}
-              currentCaseIndex={currentCaseIndex}
-              totalCases={totalCases}
-              onCaseSelect={handleCaseClick}
-              scrollToCase={scrollToCaseIndex}
-              isQuantLabAvailable={isQuantLabAvailable}
-              isQuantLabLoading={isQuantLabLoading}
-              isExporting={isExporting}
-              onExportToQuantLab={handleExportClick}
-            />
           ) : loading ? (
             <div className="flex items-center justify-center h-64">
               <div className="text-color-terminal-text-muted">
@@ -1800,20 +1412,6 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Component 8: Executor Status Panel (shown when executing) */}
-              {/* TICKET_151: Show progress for sequential execution */}
-              {/* TICKET_228: Use executorProgress for actual execution progress */}
-              {isExecuting && (
-                <ExecutorStatusPanel
-                  status="running"
-                  progress={executorProgress}
-                  message={totalCases > 1
-                    ? `Running backtest ${currentCaseIndex}/${totalCases}...`
-                    : 'Running backtest...'
-                  }
-                />
-              )}
-
               {/* TICKET_176_1: Checkpoint Resume Panel */}
               {showCheckpointPanel && checkpointInfo && (
                 <CheckpointResumePanel
@@ -1871,43 +1469,6 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 <PlayIcon className="w-3 h-3" />
                 {t('buttons.newBacktest')}
               </button>
-            </div>
-          ) : /* TICKET_151: Check backtestResults array instead of single result */
-          backtestResults.length > 0 ? (
-            /* TICKET_171: Action buttons - Keep, Discard, Export (left-aligned) */
-            <div className="flex justify-start gap-3">
-              {/* Keep: preserve result, return to config, preserve config */}
-              <button
-                onClick={handleKeepResult}
-                className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all border-color-terminal-accent-teal bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal hover:bg-color-terminal-accent-teal/20"
-              >
-                <CheckIcon className="w-3 h-3" />
-                {t('buttons.keep')}
-              </button>
-              {/* Discard: delete from DB, return to config, reset config */}
-              <button
-                onClick={handleDiscardResult}
-                className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all border-red-500 bg-red-500/10 text-red-400 hover:bg-red-500/20"
-              >
-                <XIcon className="w-3 h-3" />
-                {t('buttons.discard')}
-              </button>
-              {/* TICKET_264: Export to Quant Lab - only shown when plugin is available */}
-              {!isQuantLabLoading && isQuantLabAvailable && (
-                <button
-                  onClick={handleExportClick}
-                  disabled={isExporting}
-                  className={cn(
-                    "flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all",
-                    isExporting
-                      ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
-                      : "border-[#a78bfa] bg-[#a78bfa]/10 text-[#a78bfa] hover:bg-[#a78bfa]/20"
-                  )}
-                >
-                  <ExportIcon className="w-3 h-3" />
-                  {isExporting ? t('buttons.exporting') : t('buttons.exportToQuantLab')}
-                </button>
-              )}
             </div>
           ) : (
             /* TICKET_171: Reset left, Execute right */
@@ -2015,7 +1576,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         visible={exportDialogVisible}
         context="export"
         contextData={{
-          workflowName: currentResult ? `${dataConfig.symbol}_${dataConfig.timeframe}` : undefined,
+          workflowName: `${dataConfig.symbol}_${dataConfig.timeframe || ''}`,
           // Get first analysis algorithm name from workflowRows
           analysisName: workflowRows[0]?.analysisSelections[0]?.strategyName,
           // Get first entry signal algorithm name from workflowRows
