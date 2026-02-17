@@ -40,12 +40,12 @@ const LatencyDot: React.FC<LatencyDotProps> = ({ status, latencyMs }) => {
     color = '#ef4444'; // red
     tooltip = status === 'error' ? 'Error' : 'Disconnected';
   } else if (latencyMs !== undefined) {
-    if (latencyMs < 200) {
-      color = '#22c55e'; // green
-    } else if (latencyMs < 500) {
-      color = '#eab308'; // yellow
+    if (latencyMs < 1000) {
+      color = '#22c55e'; // green - healthy for remote API
+    } else if (latencyMs < 3000) {
+      color = '#f59e0b'; // amber - slow but connected
     } else {
-      color = '#ef4444'; // red
+      color = '#f97316'; // orange - very slow (distinct from disconnected red)
     }
     tooltip = `${latencyMs}ms`;
   } else {
