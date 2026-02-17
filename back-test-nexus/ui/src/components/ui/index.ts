@@ -36,7 +36,7 @@ export {
   type ExecutorMetrics,
   type ExecutorTrade,
   type EquityPoint,
-} from './BacktestResultPanel';
+} from './backtest-result';
 
 export {
   ExecutorStatusPanel,
