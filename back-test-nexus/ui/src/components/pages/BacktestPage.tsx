@@ -958,7 +958,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   ): Promise<void> => {
     const api = executorAPI || (window as any).electronAPI?.executor;
     const startTime = Math.floor(new Date(config.startDate).getTime() / 1000);
-    const endTime = Math.floor(new Date(config.endDate).getTime() / 1000);
+    const endTime = Math.floor(new Date(config.endDate).getTime() / 1000) + 86400 - 1;
 
     // TICKET_248: Get timeframe from workflow selections (Phase 1: use first available)
     // Phase 2 will support multi-timeframe data loading

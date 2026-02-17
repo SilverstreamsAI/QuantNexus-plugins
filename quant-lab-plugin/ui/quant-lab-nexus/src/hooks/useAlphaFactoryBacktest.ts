@@ -323,7 +323,7 @@ export function useAlphaFactoryBacktest({
       setProgress(20);
 
       const startTime = Math.floor(new Date(dataConfig.startDate).getTime() / 1000);
-      const endTime = Math.floor(new Date(dataConfig.endDate).getTime() / 1000);
+      const endTime = Math.floor(new Date(dataConfig.endDate).getTime() / 1000) + 86400 - 1;
 
       const backtestResult = await api.executor.runBacktest({
         strategyPath: genResult.strategyPath,
