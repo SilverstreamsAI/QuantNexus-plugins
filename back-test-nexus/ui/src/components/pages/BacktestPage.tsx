@@ -30,6 +30,7 @@ import {
 import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
 import { extractUniqueTimeframes } from '../../utils/timeframe-utils';
 import { formatDateTime } from '@shared/utils/format-locale';
+import { computeMinStartDate } from '@shared/utils/lookback-constraints';
 import type { TimeframeValue } from '../ui/TimeframeDropdown';
 // TICKET_264: Export to Quant Lab hooks
 import { useQuantLabAvailable, useExportToQuantLab } from '../../hooks';
@@ -156,12 +157,22 @@ export interface BacktestPageProps {
     }
   ) => void;
   /** TICKET_327: Notify Host when execution begins (before data download)
-   *  TICKET_352_5: Includes caller-generated taskId for immediate tab creation */
-  onExecutionBegin?: (strategyName: string, taskId: string) => void;
+   *  TICKET_352_5: Includes caller-generated taskId for immediate tab creation
+   *  TICKET_365: 3rd arg is config snapshot for cancel -> go back preservation */
+  onExecutionBegin?: (strategyName: string, taskId: string, configSnapshot?: {
+    cockpit: string;
+    dataConfig: { symbol: string; dataSource: string; startDate: string; endDate: string; initialCapital: number; orderSize: number; orderSizeUnit: string };
+    workflowRows: unknown[];
+  }) => void;
   /** TICKET_308: Page title for PageHeader Zone A */
   pageTitle?: string;
   /** TICKET_308: Settings gear click handler for PageHeader Zone A */
   onSettingsClick?: () => void;
+  /** TICKET_365: Restored config from cancel -> go back flow */
+  initialConfig?: {
+    dataConfig: { symbol: string; dataSource: string; startDate: string; endDate: string; initialCapital: number; orderSize: number; orderSizeUnit: string };
+    workflowRows: unknown[];
+  };
 }
 
 // -----------------------------------------------------------------------------
@@ -217,6 +228,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   onExecutionBegin,
   pageTitle,
   onSettingsClick,
+  initialConfig,
 }) => {
   const { t } = useTranslation('backtest');
 
@@ -228,12 +240,18 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   // TICKET_153_1: History from SQLite
   const [historyItems, setHistoryItems] = useState<BacktestHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
-  const [workflowRows, setWorkflowRows] = useState<WorkflowRow[]>([createInitialRow()]);
+  // TICKET_365: Restore workflowRows from initialConfig if available (cancel -> go back)
+  const [workflowRows, setWorkflowRows] = useState<WorkflowRow[]>(
+    () => (initialConfig?.workflowRows as WorkflowRow[]) || [createInitialRow()]
+  );
   const [algorithms, setAlgorithms] = useState(EMPTY_ALGORITHMS);
   const [loading, setLoading] = useState(true);
 
   // Component 8: Data configuration state
-  const [dataConfig, setDataConfig] = useState<BacktestDataConfig>(createDefaultDataConfig());
+  // TICKET_365: Restore dataConfig from initialConfig if available (cancel -> go back)
+  const [dataConfig, setDataConfig] = useState<BacktestDataConfig>(
+    () => (initialConfig?.dataConfig as BacktestDataConfig) || createDefaultDataConfig()
+  );
   // TICKET_077_COMPONENT8: Empty initial state, populated by two-phase loading
   const [dataSources, setDataSources] = useState<DataSourceOption[]>([]);
   const [dataConfigErrors, setDataConfigErrors] = useState<Partial<Record<keyof BacktestDataConfig, string>>>({});
@@ -885,6 +903,45 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     return minDays;
   }, [maxLookback, workflowRows]);
 
+  // TICKET_364: Auto-adjust startDate when maxLookback is exceeded
+  const constrainStartDate = useCallback((config: BacktestDataConfig): BacktestDataConfig => {
+    if (!maxLookback || !config.startDate || !config.endDate) return config;
+
+    const timeframes = extractUniqueTimeframes(workflowRows);
+    if (timeframes.length === 0) return config;
+
+    // Find most restrictive minStartDate across all timeframes
+    let latestMin: string | null = null;
+    for (const tf of timeframes) {
+      const min = computeMinStartDate(tf, maxLookback, config.endDate);
+      if (min && (!latestMin || min > latestMin)) {
+        latestMin = min;
+      }
+    }
+
+    if (latestMin && config.startDate < latestMin) {
+      return { ...config, startDate: latestMin };
+    }
+    return config;
+  }, [maxLookback, workflowRows]);
+
+  const handleDataConfigChange = useCallback((newConfig: BacktestDataConfig) => {
+    const adjusted = constrainStartDate(newConfig);
+    if (adjusted.startDate !== newConfig.startDate) {
+      messageAPI?.info(`Start date auto-adjusted to ${adjusted.startDate} (maxLookback constraint)`);
+    }
+    setDataConfig(adjusted);
+  }, [constrainStartDate, messageAPI]);
+
+  // TICKET_364: Re-constrain startDate when workflowRows timeframes change
+  useEffect(() => {
+    const adjusted = constrainStartDate(dataConfig);
+    if (adjusted.startDate !== dataConfig.startDate) {
+      messageAPI?.info(`Start date auto-adjusted to ${adjusted.startDate} (timeframe changed)`);
+      setDataConfig(adjusted);
+    }
+  }, [workflowRows]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Symbol search handler
   // TICKET_121 + TICKET_045: Use real backend API instead of mock data
   const handleSymbolSearch = useCallback(async (query: string): Promise<SymbolSearchResult[]> => {
@@ -1024,6 +1081,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     const result = await api?.runBacktest(executorRequest);
 
     if (!result?.success) {
+      // TICKET_368: Silently skip if task was cancelled during preparation
+      if (result?.error?.includes('cancelled during preparation')) {
+        console.info(`[BacktestPage] Backtest ${caseIndex} skipped: cancelled during preparation`);
+        return;
+      }
       throw new Error(result?.error || 'Failed to start backtest');
     }
 
@@ -1205,7 +1267,17 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     // TICKET_327: Notify Host before download starts so it can navigate to result page
     // and show pipeline DOWNLOAD phase while data is being fetched
     // TICKET_352_5: Pass taskId so Host can create tab immediately
-    onExecutionBegin?.(strategyName, taskId);
+    // TICKET_365: Pass config snapshot for cancel -> go back preservation
+    onExecutionBegin?.(strategyName, taskId, {
+      cockpit: cockpitMode,
+      dataConfig: { ...dataConfig },
+      workflowRows: workflowRows.map(row => ({ ...row })),
+    });
+
+    // TICKET_366: Register task in main process queue before download starts
+    // so cancel can find it during the preparation phase
+    const executorApi = executorAPI || (window as any).electronAPI?.executor;
+    await executorApi?.registerTask?.(taskId, strategyName);
 
     try {
       // Step 1: Ensure data is available
@@ -1298,7 +1370,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       setExecuteError(error instanceof Error ? error.message : 'Execution failed');
       setIsExecuting(false);
     }
-  }, [dataConfig, workflowRows, hasWorkflowContent, findDuplicateWorkflows, runSingleBacktest, dataAPI, messageAPI, onExecutionBegin]);
+  }, [dataConfig, workflowRows, hasWorkflowContent, findDuplicateWorkflows, runSingleBacktest, dataAPI, messageAPI, onExecutionBegin, cockpitMode]);
 
   // TICKET_163: Handle naming dialog cancel
   const handleCancelNaming = useCallback(() => {
@@ -1425,7 +1497,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
               {/* Data Configuration Panel */}
               <BacktestDataConfigPanel
                 value={dataConfig}
-                onChange={setDataConfig}
+                onChange={handleDataConfigChange}
                 dataSources={dataSources}
                 onSymbolSearch={handleSymbolSearch}
                 errors={dataConfigErrors}
