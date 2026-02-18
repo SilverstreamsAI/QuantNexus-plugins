@@ -11,7 +11,7 @@ import { formatNumber } from '@shared/utils/format-locale';
 import type { ExecutorResult, EquityPoint, Candle, ExecutorTrade } from './types';
 import { formatPercent } from './format-utils';
 import { MAX_RENDER_POINTS, safeMinMax, downsampleOHLC, downsampleLTTB } from './downsample-utils';
-import { SpinnerIcon, CheckmarkIcon } from './icons';
+import { SpinnerIcon, CheckmarkIcon, CancelledIcon } from './icons';
 import type { ResultTabComponentProps } from './tab-registry';
 
 // -----------------------------------------------------------------------------
@@ -28,6 +28,8 @@ interface SingleCaseChartsProps {
   backtestTotalBars?: number;
   /** TICKET_234_3: Whether backtest is currently executing */
   isExecuting?: boolean;
+  /** TICKET_374: Whether backtest was cancelled */
+  isCancelled?: boolean;
 }
 
 const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
@@ -37,6 +39,7 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
   processedBars = 0,
   backtestTotalBars = 0,
   isExecuting = false,
+  isCancelled = false,
 }) => {
   const { t } = useTranslation('backtest');
 
@@ -57,7 +60,18 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
   // Equity curve rendering
   const renderEquityCurve = () => {
     // TICKET_234_3: Show status indicator when no equity data
+    // TICKET_374: Show cancelled indicator when backtest was cancelled
     if (!equityCurve || equityCurve.length === 0) {
+      if (isCancelled) {
+        return (
+          <div className="flex flex-col items-center justify-center h-full gap-2">
+            <CancelledIcon className="w-8 h-8 text-red-400" />
+            <span className="text-xs text-red-400 font-mono uppercase tracking-wider">
+              {t('resultPanel.status.cancelled', 'Cancelled')}
+            </span>
+          </div>
+        );
+      }
       if (isExecuting) {
         return (
           <div className="flex items-center justify-center h-full">
@@ -156,6 +170,17 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
   // K-line chart rendering
   const renderKLineChart = () => {
     if (!candles || candles.length === 0) {
+      // TICKET_374: Show cancelled indicator when backtest was cancelled
+      if (isCancelled) {
+        return (
+          <div className="flex flex-col items-center justify-center h-full gap-2">
+            <CancelledIcon className="w-8 h-8 text-red-400" />
+            <span className="text-xs text-red-400 font-mono uppercase tracking-wider">
+              {t('resultPanel.status.cancelled', 'Cancelled')}
+            </span>
+          </div>
+        );
+      }
       if (isExecuting) {
         return (
           <div className="flex items-center justify-center h-full">
@@ -317,6 +342,7 @@ export const ChartsTab: React.FC<ResultTabComponentProps> = ({
   results,
   currentCaseIndex,
   isExecuting,
+  isCancelled,
   totalCases = 0,
   scrollToCaseRef,
   processedBars = 0,
@@ -361,6 +387,7 @@ export const ChartsTab: React.FC<ResultTabComponentProps> = ({
         processedBars={processedBars}
         backtestTotalBars={backtestTotalBars}
         isExecuting={isExecuting}
+        isCancelled={isCancelled}
       />
     );
   }

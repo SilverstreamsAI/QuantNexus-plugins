@@ -34,6 +34,8 @@ export interface BacktestResultPanelProps {
   processedBars?: number;
   /** TICKET_231: Total bars in backtest (for gray-to-color transition) */
   backtestTotalBars?: number;
+  /** TICKET_374: Whether backtest was cancelled */
+  isCancelled?: boolean;
   /** TICKET_257: Workflow timeframes for display in tab header */
   workflowTimeframes?: WorkflowTimeframes;
   /** TICKET_267: Export to Quant Lab */
@@ -52,6 +54,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   results = [],
   className,
   isExecuting = false,
+  isCancelled = false,
   currentCaseIndex = 0,
   totalCases = 0,
   scrollToCase,
@@ -87,7 +90,8 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
     : (result ? [result] : []);
 
   // TICKET_302: Empty Structure pattern
-  if (allResults.length === 0 && !isExecuting) {
+  // TICKET_374: Show cancelled state in chart area instead of "no results"
+  if (allResults.length === 0 && !isExecuting && !isCancelled) {
     return (
       <div className={cn('flex items-center justify-center h-full', className)}>
         <div className="text-color-terminal-text-muted">{t('resultPanel.status.noResults')}</div>
@@ -249,6 +253,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
             results={effectiveResults}
             currentCaseIndex={currentCaseIndex}
             isExecuting={isExecuting}
+            isCancelled={isCancelled}
             totalCases={totalCases}
             scrollToCaseRef={activeScrollRef}
             processedBars={processedBars}

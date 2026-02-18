@@ -17,6 +17,8 @@ export interface ResultTabComponentProps {
   results: ExecutorResult[];
   currentCaseIndex?: number;
   isExecuting?: boolean;
+  /** TICKET_374: Whether backtest was cancelled */
+  isCancelled?: boolean;
   totalCases?: number;
   scrollToCaseRef?: React.MutableRefObject<((index: number) => void) | null>;
   processedBars?: number;
