@@ -11,8 +11,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../../lib/utils';
-import type { ExecutorResult, WorkflowTimeframes } from './types';
+import type { ExecutorResult, WorkflowTimeframes, BacktestConfigSummary } from './types';
 import { getVisibleTabs, isTabDisabled } from './tab-registry';
+import { ConfigSummaryTable } from './ConfigSummaryTable';
 
 // -----------------------------------------------------------------------------
 // Props
@@ -38,6 +39,8 @@ export interface BacktestResultPanelProps {
   isCancelled?: boolean;
   /** TICKET_257: Workflow timeframes for display in tab header */
   workflowTimeframes?: WorkflowTimeframes;
+  /** TICKET_378: Backtest configuration summary for result page display */
+  backtestConfig?: BacktestConfigSummary;
   /** TICKET_267: Export to Quant Lab */
   isQuantLabAvailable?: boolean;
   isQuantLabLoading?: boolean;
@@ -61,6 +64,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   processedBars = 0,
   backtestTotalBars = 0,
   workflowTimeframes,
+  backtestConfig,
 }) => {
   const { t } = useTranslation('backtest');
   const [activeTab, setActiveTab] = useState('charts');
@@ -141,6 +145,15 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
 
   return (
     <div className={cn('flex flex-col h-full border border-color-terminal-border rounded-lg bg-color-terminal-panel/30', className)}>
+      {/* TICKET_378: Config Summary Table */}
+      {backtestConfig && (
+        <ConfigSummaryTable
+          config={backtestConfig}
+          workflowTimeframes={workflowTimeframes}
+          className="mx-3 mt-3"
+        />
+      )}
+
       {/* Tab Header */}
       <div className="flex items-center justify-between border-b border-color-terminal-border">
         {/* Left: Tab Buttons */}

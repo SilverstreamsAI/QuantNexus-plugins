@@ -2,6 +2,7 @@
  * EquityCurveChart Component
  *
  * PLUGIN_TICKET_016: SVG equity curve chart.
+ * TICKET_377: safeMinMax + downsampleLTTB for large datasets.
  * Adapted from back-test-nexus SingleCaseCharts.renderEquityCurve() (lines 380-473),
  * simplified: no processedBars sync, no K-line reference, no isExecuting state.
  */
@@ -9,6 +10,7 @@
 import React from 'react';
 import { EquityPoint } from '../types';
 import { formatPercent } from '../utils/format-utils';
+import { safeMinMax, downsampleLTTB, MAX_RENDER_POINTS } from '../utils/downsample-utils';
 import { formatNumber } from '@shared/utils/format-locale';
 
 interface EquityCurveChartProps {
@@ -43,23 +45,28 @@ export const EquityCurveChart: React.FC<EquityCurveChartProps> = ({ equityCurve 
     );
   }
 
-  const minEquity = Math.min(...validCurve.map(p => p.equity)) * 0.98;
-  const maxEquity = Math.max(...validCurve.map(p => p.equity)) * 1.02;
+  // TICKET_377: safeMinMax avoids V8 stack overflow on Math.min(...spread)
+  const { min: rawMin, max: rawMax } = safeMinMax(validCurve, p => p.equity);
+  const minEquity = rawMin * 0.98;
+  const maxEquity = rawMax * 1.02;
   const range = maxEquity - minEquity || 1;
+
+  // TICKET_377: downsampleLTTB limits SVG render points to MAX_RENDER_POINTS
+  const renderCurve = downsampleLTTB(validCurve, MAX_RENDER_POINTS, p => p.equity);
 
   const width = 100;
   const height = 100;
 
   // Equity line points
-  const equityPoints = validCurve.map((point, index) => {
-    const x = (index / (validCurve.length - 1)) * width;
+  const equityPoints = renderCurve.map((point, index) => {
+    const x = (index / (renderCurve.length - 1)) * width;
     const y = height - ((point.equity - minEquity) / range) * height;
     return `${x},${y}`;
   }).join(' ');
 
   // Area fill path
-  const areaPath = `M 0,${height} ` + validCurve.map((point, index) => {
-    const x = (index / (validCurve.length - 1)) * width;
+  const areaPath = `M 0,${height} ` + renderCurve.map((point, index) => {
+    const x = (index / (renderCurve.length - 1)) * width;
     const y = height - ((point.equity - minEquity) / range) * height;
     return `L ${x},${y}`;
   }).join(' ') + ` L ${width},${height} Z`;

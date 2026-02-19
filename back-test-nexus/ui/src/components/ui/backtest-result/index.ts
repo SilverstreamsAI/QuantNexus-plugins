@@ -12,7 +12,11 @@ export type {
   EquityPoint,
   Candle,
   WorkflowTimeframes,
+  BacktestConfigSummary,
 } from './types';
+
+export { ConfigSummaryTable } from './ConfigSummaryTable';
+export type { ConfigSummaryTableProps } from './ConfigSummaryTable';
 
 export {
   RESULT_TAB_REGISTRY,

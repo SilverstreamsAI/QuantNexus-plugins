@@ -154,6 +154,16 @@ export interface BacktestPageProps {
       exit?: { algorithmId: string; algorithmName: string; algorithmCode: string; baseClass: string; timeframe: string; parameters: Record<string, unknown> } | null;
       symbol: string;
       dateRange: { start: string; end: string };
+    },
+    /** TICKET_378: Backtest configuration summary for result page display */
+    backtestConfig?: {
+      dataSource: string;
+      symbol: string;
+      startDate: string;
+      endDate: string;
+      initialCapital: number;
+      orderSize: number;
+      orderSizeUnit: string;
     }
   ) => void;
   /** TICKET_327: Notify Host when execution begins (before data download)
@@ -1143,7 +1153,17 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       // TICKET_233: Notify global status
       // TICKET_257: Include workflowTimeframes for result page display
       // TICKET_268: Include workflowExportData for Quant Lab export
-      onBacktestStart?.(result.taskId, strategyName || 'Backtest', workflowTimeframes, workflowExportData);
+      // TICKET_378: Include backtestConfig for result page config summary
+      const backtestConfig = {
+        dataSource: config.dataSource,
+        symbol: config.symbol,
+        startDate: config.startDate,
+        endDate: config.endDate,
+        initialCapital: config.initialCapital,
+        orderSize: config.orderSize,
+        orderSizeUnit: config.orderSizeUnit,
+      };
+      onBacktestStart?.(result.taskId, strategyName || 'Backtest', workflowTimeframes, workflowExportData, backtestConfig);
 
       // TICKET_375_2: Wait for executor to finish this task before returning.
       // Without this, the sequential case loop fires all cases immediately because

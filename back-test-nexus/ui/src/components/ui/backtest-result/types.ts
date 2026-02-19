@@ -54,6 +54,17 @@ export interface ExecutorResult {
   candles: Candle[];
 }
 
+/** TICKET_378: Backtest configuration summary for result page display */
+export interface BacktestConfigSummary {
+  dataSource: string;
+  symbol: string;
+  startDate: string;
+  endDate: string;
+  initialCapital: number;
+  orderSize: number;
+  orderSizeUnit: string;
+}
+
 /** TICKET_257: Workflow timeframe configuration */
 export interface WorkflowTimeframes {
   analysis?: string;
