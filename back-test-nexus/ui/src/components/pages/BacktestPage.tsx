@@ -1144,8 +1144,76 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       // TICKET_257: Include workflowTimeframes for result page display
       // TICKET_268: Include workflowExportData for Quant Lab export
       onBacktestStart?.(result.taskId, strategyName || 'Backtest', workflowTimeframes, workflowExportData);
+
+      // TICKET_375_2: Wait for executor to finish this task before returning.
+      // Without this, the sequential case loop fires all cases immediately because
+      // runBacktest IPC only enqueues the task and returns without waiting for completion.
+      const actualTaskId = result.taskId;
+      await new Promise<void>((resolve, reject) => {
+        const unsubCompleted = api.onCompleted?.((data: { taskId: string }) => {
+          if (data.taskId === actualTaskId) {
+            unsubCompleted?.();
+            unsubError?.();
+            resolve();
+          }
+        });
+        const unsubError = api.onError?.((data: { taskId: string; error: string }) => {
+          if (data.taskId === actualTaskId) {
+            unsubCompleted?.();
+            unsubError?.();
+            reject(new Error(data.error));
+          }
+        });
+      });
+      console.debug(`[BacktestPage] Backtest ${caseIndex} completed, taskId:`, actualTaskId);
     }
   }, [executorAPI, messageAPI, onBacktestStart]);
+
+  // TICKET_375: Independent case execution - each case gets its own data download + backtest
+  const runIndependentCase = useCallback(async (
+    workflow: WorkflowRow,
+    config: BacktestDataConfig,
+    taskId: string,
+    caseIndex: number,
+    totalCases: number,
+    strategyName: string,
+  ): Promise<void> => {
+    const dataApi = dataAPI || (window as any).electronAPI?.data;
+
+    // Step A: Extract timeframes for THIS case only
+    const timeframes = extractUniqueTimeframes([workflow]);
+    console.log(`[BacktestPage] Case ${caseIndex}/${totalCases} timeframes:`, timeframes);
+
+    // Step B: Download data for THIS case's timeframes
+    let dataResult: any;
+
+    if (timeframes.length > 1 && dataApi?.ensureMultiTimeframe) {
+      dataResult = await dataApi.ensureMultiTimeframe({
+        symbol: config.symbol,
+        startDate: config.startDate,
+        endDate: config.endDate,
+        timeframes,
+        provider: config.dataSource,
+        forceDownload: false,
+      });
+    } else {
+      dataResult = await dataApi?.ensure({
+        symbol: config.symbol,
+        startDate: config.startDate,
+        endDate: config.endDate,
+        interval: timeframes[0] || '1d',
+        provider: config.dataSource,
+        forceDownload: false,
+      });
+    }
+
+    if (!dataResult?.success) {
+      throw new Error(`Failed to load data: ${dataResult?.error}`);
+    }
+
+    // Step C: Run backtest with per-case data
+    await runSingleBacktest(workflow, config, dataResult, caseIndex, totalCases, strategyName, taskId);
+  }, [dataAPI, runSingleBacktest]);
 
   // Validate data configuration
   const validateDataConfig = useCallback((config: BacktestDataConfig): boolean => {
@@ -1255,111 +1323,47 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       }
     }
 
-    // Set executing state
-    setIsExecuting(true);
-    setTotalCases(activeWorkflows.length);
-    setCurrentCaseIndex(0);
+    // TICKET_375: Generate independent taskId for each case
+    const caseTasks = activeWorkflows.map(workflow => ({
+      workflow,
+      taskId: crypto.randomUUID(),
+    }));
 
-    // TICKET_352_5: Generate taskId immediately (caller-generated ID pattern)
-    // This decouples tab creation from the async data download + strategy generation chain
-    const taskId = crypto.randomUUID();
-
-    // TICKET_327: Notify Host before download starts so it can navigate to result page
-    // and show pipeline DOWNLOAD phase while data is being fetched
-    // TICKET_352_5: Pass taskId so Host can create tab immediately
-    // TICKET_365: Pass config snapshot for cancel -> go back preservation
-    onExecutionBegin?.(strategyName, taskId, {
-      cockpit: cockpitMode,
-      dataConfig: { ...dataConfig },
-      workflowRows: workflowRows.map(row => ({ ...row })),
-    });
-
-    // TICKET_366: Register task in main process queue before download starts
-    // so cancel can find it during the preparation phase
+    // TICKET_366: Register all tasks in main process queue before execution starts
     const executorApi = executorAPI || (window as any).electronAPI?.executor;
-    await executorApi?.registerTask?.(taskId, strategyName);
+    for (const ct of caseTasks) {
+      await executorApi?.registerTask?.(ct.taskId, strategyName);
+    }
+
+    setIsExecuting(true);
 
     try {
-      // Step 1: Ensure data is available
-      const dataApi = dataAPI || (window as any).electronAPI?.data;
       messageAPI?.info(`Loading market data for ${dataConfig.symbol}...`);
 
-      // TICKET_248 Phase 2: Extract unique timeframes from all workflow selections
-      const timeframes = extractUniqueTimeframes(activeWorkflows);
-      console.log('[BacktestPage] Extracted timeframes:', timeframes);
+      // TICKET_375_1: Sequential case execution to prevent concurrent file writes
+      // TICKET_375_2: Create tab per case only when that case starts (not all upfront)
+      const failures: Array<{ caseIndex: number; error: string }> = [];
+      for (let i = 0; i < caseTasks.length; i++) {
+        const { workflow, taskId: caseTaskId } = caseTasks[i];
 
-      // TICKET_248 Phase 2: Load data for all required timeframes
-      let dataResult: any;
-
-      if (timeframes.length > 1 && dataApi?.ensureMultiTimeframe) {
-        // Multi-timeframe mode
-        const multiRequest = {
-          symbol: dataConfig.symbol,
-          startDate: dataConfig.startDate,
-          endDate: dataConfig.endDate,
-          timeframes,
-          provider: dataConfig.dataSource,
-          forceDownload: false,
-        };
-
-        console.log('[BacktestPage] Fetching multi-timeframe data:', multiRequest);
-        dataResult = await dataApi.ensureMultiTimeframe(multiRequest);
-
-        if (!dataResult?.success) {
-          messageAPI?.error(`Failed to load market data: ${dataResult?.error}`);
-          setIsExecuting(false);
-          return;
+        // TICKET_375_2: Create result tab just before this case executes
+        if (i === 0) {
+          onExecutionBegin?.(strategyName, caseTaskId, {
+            cockpit: cockpitMode,
+            dataConfig: { ...dataConfig },
+            workflowRows: workflowRows.map(row => ({ ...row })),
+          });
+        } else {
+          onExecutionBegin?.(strategyName, caseTaskId);
         }
-
-        const totalBars = Object.values(dataResult.dataFeeds || {}).reduce(
-          (sum: number, feed: any) => sum + (feed.totalBars || 0), 0
-        );
-        messageAPI?.success(`Loaded ${totalBars} bars across ${timeframes.length} timeframe(s)`);
-      } else {
-        // Single timeframe mode (legacy fallback)
-        const singleRequest = {
-          symbol: dataConfig.symbol,
-          startDate: dataConfig.startDate,
-          endDate: dataConfig.endDate,
-          interval: timeframes[0] || '1d',
-          provider: dataConfig.dataSource,
-          forceDownload: false,
-        };
-
-        console.debug('[BacktestPage] Fetching single-timeframe data:', singleRequest);
-        dataResult = await dataApi?.ensure(singleRequest);
-
-        if (!dataResult?.success) {
-          messageAPI?.error(`Failed to load market data: ${dataResult?.error}`);
-          setIsExecuting(false);
-          return;
-        }
-
-        const barsLoaded = dataResult.coverage?.totalBars || dataResult.downloadStats?.barsImported || 0;
-        messageAPI?.success(`Loaded ${barsLoaded} bars for ${dataConfig.symbol}`);
-      }
-
-      console.debug('[BacktestPage] Data loaded:', dataResult);
-
-      // Execute each workflow - submit to executor queue (fire-and-forget)
-      for (let i = 0; i < activeWorkflows.length; i++) {
-        const workflow = activeWorkflows[i];
-        setCurrentCaseIndex(i + 1);
 
         try {
-          // TICKET_352_5: Pass caller-generated taskId for first case
-          await runSingleBacktest(
-            workflow,
-            dataConfig,
-            dataResult,
-            i + 1,
-            activeWorkflows.length,
-            strategyName,
-            i === 0 ? taskId : undefined,
-          );
+          await runIndependentCase(workflow, dataConfig, caseTaskId, i + 1, caseTasks.length, strategyName);
         } catch (error) {
-          console.error(`[BacktestPage] Backtest ${i + 1} failed:`, error);
-          messageAPI?.error(`Backtest ${i + 1} failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          const msg = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`[BacktestPage] Case ${i + 1} failed:`, error);
+          messageAPI?.error(`Case ${i + 1} failed: ${msg}`);
+          failures.push({ caseIndex: i + 1, error: msg });
         }
       }
 
@@ -1370,7 +1374,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       setExecuteError(error instanceof Error ? error.message : 'Execution failed');
       setIsExecuting(false);
     }
-  }, [dataConfig, workflowRows, hasWorkflowContent, findDuplicateWorkflows, runSingleBacktest, dataAPI, messageAPI, onExecutionBegin, cockpitMode]);
+  }, [dataConfig, workflowRows, hasWorkflowContent, findDuplicateWorkflows, runIndependentCase, dataAPI, executorAPI, messageAPI, onExecutionBegin, cockpitMode]);
 
   // TICKET_163: Handle naming dialog cancel
   const handleCancelNaming = useCallback(() => {
