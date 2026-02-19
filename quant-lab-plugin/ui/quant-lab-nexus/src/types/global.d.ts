@@ -163,6 +163,7 @@ interface ElectronAPI {
       endDate: string;
       interval: string;
       provider?: string;
+      callerId?: string;
     }) => Promise<{
       success: boolean;
       dataPath?: string;
@@ -174,6 +175,7 @@ interface ElectronAPI {
       endDate: string;
       timeframes: string[];
       provider?: string;
+      callerId?: string;
     }) => Promise<{
       success: boolean;
       dataPath?: string;

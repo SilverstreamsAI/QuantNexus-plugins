@@ -10,6 +10,7 @@ interface DataEnsureConfig {
   interval: string;
   provider?: string;
   forceDownload?: boolean;
+  callerId?: string;
 }
 
 interface DataEnsureResult {

@@ -333,12 +333,27 @@ const WorkflowRowItem: React.FC<WorkflowRowItemProps> = ({
     onUpdate(row.id, { [updateKey]: selections });
   }, [row.id, onUpdate]);
 
+  // TICKET_380: When step-level timeframe changes, propagate to ALL existing selections in that column
   const handleDefaultTimeframeChange = useCallback((
     column: 'analysis' | 'preCondition' | 'steps' | 'postCondition',
     timeframe: TimeframeValue
   ) => {
     setDefaultTimeframes(prev => ({ ...prev, [column]: timeframe }));
-  }, []);
+
+    // TICKET_380: Update existing algorithm selections to use new timeframe
+    const selectionKey = {
+      analysis: 'analysisSelections',
+      preCondition: 'preConditionSelections',
+      steps: 'stepSelections',
+      postCondition: 'postConditionSelections',
+    }[column] as keyof WorkflowRow;
+
+    const currentSelections = row[selectionKey] as AlgorithmSelection[];
+    if (currentSelections.length > 0) {
+      const updated = currentSelections.map(s => ({ ...s, timeframe }));
+      onUpdate(row.id, { [selectionKey]: updated });
+    }
+  }, [row, onUpdate]);
 
   // Pre-condition (Entry Filter):
   // - If disableAnalysis is true (trader mode), always enabled (independent of Market Analysis)

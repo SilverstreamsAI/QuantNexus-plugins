@@ -1215,6 +1215,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         timeframes,
         provider: config.dataSource,
         forceDownload: false,
+        callerId: 'backtest',
       });
     } else {
       dataResult = await dataApi?.ensure({
@@ -1224,6 +1225,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         interval: timeframes[0] || '1d',
         provider: config.dataSource,
         forceDownload: false,
+        callerId: 'backtest',
       });
     }
 

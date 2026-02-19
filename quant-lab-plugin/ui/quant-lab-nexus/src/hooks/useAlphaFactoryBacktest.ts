@@ -266,6 +266,7 @@ export function useAlphaFactoryBacktest({
           endDate: dataConfig.endDate,
           timeframes: uniqueTimeframes,
           provider: dataConfig.dataSource,
+          callerId: 'alpha-factory',
         });
         if (!dataResult.success) {
           throw new Error(dataResult.error || 'Failed to load market data');
@@ -284,6 +285,7 @@ export function useAlphaFactoryBacktest({
           endDate: dataConfig.endDate,
           interval: primaryTimeframe,
           provider: dataConfig.dataSource,
+          callerId: 'alpha-factory',
         });
         if (!dataResult.success) {
           throw new Error(dataResult.error || 'Failed to load market data');
