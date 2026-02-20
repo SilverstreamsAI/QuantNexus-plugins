@@ -80,10 +80,12 @@ export function useAlphaFactoryBacktest({
     const merged = buffer.reduce((acc, inc) => ({
       newEquityPoints: acc.newEquityPoints.concat(inc.newEquityPoints || []),
       newTrades: acc.newTrades.concat(inc.newTrades || []),
+      newCandles: acc.newCandles.concat(inc.newCandles || []),
       currentMetrics: inc.currentMetrics,
     }), {
       newEquityPoints: [] as any[],
       newTrades: [] as any[],
+      newCandles: [] as any[],
       currentMetrics: buffer[0].currentMetrics,
     });
 
@@ -109,6 +111,7 @@ export function useAlphaFactoryBacktest({
           },
           equityCurve: merged.newEquityPoints,
           trades: merged.newTrades,
+          candles: merged.newCandles,
         };
       }
 
@@ -125,6 +128,7 @@ export function useAlphaFactoryBacktest({
         },
         equityCurve: [...prev.equityCurve, ...merged.newEquityPoints],
         trades: [...prev.trades, ...merged.newTrades],
+        candles: [...prev.candles, ...merged.newCandles],
       };
     });
   }, []);
@@ -180,7 +184,15 @@ export function useAlphaFactoryBacktest({
     setTimeframeStatus([]);
     cleanupSubscriptions();
 
+    // TICKET_382: Generate AF-prefixed taskId and register with AF queue
+    const taskId = `af_${Date.now()}`;
+    const strategyName = `AlphaFactory_${signals.length}sig_${factors.length}fac_${signalMethod}`;
+    activeTaskIdRef.current = taskId;
+
     try {
+      // Register task in AF queue (preparing state, enables cancel during download)
+      await api.alphaFactory.registerTask(taskId, strategyName);
+
       // Step 1: Extract unique timeframes from signals
       const timeframes = new Set<string>();
       for (const sig of signals) {
@@ -301,7 +313,7 @@ export function useAlphaFactoryBacktest({
       // Step 3: Generate strategy code
       console.log('[AlphaFactoryBacktest] Data loaded, dataPath:', dataPath, 'dataFeeds:', dataFeeds?.length);
       setStatus('generating');
-      setProgress(10);
+      setProgress(0);
 
       const genResult = await api.alphaFactory.run({
         signalIds: signals.map((s) => s.id),
@@ -322,14 +334,16 @@ export function useAlphaFactoryBacktest({
       // Step 4: Run backtest via executor
       console.log('[AlphaFactoryBacktest] Strategy generated:', genResult.strategyPath);
       setStatus('running');
-      setProgress(20);
+      setProgress(0);
 
       const startTime = Math.floor(new Date(dataConfig.startDate).getTime() / 1000);
       const endTime = Math.floor(new Date(dataConfig.endDate).getTime() / 1000) + 86400 - 1;
 
-      const backtestResult = await api.executor.runBacktest({
+      // TICKET_382: Enqueue via AF-specific queue (independent from backtest plugin)
+      const backtestResult = await api.alphaFactory.runBacktest({
+        taskId,
         strategyPath: genResult.strategyPath,
-        strategyName: `AlphaFactory_${signals.length}sig_${factors.length}fac_${signalMethod}`,
+        strategyName,
         symbol: dataConfig.symbol,
         interval: uniqueTimeframes[0] || '1d',
         startTime,
@@ -346,15 +360,14 @@ export function useAlphaFactoryBacktest({
         throw new Error(backtestResult.error || 'Failed to start backtest');
       }
 
-      const taskId = backtestResult.taskId;
-      activeTaskIdRef.current = taskId;
       console.log('[AlphaFactoryBacktest] Executor started, taskId:', taskId);
 
       // Step 5: Subscribe to executor events
+      // TICKET_384: Use executor percent directly (no offset formula).
+      // Pipeline model: each phase has its own 0-100% progress.
       const unsubProgress = api.executor.onProgress((data) => {
         if (data.taskId === taskId) {
-          console.log('[AlphaFactoryBacktest] onProgress:', data.percent);
-          setProgress(20 + (data.percent * 0.8));
+          setProgress(data.percent);
         }
       });
       cleanupRef.current.push(unsubProgress);
@@ -363,10 +376,6 @@ export function useAlphaFactoryBacktest({
       const THROTTLE_MS = 100;
       const unsubIncrement = api.executor.onIncrement((data) => {
         if (data.taskId !== taskId) return;
-        if (data.increment.totalBars > 0) {
-          const pct = (data.increment.processedBars / data.increment.totalBars) * 100;
-          setProgress(20 + (pct * 0.8));
-        }
         pendingBufferRef.current.push(data.increment);
         if (!throttleTimerRef.current) {
           throttleTimerRef.current = setTimeout(() => {
@@ -413,6 +422,10 @@ export function useAlphaFactoryBacktest({
             entryPrice: number; exitPrice: number; quantity: number;
             pnl: number; commission: number; reason: string;
           }>;
+          candles?: Array<{
+            timestamp: number; open: number; high: number; low: number;
+            close: number; volume: number;
+          }>;
         };
 
         console.log('[AlphaFactoryBacktest] result.success:', r?.success, 'metrics:', r?.metrics ? 'present' : 'missing');
@@ -430,6 +443,7 @@ export function useAlphaFactoryBacktest({
               metrics: r.metrics!,
               equityCurve: r.equityCurve ?? [],
               trades: r.trades ?? [],
+              candles: r.candles ?? [],
             };
             if (!prev) return finalResult;
             return {
@@ -437,6 +451,8 @@ export function useAlphaFactoryBacktest({
               equityCurve: prev.equityCurve.length > finalResult.equityCurve.length
                 ? prev.equityCurve : finalResult.equityCurve,
               trades: prev.trades.length > 0 ? prev.trades : finalResult.trades,
+              candles: prev.candles.length > finalResult.candles.length
+                ? prev.candles : finalResult.candles,
             };
           });
           setStatus('completed');

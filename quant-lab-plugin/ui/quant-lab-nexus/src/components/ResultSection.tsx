@@ -16,6 +16,7 @@ import { BacktestStatus, ExecutorResult, SignalChip, ExitRules, DataConfig, Time
 import { SignalSummaryHeader } from './SignalSummaryHeader';
 import { MetricSummaryRow } from './MetricSummaryRow';
 import { EquityCurveChart } from './EquityCurveChart';
+import { CandleChart } from './CandleChart';
 import { TradesTable } from './TradesTable';
 import { TimeframeDownloadList } from './TimeframeDownloadList';
 
@@ -96,6 +97,7 @@ export const ResultSection: React.FC<ResultSectionProps> = ({
           />
           <MetricSummaryRow metrics={result.metrics} />
           <EquityCurveChart equityCurve={result.equityCurve} />
+          <CandleChart candles={result.candles} trades={result.trades} />
           <TradesTable trades={result.trades} />
         </div>
       );
@@ -128,6 +130,7 @@ export const ResultSection: React.FC<ResultSectionProps> = ({
         />
         <MetricSummaryRow metrics={result.metrics} />
         <EquityCurveChart equityCurve={result.equityCurve} />
+        <CandleChart candles={result.candles} trades={result.trades} />
         <TradesTable trades={result.trades} />
       </div>
     );

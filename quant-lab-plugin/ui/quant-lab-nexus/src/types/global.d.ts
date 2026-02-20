@@ -300,6 +300,61 @@ interface ElectronAPI {
       error?: string;
     }>;
 
+    // TICKET_382: Alpha Factory independent queue API
+    registerTask: (taskId: string, strategyName: string) => Promise<{
+      success: boolean;
+      error?: string;
+    }>;
+
+    runBacktest: (config: {
+      taskId?: string;
+      strategyPath: string;
+      strategyName: string;
+      symbol: string;
+      interval: string;
+      startTime: number;
+      endTime: number;
+      dataPath: string;
+      dataSourceType: string;
+      dataFeeds?: Array<{ interval: string; dataPath: string }>;
+      initialCapital?: number;
+      orderSize?: number;
+      orderSizeUnit?: string;
+    }) => Promise<{
+      success: boolean;
+      taskId?: string;
+      error?: string;
+    }>;
+
+    cancelBacktest: (taskId: string) => Promise<{
+      success: boolean;
+      error?: string;
+    }>;
+
+    getQueueStatus: () => Promise<{
+      success: boolean;
+      data?: {
+        tasks: Array<{
+          taskId: string;
+          status: 'preparing' | 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
+          createdAt: number;
+        }>;
+        activeCount: number;
+        queuedCount: number;
+      };
+      error?: string;
+    }>;
+
+    onQueueStatus: (callback: (data: {
+      tasks: Array<{
+        taskId: string;
+        status: 'preparing' | 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
+        createdAt: number;
+      }>;
+      activeCount: number;
+      queuedCount: number;
+    }) => void) => () => void;
+
     // PLUGIN_TICKET_015: Generate strategy and return path
     run: (request: {
       signalIds: string[];

@@ -201,49 +201,15 @@ export interface BacktestResultSummary {
 
 /**
  * PLUGIN_TICKET_016: Executor result types for full result display.
- * Adapted from back-test-nexus BacktestResultPanel.tsx (lines 20-70) minus Candle type.
+ * TICKET_383: Canonical types moved to Tier 0 (data-plugin), re-exported here.
  */
-export interface ExecutorMetrics {
-  totalPnl: number;
-  totalReturn: number;
-  sharpeRatio: number;
-  maxDrawdown: number;
-  totalTrades: number;
-  winningTrades: number;
-  losingTrades: number;
-  winRate: number;
-  profitFactor: number;
-}
-
-export interface ExecutorTrade {
-  entryTime: number;
-  exitTime: number;
-  symbol: string;
-  side: string;
-  entryPrice: number;
-  exitPrice: number;
-  quantity: number;
-  pnl: number;
-  commission: number;
-  reason: string;
-}
-
-export interface EquityPoint {
-  timestamp: number;
-  equity: number;
-  drawdown: number;
-}
-
-export interface ExecutorResult {
-  success: boolean;
-  errorMessage?: string;
-  startTime: number;
-  endTime: number;
-  executionTimeMs: number;
-  metrics: ExecutorMetrics;
-  equityCurve: EquityPoint[];
-  trades: ExecutorTrade[];
-}
+export type {
+  ExecutorMetrics,
+  ExecutorTrade,
+  EquityPoint,
+  Candle,
+  ExecutorResult,
+} from '@plugins/data-plugin/types/executor';
 
 /**
  * TICKET_077_P3: Per-timeframe download status for Alpha Factory backtest.

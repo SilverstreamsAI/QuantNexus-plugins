@@ -1,58 +1,15 @@
 /**
  * TICKET_358: Shared types for backtest result components
+ * TICKET_383: Canonical types moved to Tier 0 (data-plugin), re-exported here.
  */
 
-export interface ExecutorMetrics {
-  totalPnl: number;
-  totalReturn: number;
-  sharpeRatio: number;
-  maxDrawdown: number;
-  totalTrades: number;
-  winningTrades: number;
-  losingTrades: number;
-  winRate: number;
-  profitFactor: number;
-}
-
-export interface ExecutorTrade {
-  entryTime: number;
-  exitTime: number;
-  symbol: string;
-  side: string;
-  entryPrice: number;
-  exitPrice: number;
-  quantity: number;
-  pnl: number;
-  commission: number;
-  reason: string;
-}
-
-export interface EquityPoint {
-  timestamp: number;
-  equity: number;
-  drawdown: number;
-}
-
-export interface Candle {
-  timestamp: number;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-}
-
-export interface ExecutorResult {
-  success: boolean;
-  errorMessage?: string;
-  startTime: number;
-  endTime: number;
-  executionTimeMs: number;
-  metrics: ExecutorMetrics;
-  equityCurve: EquityPoint[];
-  trades: ExecutorTrade[];
-  candles: Candle[];
-}
+export type {
+  ExecutorMetrics,
+  ExecutorTrade,
+  EquityPoint,
+  Candle,
+  ExecutorResult,
+} from '@plugins/data-plugin/types/executor';
 
 /** TICKET_378: Backtest configuration summary for result page display */
 export interface BacktestConfigSummary {
