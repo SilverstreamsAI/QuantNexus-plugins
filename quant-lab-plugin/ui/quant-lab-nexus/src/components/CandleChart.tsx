@@ -3,25 +3,38 @@
  *
  * TICKET_383: SVG candlestick chart for Alpha Factory results.
  * Adapted from back-test-nexus ChartsTab.renderKLineChart().
- * Simplified: no processedBars sync, no isExecuting/isCancelled states, no i18n.
+ * TICKET_386: Progressive gray-to-colored rendering via processedBars.
  */
 
 import React from 'react';
 import type { Candle, ExecutorTrade } from '../types';
 import { safeMinMax, downsampleOHLC, MAX_RENDER_POINTS } from '../utils/downsample-utils';
-import { CANDLE_COLOR_BULLISH, CANDLE_COLOR_BEARISH } from '@plugins/data-plugin/utils/chart-utils';
+import { getCandleColor, isCandleProcessed, CANDLE_COLOR_BULLISH, CANDLE_COLOR_BEARISH } from '@plugins/data-plugin/utils/chart-utils';
 
 interface CandleChartProps {
   candles: Candle[];
   trades: ExecutorTrade[];
+  /** TICKET_384: When true, show spinner instead of "no data" text */
+  isExecuting?: boolean;
+  /** TICKET_386: Number of bars processed so far (for gray-to-colored transition) */
+  processedBars?: number;
+  /** TICKET_386: Total bars in backtest dataset */
+  backtestTotalBars?: number;
 }
 
-export const CandleChart: React.FC<CandleChartProps> = ({ candles, trades }) => {
+export const CandleChart: React.FC<CandleChartProps> = ({ candles, trades, isExecuting, processedBars, backtestTotalBars }) => {
   if (!candles || candles.length === 0) {
     return (
       <div className="border border-color-terminal-border rounded p-4" style={{ backgroundColor: 'rgba(10, 25, 47, 0.5)' }}>
         <div className="flex items-center justify-center h-[168px] text-color-terminal-text-muted text-xs">
-          No candle data available
+          {isExecuting ? (
+            <svg className="animate-spin w-8 h-8 text-color-terminal-accent-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+              <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+            </svg>
+          ) : (
+            'No candle data available'
+          )}
         </div>
       </div>
     );
@@ -85,7 +98,11 @@ export const CandleChart: React.FC<CandleChartProps> = ({ candles, trades }) => 
         {renderCandles.map((candle, i) => {
           const x = i * candleWidth + candleWidth / 2;
           const isUp = candle.close >= candle.open;
-          const color = isUp ? CANDLE_COLOR_BULLISH : CANDLE_COLOR_BEARISH;
+          // TICKET_386: Map downsampled index back to original for processed check
+          const bucketRatio = candles.length / renderCandles.length;
+          const origIdx = Math.floor(i * bucketRatio);
+          const isProcessed = !isExecuting || isCandleProcessed(origIdx, processedBars || 0, backtestTotalBars);
+          const color = getCandleColor(isUp, isProcessed);
           const bodyTop = priceToY(Math.max(candle.open, candle.close));
           const bodyBottom = priceToY(Math.min(candle.open, candle.close));
           const bodyH = Math.max(0.3, bodyBottom - bodyTop);

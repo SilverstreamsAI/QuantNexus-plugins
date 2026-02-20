@@ -34,7 +34,30 @@ import { ConfigSidebar } from '../components/ConfigSidebar';
 import { useAlphaFactoryConfig } from '../hooks/useAlphaFactoryConfig';
 import { useAlphaFactoryBacktest } from '../hooks/useAlphaFactoryBacktest';
 
-export const AlphaFactoryPage: React.FC = () => {
+// TICKET_388: Recovered backtest state passed from host (QuantLabPage)
+export interface RecoveredBacktestState {
+  taskId: string;
+  status: string;
+  progress: number;
+  result: import('../types').ExecutorResult | null;
+  executionState: {
+    isExecuting: boolean;
+    processedBars: number;
+    totalBars: number;
+  } | null;
+}
+
+// TICKET_384: Props for host-level pipeline rendering
+// TICKET_385: footer slot for pipeline alignment inside sidebar layout
+interface AlphaFactoryPageProps {
+  onActiveTaskChange?: (taskId: string | null) => void;
+  onPipelinePhase?: (taskId: string, phase: string) => void;
+  footer?: React.ReactNode;
+  // TICKET_388: Recovered state for lifecycle persistence
+  recoveredState?: RecoveredBacktestState;
+}
+
+export const AlphaFactoryPage: React.FC<AlphaFactoryPageProps> = ({ onActiveTaskChange, onPipelinePhase, footer, recoveredState }) => {
   const {
     signals, setSignals,
     signalMethod, setSignalMethod,
@@ -120,7 +143,7 @@ export const AlphaFactoryPage: React.FC = () => {
   }, []);
 
   // PLUGIN_TICKET_015: Backtest hook
-  const { status, progress, result, error, timeframeStatus, runBacktest } = useAlphaFactoryBacktest({
+  const { status, progress, result, error, timeframeStatus, runBacktest, activeTaskId, processedBars, totalBars } = useAlphaFactoryBacktest({
     signals,
     signalMethod,
     lookback,
@@ -131,7 +154,16 @@ export const AlphaFactoryPage: React.FC = () => {
     factorMethod,
     factorLookback,
     dataConfig,
+    // TICKET_384: Pipeline phase callback for host-level rendering
+    onPipelinePhase,
+    // TICKET_388: Recovery state from host stores
+    recoveredState,
   });
+
+  // TICKET_384: Notify host of active task changes for pipeline rendering
+  useEffect(() => {
+    onActiveTaskChange?.(activeTaskId);
+  }, [activeTaskId, onActiveTaskChange]);
 
   const isRunning = status === 'loading_data' || status === 'generating' || status === 'running';
   // TICKET_276: Hybrid model allows either signals > 0 OR factors > 0 (or both)
@@ -239,97 +271,102 @@ export const AlphaFactoryPage: React.FC = () => {
         isLoading={isLoadingList}
       />
 
-      {/* Content Area */}
-      <div className="flex-1 overflow-auto p-6">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <SignalFactorySection
-            signals={signals}
-            method={signalMethod}
-            lookback={lookback}
-            onAddSignal={handleAddSignal}
-            onRemoveSignal={handleRemoveSignal}
-            onMethodChange={setSignalMethod}
-            onLookbackChange={setLookback}
-            onTimeframeChange={handleTimeframeChange}
-          />
-
-          {/* PLUGIN_TICKET_007: Modal renders via portal, placed at page level */}
-          {/* TICKET_275: Picker only for signals (usageType='signal' always) */}
-          <SignalSourcePicker
-            visible={pickerVisible}
-            usageType="signal"
-            onSelect={handleSelectSource}
-            onClose={() => setPickerVisible(false)}
-            excludeIds={signals.map(s => s.id)}
-          />
-
-          <FlowDivider />
-
-          {/* TICKET_276: Factor Factory Section */}
-          <FactorFactorySection
-            factors={factors}
-            method={factorMethod}
-            lookback={factorLookback}
-            onAddFactor={handleAddFactor}
-            onRemoveFactor={handleRemoveFactor}
-            onMethodChange={setFactorMethod}
-            onLookbackChange={setFactorLookback}
-          />
-
-          {/* TICKET_276: Factor picker modal */}
-          <FactorSourcePicker
-            visible={factorPickerVisible}
-            onSelect={handleSelectFactor}
-            onClose={() => setFactorPickerVisible(false)}
-            excludeIds={factors.map(f => f.id)}
-          />
-
-          <FlowDivider />
-
-          {/* TICKET_275: Risk override panel replaces card grid */}
-          <ExitFactorySection
-            exitRules={exitRules}
-            exitMethod={exitMethod}
-            onExitRulesChange={setExitRules}
-            onMethodChange={setExitMethod}
-          />
-
-          <FlowDivider />
-
-          {/* PLUGIN_TICKET_015: Data Configuration */}
-          <DataConfigPanel
-            value={dataConfig}
-            onChange={setDataConfig}
-            disabled={isRunning}
-            dataSources={dataSources}
-            isAuthenticated={isAuthenticated}
-          />
-
-          <ActionBar
-            onValidate={handleValidate}
-            onSaveAs={saveAs}
-            onRunBacktest={handleRunBacktest}
-            isRunning={isRunning}
-            canRun={canRun}
-          />
-
-          {/* PLUGIN_TICKET_016: Full result section */}
-          <div ref={resultRef}>
-            <ResultSection
-              status={status}
-              progress={progress}
-              result={result}
-              error={error}
+      {/* Content Area - TICKET_385: flex-col to stack scrollable content + fixed footer */}
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex-1 overflow-auto p-6">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <SignalFactorySection
               signals={signals}
-              signalMethod={signalMethod}
+              method={signalMethod}
               lookback={lookback}
+              onAddSignal={handleAddSignal}
+              onRemoveSignal={handleRemoveSignal}
+              onMethodChange={setSignalMethod}
+              onLookbackChange={setLookback}
+              onTimeframeChange={handleTimeframeChange}
+            />
+
+            {/* PLUGIN_TICKET_007: Modal renders via portal, placed at page level */}
+            {/* TICKET_275: Picker only for signals (usageType='signal' always) */}
+            <SignalSourcePicker
+              visible={pickerVisible}
+              usageType="signal"
+              onSelect={handleSelectSource}
+              onClose={() => setPickerVisible(false)}
+              excludeIds={signals.map(s => s.id)}
+            />
+
+            <FlowDivider />
+
+            {/* TICKET_276: Factor Factory Section */}
+            <FactorFactorySection
+              factors={factors}
+              method={factorMethod}
+              lookback={factorLookback}
+              onAddFactor={handleAddFactor}
+              onRemoveFactor={handleRemoveFactor}
+              onMethodChange={setFactorMethod}
+              onLookbackChange={setFactorLookback}
+            />
+
+            {/* TICKET_276: Factor picker modal */}
+            <FactorSourcePicker
+              visible={factorPickerVisible}
+              onSelect={handleSelectFactor}
+              onClose={() => setFactorPickerVisible(false)}
+              excludeIds={factors.map(f => f.id)}
+            />
+
+            <FlowDivider />
+
+            {/* TICKET_275: Risk override panel replaces card grid */}
+            <ExitFactorySection
               exitRules={exitRules}
               exitMethod={exitMethod}
-              dataConfig={dataConfig}
-              timeframeStatus={timeframeStatus}
+              onExitRulesChange={setExitRules}
+              onMethodChange={setExitMethod}
             />
+
+            <FlowDivider />
+
+            {/* PLUGIN_TICKET_015: Data Configuration */}
+            <DataConfigPanel
+              value={dataConfig}
+              onChange={setDataConfig}
+              disabled={isRunning}
+              dataSources={dataSources}
+              isAuthenticated={isAuthenticated}
+            />
+
+            <ActionBar
+              onValidate={handleValidate}
+              onSaveAs={saveAs}
+              onRunBacktest={handleRunBacktest}
+              isRunning={isRunning}
+              canRun={canRun}
+            />
+
+            {/* PLUGIN_TICKET_016: Full result section */}
+            <div ref={resultRef}>
+              <ResultSection
+                status={status}
+                result={result}
+                error={error}
+                signals={signals}
+                signalMethod={signalMethod}
+                lookback={lookback}
+                exitRules={exitRules}
+                exitMethod={exitMethod}
+                dataConfig={dataConfig}
+                timeframeStatus={timeframeStatus}
+                processedBars={processedBars}
+                backtestTotalBars={totalBars}
+              />
+            </div>
           </div>
         </div>
+        {/* TICKET_385: Footer slot renders inside sidebar layout for vertical alignment */}
+        {footer}
       </div>
     </div>
   );

@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { LogIn } from 'lucide-react';
 import type { DataSourceOption } from '../types/data-source';
 
 // =============================================================================
@@ -134,7 +135,12 @@ export const DataSourceSelectField: React.FC<DataSourceSelectFieldProps> = ({
         <span className="flex items-center gap-2">
           <span className="truncate">{selected?.name || value}</span>
           {selected && (
-            <LatencyDot status={selected.status} latencyMs={selected.latencyMs} />
+            <>
+              {selected.requiresAuth && !isAuthenticated && (
+                <span title="Login required"><LogIn className="w-3 h-3 flex-shrink-0" style={{ color: '#f59e0b' }} /></span>
+              )}
+              <LatencyDot status={selected.status} latencyMs={selected.latencyMs} />
+            </>
           )}
         </span>
       </button>
@@ -176,7 +182,12 @@ export const DataSourceSelectField: React.FC<DataSourceSelectFieldProps> = ({
                 }}
               >
                 <span>{ds.name}</span>
-                <LatencyDot status={ds.status} latencyMs={ds.latencyMs} />
+                <span className="flex items-center gap-1.5">
+                  {ds.requiresAuth && !isAuthenticated && (
+                    <span title="Login required"><LogIn className="w-3 h-3 flex-shrink-0" style={{ color: '#f59e0b' }} /></span>
+                  )}
+                  <LatencyDot status={ds.status} latencyMs={ds.latencyMs} />
+                </span>
               </button>
             );
           })}

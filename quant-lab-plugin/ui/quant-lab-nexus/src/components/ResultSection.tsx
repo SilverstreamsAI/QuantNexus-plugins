@@ -4,9 +4,14 @@
  * PLUGIN_TICKET_016: Composition container replacing BacktestResultPanel.
  * Composes: SignalSummaryHeader + MetricSummaryRow + EquityCurveChart + TradesTable.
  *
+ * TICKET_384: Progress bar removed from this component.
+ * Pipeline progress is rendered at host level (QuantLabPage) via PipelineProgress component.
+ *
  * States:
  * - idle: return null
- * - loading_data / generating / running: progress bar
+ * - loading_data: timeframe download list (no progress bar)
+ * - generating: null (pipeline shown at host level)
+ * - running: real-time charts (Empty Structure pattern when no data yet)
  * - error: error message
  * - completed: full result display
  */
@@ -22,7 +27,6 @@ import { TimeframeDownloadList } from './TimeframeDownloadList';
 
 interface ResultSectionProps {
   status: BacktestStatus;
-  progress: number;
   result: ExecutorResult | null;
   error: string | null;
   signals: SignalChip[];
@@ -33,77 +37,98 @@ interface ResultSectionProps {
   dataConfig: DataConfig;
   // TICKET_077_P3: Per-timeframe download status
   timeframeStatus: TimeframeDownloadStatus[];
+  // TICKET_386: Progressive candle rendering (gray-to-colored)
+  processedBars?: number;
+  backtestTotalBars?: number;
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  loading_data: 'Loading market data...',
-  generating: 'Generating strategy code...',
-  running: 'Running backtest...',
-};
+/** Shared result display used by both running (real-time) and completed states */
+const ResultDisplay: React.FC<{
+  result: ExecutorResult;
+  signals: SignalChip[];
+  signalMethod: string;
+  lookback: number;
+  exitRules: ExitRules;
+  exitMethod: string;
+  dataConfig: DataConfig;
+  // TICKET_386: Progressive candle rendering
+  isExecuting?: boolean;
+  processedBars?: number;
+  backtestTotalBars?: number;
+}> = ({ result, signals, signalMethod, lookback, exitRules, exitMethod, dataConfig, isExecuting, processedBars, backtestTotalBars }) => (
+  <>
+    <SignalSummaryHeader
+      signals={signals}
+      signalMethod={signalMethod}
+      lookback={lookback}
+      exitRules={exitRules}
+      exitMethod={exitMethod}
+      dataConfig={dataConfig}
+    />
+    <MetricSummaryRow metrics={result.metrics} />
+    <EquityCurveChart
+      equityCurve={result.equityCurve}
+      isExecuting={isExecuting}
+      processedBars={processedBars}
+      backtestTotalBars={backtestTotalBars}
+    />
+    <CandleChart
+      candles={result.candles}
+      trades={result.trades}
+      isExecuting={isExecuting}
+      processedBars={processedBars}
+      backtestTotalBars={backtestTotalBars}
+    />
+    <TradesTable trades={result.trades} />
+  </>
+);
 
 export const ResultSection: React.FC<ResultSectionProps> = ({
-  status, progress, result, error,
+  status, result, error,
   signals, signalMethod, lookback, exitRules, exitMethod, dataConfig,
   timeframeStatus,
+  processedBars, backtestTotalBars,
 }) => {
   if (status === 'idle') return null;
 
-  // Progress state
-  if (status === 'loading_data' || status === 'generating' || status === 'running') {
-    const label = STATUS_LABELS[status] || 'Processing...';
-    const pct = Math.min(Math.max(progress, 0), 100);
+  // TICKET_077_P3: Show per-timeframe download list during loading_data phase
+  if (status === 'loading_data' && timeframeStatus.length > 0) {
+    return <TimeframeDownloadList timeframeStatus={timeframeStatus} />;
+  }
 
-    const progressBar = (
-      <div className="rounded-lg border border-color-terminal-border p-4 space-y-3"
-           style={{ backgroundColor: 'rgba(10, 25, 47, 0.7)' }}>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-color-terminal-text-secondary terminal-mono">{label}</span>
-          <span className="text-sm text-color-terminal-text-muted terminal-mono">{pct.toFixed(0)}%</span>
-        </div>
-        <div className="w-full h-2 rounded-full overflow-hidden" style={{ backgroundColor: '#233554' }}>
-          <div
-            className="h-full rounded-full transition-all duration-300"
-            style={{
-              width: `${pct}%`,
-              backgroundColor: 'var(--color-terminal-accent-primary)',
-            }}
-          />
-        </div>
+  // TICKET_384: Empty Structure pattern - show empty charts with spinners during pre-data phases
+  if (status === 'generating' || status === 'loading_data') {
+    return (
+      <div className="space-y-4">
+        <EquityCurveChart equityCurve={[]} isExecuting />
+        <CandleChart candles={[]} trades={[]} isExecuting />
       </div>
     );
+  }
 
-    // TICKET_077_P3: Show per-timeframe download list during loading_data phase
-    if (status === 'loading_data' && timeframeStatus.length > 0) {
-      return (
-        <div className="space-y-3">
-          <TimeframeDownloadList timeframeStatus={timeframeStatus} />
-          {progressBar}
-        </div>
-      );
-    }
-
-    // PLUGIN_TICKET_017: Render real-time charts during running status when data exists
-    if (status === 'running' && result) {
+  // PLUGIN_TICKET_017: Render real-time charts during running status when data exists
+  if (status === 'running') {
+    if (!result) {
+      // TICKET_384: Empty Structure pattern - empty charts with spinners before first INCREMENT
       return (
         <div className="space-y-4">
-          {progressBar}
-          <SignalSummaryHeader
-            signals={signals}
-            signalMethod={signalMethod}
-            lookback={lookback}
-            exitRules={exitRules}
-            exitMethod={exitMethod}
-            dataConfig={dataConfig}
-          />
-          <MetricSummaryRow metrics={result.metrics} />
-          <EquityCurveChart equityCurve={result.equityCurve} />
-          <CandleChart candles={result.candles} trades={result.trades} />
-          <TradesTable trades={result.trades} />
+          <EquityCurveChart equityCurve={[]} isExecuting />
+          <CandleChart candles={[]} trades={[]} isExecuting />
         </div>
       );
     }
-
-    return progressBar;
+    return (
+      <div className="space-y-4">
+        <ResultDisplay
+          result={result}
+          signals={signals} signalMethod={signalMethod} lookback={lookback}
+          exitRules={exitRules} exitMethod={exitMethod} dataConfig={dataConfig}
+          isExecuting
+          processedBars={processedBars}
+          backtestTotalBars={backtestTotalBars}
+        />
+      </div>
+    );
   }
 
   // Error state
@@ -120,18 +145,11 @@ export const ResultSection: React.FC<ResultSectionProps> = ({
   if (status === 'completed' && result) {
     return (
       <div className="space-y-4">
-        <SignalSummaryHeader
-          signals={signals}
-          signalMethod={signalMethod}
-          lookback={lookback}
-          exitRules={exitRules}
-          exitMethod={exitMethod}
-          dataConfig={dataConfig}
+        <ResultDisplay
+          result={result}
+          signals={signals} signalMethod={signalMethod} lookback={lookback}
+          exitRules={exitRules} exitMethod={exitMethod} dataConfig={dataConfig}
         />
-        <MetricSummaryRow metrics={result.metrics} />
-        <EquityCurveChart equityCurve={result.equityCurve} />
-        <CandleChart candles={result.candles} trades={result.trades} />
-        <TradesTable trades={result.trades} />
       </div>
     );
   }

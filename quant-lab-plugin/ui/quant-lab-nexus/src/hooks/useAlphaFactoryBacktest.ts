@@ -30,6 +30,24 @@ interface UseAlphaFactoryBacktestReturn {
   error: string | null;
   timeframeStatus: TimeframeDownloadStatus[];
   runBacktest: () => Promise<void>;
+  // TICKET_384: Expose active taskId for host-level pipeline rendering
+  activeTaskId: string | null;
+  // TICKET_386: Progressive candle rendering (gray-to-colored)
+  processedBars: number;
+  totalBars: number;
+}
+
+// TICKET_388: Recovered state from host stores (passed via props)
+interface RecoveredBacktestState {
+  taskId: string;
+  status: string;
+  progress: number;
+  result: ExecutorResult | null;
+  executionState: {
+    isExecuting: boolean;
+    processedBars: number;
+    totalBars: number;
+  } | null;
 }
 
 interface UseAlphaFactoryBacktestParams {
@@ -43,6 +61,27 @@ interface UseAlphaFactoryBacktestParams {
   factorMethod: string;
   factorLookback: number;
   dataConfig: DataConfig;
+  // TICKET_384: Callback for host-level pipeline phase updates
+  onPipelinePhase?: (taskId: string, phase: string) => void;
+  // TICKET_388: Recovered state for lifecycle persistence
+  recoveredState?: RecoveredBacktestState;
+}
+
+// TICKET_388: Map AF store status -> hook BacktestStatus
+function mapAfStatusToBacktestStatus(afStatus: string): BacktestStatus {
+  switch (afStatus) {
+    case 'running':
+    case 'queued':
+    case 'preparing':
+      return 'running';
+    case 'completed':
+      return 'completed';
+    case 'failed':
+    case 'cancelled':
+      return 'error';
+    default:
+      return 'idle';
+  }
 }
 
 export function useAlphaFactoryBacktest({
@@ -55,16 +94,32 @@ export function useAlphaFactoryBacktest({
   factorMethod,
   factorLookback,
   dataConfig,
+  onPipelinePhase,
+  recoveredState,
 }: UseAlphaFactoryBacktestParams): UseAlphaFactoryBacktestReturn {
-  const [status, setStatus] = useState<BacktestStatus>('idle');
-  const [progress, setProgress] = useState(0);
-  const [result, setResult] = useState<ExecutorResult | null>(null);
+  // TICKET_388: Initialize from recovered state if available
+  const [status, setStatus] = useState<BacktestStatus>(
+    () => recoveredState ? mapAfStatusToBacktestStatus(recoveredState.status) : 'idle'
+  );
+  const [progress, setProgress] = useState(
+    () => recoveredState?.progress ?? 0
+  );
+  const [result, setResult] = useState<ExecutorResult | null>(
+    () => recoveredState?.result ?? null
+  );
   const [error, setError] = useState<string | null>(null);
   // TICKET_077_P3: Per-timeframe download status
   const [timeframeStatus, setTimeframeStatus] = useState<TimeframeDownloadStatus[]>([]);
+  // TICKET_386: Progressive candle rendering (gray-to-colored)
+  const [processedBars, setProcessedBars] = useState(
+    () => recoveredState?.executionState?.processedBars ?? 0
+  );
+  const [totalBars, setTotalBars] = useState(
+    () => recoveredState?.executionState?.totalBars ?? 0
+  );
 
   // Track active task for event filtering
-  const activeTaskIdRef = useRef<string | null>(null);
+  const activeTaskIdRef = useRef<string | null>(recoveredState?.taskId ?? null);
   // Track cleanup functions for event subscriptions
   const cleanupRef = useRef<Array<() => void>>([]);
   // PLUGIN_TICKET_017: Throttled buffer for real-time incremental updates
@@ -82,14 +137,23 @@ export function useAlphaFactoryBacktest({
       newTrades: acc.newTrades.concat(inc.newTrades || []),
       newCandles: acc.newCandles.concat(inc.newCandles || []),
       currentMetrics: inc.currentMetrics,
+      // TICKET_386: Take latest processedBars/totalBars from last increment
+      processedBars: inc.processedBars ?? acc.processedBars,
+      totalBars: inc.totalBars ?? acc.totalBars,
     }), {
       newEquityPoints: [] as any[],
       newTrades: [] as any[],
       newCandles: [] as any[],
       currentMetrics: buffer[0].currentMetrics,
+      processedBars: buffer[0].processedBars ?? 0,
+      totalBars: buffer[0].totalBars ?? 0,
     });
 
     buffer.length = 0;
+
+    // TICKET_386: Update progressive candle state
+    if (merged.processedBars > 0) setProcessedBars(merged.processedBars);
+    if (merged.totalBars > 0) setTotalBars(merged.totalBars);
 
     setResult(prev => {
       if (!prev) {
@@ -153,6 +217,133 @@ export function useAlphaFactoryBacktest({
     };
   }, [cleanupSubscriptions]);
 
+  // TICKET_388: Re-subscribe to executor events if recovered task is still running
+  useEffect(() => {
+    if (!recoveredState) return;
+    const { taskId, status: afStatus } = recoveredState;
+    const isActive = afStatus === 'running' || afStatus === 'queued' || afStatus === 'preparing';
+    if (!isActive) return;
+
+    const api = window.electronAPI;
+    if (!api?.executor) return;
+
+    activeTaskIdRef.current = taskId;
+    isCompletedRef.current = false;
+
+    const THROTTLE_MS = 100;
+
+    const unsubProgress = api.executor.onProgress((data: { taskId: string; percent: number }) => {
+      if (data.taskId === taskId) {
+        setProgress(data.percent);
+      }
+    });
+    cleanupRef.current.push(unsubProgress);
+
+    const unsubIncrement = api.executor.onIncrement((data: { taskId: string; increment: any }) => {
+      if (data.taskId !== taskId) return;
+      pendingBufferRef.current.push(data.increment);
+      if (!throttleTimerRef.current) {
+        throttleTimerRef.current = setTimeout(() => {
+          throttleTimerRef.current = null;
+          flushBuffer();
+        }, THROTTLE_MS);
+      }
+    });
+    cleanupRef.current.push(unsubIncrement);
+
+    const unsubCompleted = api.executor.onCompleted((data: { taskId: string; result: any }) => {
+      if (data.taskId !== taskId) return;
+      isCompletedRef.current = true;
+      if (throttleTimerRef.current) {
+        clearTimeout(throttleTimerRef.current);
+        throttleTimerRef.current = null;
+      }
+      pendingBufferRef.current.length = 0;
+
+      const r = data.result as {
+        success: boolean; metrics?: any;
+        equityCurve?: any[]; trades?: any[]; candles?: any[];
+        startTime?: number; endTime?: number; executionTimeMs?: number;
+        errorMessage?: string;
+      };
+      if (r?.success && r.metrics) {
+        setResult((prev: ExecutorResult | null) => {
+          const finalResult: ExecutorResult = {
+            success: r.success,
+            errorMessage: r.errorMessage,
+            startTime: r.startTime ?? 0,
+            endTime: r.endTime ?? 0,
+            executionTimeMs: r.executionTimeMs ?? 0,
+            metrics: r.metrics!,
+            equityCurve: r.equityCurve ?? [],
+            trades: r.trades ?? [],
+            candles: r.candles ?? [],
+          };
+          if (!prev) return finalResult;
+          return {
+            ...finalResult,
+            equityCurve: prev.equityCurve.length > finalResult.equityCurve.length
+              ? prev.equityCurve : finalResult.equityCurve,
+            trades: prev.trades.length > 0 ? prev.trades : finalResult.trades,
+            candles: prev.candles.length > finalResult.candles.length
+              ? prev.candles : finalResult.candles,
+          };
+        });
+        setStatus('completed');
+        setProgress(100);
+      } else {
+        setError('Backtest completed but no metrics returned');
+        setStatus('error');
+      }
+      // TICKET_393: Keep activeTaskIdRef so host can read pipeline 'complete' state
+      cleanupSubscriptions();
+    });
+    cleanupRef.current.push(unsubCompleted);
+
+    const unsubError = api.executor.onError((data: { taskId: string; error: string }) => {
+      if (data.taskId !== taskId) return;
+      setError(data.error);
+      setStatus('error');
+      // TICKET_393: Keep activeTaskIdRef so host can read pipeline 'error' state
+      cleanupSubscriptions();
+    });
+    cleanupRef.current.push(unsubError);
+
+    return () => {
+      cleanupSubscriptions();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount only
+
+  // TICKET_388: Sync result from recovered state (e.g. loaded from DB after mount)
+  useEffect(() => {
+    if (!recoveredState?.result) return;
+    // Only sync if local result is null (avoid overwriting active incremental data)
+    setResult((prev: ExecutorResult | null) => prev === null ? recoveredState.result : prev);
+  }, [recoveredState?.result]);
+
+  // TICKET_388: Sync status from recovered state when task completes while away
+  useEffect(() => {
+    if (!recoveredState) return;
+    const mappedStatus = mapAfStatusToBacktestStatus(recoveredState.status);
+    // Only sync terminal states (completed/error) to avoid overwriting active running state
+    if (mappedStatus === 'completed' || mappedStatus === 'error') {
+      setStatus((prev) => {
+        // Don't downgrade from completed to something else
+        if (prev === 'completed') return prev;
+        return mappedStatus;
+      });
+    }
+    if (recoveredState.executionState) {
+      if (recoveredState.executionState.processedBars > 0) {
+        setProcessedBars(recoveredState.executionState.processedBars);
+      }
+      if (recoveredState.executionState.totalBars > 0) {
+        setTotalBars(recoveredState.executionState.totalBars);
+      }
+    }
+  }, [recoveredState?.status, recoveredState?.executionState]);
+
   const runBacktest = useCallback(async () => {
     const api = window.electronAPI;
     console.log('[AlphaFactoryBacktest] runBacktest called, signals:', signals.length, 'symbol:', dataConfig.symbol);
@@ -182,9 +373,13 @@ export function useAlphaFactoryBacktest({
     setResult(null);
     setError(null);
     setTimeframeStatus([]);
+    // TICKET_386: Reset progressive candle state
+    setProcessedBars(0);
+    setTotalBars(0);
     cleanupSubscriptions();
 
     // TICKET_382: Generate AF-prefixed taskId and register with AF queue
+    // TICKET_384: Notify host pipeline immediately
     const taskId = `af_${Date.now()}`;
     const strategyName = `AlphaFactory_${signals.length}sig_${factors.length}fac_${signalMethod}`;
     activeTaskIdRef.current = taskId;
@@ -192,6 +387,8 @@ export function useAlphaFactoryBacktest({
     try {
       // Register task in AF queue (preparing state, enables cancel during download)
       await api.alphaFactory.registerTask(taskId, strategyName);
+      // TICKET_384: Set downloading phase in host pipeline
+      onPipelinePhase?.(taskId, 'downloading');
 
       // Step 1: Extract unique timeframes from signals
       const timeframes = new Set<string>();
@@ -314,6 +511,8 @@ export function useAlphaFactoryBacktest({
       console.log('[AlphaFactoryBacktest] Data loaded, dataPath:', dataPath, 'dataFeeds:', dataFeeds?.length);
       setStatus('generating');
       setProgress(0);
+      // TICKET_384: Set generating phase in host pipeline
+      onPipelinePhase?.(taskId, 'generating');
 
       const genResult = await api.alphaFactory.run({
         signalIds: signals.map((s) => s.id),
@@ -463,7 +662,7 @@ export function useAlphaFactoryBacktest({
           setStatus('error');
         }
 
-        activeTaskIdRef.current = null;
+        // TICKET_393: Keep activeTaskIdRef so host can read pipeline 'complete' state
         cleanupSubscriptions();
       });
       cleanupRef.current.push(unsubCompleted);
@@ -473,7 +672,7 @@ export function useAlphaFactoryBacktest({
         if (data.taskId !== taskId) return;
         setError(data.error);
         setStatus('error');
-        activeTaskIdRef.current = null;
+        // TICKET_393: Keep activeTaskIdRef so host can read pipeline 'error' state
         cleanupSubscriptions();
       });
       cleanupRef.current.push(unsubError);
@@ -484,7 +683,7 @@ export function useAlphaFactoryBacktest({
       setStatus('error');
       cleanupSubscriptions();
     }
-  }, [signals, signalMethod, lookback, exitMethod, exitRules, factors, factorMethod, factorLookback, dataConfig, cleanupSubscriptions, flushBuffer]);
+  }, [signals, signalMethod, lookback, exitMethod, exitRules, factors, factorMethod, factorLookback, dataConfig, cleanupSubscriptions, flushBuffer, onPipelinePhase]);
 
-  return { status, progress, result, error, timeframeStatus, runBacktest };
+  return { status, progress, result, error, timeframeStatus, runBacktest, activeTaskId: activeTaskIdRef.current, processedBars, totalBars };
 }
