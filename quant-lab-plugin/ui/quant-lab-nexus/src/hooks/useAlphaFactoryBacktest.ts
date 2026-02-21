@@ -316,11 +316,12 @@ export function useAlphaFactoryBacktest({
   }, []); // Run once on mount only
 
   // TICKET_388: Sync result from recovered state (e.g. loaded from DB after mount)
+  // TICKET_394: Only sync during cold recovery (idle), not during active backtest run
   useEffect(() => {
     if (!recoveredState?.result) return;
-    // Only sync if local result is null (avoid overwriting active incremental data)
+    if (status !== 'idle') return;
     setResult((prev: ExecutorResult | null) => prev === null ? recoveredState.result : prev);
-  }, [recoveredState?.result]);
+  }, [recoveredState?.result, status]);
 
   // TICKET_388: Sync status from recovered state when task completes while away
   useEffect(() => {
