@@ -227,6 +227,7 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
       const indicatorsWithNewIds = template.indicators.map((ind, index) => ({
         ...ind,
         id: `template_${Date.now()}_${index}`,
+        field: ind.field || 'close',
       }));
       setIndicatorBlocks(indicatorsWithNewIds);
     }
@@ -276,6 +277,7 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
     const newBlock: RawIndicatorBlock = {
       id: `ind_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       indicatorSlug: null,
+      field: 'close',
       paramValues: {},
     };
     setIndicatorBlocks(prev => [...prev, newBlock]);
@@ -295,14 +297,20 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
     llmModel,
   }), [presetMode, bespokeConfig, prompt, indicatorBlocks, storageMode, llmProvider, llmModel]);
 
-  const validationItems = useMemo(() => [{ prompt }], [prompt]);
+  // TICKET_396: Validation requires both prompt and at least one indicator
+  const validationItems = useMemo(() => {
+    const hasPrompt = prompt && prompt.trim().length >= 10;
+    const hasIndicators = indicatorBlocks.some(b => b.indicatorSlug !== null);
+    if (!hasPrompt || !hasIndicators) return [];
+    return [{ prompt }, ...indicatorBlocks];
+  }, [prompt, indicatorBlocks]);
 
   const workflowConfig = useMemo((): GenerateWorkflowConfig<TraderAIEntryConfig, TraderAIEntryState> => ({
     pageId: 'trader-ai-entry-page',
     llmProvider,
     llmModel,
     defaultStrategyName: 'New Trader Strategy',
-    validationErrorMessage: 'Please enter a prompt to generate the strategy',
+    validationErrorMessage: 'Please add at least one indicator and enter a prompt (min 10 characters)',
     buildConfig: buildApiConfig,
     validateConfig: validateTraderAIEntryConfig,
     executeApi,
@@ -417,7 +425,7 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
                     indicators={indicatorData as IndicatorDefinition[]}
                     blocks={indicatorBlocks}
                     onChange={setIndicatorBlocks}
-                    title="INDICATOR CONTEXT (OPTIONAL)"
+                    title="INDICATOR CONTEXT"
                   />
                 </div>
               )}

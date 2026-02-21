@@ -149,6 +149,7 @@ export function getAILiberoErrorMessage(result: AILiberoResult): string {
 interface ServerRawIndicator {
   type: 'raw_indicator';
   indicator_slug: string;
+  field: string;
   parameters: Record<string, unknown>;
   output_name: string;
 }
@@ -270,6 +271,7 @@ function transformRawIndicators(blocks: RawIndicatorBlock[]): ServerRawIndicator
     .map((block, index) => ({
       type: 'raw_indicator' as const,
       indicator_slug: block.indicatorSlug!,
+      field: block.field,
       parameters: block.paramValues as Record<string, unknown>,
       output_name: `${block.indicatorSlug!.toLowerCase()}_${index}`,
     }));
@@ -403,6 +405,19 @@ export function validateAILiberoConfig(
   const validModes: TraderPresetMode[] = ['baseline', 'monk', 'warrior', 'bespoke'];
   if (config.preset_mode && !validModes.includes(config.preset_mode)) {
     return { valid: false, error: 'Invalid preset mode selected' };
+  }
+
+  // TICKET_396: Validate rawIndicators field completeness
+  const validFields = ['close', 'open', 'high', 'low', 'volume'];
+  if (config.indicators && config.indicators.length > 0) {
+    for (const block of config.indicators) {
+      if (block.indicatorSlug && !block.field) {
+        return { valid: false, error: 'Each indicator requires a data field selection (close/open/high/low/volume)' };
+      }
+      if (block.field && !validFields.includes(block.field)) {
+        return { valid: false, error: `Invalid data field "${block.field}". Must be one of: ${validFields.join(', ')}` };
+      }
+    }
   }
 
   // Validate prediction config

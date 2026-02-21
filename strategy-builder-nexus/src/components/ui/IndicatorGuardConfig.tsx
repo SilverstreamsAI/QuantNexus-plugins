@@ -70,6 +70,7 @@ export const IndicatorGuardConfig: React.FC<IndicatorGuardConfigProps> = ({
     ? [{
         id: 'guard-ind-0',
         indicatorSlug: rule.indicator.name,
+        field: 'close',
         paramValues: rule.indicator.parameters as Record<string, number | string>,
       }]
     : [];

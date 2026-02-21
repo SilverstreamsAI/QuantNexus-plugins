@@ -19,9 +19,19 @@ import type { IndicatorDefinition, IndicatorParam } from './IndicatorSelector';
 // Types
 // -----------------------------------------------------------------------------
 
+// TICKET_396: OHLCV field options for indicator data source
+const OHLCV_FIELD_OPTIONS = [
+  { value: 'close', label: 'Close' },
+  { value: 'open', label: 'Open' },
+  { value: 'high', label: 'High' },
+  { value: 'low', label: 'Low' },
+  { value: 'volume', label: 'Volume' },
+] as const;
+
 export interface RawIndicatorBlock {
   id: string;
   indicatorSlug: string | null;
+  field: string;
   paramValues: Record<string, number | string>;
 }
 
@@ -108,6 +118,14 @@ const RawIndicatorBlockItem: React.FC<RawIndicatorBlockItemProps> = ({
     setIsIndicatorOpen(false);
   }, [indicators, block, onUpdate]);
 
+  // TICKET_396: Handle OHLCV field change
+  const handleFieldChange = useCallback((value: string) => {
+    onUpdate({
+      ...block,
+      field: value,
+    });
+  }, [block, onUpdate]);
+
   // Handle parameter change
   const handleParamChange = useCallback((paramName: string, value: number | string) => {
     onUpdate({
@@ -189,6 +207,31 @@ const RawIndicatorBlockItem: React.FC<RawIndicatorBlockItemProps> = ({
           </PortalDropdown>
         </div>
 
+        {/* TICKET_396: OHLCV Field Selector */}
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
+            Data Field
+          </label>
+          <select
+            value={block.field}
+            onChange={(e) => handleFieldChange(e.target.value)}
+            className={cn(
+              'w-full px-3 py-2 text-xs terminal-mono',
+              'border rounded',
+              'bg-color-terminal-bg',
+              'border-color-terminal-border',
+              'text-color-terminal-text',
+              'focus:outline-none focus:border-color-terminal-accent-teal'
+            )}
+          >
+            {OHLCV_FIELD_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* PARAMETERS Section */}
         {selectedIndicator && selectedIndicator.params.length > 0 && (
           <div className="space-y-3">
@@ -265,6 +308,7 @@ export const RawIndicatorSelector: React.FC<RawIndicatorSelectorProps> = ({
     const newBlock: RawIndicatorBlock = {
       id: generateId(),
       indicatorSlug: null,
+      field: 'close',
       paramValues: {},
     };
     onChange([...blocks, newBlock]);

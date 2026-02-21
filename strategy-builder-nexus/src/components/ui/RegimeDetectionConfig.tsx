@@ -71,6 +71,7 @@ export const RegimeDetectionConfig: React.FC<RegimeDetectionConfigProps> = ({
     ? [{
         id: 'regime-ind-0',
         indicatorSlug: rule.indicator.name,
+        field: 'close',
         paramValues: rule.indicator.parameters as Record<string, number | string>,
       }]
     : [];
