@@ -130,13 +130,18 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
       return `${x},${y}`;
     }).join(' ');
 
+    const firstOrigIdx = originalIndices.get(renderCurve[0]) ?? 0;
     const lastOrigIdx = originalIndices.get(renderCurve[renderCurve.length - 1]) ?? (displayEquityCurve.length - 1);
-    const areaPath = `M 0,${height} ` + renderCurve.map((point) => {
+    const firstX = (firstOrigIdx / (totalXPoints - 1)) * width;
+    const lastX = (lastOrigIdx / (totalXPoints - 1)) * width;
+    // TICKET_399_1: Area fill spans only the equity data range (firstX to lastX),
+    // preventing visual collapse when equity covers less than full chart width.
+    const areaPath = `M ${firstX},${height} ` + renderCurve.map((point) => {
       const origIdx = originalIndices.get(point) ?? 0;
       const x = (origIdx / (totalXPoints - 1)) * width;
       const y = height - ((point.equity - minEquity) / range) * height;
       return `L ${x},${y}`;
-    }).join(' ') + ` L ${lastOrigIdx / (totalXPoints - 1) * width},${height} Z`;
+    }).join(' ') + ` L ${lastX},${height} Z`;
 
     const startEquity = displayEquityCurve[0]?.equity || 0;
     const endEquity = displayEquityCurve[displayEquityCurve.length - 1]?.equity || 0;
