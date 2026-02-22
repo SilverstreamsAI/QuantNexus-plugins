@@ -30,6 +30,8 @@ interface SingleCaseChartsProps {
   isExecuting?: boolean;
   /** TICKET_374: Whether backtest was cancelled */
   isCancelled?: boolean;
+  /** TICKET_401: Executor progress (0-100) for progressive chart rendering */
+  executorProgress?: number;
 }
 
 const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
@@ -40,18 +42,12 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
   backtestTotalBars = 0,
   isExecuting = false,
   isCancelled = false,
+  executorProgress = 0,
 }) => {
   const { t } = useTranslation('backtest');
 
-  // TICKET_231: Debug sync values
-  const isBacktestInProgress = backtestTotalBars > 0 && processedBars > 0 && processedBars < backtestTotalBars;
-  console.log('[TICKET_266] SingleCaseCharts render:', {
-    processedBars,
-    backtestTotalBars,
-    isBacktestInProgress,
-    equityCurveLength: equityCurve?.length,
-    candlesLength: candles?.length,
-  });
+  // TICKET_401: Use executorProgress (Tab percentage, 0-100) to gate progressive rendering
+  const isBacktestInProgress = isExecuting && executorProgress > 0 && executorProgress < 100;
 
   // Equity curve chart dimensions
   const equityHeight = 180;
@@ -92,9 +88,9 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
       Number.isFinite(p.equity) && Math.abs(p.equity) < 1e15
     );
 
-    // TICKET_231: Limit equity display to processedBars for synchronized display
+    // TICKET_401: Limit equity display to executorProgress percentage
     const displayLimit = isBacktestInProgress
-      ? Math.min(processedBars, validEquityCurve.length)
+      ? Math.max(2, Math.floor((executorProgress / 100) * validEquityCurve.length))
       : validEquityCurve.length;
     const displayEquityCurve = validEquityCurve.slice(0, displayLimit);
 
@@ -200,18 +196,23 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
       );
     }
 
+    // TICKET_401: Progressive K-line rendering gated by executorProgress
+    const displayCandles = isBacktestInProgress
+      ? candles.slice(0, Math.max(1, Math.floor((executorProgress / 100) * candles.length)))
+      : candles;
+
     const viewWidth = 100;
     const viewHeight = 100;
     const margin = { top: 5, bottom: 15 };
     const chartHeight = viewHeight - margin.top - margin.bottom;
 
-    const { min: rawMinPrice } = safeMinMax(candles, c => c.low);
-    const { max: rawMaxHigh } = safeMinMax(candles, c => c.high);
+    const { min: rawMinPrice } = safeMinMax(displayCandles, c => c.low);
+    const { max: rawMaxHigh } = safeMinMax(displayCandles, c => c.high);
     const minPrice = rawMinPrice * 0.998;
     const maxPrice = rawMaxHigh * 1.002;
     const priceRange = maxPrice - minPrice || 1;
 
-    const renderCandles = downsampleOHLC(candles, MAX_RENDER_POINTS);
+    const renderCandles = downsampleOHLC(displayCandles, MAX_RENDER_POINTS);
 
     const candleWidth = viewWidth / renderCandles.length;
     const bodyWidth = candleWidth * 0.7;
@@ -225,7 +226,7 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
             {t('resultPanel.charts.klineChart')}
           </span>
           <span className="text-[10px] text-color-terminal-text-muted tabular-nums">
-            {t('resultPanel.charts.bars', { count: candles.length })}
+            {t('resultPanel.charts.bars', { count: displayCandles.length })}
           </span>
         </div>
         <svg viewBox={`0 0 ${viewWidth} ${viewHeight}`} className="w-full" style={{ height: klineHeight - 32 }} preserveAspectRatio="none">
@@ -247,7 +248,7 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
           {renderCandles.map((candle, i) => {
             const x = i * candleWidth + candleWidth / 2;
             const isUp = candle.close >= candle.open;
-            const bucketRatio = candles.length / renderCandles.length;
+            const bucketRatio = displayCandles.length / renderCandles.length;
             const origIdx = Math.floor(i * bucketRatio);
             const isProcessed = !isExecuting || isCandleProcessed(origIdx, processedBars, backtestTotalBars);
             const color = getCandleColor(isUp, isProcessed);
@@ -282,12 +283,12 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
             .slice(0, 50)
             .map((trade, i) => {
             const tradeTime = trade.entryTime;
-            const origCandleIndex = candles.findIndex((c, idx) =>
-              c.timestamp <= tradeTime && (idx === candles.length - 1 || candles[idx + 1].timestamp > tradeTime)
+            const origCandleIndex = displayCandles.findIndex((c, idx) =>
+              c.timestamp <= tradeTime && (idx === displayCandles.length - 1 || displayCandles[idx + 1].timestamp > tradeTime)
             );
             if (origCandleIndex < 0) return null;
 
-            const dsIndex = Math.floor(origCandleIndex / (candles.length / renderCandles.length));
+            const dsIndex = Math.floor(origCandleIndex / (displayCandles.length / renderCandles.length));
             const x = Math.min(dsIndex, renderCandles.length - 1) * candleWidth + candleWidth / 2;
             const y = priceToY(trade.entryPrice);
             const isBuy = trade.side.toLowerCase().includes('buy');
@@ -352,6 +353,7 @@ export const ChartsTab: React.FC<ResultTabComponentProps> = ({
   scrollToCaseRef,
   processedBars = 0,
   backtestTotalBars = 0,
+  executorProgress = 0,
 }) => {
   const { t } = useTranslation('backtest');
   const containerRef = useRef<HTMLDivElement>(null);
@@ -393,6 +395,7 @@ export const ChartsTab: React.FC<ResultTabComponentProps> = ({
         backtestTotalBars={backtestTotalBars}
         isExecuting={isExecuting}
         isCancelled={isCancelled}
+        executorProgress={executorProgress}
       />
     );
   }
@@ -439,6 +442,7 @@ export const ChartsTab: React.FC<ResultTabComponentProps> = ({
                 processedBars={processedBars}
                 backtestTotalBars={backtestTotalBars}
                 isExecuting={isCurrentCase}
+                executorProgress={executorProgress}
               />
             ) : (
               <div className="flex items-center justify-center h-96 text-color-terminal-text-muted text-xs">

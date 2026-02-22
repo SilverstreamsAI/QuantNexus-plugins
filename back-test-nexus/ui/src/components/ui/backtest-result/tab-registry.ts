@@ -23,6 +23,8 @@ export interface ResultTabComponentProps {
   scrollToCaseRef?: React.MutableRefObject<((index: number) => void) | null>;
   processedBars?: number;
   backtestTotalBars?: number;
+  /** TICKET_401: Executor progress (0-100) for progressive chart rendering */
+  executorProgress?: number;
 }
 
 // -----------------------------------------------------------------------------

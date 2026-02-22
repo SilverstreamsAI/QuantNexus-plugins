@@ -37,6 +37,8 @@ export interface BacktestResultPanelProps {
   backtestTotalBars?: number;
   /** TICKET_374: Whether backtest was cancelled */
   isCancelled?: boolean;
+  /** TICKET_401: Executor progress (0-100) for progressive chart rendering */
+  executorProgress?: number;
   /** TICKET_257: Workflow timeframes for display in tab header */
   workflowTimeframes?: WorkflowTimeframes;
   /** TICKET_378: Backtest configuration summary for result page display */
@@ -69,6 +71,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   scrollToCase,
   processedBars = 0,
   backtestTotalBars = 0,
+  executorProgress = 0,
   workflowTimeframes,
   backtestConfig,
   dryRunResult,
@@ -302,6 +305,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
             scrollToCaseRef={activeScrollRef}
             processedBars={processedBars}
             backtestTotalBars={backtestTotalBars}
+            executorProgress={executorProgress}
           />
         )}
       </div>
