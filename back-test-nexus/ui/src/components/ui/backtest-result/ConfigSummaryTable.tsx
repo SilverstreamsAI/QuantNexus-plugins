@@ -75,40 +75,6 @@ export const ConfigSummaryTable: React.FC<ConfigSummaryTableProps> = ({
             <td className={cn(labelClass, 'pr-3 py-0.5')}>ORDER SIZE</td>
             <td className={cn(valueClass, 'py-0.5')}>{formatOrderSize(config.orderSize, config.orderSizeUnit)}</td>
           </tr>
-          {/* Row 4: Workflow Timeframes (if available) */}
-          {workflowTimeframes && (
-            <tr>
-              <td className={cn(labelClass, 'pr-3 py-0.5')}>WORKFLOW</td>
-              <td colSpan={3} className={cn(valueClass, 'py-0.5')}>
-                <div className="flex items-center gap-3 flex-wrap">
-                  {workflowTimeframes.analysis && (
-                    <span>
-                      <span className="text-[#64ffda]">{workflowTimeframes.analysis}</span>
-                      <span className="text-color-terminal-text-muted ml-1">Analysis</span>
-                    </span>
-                  )}
-                  {workflowTimeframes.entryFilter && (
-                    <span>
-                      <span className="text-[#a78bfa]">{workflowTimeframes.entryFilter}</span>
-                      <span className="text-color-terminal-text-muted ml-1">Filter</span>
-                    </span>
-                  )}
-                  {workflowTimeframes.entrySignal && (
-                    <span>
-                      <span className="text-[#60a5fa]">{workflowTimeframes.entrySignal}</span>
-                      <span className="text-color-terminal-text-muted ml-1">Entry</span>
-                    </span>
-                  )}
-                  {workflowTimeframes.exitStrategy && (
-                    <span>
-                      <span className="text-[#fbbf24]">{workflowTimeframes.exitStrategy}</span>
-                      <span className="text-color-terminal-text-muted ml-1">Exit</span>
-                    </span>
-                  )}
-                </div>
-              </td>
-            </tr>
-          )}
         </tbody>
       </table>
     </div>

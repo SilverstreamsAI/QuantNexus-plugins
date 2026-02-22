@@ -15,6 +15,48 @@ import type { ExecutorResult, WorkflowTimeframes, BacktestConfigSummary } from '
 import { getVisibleTabs, isTabDisabled } from './tab-registry';
 import { ConfigSummaryTable } from './ConfigSummaryTable';
 
+// ---------------------------------------------------------------------------
+// Elapsed Timer Hook
+// ---------------------------------------------------------------------------
+
+function formatElapsed(ms: number): string {
+  const totalSec = Math.floor(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+// TICKET_403: Render-time elapsed calculation.
+// During BACKTEST phase, heavy chart re-renders (256k data points) starve setInterval macro-tasks.
+// Solution: compute elapsed from Date.now() - startTime at each render, piggybacking on
+// progress-driven re-renders. Fallback setInterval(500ms) covers idle phases (SPAWN/INITIALIZE).
+function useElapsedTimer(isRunning: boolean): number {
+  const startRef = useRef<number | null>(null);
+  const frozenRef = useRef(0);
+  const [, tick] = useState(0);
+
+  useEffect(() => {
+    if (isRunning) {
+      startRef.current = Date.now();
+      frozenRef.current = 0;
+      // Fallback tick for idle phases with no progress-driven re-renders
+      const id = setInterval(() => tick((n) => n + 1), 500);
+      return () => {
+        if (startRef.current !== null) {
+          frozenRef.current = Date.now() - startRef.current;
+        }
+        clearInterval(id);
+      };
+    }
+  }, [isRunning]);
+
+  if (isRunning && startRef.current !== null) {
+    return Date.now() - startRef.current;
+  }
+  return frozenRef.current;
+}
+
 // -----------------------------------------------------------------------------
 // Props
 // -----------------------------------------------------------------------------
@@ -139,6 +181,13 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
 
   const hasMultipleResults = effectiveResults.length > 1;
 
+  // Elapsed timer: ticks while executing, freezes on completion
+  const elapsedMs = useElapsedTimer(isExecuting);
+  // After completion, prefer the accurate executionTimeMs from the result
+  const completedTimeMs = !isExecuting && effectiveResults[0]?.executionTimeMs
+    ? effectiveResults[0].executionTimeMs
+    : 0;
+  const displayTimeMs = isExecuting ? elapsedMs : (completedTimeMs || elapsedMs);
   // TICKET_358: Registry-driven tabs
   const tabs = getVisibleTabs({ hasMultipleResults });
   const disabledCtx = { isExecuting, hasMultipleResults };
@@ -214,6 +263,19 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
             );
           })}
         </div>
+
+        {/* Center: Elapsed Timer */}
+        {displayTimeMs > 0 && (
+          <div className="flex items-center gap-1.5 font-mono text-xs text-color-terminal-text-muted">
+            <span className="text-[10px] uppercase tracking-wider">Elapsed</span>
+            <span className={cn(
+              'tabular-nums',
+              isExecuting ? 'text-color-terminal-accent-primary' : 'text-color-terminal-text'
+            )}>
+              {formatElapsed(displayTimeMs)}
+            </span>
+          </div>
+        )}
 
         {/* Right: TICKET_257 Workflow Timeframe Buttons */}
         {workflowTimeframes && (
