@@ -196,23 +196,24 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
       );
     }
 
-    // TICKET_401: Progressive K-line rendering gated by executorProgress
-    const displayCandles = isBacktestInProgress
-      ? candles.slice(0, Math.max(1, Math.floor((executorProgress / 100) * candles.length)))
-      : candles;
+    // TICKET_401: K-line shows all candles from the start (gray for unprocessed),
+    // color transition driven by executorProgress percentage
+    const progressBars = isBacktestInProgress
+      ? Math.floor((executorProgress / 100) * candles.length)
+      : candles.length;
 
     const viewWidth = 100;
     const viewHeight = 100;
     const margin = { top: 5, bottom: 15 };
     const chartHeight = viewHeight - margin.top - margin.bottom;
 
-    const { min: rawMinPrice } = safeMinMax(displayCandles, c => c.low);
-    const { max: rawMaxHigh } = safeMinMax(displayCandles, c => c.high);
+    const { min: rawMinPrice } = safeMinMax(candles, c => c.low);
+    const { max: rawMaxHigh } = safeMinMax(candles, c => c.high);
     const minPrice = rawMinPrice * 0.998;
     const maxPrice = rawMaxHigh * 1.002;
     const priceRange = maxPrice - minPrice || 1;
 
-    const renderCandles = downsampleOHLC(displayCandles, MAX_RENDER_POINTS);
+    const renderCandles = downsampleOHLC(candles, MAX_RENDER_POINTS);
 
     const candleWidth = viewWidth / renderCandles.length;
     const bodyWidth = candleWidth * 0.7;
@@ -226,7 +227,7 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
             {t('resultPanel.charts.klineChart')}
           </span>
           <span className="text-[10px] text-color-terminal-text-muted tabular-nums">
-            {t('resultPanel.charts.bars', { count: displayCandles.length })}
+            {t('resultPanel.charts.bars', { count: candles.length })}
           </span>
         </div>
         <svg viewBox={`0 0 ${viewWidth} ${viewHeight}`} className="w-full" style={{ height: klineHeight - 32 }} preserveAspectRatio="none">
@@ -248,9 +249,9 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
           {renderCandles.map((candle, i) => {
             const x = i * candleWidth + candleWidth / 2;
             const isUp = candle.close >= candle.open;
-            const bucketRatio = displayCandles.length / renderCandles.length;
+            const bucketRatio = candles.length / renderCandles.length;
             const origIdx = Math.floor(i * bucketRatio);
-            const isProcessed = !isExecuting || isCandleProcessed(origIdx, processedBars, backtestTotalBars);
+            const isProcessed = !isExecuting || isCandleProcessed(origIdx, progressBars, candles.length);
             const color = getCandleColor(isUp, isProcessed);
             const bodyTop = priceToY(Math.max(candle.open, candle.close));
             const bodyBottom = priceToY(Math.min(candle.open, candle.close));
@@ -283,12 +284,12 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
             .slice(0, 50)
             .map((trade, i) => {
             const tradeTime = trade.entryTime;
-            const origCandleIndex = displayCandles.findIndex((c, idx) =>
-              c.timestamp <= tradeTime && (idx === displayCandles.length - 1 || displayCandles[idx + 1].timestamp > tradeTime)
+            const origCandleIndex = candles.findIndex((c, idx) =>
+              c.timestamp <= tradeTime && (idx === candles.length - 1 || candles[idx + 1].timestamp > tradeTime)
             );
             if (origCandleIndex < 0) return null;
 
-            const dsIndex = Math.floor(origCandleIndex / (displayCandles.length / renderCandles.length));
+            const dsIndex = Math.floor(origCandleIndex / (candles.length / renderCandles.length));
             const x = Math.min(dsIndex, renderCandles.length - 1) * candleWidth + candleWidth / 2;
             const y = priceToY(trade.entryPrice);
             const isBuy = trade.side.toLowerCase().includes('buy');
