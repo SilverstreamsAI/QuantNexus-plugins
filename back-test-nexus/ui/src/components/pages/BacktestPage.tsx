@@ -26,6 +26,7 @@ import {
   BacktestHistorySidebar,
   type BacktestHistoryItem,
   PageHeader,
+  DryRunExecuteButton,
 } from '../ui';
 import { algorithmService, toAlgorithmOption } from '../../services/algorithmService';
 import { extractUniqueTimeframes } from '../../utils/timeframe-utils';
@@ -168,12 +169,13 @@ export interface BacktestPageProps {
   ) => void;
   /** TICKET_327: Notify Host when execution begins (before data download)
    *  TICKET_352_5: Includes caller-generated taskId for immediate tab creation
-   *  TICKET_365: 3rd arg is config snapshot for cancel -> go back preservation */
+   *  TICKET_365: 3rd arg is config snapshot for cancel -> go back preservation
+   *  TICKET_398: 4th arg isDryRun flag */
   onExecutionBegin?: (strategyName: string, taskId: string, configSnapshot?: {
     cockpit: string;
     dataConfig: { symbol: string; dataSource: string; startDate: string; endDate: string; initialCapital: number; orderSize: number; orderSizeUnit: string };
     workflowRows: unknown[];
-  }) => void;
+  }, isDryRun?: boolean) => void;
   /** TICKET_308: Page title for PageHeader Zone A */
   pageTitle?: string;
   /** TICKET_308: Settings gear click handler for PageHeader Zone A */
@@ -247,6 +249,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   const [currentCaseIndex, setCurrentCaseIndex] = useState(0);
   const [totalCases, setTotalCases] = useState(0);
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
+  // TICKET_398: Dry run toggle state (default ON for kronos/trader)
+  const [dryRunEnabled, setDryRunEnabled] = useState(true);
   // TICKET_153_1: History from SQLite
   const [historyItems, setHistoryItems] = useState<BacktestHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -1075,6 +1079,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       initialCapital: config.initialCapital,
       orderSize: config.orderSize,
       orderSizeUnit: config.orderSizeUnit,
+      // TICKET_398: Pass dry run flag
+      ...(dryRunEnabled && (cockpitMode === 'kronos' || cockpitMode === 'trader') ? { dryRun: true } : {}),
     };
 
     // TICKET_248 Phase 2: Pass dataFeeds for multi-timeframe execution
@@ -1187,7 +1193,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       });
       console.debug(`[BacktestPage] Backtest ${caseIndex} completed, taskId:`, actualTaskId);
     }
-  }, [executorAPI, messageAPI, onBacktestStart]);
+  }, [executorAPI, messageAPI, onBacktestStart, dryRunEnabled, cockpitMode]);
 
   // TICKET_375: Independent case execution - each case gets its own data download + backtest
   const runIndependentCase = useCallback(async (
@@ -1369,14 +1375,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         const { workflow, taskId: caseTaskId } = caseTasks[i];
 
         // TICKET_375_2: Create result tab just before this case executes
+        // TICKET_398: Pass isDryRun for tab creation
+        const isDryRun = dryRunEnabled && (cockpitMode === 'kronos' || cockpitMode === 'trader');
         if (i === 0) {
           onExecutionBegin?.(strategyName, caseTaskId, {
             cockpit: cockpitMode,
             dataConfig: { ...dataConfig },
             workflowRows: workflowRows.map(row => ({ ...row })),
-          });
+          }, isDryRun);
         } else {
-          onExecutionBegin?.(strategyName, caseTaskId);
+          onExecutionBegin?.(strategyName, caseTaskId, undefined, isDryRun);
         }
 
         try {
@@ -1585,29 +1593,40 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                 <RotateCcwIcon className="w-3 h-3" />
                 {t('buttons.reset')}
               </button>
-              {/* Execute button - right (same height as Reset) */}
-              <button
-                onClick={handleShowNamingDialog}
-                disabled={isExecuting}
-                className={cn(
-                  "flex items-center justify-center gap-2 px-6 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all",
-                  isExecuting
-                    ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
-                    : "border-color-terminal-accent-gold bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20"
-                )}
-              >
-                {isExecuting ? (
-                  <>
-                    <LoaderIcon className="w-3 h-3 animate-spin" />
-                    {t('buttons.executing')}
-                  </>
-                ) : (
-                  <>
-                    <PlayIcon className="w-3 h-3" />
-                    {t('buttons.execute')}
-                  </>
-                )}
-              </button>
+              {/* TICKET_398: Show DryRunExecuteButton for kronos/trader, plain button for indicators */}
+              {(cockpitMode === 'kronos' || cockpitMode === 'trader') ? (
+                <DryRunExecuteButton
+                  dryRunEnabled={dryRunEnabled}
+                  onToggle={() => setDryRunEnabled(prev => !prev)}
+                  onExecute={handleShowNamingDialog}
+                  isExecuting={isExecuting}
+                  executeLabel={t('buttons.execute')}
+                  executingLabel={t('buttons.executing')}
+                />
+              ) : (
+                <button
+                  onClick={handleShowNamingDialog}
+                  disabled={isExecuting}
+                  className={cn(
+                    "flex items-center justify-center gap-2 px-6 py-2 text-xs font-bold uppercase tracking-wider border rounded transition-all",
+                    isExecuting
+                      ? "border-color-terminal-border bg-color-terminal-surface text-color-terminal-text-muted cursor-not-allowed"
+                      : "border-color-terminal-accent-gold bg-color-terminal-accent-gold/10 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/20"
+                  )}
+                >
+                  {isExecuting ? (
+                    <>
+                      <LoaderIcon className="w-3 h-3 animate-spin" />
+                      {t('buttons.executing')}
+                    </>
+                  ) : (
+                    <>
+                      <PlayIcon className="w-3 h-3" />
+                      {t('buttons.execute')}
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           )}
           </div>

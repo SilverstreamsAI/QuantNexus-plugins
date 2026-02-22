@@ -68,3 +68,7 @@ export {
 // TICKET_308: PageHeader for Zone A (title + settings gear)
 export { PageHeader } from './PageHeader';
 export type { PageHeaderProps } from './PageHeader';
+
+// TICKET_398: Dry Run Execute Button
+export { DryRunExecuteButton } from './DryRunExecuteButton';
+export type { DryRunExecuteButtonProps } from './DryRunExecuteButton';

@@ -46,6 +46,12 @@ export interface BacktestResultPanelProps {
   isQuantLabLoading?: boolean;
   isExporting?: boolean;
   onExportToQuantLab?: () => void;
+  /** TICKET_398_2: Real-time dry run LLM call estimation */
+  dryRunResult?: {
+    totalBars: number;
+    llmCalls: Array<{ label: string; count: number }>;
+    totalLlmCalls: number;
+  };
 }
 
 // -----------------------------------------------------------------------------
@@ -65,6 +71,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
   backtestTotalBars = 0,
   workflowTimeframes,
   backtestConfig,
+  dryRunResult,
 }) => {
   const { t } = useTranslation('backtest');
   const [activeTab, setActiveTab] = useState('charts');
@@ -152,6 +159,30 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
           workflowTimeframes={workflowTimeframes}
           className="mx-3 mt-3"
         />
+      )}
+
+      {/* TICKET_398_2: Real-time LLM Call Estimate (shown during execution and after completion) */}
+      {dryRunResult && (
+        <div className="mx-3 mt-2 rounded border border-color-terminal-accent-primary/30 bg-color-terminal-accent-primary/5 p-3">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-color-terminal-accent-primary mb-2">
+            LLM Call Estimate (Dry Run)
+          </div>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
+            <div className="text-color-terminal-text-muted">Bars Processed</div>
+            <div className="text-color-terminal-text font-mono">{dryRunResult.totalBars.toLocaleString()}</div>
+            {dryRunResult.llmCalls.map((call, idx) => (
+              <React.Fragment key={idx}>
+                <div className="text-color-terminal-text-muted">{call.label}</div>
+                <div className="text-color-terminal-text font-mono">{call.count.toLocaleString()} calls</div>
+              </React.Fragment>
+            ))}
+            <div className="col-span-2 border-t border-color-terminal-border/30 my-1" />
+            <div className="text-color-terminal-text font-bold">Total LLM Calls</div>
+            <div className="text-color-terminal-accent-primary font-mono font-bold">
+              {dryRunResult.totalLlmCalls.toLocaleString()}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Tab Header */}
