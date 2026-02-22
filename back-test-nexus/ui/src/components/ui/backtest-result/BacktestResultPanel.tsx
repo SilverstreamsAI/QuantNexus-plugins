@@ -154,16 +154,17 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
       : undefined;
 
   return (
-    <div className={cn('flex flex-col h-full border border-color-terminal-border rounded-lg bg-color-terminal-panel/30', className)}>
-      {/* TICKET_378: Config Summary Table */}
+    <div className={cn('flex flex-col h-full', className)}>
+      {/* TICKET_378: Config Summary Table - outside bordered container */}
       {backtestConfig && (
         <ConfigSummaryTable
           config={backtestConfig}
           workflowTimeframes={workflowTimeframes}
-          className="mx-3 mt-3"
+          className="mb-2"
         />
       )}
 
+      <div className="flex flex-col border border-color-terminal-border rounded-lg bg-color-terminal-panel/30">
       {/* TICKET_398_2: Real-time LLM Call Estimate (shown during execution and after completion) */}
       {dryRunResult && (
         <div className="mx-3 mt-2 rounded border border-color-terminal-accent-primary/30 bg-color-terminal-accent-primary/5 p-3">
@@ -294,7 +295,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
       </div>
 
       {/* Tab Content - TICKET_358: Registry-driven rendering */}
-      <div className="flex-1 overflow-hidden">
+      <div>
         {activeTabDef && (
           <activeTabDef.component
             results={effectiveResults}
@@ -308,6 +309,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
             executorProgress={executorProgress}
           />
         )}
+      </div>
       </div>
     </div>
   );

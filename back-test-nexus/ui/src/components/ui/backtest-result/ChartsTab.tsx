@@ -320,7 +320,7 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
   };
 
   return (
-    <div className="p-3 space-y-3 overflow-y-auto h-full">
+    <div className="p-3 space-y-3">
       {/* Equity Curve */}
       <div className="border border-color-terminal-border rounded bg-color-terminal-panel/30" style={{ height: equityHeight }}>
         {renderEquityCurve()}
