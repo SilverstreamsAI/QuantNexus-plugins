@@ -38,31 +38,30 @@ export const DryRunExecuteButton: React.FC<DryRunExecuteButtonProps> = ({
         onClick={isExecuting ? undefined : onToggle}
         disabled={isExecuting}
         className={[
-          'relative flex items-center h-7 rounded-full border text-[10px] font-bold uppercase tracking-wider transition-all duration-200',
+          'relative flex items-center h-[34px] rounded border text-[10px] font-bold uppercase tracking-wider transition-all duration-200',
           isExecuting
             ? 'border-color-terminal-border bg-color-terminal-surface cursor-not-allowed opacity-50'
-            : 'border-color-terminal-accent-primary/40 bg-color-terminal-surface/50 cursor-pointer hover:border-color-terminal-accent-primary/60',
+            : 'border-color-terminal-accent-primary/40 bg-color-terminal-surface/80 cursor-pointer hover:border-color-terminal-accent-primary/60',
         ].join(' ')}
-        style={{ minWidth: '120px' }}
+        style={{ minWidth: '148px' }}
       >
         {/* Sliding indicator */}
         <span
-          className="absolute top-0.5 bottom-0.5 rounded-full transition-all duration-200 ease-out"
+          className={[
+            'absolute top-[2px] bottom-[2px] rounded transition-all duration-200 ease-out',
+            dryRunEnabled
+              ? 'bg-color-terminal-accent-primary/20 border border-color-terminal-accent-primary/50'
+              : 'bg-color-terminal-accent-gold/20 border border-color-terminal-accent-gold/50',
+          ].join(' ')}
           style={{
-            width: '50%',
-            left: dryRunEnabled ? '2px' : 'calc(50% - 2px)',
-            background: dryRunEnabled
-              ? 'rgba(var(--color-terminal-accent-primary-rgb, 99, 102, 241), 0.25)'
-              : 'rgba(var(--color-terminal-accent-gold-rgb, 234, 179, 8), 0.25)',
-            border: dryRunEnabled
-              ? '1px solid rgba(var(--color-terminal-accent-primary-rgb, 99, 102, 241), 0.5)'
-              : '1px solid rgba(var(--color-terminal-accent-gold-rgb, 234, 179, 8), 0.5)',
+            width: 'calc(50% - 4px)',
+            left: dryRunEnabled ? '2px' : 'calc(50% + 2px)',
           }}
         />
         {/* Labels */}
         <span
           className={[
-            'relative z-10 flex-1 text-center px-2 transition-colors duration-150',
+            'relative z-10 flex-1 text-center px-3 py-1 transition-colors duration-150',
             dryRunEnabled ? 'text-color-terminal-accent-primary' : 'text-color-terminal-text-muted',
           ].join(' ')}
         >
@@ -70,7 +69,7 @@ export const DryRunExecuteButton: React.FC<DryRunExecuteButtonProps> = ({
         </span>
         <span
           className={[
-            'relative z-10 flex-1 text-center px-2 transition-colors duration-150',
+            'relative z-10 flex-1 text-center px-3 py-1 transition-colors duration-150',
             !dryRunEnabled ? 'text-color-terminal-accent-gold' : 'text-color-terminal-text-muted',
           ].join(' ')}
         >

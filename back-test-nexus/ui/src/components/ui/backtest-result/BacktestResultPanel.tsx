@@ -181,13 +181,9 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
 
   const hasMultipleResults = effectiveResults.length > 1;
 
-  // Elapsed timer: ticks while executing, freezes on completion
+  // Elapsed timer: ticks while executing, freezes on completion (TICKET_404)
   const elapsedMs = useElapsedTimer(isExecuting);
-  // After completion, prefer the accurate executionTimeMs from the result
-  const completedTimeMs = !isExecuting && effectiveResults[0]?.executionTimeMs
-    ? effectiveResults[0].executionTimeMs
-    : 0;
-  const displayTimeMs = isExecuting ? elapsedMs : (completedTimeMs || elapsedMs);
+  const displayTimeMs = elapsedMs;
   // TICKET_358: Registry-driven tabs
   const tabs = getVisibleTabs({ hasMultipleResults });
   const disabledCtx = { isExecuting, hasMultipleResults };
