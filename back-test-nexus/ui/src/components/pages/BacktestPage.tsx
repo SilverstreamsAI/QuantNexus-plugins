@@ -185,6 +185,20 @@ export interface BacktestPageProps {
     dataConfig: { symbol: string; dataSource: string; startDate: string; endDate: string; initialCapital: number; orderSize: number; orderSizeUnit: string };
     workflowRows: unknown[];
   };
+  /** TICKET_410: Save pipeline artifacts for dry run GO reuse */
+  onSavePipelineArtifacts?: (taskId: string, artifacts: {
+    strategyPath: string;
+    dataPath: string;
+    dataFeeds?: Array<{ interval: string; dataPath: string }>;
+    symbol: string;
+    interval: string;
+    startTime: number;
+    endTime: number;
+    initialCapital: number;
+    orderSize: number;
+    orderSizeUnit: string;
+    strategyName: string;
+  }) => void;
 }
 
 // -----------------------------------------------------------------------------
@@ -241,6 +255,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   pageTitle,
   onSettingsClick,
   initialConfig,
+  onSavePipelineArtifacts,
 }) => {
   const { t } = useTranslation('backtest');
 
@@ -1171,6 +1186,23 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       };
       onBacktestStart?.(result.taskId, strategyName || 'Backtest', workflowTimeframes, workflowExportData, backtestConfig);
 
+      // TICKET_410: Save pipeline artifacts for GO button reuse
+      if (dryRunEnabled && (cockpitMode === 'kronos' || cockpitMode === 'trader')) {
+        onSavePipelineArtifacts?.(result.taskId, {
+          strategyPath: genResult.strategyPath,
+          dataPath: dataResult.dataPath || '',
+          dataFeeds: executorRequest.dataFeeds,
+          symbol: config.symbol,
+          interval: workflowTimeframe,
+          startTime,
+          endTime,
+          initialCapital: config.initialCapital,
+          orderSize: config.orderSize,
+          orderSizeUnit: config.orderSizeUnit,
+          strategyName: strategyName || 'Backtest',
+        });
+      }
+
       // TICKET_375_2: Wait for executor to finish this task before returning.
       // Without this, the sequential case loop fires all cases immediately because
       // runBacktest IPC only enqueues the task and returns without waiting for completion.
@@ -1193,7 +1225,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       });
       console.debug(`[BacktestPage] Backtest ${caseIndex} completed, taskId:`, actualTaskId);
     }
-  }, [executorAPI, messageAPI, onBacktestStart, dryRunEnabled, cockpitMode]);
+  }, [executorAPI, messageAPI, onBacktestStart, onSavePipelineArtifacts, dryRunEnabled, cockpitMode]);
 
   // TICKET_375: Independent case execution - each case gets its own data download + backtest
   const runIndependentCase = useCallback(async (
