@@ -198,6 +198,7 @@ export interface BacktestPageProps {
     orderSize: number;
     orderSizeUnit: string;
     strategyName: string;
+    strategyParams?: Record<string, unknown>;
   }) => void;
 }
 
@@ -1079,6 +1080,16 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     // Run backtest
     messageAPI?.info(`Running backtest (${caseIndex}/${totalWorkflows})...`);
 
+    // TICKET_414_4: Extract server_strategy_id from entry algorithm's classification_metadata
+    const entrySelection = workflow.stepSelections[0];
+    let serverStrategyId: number | undefined;
+    if (entrySelection?.classificationMetadata) {
+      try {
+        const meta = JSON.parse(entrySelection.classificationMetadata);
+        serverStrategyId = meta.server_strategy_id;
+      } catch { /* classification_metadata parse error - skip */ }
+    }
+
     // Build executor request inline (TICKET_173: replaces toExecutorRequest import)
     // TICKET_248 Phase 2: Include dataFeeds for multi-timeframe support
     const executorRequest: any = {
@@ -1094,6 +1105,8 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       initialCapital: config.initialCapital,
       orderSize: config.orderSize,
       orderSizeUnit: config.orderSizeUnit,
+      // TICKET_414_4: Pass server_strategy_id as strategy_id for LLM API
+      ...(serverStrategyId ? { strategyParams: { strategy_id: serverStrategyId } } : {}),
       // TICKET_398: Pass dry run flag
       ...(dryRunEnabled && (cockpitMode === 'kronos' || cockpitMode === 'trader') ? { dryRun: true } : {}),
     };
@@ -1200,6 +1213,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
           orderSize: config.orderSize,
           orderSizeUnit: config.orderSizeUnit,
           strategyName: strategyName || 'Backtest',
+          strategyParams: executorRequest.strategyParams,
         });
       }
 

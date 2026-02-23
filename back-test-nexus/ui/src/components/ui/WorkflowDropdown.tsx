@@ -51,6 +51,7 @@ export interface AlgorithmOption {
   strategyName: string;
   strategyType: number;
   description?: string;
+  classificationMetadata?: string;
 }
 
 export type ColorTheme = 'teal' | 'purple' | 'blue' | 'gold';

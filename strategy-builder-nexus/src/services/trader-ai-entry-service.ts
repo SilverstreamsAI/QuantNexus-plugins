@@ -15,6 +15,7 @@
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
+import { getCurrentUserId } from '../utils/auth-utils';
 import type { RawIndicatorBlock } from '../components/ui/RawIndicatorSelector';
 import type { IndicatorTemplate } from '../components/ui/SaveTemplateDialog';
 
@@ -289,7 +290,7 @@ function transformRawIndicators(blocks: RawIndicatorBlock[]): ServerRawIndicator
  * Build server request from client config (ISSUE_3299)
  * Reference: market-observer-service.ts (Page 35 pattern)
  */
-function buildServerRequest(config: TraderAIEntryConfig): ServerRequest {
+function buildServerRequest(config: TraderAIEntryConfig, userId: number): ServerRequest {
   const lookbackBars = config.preset_mode === 'bespoke' && config.bespoke_config
     ? config.bespoke_config.lookbackBars
     : PRESET_LOOKBACK_BARS[config.preset_mode];
@@ -318,7 +319,7 @@ function buildServerRequest(config: TraderAIEntryConfig): ServerRequest {
   }
 
   return {
-    user_id: 1,
+    user_id: userId,
     task_id: taskId,
     locale: 'en_US',
     output_format: 'v3', // TICKET_220: V3 framework import format
@@ -362,7 +363,8 @@ function buildServerRequest(config: TraderAIEntryConfig): ServerRequest {
 export async function executeTraderAIEntry(
   config: TraderAIEntryConfig
 ): Promise<TraderAIEntryResult> {
-  const requestPayload = buildServerRequest(config);
+  const userId = await getCurrentUserId();
+  const requestPayload = buildServerRequest(config, userId);
 
   console.debug('[TraderAIEntry] Calling API:', API_ENDPOINTS.START);
   console.debug('[TraderAIEntry] Request payload:', JSON.stringify(requestPayload, null, 2).substring(0, 1000));

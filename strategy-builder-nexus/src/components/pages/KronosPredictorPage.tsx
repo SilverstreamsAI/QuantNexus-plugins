@@ -49,6 +49,7 @@ import {
   extractClassName,
 } from '../../services/algorithm-storage-service';
 import type { AlgorithmSaveRequest } from '../../services/algorithm-storage-service';
+import { getCurrentUserIdAsString } from '../../utils/auth-utils';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -291,11 +292,12 @@ function buildApiConfig(state: KronosPredictorState, strategyName: string): Kron
 /**
  * Build storage request from API result
  */
-function buildStorageRequestFromResult(
+async function buildStorageRequestFromResult(
   result: GenerationResult,
   state: KronosPredictorState,
   strategyName: string
-): AlgorithmSaveRequest {
+): Promise<AlgorithmSaveRequest> {
+  const userId = await getCurrentUserIdAsString();
   return buildKronosPredictorRequest(
     {
       strategy_name: strategyName,
@@ -335,7 +337,8 @@ function buildStorageRequestFromResult(
         },
         combination_logic: state.signalFilter.combinationLogic,
       },
-    }
+    },
+    userId
   );
 }
 

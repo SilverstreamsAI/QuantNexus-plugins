@@ -69,6 +69,7 @@ import {
   extractClassName,
   AlgorithmSaveRequest,
 } from '../../services/algorithm-storage-service';
+import { getCurrentUserIdAsString } from '../../utils/auth-utils';
 
 // Import indicator data for RawIndicatorSelector
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
@@ -158,11 +159,12 @@ async function executeApi(config: AILiberoConfig): Promise<GenerationResult> {
 /**
  * Build storage request from result
  */
-function buildStorageRequest(
+async function buildStorageRequest(
   result: GenerationResult,
   state: AILiberoState,
   strategyName: string
-): AlgorithmSaveRequest {
+): Promise<AlgorithmSaveRequest> {
+  const userId = await getCurrentUserIdAsString();
   return buildAILiberoRequest(
     {
       strategy_name: strategyName,
@@ -177,7 +179,8 @@ function buildStorageRequest(
       indicators: state.indicatorBlocks,
       llm_provider: state.llmProvider,
       llm_model: state.llmModel,
-    }
+    },
+    userId
   );
 }
 

@@ -8,6 +8,8 @@
  * @see /app/nona_server/src/services/strategy_storage_service.py
  */
 
+import { getCurrentUserIdAsString } from '../utils/auth-utils';
+
 // =============================================================================
 // Enums (matches backend constants)
 // =============================================================================
@@ -72,6 +74,7 @@ export interface ClassificationMetadata {
   // Type-specific fields
   entry_signal_base?: string;  // For Kronos Indicator Entry
   regime_type?: string;        // For Regime Detector
+  server_strategy_id?: number; // Backend DB strategy ID for LLM API
 }
 
 /**
@@ -222,6 +225,7 @@ export interface KronosAIEntryResult {
   strategy_name: string;
   strategy_code: string;
   class_name: string;
+  strategy_id?: number;
   created_at?: string;
 }
 
@@ -504,8 +508,9 @@ export class AlgorithmStorageService {
    */
   async getKronosAIEntryAlgorithms(): Promise<AlgorithmListResult> {
     try {
+      const userId = await getCurrentUserIdAsString();
       const response = await window.electronAPI.database.getAlgorithms({
-        userId: 'default',
+        userId,
         strategyType: StrategyType.TYPE_EXECUTION,
         signalSourcePrefix: 'kronos_llm_entry',
       });
@@ -557,12 +562,13 @@ export class AlgorithmStorageService {
  */
 export function buildKronosIndicatorEntryRequest(
   result: KronosIndicatorEntryResult,
-  config: KronosIndicatorEntryConfig
+  config: KronosIndicatorEntryConfig,
+  userId: string
 ): AlgorithmSaveRequest {
   return {
     strategy_name: result.strategy_name,
     code: result.strategy_code,
-    user_id: config.user_id || 'default',
+    user_id: userId,
     strategy_type: StrategyType.TYPE_EXECUTION,
     storage_mode: StorageMode.LOCAL,
     classification_metadata: {
@@ -596,12 +602,13 @@ export function buildKronosIndicatorEntryRequest(
  */
 export function buildRegimeDetectorRequest(
   result: RegimeDetectorResult,
-  config: RegimeDetectorConfig
+  config: RegimeDetectorConfig,
+  userId: string
 ): AlgorithmSaveRequest {
   return {
     strategy_name: result.strategy_name,
     code: result.strategy_code,
-    user_id: config.user_id || 'default',
+    user_id: userId,
     strategy_type: StrategyType.TYPE_ANALYSIS,
     storage_mode: StorageMode.LOCAL,
     classification_metadata: {
@@ -634,12 +641,13 @@ export function buildRegimeDetectorRequest(
  */
 export function buildEntrySignalRequest(
   result: EntrySignalResult,
-  config: EntrySignalConfig
+  config: EntrySignalConfig,
+  userId: string
 ): AlgorithmSaveRequest {
   return {
     strategy_name: result.strategy_name,
     code: result.strategy_code,
-    user_id: config.user_id || 'default',
+    user_id: userId,
     strategy_type: StrategyType.TYPE_ENTRY_SIGNAL,  // TICKET_210: Fix 0 -> 3
     storage_mode: StorageMode.LOCAL,
     classification_metadata: {
@@ -669,12 +677,13 @@ export function buildEntrySignalRequest(
  */
 export function buildKronosPredictorRequest(
   result: KronosPredictorResult,
-  config: KronosPredictorConfig
+  config: KronosPredictorConfig,
+  userId: string
 ): AlgorithmSaveRequest {
   return {
     strategy_name: result.strategy_name,
     code: result.strategy_code,
-    user_id: config.user_id || 'default',
+    user_id: userId,
     strategy_type: StrategyType.TYPE_ANALYSIS,  // TYPE_ANALYSIS = 9 for Kronos Predictor
     storage_mode: StorageMode.LOCAL,
     classification_metadata: {
@@ -720,12 +729,13 @@ export function buildKronosPredictorRequest(
  */
 export function buildKronosAIEntryRequest(
   result: KronosAIEntryResult,
-  config: KronosAIEntryConfig
+  config: KronosAIEntryConfig,
+  userId: string
 ): AlgorithmSaveRequest {
   return {
     strategy_name: result.strategy_name,
     code: result.strategy_code,
-    user_id: config.user_id || 'default',
+    user_id: userId,
     strategy_type: StrategyType.TYPE_EXECUTION,  // TYPE_EXECUTION = 1 for entry strategies
     storage_mode: StorageMode.LOCAL,
     classification_metadata: {
@@ -735,6 +745,7 @@ export function buildKronosAIEntryRequest(
       strategy_composition: 'atomic',
       class_name: result.class_name,
       entry_signal_base: 'kronos',
+      server_strategy_id: result.strategy_id,
       components: {
         kronos_ai_entry: {
           preset_mode: config.preset_mode,
@@ -764,12 +775,13 @@ export function buildKronosAIEntryRequest(
  */
 export function buildMarketObserverRequest(
   result: MarketObserverResult,
-  config: MarketObserverConfig
+  config: MarketObserverConfig,
+  userId: string
 ): AlgorithmSaveRequest {
   return {
     strategy_name: result.strategy_name,
     code: result.strategy_code,
-    user_id: config.user_id || 'default',
+    user_id: userId,
     strategy_type: StrategyType.TYPE_PRECONDITION,  // TYPE_PRECONDITION = 7
     storage_mode: StorageMode.LOCAL,
     classification_metadata: {
@@ -834,12 +846,13 @@ export interface TraderAIEntryConfig {
  */
 export function buildTraderAIEntryRequest(
   result: TraderAIEntryResult,
-  config: TraderAIEntryConfig
+  config: TraderAIEntryConfig,
+  userId: string
 ): AlgorithmSaveRequest {
   return {
     strategy_name: result.strategy_name,
     code: result.strategy_code,
-    user_id: config.user_id || 'default',
+    user_id: userId,
     strategy_type: StrategyType.TYPE_EXECUTION,  // TYPE_EXECUTION = 1 for entry strategies
     storage_mode: StorageMode.LOCAL,
     classification_metadata: {
@@ -912,12 +925,13 @@ interface AILiberoConfig {
  */
 export function buildAILiberoRequest(
   result: AILiberoResult,
-  config: AILiberoConfig
+  config: AILiberoConfig,
+  userId: string
 ): AlgorithmSaveRequest {
   return {
     strategy_name: result.strategy_name,
     code: result.strategy_code,
-    user_id: config.user_id || 'default',
+    user_id: userId,
     strategy_type: StrategyType.TYPE_EXECUTION,  // TYPE_EXECUTION = 1 for entry strategies
     storage_mode: StorageMode.LOCAL,
     classification_metadata: {
@@ -979,12 +993,13 @@ export interface RiskOverrideExitStorageConfig {
  */
 export function buildRiskOverrideExitRequest(
   result: RiskOverrideExitResult,
-  config: RiskOverrideExitStorageConfig
+  config: RiskOverrideExitStorageConfig,
+  userId: string
 ): AlgorithmSaveRequest {
   return {
     strategy_name: result.strategy_name,
     code: result.strategy_code,
-    user_id: config.user_id || 'default',
+    user_id: userId,
     strategy_type: StrategyType.TYPE_EXIT_SIGNAL,  // TYPE_EXIT_SIGNAL = 6
     storage_mode: StorageMode.LOCAL,
     classification_metadata: {

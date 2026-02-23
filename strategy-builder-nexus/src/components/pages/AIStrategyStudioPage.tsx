@@ -25,6 +25,7 @@ import {
   VibingChatResponse,
   StrategyRulesResponse,
 } from '../../services';
+import { getCurrentUserId, getCurrentUserIdAsString } from '../../utils/auth-utils';
 
 // AI Studio Components (component19)
 import {
@@ -214,9 +215,8 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
   useEffect(() => {
     const loadUserAndConversations = async () => {
       try {
-        // Get user ID from auth state
-        const authResult = await window.electronAPI.auth?.getUser();
-        const currentUserId = authResult?.data?.id || 'anonymous';
+        // Get user ID from centralized auth utils
+        const currentUserId = await getCurrentUserIdAsString();
         setUserId(currentUserId);
 
         // Load existing conversations from SQLite
@@ -441,7 +441,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
           model: llmProvider as VibingChatRequest['model'],
           llm_model: llmModel,
           metadata: {
-            user_id: parseInt(userId, 10) || 1,
+            user_id: await getCurrentUserId(),
             mode: 'generator',
           },
         });

@@ -17,6 +17,7 @@
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
+import { getCurrentUserId } from '../utils/auth-utils';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -233,7 +234,7 @@ function transformRule(rule: IndicatorEntryRule): ServerIndicatorRule | null {
  * Build server request from client config
  * TICKET_260: Include auto_reverse parameter
  */
-function buildServerRequest(config: RegimeIndicatorEntryConfig): ServerRequest {
+function buildServerRequest(config: RegimeIndicatorEntryConfig, userId: number): ServerRequest {
   // Transform all rules to server format
   // For now, all rules go to longEntryIndicators
   // TODO: Support separate long/short indicators from UI
@@ -253,7 +254,7 @@ function buildServerRequest(config: RegimeIndicatorEntryConfig): ServerRequest {
   const autoReverse = config.auto_reverse !== false;
 
   return {
-    user_id: 1,
+    user_id: userId,
     task_id: taskId,
     locale: 'en',
     output_format: 'v3', // TICKET_223: V3 framework import format
@@ -288,7 +289,8 @@ function buildServerRequest(config: RegimeIndicatorEntryConfig): ServerRequest {
 export async function executeRegimeIndicatorEntry(
   config: RegimeIndicatorEntryConfig
 ): Promise<RegimeIndicatorEntryResult> {
-  const requestPayload = buildServerRequest(config);
+  const userId = await getCurrentUserId();
+  const requestPayload = buildServerRequest(config, userId);
 
   console.debug('[RegimeIndicatorEntry] Calling API:', API_ENDPOINTS.START);
   console.debug('[RegimeIndicatorEntry] Request payload:', JSON.stringify(requestPayload, null, 2).substring(0, 1000));

@@ -60,6 +60,7 @@ import {
   extractClassName,
   AlgorithmSaveRequest,
 } from '../../services/algorithm-storage-service';
+import { getCurrentUserIdAsString } from '../../utils/auth-utils';
 
 // Import indicator data for RawIndicatorSelector
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
@@ -135,6 +136,7 @@ async function executeApi(config: KronosAIEntryConfig): Promise<GenerationResult
     return {
       status: 'completed',
       strategy_code: result.strategy_code,
+      strategy_id: result.strategy_id,
     };
   }
 
@@ -151,16 +153,18 @@ async function executeApi(config: KronosAIEntryConfig): Promise<GenerationResult
  * Build storage request from result
  * Uses centralized buildKronosAIEntryRequest for consistent AlgorithmSaveRequest format
  */
-function buildStorageRequest(
+async function buildStorageRequest(
   result: GenerationResult,
   state: KronosAIEntryState,
   strategyName: string
-): AlgorithmSaveRequest {
+): Promise<AlgorithmSaveRequest> {
+  const userId = await getCurrentUserIdAsString();
   return buildKronosAIEntryRequest(
     {
       strategy_name: strategyName,
       strategy_code: result.strategy_code || '',
       class_name: extractClassName(result.strategy_code || ''),
+      strategy_id: result.strategy_id,
     },
     {
       preset_mode: state.presetMode,
@@ -169,7 +173,8 @@ function buildStorageRequest(
       indicators: state.indicatorBlocks,
       llm_provider: state.llmProvider,
       llm_model: state.llmModel,
-    }
+    },
+    userId
   );
 }
 

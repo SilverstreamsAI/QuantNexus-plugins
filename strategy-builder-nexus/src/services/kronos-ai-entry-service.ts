@@ -16,6 +16,7 @@
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
+import { getCurrentUserId } from '../utils/auth-utils';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -76,6 +77,7 @@ export interface KronosAIEntryConfig {
  */
 export interface KronosAIEntryResult {
   status: 'completed' | 'failed' | 'processing' | 'rejected';
+  strategy_id?: number;
   validation_status?: 'VALID' | 'VALID_WITH_WARNINGS' | 'INVALID';
   reason_code?: string;
   strategy_code?: string;
@@ -253,7 +255,7 @@ function transformRawIndicators(blocks: RawIndicatorBlock[]): ServerRawIndicator
 /**
  * Build server request from client config
  */
-function buildServerRequest(config: KronosAIEntryConfig): ServerRequest {
+function buildServerRequest(config: KronosAIEntryConfig, userId: number): ServerRequest {
   // Determine lookback bars
   const lookbackBars = config.preset_mode === 'bespoke' && config.bespoke_config
     ? config.bespoke_config.lookbackBars
@@ -266,7 +268,7 @@ function buildServerRequest(config: KronosAIEntryConfig): ServerRequest {
   const taskId = `kronos_llm_entry_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
   return {
-    user_id: 1,
+    user_id: userId,
     task_id: taskId,
     locale: 'en_US',
     output_format: 'v3', // TICKET_223: V3 framework import format
@@ -303,7 +305,8 @@ function buildServerRequest(config: KronosAIEntryConfig): ServerRequest {
 export async function executeKronosAIEntry(
   config: KronosAIEntryConfig
 ): Promise<KronosAIEntryResult> {
-  const requestPayload = buildServerRequest(config);
+  const userId = await getCurrentUserId();
+  const requestPayload = buildServerRequest(config, userId);
 
   console.debug('[KronosAIEntry] Calling API:', API_ENDPOINTS.START);
   console.debug('[KronosAIEntry] Request payload:', JSON.stringify(requestPayload, null, 2).substring(0, 1000));
@@ -327,6 +330,7 @@ export async function executeKronosAIEntry(
         isComplete,
         result: {
           status: status as KronosAIEntryResult['status'],
+          strategy_id: result?.strategy_id as number | undefined,
           validation_status: result?.validation_status as KronosAIEntryResult['validation_status'],
           reason_code: result?.reason_code as string | undefined,
           strategy_code: result?.strategy_code as string | undefined,

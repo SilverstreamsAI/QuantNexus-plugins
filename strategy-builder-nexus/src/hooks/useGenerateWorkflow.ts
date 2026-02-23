@@ -30,6 +30,7 @@ import {
 export interface GenerationResult {
   status: 'completed' | 'failed' | 'rejected' | 'processing';
   strategy_code?: string;
+  strategy_id?: number;
   reason_code?: string;
   error?: string | { error_code?: string; error_message?: string; code?: string; message?: string };
 }
@@ -80,7 +81,7 @@ export interface GenerateWorkflowConfig<TConfig, TState> {
     result: GenerationResult,
     state: TState,
     strategyName: string
-  ) => AlgorithmSaveRequest;
+  ) => AlgorithmSaveRequest | Promise<AlgorithmSaveRequest>;
 
   /** Error code to message mapping */
   errorMessages: Record<string, string>;
@@ -374,7 +375,7 @@ export function useGenerateWorkflow<TConfig, TState>(
         try {
           console.log(`[GenerateWorkflow:${config.pageId}] Saving algorithm...`);
           const storageService = getAlgorithmStorageService();
-          const saveRequest = config.buildStorageRequest(result, currentState, finalName);
+          const saveRequest = await config.buildStorageRequest(result, currentState, finalName);
           const saveResult = await storageService.save(saveRequest);
 
           if (saveResult.success) {

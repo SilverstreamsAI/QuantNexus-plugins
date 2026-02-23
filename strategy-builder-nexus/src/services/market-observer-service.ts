@@ -11,6 +11,7 @@
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
+import { getCurrentUserId } from '../utils/auth-utils';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -277,7 +278,7 @@ function mapModelToProvider(modelId: string): string {
  * - symbol, item_type in operation_data
  * - llm_provider, llm_model, storage_mode at top level
  */
-function buildServerRequest(config: MarketObserverConfig, apiKey?: string): ServerRequest {
+function buildServerRequest(config: MarketObserverConfig, userId: number, apiKey?: string): ServerRequest {
   const conditionType = determineConditionType(config.rules);
   const strategyName = config.strategy_name || 'Untitled Observer';
 
@@ -307,7 +308,7 @@ function buildServerRequest(config: MarketObserverConfig, apiKey?: string): Serv
   }
 
   return {
-    user_id: 1,
+    user_id: userId,
     output_format: 'v3', // TICKET_220: V3 framework import format
     operation_type: 'add_item',
     locale: 'en',
@@ -333,7 +334,8 @@ export async function executeMarketObserverGeneration(
   const modelId = config.llm_model || 'nona-nexus';
   const apiKey = await resolveApiKeyForProvider(providerId, modelId);
 
-  const requestPayload = buildServerRequest(config, apiKey);
+  const userId = await getCurrentUserId();
+  const requestPayload = buildServerRequest(config, userId, apiKey);
 
   return await pluginApiClient.executeWithPolling<MarketObserverResult>({
     initialData: requestPayload,

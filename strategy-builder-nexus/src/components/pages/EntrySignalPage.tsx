@@ -54,6 +54,7 @@ import {
   extractClassName,
 } from '../../services/algorithm-storage-service';
 import type { AlgorithmSaveRequest } from '../../services/algorithm-storage-service';
+import { getCurrentUserIdAsString } from '../../utils/auth-utils';
 
 // Import indicator data
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
@@ -159,11 +160,12 @@ function buildApiConfig(state: EntrySignalState, strategyName: string): RegimeIn
 /**
  * Build storage request from API result
  */
-function buildStorageRequestFromResult(
+async function buildStorageRequestFromResult(
   result: GenerationResult,
   state: EntrySignalState,
   strategyName: string
-): AlgorithmSaveRequest {
+): Promise<AlgorithmSaveRequest> {
+  const userId = await getCurrentUserIdAsString();
   return buildEntrySignalRequest(
     {
       strategy_name: strategyName,
@@ -175,7 +177,8 @@ function buildStorageRequestFromResult(
       indicator_blocks: state.indicatorBlocks,
       llm_provider: state.llmProvider,
       llm_model: state.llmModel,
-    }
+    },
+    userId
   );
 }
 

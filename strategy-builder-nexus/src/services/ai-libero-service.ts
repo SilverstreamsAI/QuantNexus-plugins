@@ -15,6 +15,7 @@
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
+import { getCurrentUserId } from '../utils/auth-utils';
 import type { RawIndicatorBlock } from '../components/ui/RawIndicatorSelector';
 import type { IndicatorTemplate } from '../components/ui/SaveTemplateDialog';
 import type { PredictionConfig } from '../components/ui/AdvancedConfigPanel';
@@ -280,7 +281,7 @@ function transformRawIndicators(blocks: RawIndicatorBlock[]): ServerRawIndicator
 /**
  * Build server request from client config
  */
-function buildServerRequest(config: AILiberoConfig): ServerRequest {
+function buildServerRequest(config: AILiberoConfig, userId: number): ServerRequest {
   const taskId = `agent_llm_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
   const llmProvider = config.llm_provider || 'NONA';
@@ -305,7 +306,7 @@ function buildServerRequest(config: AILiberoConfig): ServerRequest {
   }
 
   return {
-    user_id: 1,
+    user_id: userId,
     task_id: taskId,
     locale: 'en_US',
     output_format: 'v3',
@@ -352,7 +353,8 @@ function buildServerRequest(config: AILiberoConfig): ServerRequest {
 export async function executeAILibero(
   config: AILiberoConfig
 ): Promise<AILiberoResult> {
-  const requestPayload = buildServerRequest(config);
+  const userId = await getCurrentUserId();
+  const requestPayload = buildServerRequest(config, userId);
 
   console.debug('[AILibero] Calling API:', API_ENDPOINTS.START);
   console.debug('[AILibero] Request payload:', JSON.stringify(requestPayload, null, 2).substring(0, 1000));

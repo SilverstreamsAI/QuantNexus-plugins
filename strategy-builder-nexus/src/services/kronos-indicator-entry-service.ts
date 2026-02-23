@@ -14,6 +14,7 @@
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
+import { getCurrentUserId } from '../utils/auth-utils';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -221,7 +222,7 @@ function transformRule(rule: KronosIndicatorRule): ServerIndicatorRule | null {
 /**
  * Build server request from client config
  */
-function buildServerRequest(config: KronosIndicatorEntryConfig): ServerRequest {
+function buildServerRequest(config: KronosIndicatorEntryConfig, userId: number): ServerRequest {
   // Transform all rules to server format
   const serverRules: ServerIndicatorRule[] = [];
 
@@ -236,7 +237,7 @@ function buildServerRequest(config: KronosIndicatorEntryConfig): ServerRequest {
   const taskId = `kronos_indicator_entry_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
   return {
-    user_id: 1,
+    user_id: userId,
     task_id: taskId,
     output_format: 'v3', // TICKET_223: V3 framework import format
     storage_mode: config.storage_mode || 'local',
@@ -267,7 +268,8 @@ function buildServerRequest(config: KronosIndicatorEntryConfig): ServerRequest {
 export async function executeKronosIndicatorEntry(
   config: KronosIndicatorEntryConfig
 ): Promise<KronosIndicatorEntryResult> {
-  const requestPayload = buildServerRequest(config);
+  const userId = await getCurrentUserId();
+  const requestPayload = buildServerRequest(config, userId);
 
   console.debug('[KronosIndicatorEntry] Calling API:', API_ENDPOINTS.START);
   console.debug('[KronosIndicatorEntry] Request payload:', JSON.stringify(requestPayload, null, 2).substring(0, 1000));

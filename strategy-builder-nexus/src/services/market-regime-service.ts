@@ -9,6 +9,7 @@
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
+import { getCurrentUserId } from '../utils/auth-utils';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -268,7 +269,7 @@ function buildPrompt(config: MarketRegimeConfig): string {
  * TICKET_200: Include storage_mode preference
  * TICKET_260: Include auto_reverse parameter and protocol-compliant format
  */
-function buildServerRequest(config: MarketRegimeConfig, apiKey?: string): ServerRequest {
+function buildServerRequest(config: MarketRegimeConfig, userId: number, apiKey?: string): ServerRequest {
   // TICKET_260: Default to true if not specified
   const autoReverse = config.auto_reverse !== false;
   const serverIndicators = transformToServerIndicators(config.rules, autoReverse);
@@ -281,7 +282,7 @@ function buildServerRequest(config: MarketRegimeConfig, apiKey?: string): Server
   console.info('[MarketRegimeService] Indicators:', JSON.stringify(serverIndicators));
 
   return {
-    user_id: 1,
+    user_id: userId,
     strategy_name: config.strategy_name || 'Untitled Strategy',
     locale: 'en',
     output_format: 'v3', // TICKET_223: V3 framework import format
@@ -376,7 +377,8 @@ export async function executeMarketRegimeAnalysis(
   const modelId = config.llm_model || 'nona-nexus';
   const apiKey = await resolveApiKeyForProvider(providerId, modelId);
 
-  const requestPayload = buildServerRequest(config, apiKey);
+  const userId = await getCurrentUserId();
+  const requestPayload = buildServerRequest(config, userId, apiKey);
 
   return await pluginApiClient.executeWithPolling<MarketRegimeResult>({
     initialData: requestPayload,

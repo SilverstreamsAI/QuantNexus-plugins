@@ -59,6 +59,7 @@ import {
   extractClassName,
 } from '../../services/algorithm-storage-service';
 import type { AlgorithmSaveRequest } from '../../services/algorithm-storage-service';
+import { getCurrentUserIdAsString } from '../../utils/auth-utils';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -166,11 +167,12 @@ function buildApiConfig(state: IndicatorExitState, strategyName: string): RiskOv
   };
 }
 
-function buildStorageRequestFromResult(
+async function buildStorageRequestFromResult(
   result: GenerationResult,
   state: IndicatorExitState,
   strategyName: string
-): AlgorithmSaveRequest {
+): Promise<AlgorithmSaveRequest> {
+  const userId = await getCurrentUserIdAsString();
   return buildRiskOverrideExitRequest(
     {
       strategy_name: strategyName,
@@ -183,7 +185,8 @@ function buildStorageRequestFromResult(
       hard_safety: { max_loss_percent: state.hardSafety.maxLossPercent },
       llm_provider: state.llmProvider,
       llm_model: state.llmModel,
-    }
+    },
+    userId
   );
 }
 

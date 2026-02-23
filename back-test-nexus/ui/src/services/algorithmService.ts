@@ -24,6 +24,7 @@ export interface Algorithm {
   strategyName: string;
   strategyType: number;
   description?: string;
+  classificationMetadata?: string;
 }
 
 export interface AlgorithmOption {
@@ -32,6 +33,7 @@ export interface AlgorithmOption {
   strategyName: string;
   strategyType: number;
   description?: string;
+  classificationMetadata?: string;
 }
 
 interface AlgorithmResponse {
@@ -42,6 +44,7 @@ interface AlgorithmResponse {
     strategy_name: string;
     strategy_type: number;
     description: string | null;
+    classification_metadata: string | null;
   }>;
   error?: { code: string; message: string };
 }
@@ -255,6 +258,7 @@ function toAlgorithm(record: {
   strategy_name: string;
   strategy_type: number;
   description: string | null;
+  classification_metadata: string | null;
 }): Algorithm {
   // TICKET_168: Use registry to get valid code
   const validCode = algorithmCodeRegistry.getValidCode(record.strategy_name, record.code);
@@ -265,6 +269,7 @@ function toAlgorithm(record: {
     strategyName: record.strategy_name,
     strategyType: record.strategy_type,
     description: record.description || undefined,
+    classificationMetadata: record.classification_metadata || undefined,
   };
 }
 
@@ -278,5 +283,6 @@ export function toAlgorithmOption(algo: Algorithm): AlgorithmOption {
     strategyName: algo.strategyName,
     strategyType: algo.strategyType,
     description: algo.description,
+    classificationMetadata: algo.classificationMetadata,
   };
 }

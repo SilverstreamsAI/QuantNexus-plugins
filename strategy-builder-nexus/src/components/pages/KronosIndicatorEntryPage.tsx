@@ -54,6 +54,7 @@ import {
   extractClassName,
 } from '../../services/algorithm-storage-service';
 import type { AlgorithmSaveRequest } from '../../services/algorithm-storage-service';
+import { getCurrentUserIdAsString } from '../../utils/auth-utils';
 
 // Import indicator data
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
@@ -157,11 +158,12 @@ function buildApiConfig(state: KronosIndicatorEntryState, strategyName: string):
  * Build storage request from API result
  * Converts page state to algorithm-storage-service format
  */
-function buildStorageRequestFromResult(
+async function buildStorageRequestFromResult(
   result: GenerationResult,
   state: KronosIndicatorEntryState,
   strategyName: string
-): AlgorithmSaveRequest {
+): Promise<AlgorithmSaveRequest> {
+  const userId = await getCurrentUserIdAsString();
   // Convert indicatorBlocks to longEntryIndicators format
   const longEntryIndicators = state.indicatorBlocks.map(block => ({
     indicator: {
@@ -188,7 +190,8 @@ function buildStorageRequestFromResult(
     {
       longEntryIndicators,
       shortEntryIndicators: [],
-    }
+    },
+    userId
   );
 }
 

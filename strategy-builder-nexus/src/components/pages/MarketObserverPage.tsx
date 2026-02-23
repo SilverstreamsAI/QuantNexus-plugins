@@ -49,6 +49,7 @@ import {
   extractClassName,
 } from '../../services/algorithm-storage-service';
 import type { AlgorithmSaveRequest } from '../../services/algorithm-storage-service';
+import { getCurrentUserIdAsString } from '../../utils/auth-utils';
 
 // Import indicator data
 import indicatorData from '../../../assets/indicators/market-analysis-indicator.json';
@@ -132,11 +133,12 @@ function buildApiConfig(state: MarketObserverState, strategyName: string): Marke
   };
 }
 
-function buildStorageRequestFromResult(
+async function buildStorageRequestFromResult(
   result: GenerationResult,
   state: MarketObserverState,
   strategyName: string
-): AlgorithmSaveRequest {
+): Promise<AlgorithmSaveRequest> {
+  const userId = await getCurrentUserIdAsString();
   return buildMarketObserverRequest(
     {
       strategy_name: strategyName,
@@ -148,7 +150,8 @@ function buildStorageRequestFromResult(
       llm_model: state.llmModel,
       indicators: state.indicatorBlocks,
       rules: state.strategies.map(s => ({ expression: s.expression })),
-    }
+    },
+    userId
   );
 }
 

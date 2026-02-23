@@ -29,6 +29,7 @@ export interface AlgorithmSelection {
   strategyName: string;
   strategyType: number;
   description?: string;
+  classificationMetadata?: string;
   /** TICKET_248: Stage-level timeframe for this algorithm */
   timeframe: TimeframeValue;
 }
@@ -221,6 +222,7 @@ const AlgorithmSelectorWithTimeframe: React.FC<AlgorithmSelectorWithTimeframePro
             strategyName: option.strategyName,
             strategyType: option.strategyType,
             description: option.description,
+            classificationMetadata: option.classificationMetadata,
             timeframe: defaultTimeframe,
           });
         }
