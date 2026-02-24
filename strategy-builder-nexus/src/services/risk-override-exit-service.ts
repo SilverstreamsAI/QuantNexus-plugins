@@ -14,7 +14,6 @@
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
-import { getCurrentUserId } from '../utils/auth-utils';
 
 // =============================================================================
 // Constants
@@ -279,7 +278,6 @@ interface ServerRule {
  * Server request format for /api/start_exit_strategy
  */
 interface ServerRequest {
-  user_id: number;
   task_id: string;
   locale: string;
   output_format: 'v3';
@@ -370,14 +368,13 @@ function transformRule(rule: RiskOverrideRule): ServerRule {
 /**
  * Build server request from client config
  */
-function buildServerRequest(config: RiskOverrideExitConfig, userId: number): ServerRequest {
+function buildServerRequest(config: RiskOverrideExitConfig): ServerRequest {
   const enabledRules = config.rules.filter(r => r.enabled);
   const serverRules = enabledRules.map(transformRule);
 
   const taskId = `exit_strategy_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
   return {
-    user_id: userId,
     task_id: taskId,
     locale: 'en',
     output_format: 'v3',
@@ -409,8 +406,7 @@ function buildServerRequest(config: RiskOverrideExitConfig, userId: number): Ser
 export async function executeRiskOverrideExit(
   config: RiskOverrideExitConfig
 ): Promise<RiskOverrideExitResult> {
-  const userId = await getCurrentUserId();
-  const requestPayload = buildServerRequest(config, userId);
+  const requestPayload = buildServerRequest(config);
 
   console.debug('[RiskOverrideExit] Calling API:', API_ENDPOINTS.START);
   console.debug('[RiskOverrideExit] Request payload:', JSON.stringify(requestPayload, null, 2).substring(0, 1000));

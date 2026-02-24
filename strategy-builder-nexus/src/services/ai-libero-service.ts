@@ -15,7 +15,6 @@
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
-import { getCurrentUserId } from '../utils/auth-utils';
 import type { RawIndicatorBlock } from '../components/ui/RawIndicatorSelector';
 import type { IndicatorTemplate } from '../components/ui/SaveTemplateDialog';
 import type { PredictionConfig } from '../components/ui/AdvancedConfigPanel';
@@ -183,7 +182,6 @@ interface TraderModeConstraints {
  * Server request format for /api/agent_llm
  */
 interface ServerRequest {
-  user_id: number;
   task_id?: string;
   locale?: string;
   output_format?: 'v1' | 'v3';
@@ -281,7 +279,7 @@ function transformRawIndicators(blocks: RawIndicatorBlock[]): ServerRawIndicator
 /**
  * Build server request from client config
  */
-function buildServerRequest(config: AILiberoConfig, userId: number): ServerRequest {
+function buildServerRequest(config: AILiberoConfig): ServerRequest {
   const taskId = `agent_llm_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
   const llmProvider = config.llm_provider || 'NONA';
@@ -306,7 +304,6 @@ function buildServerRequest(config: AILiberoConfig, userId: number): ServerReque
   }
 
   return {
-    user_id: userId,
     task_id: taskId,
     locale: 'en_US',
     output_format: 'v3',
@@ -353,8 +350,7 @@ function buildServerRequest(config: AILiberoConfig, userId: number): ServerReque
 export async function executeAILibero(
   config: AILiberoConfig
 ): Promise<AILiberoResult> {
-  const userId = await getCurrentUserId();
-  const requestPayload = buildServerRequest(config, userId);
+  const requestPayload = buildServerRequest(config);
 
   console.debug('[AILibero] Calling API:', API_ENDPOINTS.START);
   console.debug('[AILibero] Request payload:', JSON.stringify(requestPayload, null, 2).substring(0, 1000));

@@ -17,7 +17,6 @@
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
-import { getCurrentUserId } from '../utils/auth-utils';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -159,7 +158,6 @@ interface ServerIndicatorRule {
  * @see nona_server/src/main_service/business/market_analysis_business.py
  */
 interface ServerRequest {
-  user_id: number;
   task_id?: string;
   locale?: string;
   output_format?: 'v1' | 'v3'; // TICKET_223: V3 framework import format
@@ -234,7 +232,7 @@ function transformRule(rule: IndicatorEntryRule): ServerIndicatorRule | null {
  * Build server request from client config
  * TICKET_260: Include auto_reverse parameter
  */
-function buildServerRequest(config: RegimeIndicatorEntryConfig, userId: number): ServerRequest {
+function buildServerRequest(config: RegimeIndicatorEntryConfig): ServerRequest {
   // Transform all rules to server format
   // For now, all rules go to longEntryIndicators
   // TODO: Support separate long/short indicators from UI
@@ -254,7 +252,6 @@ function buildServerRequest(config: RegimeIndicatorEntryConfig, userId: number):
   const autoReverse = config.auto_reverse !== false;
 
   return {
-    user_id: userId,
     task_id: taskId,
     locale: 'en',
     output_format: 'v3', // TICKET_223: V3 framework import format
@@ -289,8 +286,7 @@ function buildServerRequest(config: RegimeIndicatorEntryConfig, userId: number):
 export async function executeRegimeIndicatorEntry(
   config: RegimeIndicatorEntryConfig
 ): Promise<RegimeIndicatorEntryResult> {
-  const userId = await getCurrentUserId();
-  const requestPayload = buildServerRequest(config, userId);
+  const requestPayload = buildServerRequest(config);
 
   console.debug('[RegimeIndicatorEntry] Calling API:', API_ENDPOINTS.START);
   console.debug('[RegimeIndicatorEntry] Request payload:', JSON.stringify(requestPayload, null, 2).substring(0, 1000));

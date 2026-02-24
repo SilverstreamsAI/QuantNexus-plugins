@@ -4,7 +4,7 @@
  * Fail-fast: throws if not authenticated (no silent fallbacks).
  */
 
-export async function getCurrentUserId(): Promise<number> {
+export async function getCurrentUserId(): Promise<string> {
   if (!window.electronAPI.auth) {
     throw new Error('Auth API not available');
   }
@@ -12,11 +12,7 @@ export async function getCurrentUserId(): Promise<number> {
   if (!result?.success || !result.data?.id) {
     throw new Error('User not authenticated. Please log in.');
   }
-  const userId = parseInt(result.data.id, 10);
-  if (isNaN(userId)) {
-    throw new Error('Invalid user ID format: ' + result.data.id);
-  }
-  return userId;
+  return result.data.id;
 }
 
 export async function getCurrentUserIdAsString(): Promise<string> {

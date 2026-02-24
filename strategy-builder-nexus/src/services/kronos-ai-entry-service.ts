@@ -16,7 +16,6 @@
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
-import { getCurrentUserId } from '../utils/auth-utils';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -179,7 +178,6 @@ interface ServerKronosConfig {
  * Server request format for /api/kronos_llm_entry
  */
 interface ServerRequest {
-  user_id: number;
   task_id?: string;
   locale?: string;
   output_format?: 'v1' | 'v3'; // TICKET_223: V3 framework import format
@@ -255,7 +253,7 @@ function transformRawIndicators(blocks: RawIndicatorBlock[]): ServerRawIndicator
 /**
  * Build server request from client config
  */
-function buildServerRequest(config: KronosAIEntryConfig, userId: number): ServerRequest {
+function buildServerRequest(config: KronosAIEntryConfig): ServerRequest {
   // Determine lookback bars
   const lookbackBars = config.preset_mode === 'bespoke' && config.bespoke_config
     ? config.bespoke_config.lookbackBars
@@ -268,7 +266,6 @@ function buildServerRequest(config: KronosAIEntryConfig, userId: number): Server
   const taskId = `kronos_llm_entry_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
   return {
-    user_id: userId,
     task_id: taskId,
     locale: 'en_US',
     output_format: 'v3', // TICKET_223: V3 framework import format
@@ -305,8 +302,7 @@ function buildServerRequest(config: KronosAIEntryConfig, userId: number): Server
 export async function executeKronosAIEntry(
   config: KronosAIEntryConfig
 ): Promise<KronosAIEntryResult> {
-  const userId = await getCurrentUserId();
-  const requestPayload = buildServerRequest(config, userId);
+  const requestPayload = buildServerRequest(config);
 
   console.debug('[KronosAIEntry] Calling API:', API_ENDPOINTS.START);
   console.debug('[KronosAIEntry] Request payload:', JSON.stringify(requestPayload, null, 2).substring(0, 1000));

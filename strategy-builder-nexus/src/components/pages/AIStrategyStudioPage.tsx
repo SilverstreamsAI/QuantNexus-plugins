@@ -25,7 +25,7 @@ import {
   VibingChatResponse,
   StrategyRulesResponse,
 } from '../../services';
-import { getCurrentUserId, getCurrentUserIdAsString } from '../../utils/auth-utils';
+import { getCurrentUserIdAsString } from '../../utils/auth-utils';
 
 // AI Studio Components (component19)
 import {
@@ -441,7 +441,6 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
           model: llmProvider as VibingChatRequest['model'],
           llm_model: llmModel,
           metadata: {
-            user_id: await getCurrentUserId(),
             mode: 'generator',
           },
         });

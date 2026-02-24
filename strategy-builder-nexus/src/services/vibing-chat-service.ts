@@ -7,7 +7,6 @@
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
-import { getCurrentUserId } from '../utils/auth-utils';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -87,7 +86,6 @@ export interface VibingChatRequest {
   storage_mode?: 'local' | 'remote' | 'hybrid';
   current_strategy_rules?: Partial<StrategyRulesResponse>;
   metadata?: {
-    user_id?: number;
     mode?: string;
     timestamp?: string;
   };
@@ -193,7 +191,7 @@ export function getVibingChatErrorMessage(response: VibingChatResponse): string 
 /**
  * Build server request from client config
  */
-function buildServerRequest(config: VibingChatRequest, userId: number): Record<string, unknown> {
+function buildServerRequest(config: VibingChatRequest): Record<string, unknown> {
   const taskId = `vibing_chat_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   const messageId = config.message_id || `msg_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
@@ -210,7 +208,6 @@ function buildServerRequest(config: VibingChatRequest, userId: number): Record<s
     storage_mode: config.storage_mode || 'local',
     current_strategy_rules: config.current_strategy_rules,
     metadata: {
-      user_id: userId,
       mode: config.metadata?.mode || 'generator',
       timestamp: config.metadata?.timestamp || new Date().toISOString(),
     },
@@ -232,8 +229,7 @@ function buildServerRequest(config: VibingChatRequest, userId: number): Record<s
 export async function executeVibingChat(
   config: VibingChatRequest
 ): Promise<VibingChatResponse> {
-  const userId = await getCurrentUserId();
-  const requestPayload = buildServerRequest(config, userId);
+  const requestPayload = buildServerRequest(config);
 
   console.debug('[VibingChat] Calling API:', API_ENDPOINTS.START);
   console.debug('[VibingChat] Request payload:', JSON.stringify(requestPayload, null, 2).substring(0, 1000));

@@ -11,7 +11,6 @@
  */
 
 import { pluginApiClient, ApiResponse } from './api-client';
-import { getCurrentUserId } from '../utils/auth-utils';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -130,7 +129,6 @@ export function getErrorMessage(result: MarketObserverResult): string {
  * - llm_provider, llm_model, temporary_api_key, storage_mode at top level
  */
 interface ServerRequest {
-  user_id: number;
   output_format?: 'v1' | 'v3'; // TICKET_220: V3 framework import format
   operation_type: 'add_item' | 'remove_item' | 'add_alert' | 'get_list' | 'get_item';
   locale: string;
@@ -278,7 +276,7 @@ function mapModelToProvider(modelId: string): string {
  * - symbol, item_type in operation_data
  * - llm_provider, llm_model, storage_mode at top level
  */
-function buildServerRequest(config: MarketObserverConfig, userId: number, apiKey?: string): ServerRequest {
+function buildServerRequest(config: MarketObserverConfig, apiKey?: string): ServerRequest {
   const conditionType = determineConditionType(config.rules);
   const strategyName = config.strategy_name || 'Untitled Observer';
 
@@ -308,7 +306,6 @@ function buildServerRequest(config: MarketObserverConfig, userId: number, apiKey
   }
 
   return {
-    user_id: userId,
     output_format: 'v3', // TICKET_220: V3 framework import format
     operation_type: 'add_item',
     locale: 'en',
@@ -334,8 +331,7 @@ export async function executeMarketObserverGeneration(
   const modelId = config.llm_model || 'nona-nexus';
   const apiKey = await resolveApiKeyForProvider(providerId, modelId);
 
-  const userId = await getCurrentUserId();
-  const requestPayload = buildServerRequest(config, userId, apiKey);
+  const requestPayload = buildServerRequest(config, apiKey);
 
   return await pluginApiClient.executeWithPolling<MarketObserverResult>({
     initialData: requestPayload,
