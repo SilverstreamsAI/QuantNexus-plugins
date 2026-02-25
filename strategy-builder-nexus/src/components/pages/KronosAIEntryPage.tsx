@@ -196,26 +196,9 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
   const [bespokeConfig, setBespokeConfig] = useState<BespokeConfig>(DEFAULT_BESPOKE_CONFIG);
   const [prompt, setPrompt] = useState<string>(DEFAULT_PROMPT);
   const [indicatorBlocks, setIndicatorBlocks] = useState<RawIndicatorBlock[]>([]);
-  const [storageMode, setStorageMode] = useState<'local' | 'remote' | 'hybrid'>('local');
 
   // TICKET_212: Load Template dialog state
   const [isLoadDialogOpen, setIsLoadDialogOpen] = useState(false);
-
-  // Load storage mode from plugin config
-  useEffect(() => {
-    const loadStorageMode = async () => {
-      try {
-        const configResult = await window.electronAPI.plugin.getConfig('com.quantnexus.strategy-builder-nexus');
-        if (configResult.success && configResult.config) {
-          const mode = configResult.config['strategy.dataSource'] as string || 'local';
-          setStorageMode(mode as 'local' | 'remote' | 'hybrid');
-        }
-      } catch (e) {
-        console.error('[KronosAIEntry] Failed to load storage mode:', e);
-      }
-    };
-    loadStorageMode();
-  }, []);
 
   // ---------------------------------------------------------------------------
   // Template Toolbar Handlers
@@ -277,10 +260,10 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
     bespokeConfig,
     prompt,
     indicatorBlocks,
-    storageMode,
+    storageMode: 'local',
     llmProvider,
     llmModel,
-  }), [presetMode, bespokeConfig, prompt, indicatorBlocks, storageMode, llmProvider, llmModel]);
+  }), [presetMode, bespokeConfig, prompt, indicatorBlocks, llmProvider, llmModel]);
 
   // TICKET_396: Validation requires both prompt and at least one indicator
   const validationItems = useMemo(() => {

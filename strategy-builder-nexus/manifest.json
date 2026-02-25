@@ -118,16 +118,15 @@
       "properties": {
         "strategy.dataSource": {
           "type": "string",
-          "enum": ["local", "remote", "hybrid"],
+          "enum": ["local"],
           "enumDescriptions": [
-            "Store data locally only",
-            "Store data on remote server",
-            "Use both local and remote storage"
+            "Store data locally only"
           ],
           "default": "local",
           "description": "Data storage mode for strategies",
           "category": "Data",
-          "order": 1
+          "order": 1,
+          "readOnly": true
         },
         "strategy.apiKey": {
           "type": "string",

@@ -11,7 +11,7 @@
  * @see TICKET_078 - Input Theming and Portal Patterns
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -200,26 +200,8 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
   const [selectedRegime, setSelectedRegime] = useState('trend');
   const [bespokeData, setBespokeData] = useState<BespokeData>({ name: '', notes: '' });
   const [indicatorBlocks, setIndicatorBlocks] = useState<IndicatorBlock[]>([]);
-  const [storageMode, setStorageMode] = useState<'local' | 'remote' | 'hybrid'>('local');
   // TICKET_260: Signal mode for auto-reverse feature
   const [signalMode, setSignalMode] = useState<SignalMode>('auto-reverse');
-
-  // Load storage mode from plugin config
-  useEffect(() => {
-    const loadStorageMode = async () => {
-      try {
-        const configResult = await window.electronAPI.plugin.getConfig('com.quantnexus.strategy-builder-nexus');
-        if (configResult.success && configResult.config) {
-          const mode = configResult.config['strategy.dataSource'] as string || 'local';
-          setStorageMode(mode as 'local' | 'remote' | 'hybrid');
-          console.debug('[EntrySignal] Loaded storage mode:', mode);
-        }
-      } catch (e) {
-        console.error('[EntrySignal] Failed to load storage mode:', e);
-      }
-    };
-    loadStorageMode();
-  }, []);
 
   // ---------------------------------------------------------------------------
   // Workflow Configuration
@@ -230,11 +212,11 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
     selectedRegime,
     indicatorBlocks,
     strategies,
-    storageMode,
+    storageMode: 'local',
     llmProvider,
     llmModel,
     signalMode,
-  }), [selectedRegime, indicatorBlocks, strategies, storageMode, llmProvider, llmModel, signalMode]);
+  }), [selectedRegime, indicatorBlocks, strategies, llmProvider, llmModel, signalMode]);
 
   // Validation items
   const allRules = useMemo(() => [

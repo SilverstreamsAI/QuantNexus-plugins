@@ -15,7 +15,7 @@
  * @see TICKET_077 - Silverstream UI Component Library
  */
 
-import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { Settings, Plus, ShieldAlert, OctagonX, Shield } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -196,27 +196,10 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
 
   const [rules, setRules] = useState<RiskOverrideRule[]>([]);
   const [hardSafetyMaxLoss, setHardSafetyMaxLoss] = useState<number>(RULE_DEFAULTS.hard_safety.maxLossPercent);
-  const [storageMode, setStorageMode] = useState<'local' | 'remote' | 'hybrid'>('local');
 
   // Add Rule dropdown
   const addRuleRef = useRef<HTMLButtonElement>(null);
   const [addRuleOpen, setAddRuleOpen] = useState(false);
-
-  // Load storage mode from plugin config
-  useEffect(() => {
-    const loadStorageMode = async () => {
-      try {
-        const configResult = await window.electronAPI.plugin.getConfig('com.quantnexus.strategy-builder-nexus');
-        if (configResult.success && configResult.config) {
-          const mode = configResult.config['strategy.dataSource'] as string || 'local';
-          setStorageMode(mode as 'local' | 'remote' | 'hybrid');
-        }
-      } catch (e) {
-        console.error('[IndicatorExit] Failed to load storage mode:', e);
-      }
-    };
-    loadStorageMode();
-  }, []);
 
   // ---------------------------------------------------------------------------
   // Rule Management
@@ -278,10 +261,10 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
   const currentState: IndicatorExitState = useMemo(() => ({
     rules,
     hardSafety: { maxLossPercent: hardSafetyMaxLoss },
-    storageMode,
+    storageMode: 'local',
     llmProvider,
     llmModel,
-  }), [rules, hardSafetyMaxLoss, storageMode, llmProvider, llmModel]);
+  }), [rules, hardSafetyMaxLoss, llmProvider, llmModel]);
 
   // Validation items (enabled rules)
   const enabledRules = useMemo(() => rules.filter(r => r.enabled), [rules]);

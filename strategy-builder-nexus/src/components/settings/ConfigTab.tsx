@@ -44,6 +44,7 @@ interface ConfigurationProperty {
   maximum?: number;
   category?: string;
   order?: number;
+  readOnly?: boolean;
 }
 
 interface ConfigurationContribution {
@@ -107,6 +108,20 @@ function ConfigField({ propertyKey, property, value, onChange, filteredEnum, emp
   const handleChange = (newValue: unknown) => {
     onChange(propertyKey, newValue);
   };
+
+  // TICKET_418: Read-only fields render as static label
+  if (property.readOnly) {
+    const displayValue = property.enum && property.enumDescriptions
+      ? (property.enumDescriptions[property.enum.indexOf(value as string ?? property.default as string ?? '')] || value as string || property.default as string || '')
+      : (value as string || property.default as string || '');
+    return (
+      <Field label={capitalizedLabel} description={property.description}>
+        <div className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-muted-foreground">
+          {displayValue}
+        </div>
+      </Field>
+    );
+  }
 
   // Render appropriate input based on type
   switch (property.type) {
@@ -487,13 +502,15 @@ export function ConfigTab({ pluginId }: ConfigTabProps): JSX.Element {
           {/* Sections - TICKET_094: Removed unified header, each section has Local/Server buttons */}
           {categories.map((category) => {
             const sectionId = category.name.toLowerCase().replace(/\s+/g, '-');
+            // TICKET_418: Hide Local/Server buttons for categories with only read-only fields
+            const allReadOnly = category.properties.every(({ property }) => property.readOnly);
             return (
               <Section
                 key={category.name}
                 id={sectionId}
                 title={category.name}
-                onLocal={() => handleLocalSection(category.name)}
-                onServer={() => handleServerSection(category.name)}
+                onLocal={allReadOnly ? undefined : () => handleLocalSection(category.name)}
+                onServer={allReadOnly ? undefined : () => handleServerSection(category.name)}
               >
                 <div className="space-y-4">
                   {category.properties.map(({ key, property }) => {

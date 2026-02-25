@@ -27,8 +27,8 @@ export type { IndicatorTemplate, PredictionConfig };
 // -----------------------------------------------------------------------------
 
 const API_ENDPOINTS = {
-  START: '/api/agent_llm',
-  STATUS: '/api/check_agent_llm_status',
+  START: '/api/start_llm_libero_analysis',
+  STATUS: '/api/check_llm_libero_status',
 };
 
 const TEMPLATE_STORAGE_KEY = 'ai-libero-templates';

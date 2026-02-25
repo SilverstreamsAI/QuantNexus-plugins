@@ -195,28 +195,11 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
   const [bespokeConfig, setBespokeConfig] = useState<BespokeConfig>(DEFAULT_BESPOKE_CONFIG);
   const [prompt, setPrompt] = useState<string>(DEFAULT_PROMPT);
   const [indicatorBlocks, setIndicatorBlocks] = useState<RawIndicatorBlock[]>([]);
-  const [storageMode, setStorageMode] = useState<'local' | 'remote' | 'hybrid'>('local');
 
   // Template dialog states
   const [isLoadDialogOpen, setIsLoadDialogOpen] = useState(false);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [existingTemplateNames, setExistingTemplateNames] = useState<string[]>([]);
-
-  // Load storage mode from plugin config
-  useEffect(() => {
-    const loadStorageMode = async () => {
-      try {
-        const configResult = await window.electronAPI.plugin.getConfig('com.quantnexus.strategy-builder-nexus');
-        if (configResult.success && configResult.config) {
-          const mode = configResult.config['strategy.dataSource'] as string || 'local';
-          setStorageMode(mode as 'local' | 'remote' | 'hybrid');
-        }
-      } catch (e) {
-        console.error('[TraderAIEntry] Failed to load storage mode:', e);
-      }
-    };
-    loadStorageMode();
-  }, []);
 
   // ---------------------------------------------------------------------------
   // Template Toolbar Handlers
@@ -295,10 +278,10 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
     bespokeConfig,
     prompt,
     indicatorBlocks,
-    storageMode,
+    storageMode: 'local',
     llmProvider,
     llmModel,
-  }), [presetMode, bespokeConfig, prompt, indicatorBlocks, storageMode, llmProvider, llmModel]);
+  }), [presetMode, bespokeConfig, prompt, indicatorBlocks, llmProvider, llmModel]);
 
   // TICKET_396: Validation requires both prompt and at least one indicator
   const validationItems = useMemo(() => {

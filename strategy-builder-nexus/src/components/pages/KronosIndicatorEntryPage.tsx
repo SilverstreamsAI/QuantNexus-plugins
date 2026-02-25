@@ -15,7 +15,7 @@
  * @see TICKET_208 - Kronos Indicator Entry Page Migration
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -212,24 +212,6 @@ export const KronosIndicatorEntryPage: React.FC<KronosIndicatorEntryPageProps> =
 
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [indicatorBlocks, setIndicatorBlocks] = useState<IndicatorBlock[]>([]);
-  const [storageMode, setStorageMode] = useState<'local' | 'remote' | 'hybrid'>('local');
-
-  // Load storage mode from plugin config
-  useEffect(() => {
-    const loadStorageMode = async () => {
-      try {
-        const configResult = await window.electronAPI.plugin.getConfig('com.quantnexus.strategy-builder-nexus');
-        if (configResult.success && configResult.config) {
-          const mode = configResult.config['strategy.dataSource'] as string || 'local';
-          setStorageMode(mode as 'local' | 'remote' | 'hybrid');
-          console.debug('[KronosIndicatorEntry] Loaded storage mode:', mode);
-        }
-      } catch (e) {
-        console.error('[KronosIndicatorEntry] Failed to load storage mode:', e);
-      }
-    };
-    loadStorageMode();
-  }, []);
 
   // ---------------------------------------------------------------------------
   // Workflow Configuration
@@ -239,10 +221,10 @@ export const KronosIndicatorEntryPage: React.FC<KronosIndicatorEntryPageProps> =
   const currentState: KronosIndicatorEntryState = useMemo(() => ({
     indicatorBlocks,
     strategies,
-    storageMode,
+    storageMode: 'local',
     llmProvider,
     llmModel,
-  }), [indicatorBlocks, strategies, storageMode, llmProvider, llmModel]);
+  }), [indicatorBlocks, strategies, llmProvider, llmModel]);
 
   // Validation items
   const allRules = useMemo(() => [
