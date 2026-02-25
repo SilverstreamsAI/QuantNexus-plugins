@@ -223,6 +223,13 @@
     "free": "免费",
     "pro": "专业版"
   },
+  "tabBar": {
+    "prep": "准备中",
+    "wait": "等待中",
+    "closeTab": "关闭标签",
+    "close": "关闭",
+    "closeAll": "全部关闭"
+  },
   "resultPanel": {
     "tabs": {
       "charts": "图表",

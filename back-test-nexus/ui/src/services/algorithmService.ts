@@ -6,13 +6,16 @@
  *
  * TICKET_168: Uses algorithmCodeRegistry to validate and supplement code fields
  * TICKET_210: Added signal_source prefix filtering for indicator_detector/indicator_entry workflows
+ * TICKET_420: Replaced hardcoded userId='default' with authenticated user ID
  *
  * @see TICKET_077_COMPONENT7 - Data Integration
  * @see TICKET_168 - Centralized Algorithm Code Registry
  * @see TICKET_210 - Indicator Detector + Entry Workflow Mapping
+ * @see TICKET_420 - TICKET_415 Layer 3 remnant fix
  */
 
 import { algorithmCodeRegistry } from './algorithmCodeRegistry';
+import { getCurrentUserIdAsString } from '../utils/auth-utils';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -58,8 +61,9 @@ export const algorithmService = {
    * Get Trend-Range algorithms (strategy_type = 9)
    */
   async getTrendRangeAlgorithms(): Promise<Algorithm[]> {
+    const userId = await getCurrentUserIdAsString();
     const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
-      userId: 'default', // TODO: Replace with actual user ID when auth is implemented
+      userId,
       strategyType: 9,
     });
 
@@ -75,8 +79,9 @@ export const algorithmService = {
    * Get Pre-condition algorithms (strategy_type = 4)
    */
   async getPreConditionAlgorithms(): Promise<Algorithm[]> {
+    const userId = await getCurrentUserIdAsString();
     const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
-      userId: 'default',
+      userId,
       strategyType: 4,
     });
 
@@ -92,8 +97,9 @@ export const algorithmService = {
    * Get Post-condition algorithms (strategy_type = 6)
    */
   async getPostConditionAlgorithms(): Promise<Algorithm[]> {
+    const userId = await getCurrentUserIdAsString();
     const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
-      userId: 'default',
+      userId,
       strategyType: 6,
     });
 
@@ -110,8 +116,9 @@ export const algorithmService = {
    * signal_source starts with 'indicator_detector' (strategy_type = 9)
    */
   async getIndicatorDetectorAlgorithms(): Promise<Algorithm[]> {
+    const userId = await getCurrentUserIdAsString();
     const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
-      userId: 'default',
+      userId,
       strategyType: 9,
       signalSourcePrefix: 'indicator_detector',
     });
@@ -129,8 +136,9 @@ export const algorithmService = {
    * signal_source starts with 'indicator_entry' (strategy_type = 3)
    */
   async getIndicatorEntryAlgorithms(): Promise<Algorithm[]> {
+    const userId = await getCurrentUserIdAsString();
     const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
-      userId: 'default',
+      userId,
       strategyType: 3,
       signalSourcePrefix: 'indicator_entry',
     });
@@ -149,8 +157,9 @@ export const algorithmService = {
    * @see STRATEGY_TYPE_AND_SIGNAL_SOURCE_REFERENCE.md Section 9
    */
   async getKronosDetectorAlgorithms(): Promise<Algorithm[]> {
+    const userId = await getCurrentUserIdAsString();
     const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
-      userId: 'default',
+      userId,
       strategyType: 9,
       signalSourcePrefix: 'kronos_prediction',
     });
@@ -169,8 +178,9 @@ export const algorithmService = {
    * @see STRATEGY_TYPE_AND_SIGNAL_SOURCE_REFERENCE.md Section 10
    */
   async getKronosEntryAlgorithms(): Promise<Algorithm[]> {
+    const userId = await getCurrentUserIdAsString();
     const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
-      userId: 'default',
+      userId,
       strategyType: 1,
       signalSourcePrefix: 'kronosIndicatorEntry',
     });
@@ -189,8 +199,9 @@ export const algorithmService = {
    * @see TICKET_210 - Kronos AI Entry (Page 34) uses kronos_llm_entry signal_source
    */
   async getKronosAIEntryAlgorithms(): Promise<Algorithm[]> {
+    const userId = await getCurrentUserIdAsString();
     const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
-      userId: 'default',
+      userId,
       strategyType: 1,
       signalSourcePrefix: 'kronos_llm_entry',
     });
@@ -209,8 +220,9 @@ export const algorithmService = {
    * @see STRATEGY_TYPE_AND_SIGNAL_SOURCE_REFERENCE.md Section 1 (Watchlist)
    */
   async getWatchlistAlgorithms(): Promise<Algorithm[]> {
+    const userId = await getCurrentUserIdAsString();
     const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
-      userId: 'default',
+      userId,
       strategyType: 7,
       signalSourcePrefix: 'watchlist',
     });
@@ -229,8 +241,9 @@ export const algorithmService = {
    * @see STRATEGY_TYPE_AND_SIGNAL_SOURCE_REFERENCE.md Section 4 (LLM Trader)
    */
   async getLLMTraderAlgorithms(): Promise<Algorithm[]> {
+    const userId = await getCurrentUserIdAsString();
     const response: AlgorithmResponse = await window.electronAPI.database.getAlgorithms({
-      userId: 'default',
+      userId,
       strategyType: 1,
       signalSourcePrefix: 'llmtrader',
     });

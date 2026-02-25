@@ -181,6 +181,13 @@
     "free": "免費",
     "pro": "專業版"
   },
+  "tabBar": {
+    "prep": "準備中",
+    "wait": "等待中",
+    "closeTab": "關閉分頁",
+    "close": "關閉",
+    "closeAll": "全部關閉"
+  },
   "resultPanel": {
     "tabs": {
       "charts": "圖表",

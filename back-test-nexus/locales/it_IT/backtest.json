@@ -181,6 +181,13 @@
     "free": "GRATUITO",
     "pro": "PRO"
   },
+  "tabBar": {
+    "prep": "PREP",
+    "wait": "ATTESA",
+    "closeTab": "Chiudi scheda",
+    "close": "Chiudi",
+    "closeAll": "Chiudi tutto"
+  },
   "resultPanel": {
     "tabs": {
       "charts": "GRAFICI",

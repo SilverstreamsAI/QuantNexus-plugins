@@ -181,6 +181,13 @@
     "free": "무료",
     "pro": "프로"
   },
+  "tabBar": {
+    "prep": "준비 중",
+    "wait": "대기 중",
+    "closeTab": "탭 닫기",
+    "close": "닫기",
+    "closeAll": "모두 닫기"
+  },
   "resultPanel": {
     "tabs": {
       "charts": "차트",

@@ -225,6 +225,13 @@
     "free": "FREE",
     "pro": "PRO"
   },
+  "tabBar": {
+    "prep": "PREP",
+    "wait": "WAIT",
+    "closeTab": "Close tab",
+    "close": "Close",
+    "closeAll": "Close All"
+  },
   "resultPanel": {
     "tabs": {
       "charts": "CHARTS",

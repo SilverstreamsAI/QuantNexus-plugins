@@ -181,6 +181,13 @@
     "free": "無料",
     "pro": "プロ"
   },
+  "tabBar": {
+    "prep": "準備中",
+    "wait": "待機中",
+    "closeTab": "タブを閉じる",
+    "close": "閉じる",
+    "closeAll": "すべて閉じる"
+  },
   "resultPanel": {
     "tabs": {
       "charts": "チャート",
