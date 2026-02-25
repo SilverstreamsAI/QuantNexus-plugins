@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -147,6 +148,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
   llmModel = 'nona-fast',
   onSettingsClick,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // -------------------------------------------------------------------------
   // User State
   // -------------------------------------------------------------------------
@@ -190,18 +192,18 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
     return [
       {
         id: 'generate_code',
-        label: 'Generate Code',
+        label: t('pages.aiStrategyStudio.actions.generateCode'),
         loading: actionStates.generate_code,
       },
       {
         id: 'save_strategy',
-        label: 'Save Strategy',
+        label: t('pages.aiStrategyStudio.actions.saveStrategy'),
         loading: actionStates.save_strategy,
         disabled: strategyRules.length === 0,
       },
       {
         id: 'run_backtest',
-        label: 'Run Backtest',
+        label: t('pages.aiStrategyStudio.actions.runBacktest'),
         loading: actionStates.run_backtest,
         disabled: strategyRules.length === 0,
       },
@@ -234,8 +236,8 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
         // TICKET_235: Always create a new chat on page load
         const createResult = await conversationService.createConversation({
           userId: currentUserId,
-          title: 'New Strategy',
-          preview: 'Start describing your strategy...',
+          title: t('pages.aiStrategyStudio.newStrategyTitle'),
+          preview: t('pages.aiStrategyStudio.newStrategyPreview'),
         });
 
         if (createResult.success && createResult.data) {
@@ -534,7 +536,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
           const errorResult = await conversationService.addMessage({
             conversationId: activeDbId,
             type: 'system',
-            content: `Error: ${errorMessage}`,
+            content: t('pages.aiStrategyStudio.errorPrefix', { message: errorMessage }),
             tokenCount: 0,
           });
 
@@ -542,7 +544,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
             const systemMessage: Message = {
               id: String(errorResult.data.messageId),
               type: 'system',
-              content: `Error: ${errorMessage}`,
+              content: t('pages.aiStrategyStudio.errorPrefix', { message: errorMessage }),
               timestamp: new Date(),
             };
             setMessages((prev) => [...prev, systemMessage]);
@@ -557,7 +559,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
           const errorResult = await conversationService.addMessage({
             conversationId: activeDbId,
             type: 'system',
-            content: `Error: ${errorMessage}`,
+            content: t('pages.aiStrategyStudio.errorPrefix', { message: errorMessage }),
             tokenCount: 0,
           });
 
@@ -565,7 +567,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
             const systemMessage: Message = {
               id: String(errorResult.data.messageId),
               type: 'system',
-              content: `Error: ${errorMessage}`,
+              content: t('pages.aiStrategyStudio.errorPrefix', { message: errorMessage }),
               timestamp: new Date(),
             };
             setMessages((prev) => [...prev, systemMessage]);
@@ -618,9 +620,9 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
 
       if (response.success && response.result) {
         const actionLabels: Record<ActionId, string> = {
-          generate_code: 'Code generation completed',
-          save_strategy: 'Strategy saved successfully',
-          run_backtest: 'Backtest started',
+          generate_code: t('pages.aiStrategyStudio.actionResults.codeGenerated'),
+          save_strategy: t('pages.aiStrategyStudio.actionResults.strategySaved'),
+          run_backtest: t('pages.aiStrategyStudio.actionResults.backtestStarted'),
         };
 
         // If action returned content, show it as assistant message
@@ -675,7 +677,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
           const systemMessage: Message = {
             id: String(errorResult.data.messageId),
             type: 'system',
-            content: `Action failed: ${errorMessage}`,
+            content: t('pages.aiStrategyStudio.actionFailedPrefix', { message: errorMessage }),
             timestamp: new Date(),
           };
           setMessages((prev) => [...prev, systemMessage]);
@@ -697,7 +699,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
           const systemMessage: Message = {
             id: String(errorResult.data.messageId),
             type: 'system',
-            content: `Action failed: ${errorMessage}`,
+            content: t('pages.aiStrategyStudio.actionFailedPrefix', { message: errorMessage }),
             timestamp: new Date(),
           };
           setMessages((prev) => [...prev, systemMessage]);
@@ -729,8 +731,8 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
     const newRule: StrategyRule = {
       id: generateLocalId(),
       type,
-      condition: `New ${type} rule condition`,
-      description: `Add your ${type} condition here`,
+      condition: t('pages.aiStrategyStudio.newRuleCondition', { type }),
+      description: t('pages.aiStrategyStudio.newRuleDescription', { type }),
       enabled: true,
     };
 
@@ -821,8 +823,8 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
           <MessagesContainer
             messages={messages}
             isLoading={isLoading}
-            welcomeTitle="AI Strategy Studio"
-            welcomeSubtitle="Describe your trading strategy in natural language. I'll help you build entry rules, exit conditions, and risk management."
+            welcomeTitle={t('pages.aiStrategyStudio.welcomeTitle')}
+            welcomeSubtitle={t('pages.aiStrategyStudio.welcomeSubtitle')}
           />
 
           {/* Action Buttons */}
@@ -842,7 +844,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
             onChange={setInputValue}
             onSend={handleSendMessage}
             disabled={isLoading || !activeDbId}
-            placeholder={activeDbId ? 'Describe your trading strategy...' : 'Create a new chat to start...'}
+            placeholder={activeDbId ? t('pages.aiStrategyStudio.chatPlaceholder') : t('pages.aiStrategyStudio.chatPlaceholderDisabled')}
           />
         </main>
 

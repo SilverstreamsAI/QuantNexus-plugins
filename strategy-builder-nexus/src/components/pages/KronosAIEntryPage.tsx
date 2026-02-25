@@ -14,6 +14,7 @@
  */
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -188,6 +189,7 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
   llmProvider = 'NONA',
   llmModel = 'nona-fast',
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // ---------------------------------------------------------------------------
   // Page-specific State
   // ---------------------------------------------------------------------------
@@ -277,8 +279,8 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
     pageId: 'kronos-ai-entry-page',
     llmProvider,
     llmModel,
-    defaultStrategyName: 'New Kronos AI Strategy',
-    validationErrorMessage: 'Please add at least one indicator and enter a prompt (min 10 characters)',
+    defaultStrategyName: t('pages.kronosAIEntry.defaultStrategyName'),
+    validationErrorMessage: t('pages.kronosAIEntry.validationError'),
     buildConfig: buildApiConfig,
     validateConfig: validateKronosAIEntryConfig,
     executeApi,
@@ -317,7 +319,7 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
       {/* ================================================================== */}
       <div className="flex-shrink-0 h-12 px-6 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
         <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
-          {pageTitle || 'Kronos AI Entry'}
+          {pageTitle || t('pages.kronosAIEntry.title')}
         </h1>
         <button
           onClick={onSettingsClick}
@@ -335,13 +337,13 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
         <div className="w-56 flex-shrink-0 border-r border-color-terminal-border bg-color-terminal-panel/30 p-4 overflow-y-auto">
           <div className="space-y-3">
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Current Strategy
+              {t('pages.common.currentStrategy')}
             </label>
             <input
               type="text"
               value={state.strategyName}
               onChange={handleNameChange}
-              placeholder="Strategy Name"
+              placeholder={t('pages.kronosAIEntry.strategyNamePlaceholder')}
               className={cn(
                 'w-full px-3 py-2 text-xs border rounded focus:outline-none',
                 'bg-color-terminal-bg border-color-terminal-border text-color-terminal-text',
@@ -361,7 +363,7 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
                   state.isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
                 )}
               >
-                {state.isSaved ? 'Saved' : 'Unsaved'}
+                {state.isSaved ? t('pages.common.saved') : t('pages.common.unsaved')}
               </span>
             </div>
           </div>
@@ -375,7 +377,7 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
           <div className="flex-1 overflow-y-auto p-6">
             <GenerateContentWrapper
               isGenerating={state.isGenerating}
-              loadingMessage="Generating Kronos AI entry strategy..."
+              loadingMessage={t('pages.kronosAIEntry.loadingMessage')}
             >
               {/* component19: Template Toolbar */}
               <TemplateToolbar
@@ -393,7 +395,7 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
                     indicators={indicatorData as IndicatorDefinition[]}
                     blocks={indicatorBlocks}
                     onChange={setIndicatorBlocks}
-                    title="INDICATOR CONTEXT"
+                    title={t('pages.kronosAIEntry.indicatorContextTitle')}
                   />
                 </div>
               )}
@@ -422,10 +424,10 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
 
               {/* component24: Prompt Textarea */}
               <PromptTextarea
-                title="ANALYSIS PROMPT"
+                title={t('pages.kronosAIEntry.analysisPromptTitle')}
                 value={prompt}
                 onChange={setPrompt}
-                placeholder="Describe the entry strategy you want to generate..."
+                placeholder={t('pages.kronosAIEntry.analysisPromptPlaceholder')}
                 rows={8}
                 className="mb-6"
               />
@@ -440,7 +442,7 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
                   code={state.generateResult?.code || ''}
                   state={actions.getCodeDisplayState()}
                   errorMessage={state.generateResult?.error}
-                  title="GENERATED KRONOS AI ENTRY CODE"
+                  title={t('pages.kronosAIEntry.generatedCodeTitle')}
                   showLineNumbers={true}
                   maxHeight="400px"
                 />
@@ -453,8 +455,8 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
             isGenerating={state.isGenerating}
             hasResult={actions.hasResult}
             onGenerate={actions.handleStartGenerate}
-            generateLabel="Start AI Generate"
-            generatingLabel="Generating..."
+            generateLabel={t('pages.kronosAIEntry.generateLabel')}
+            generatingLabel={t('pages.kronosAIEntry.generatingLabel')}
           />
         </div>
       </div>
@@ -482,8 +484,8 @@ export const KronosAIEntryPage: React.FC<KronosAIEntryPageProps> = ({
         isOpen={isLoadDialogOpen}
         onClose={() => setIsLoadDialogOpen(false)}
         onSelect={handleSelectTemplate}
-        title="Load Indicator Template"
-        emptyMessage="No indicator templates available"
+        title={t('pages.kronosAIEntry.loadIndicatorTemplateTitle')}
+        emptyMessage={t('pages.kronosAIEntry.noTemplatesAvailable')}
       />
     </div>
   );

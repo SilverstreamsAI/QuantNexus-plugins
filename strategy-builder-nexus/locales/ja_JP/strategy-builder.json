@@ -138,4 +138,129 @@
     "edit": "編集",
     "close": "閉じる"
   }
+  ,
+  "pages": {
+    "regimeDetector": {
+      "title": "レジーム検出器",
+      "strategyNamePlaceholder": "戦略名",
+      "generatedCodeTitle": "生成された戦略コード",
+      "generateLabel": "生成を開始",
+      "generatingLabel": "生成中..."
+    },
+    "entrySignal": {
+      "title": "エントリーシグナル生成器",
+      "strategyNamePlaceholder": "戦略名",
+      "generatedCodeTitle": "生成されたエントリーコード",
+      "generateLabel": "生成を開始",
+      "generatingLabel": "生成中..."
+    },
+    "indicatorExit": {
+      "title": "指標退出生成器",
+      "strategyNamePlaceholder": "戦略名",
+      "generatedCodeTitle": "生成された退出コード",
+      "generateLabel": "生成を開始",
+      "generatingLabel": "生成中..."
+    },
+    "kronosPredictor": {
+      "title": "クロノス予測器",
+      "strategyNamePlaceholder": "戦略名",
+      "historicalDataPointsLabel": "履歴データポイント (ルックバック)",
+      "predictionDataPointsLabel": "予測データポイント (予測長)",
+      "advancedSettingsTitle": "詳細設定",
+      "temperatureLabel": "温度",
+      "topPLabel": "Top-P (核サンプリング)",
+      "topKLabel": "Top-K",
+      "generatedCodeTitle": "生成されたクロノス戦略コード",
+      "generateLabel": "クロノス分析を開始",
+      "generatingLabel": "分析を実行中..."
+    },
+    "kronosAIEntry": {
+      "title": "クロノス AI エントリー",
+      "strategyNamePlaceholder": "戦略名",
+      "promptLabel": "プロンプト",
+      "promptPlaceholder": "取引戦略を説明してください...",
+      "indicatorContextTitle": "指標コンテキスト",
+      "generatedCodeTitle": "生成されたクロノス AI エントリーコード",
+      "generateLabel": "生成を開始",
+      "generatingLabel": "生成中..."
+    },
+    "marketObserver": {
+      "title": "市場観測器",
+      "strategyNamePlaceholder": "戦略名",
+      "generatedCodeTitle": "生成された観測器コード",
+      "generateLabel": "生成を開始",
+      "generatingLabel": "生成中..."
+    },
+    "aiLibero": {
+      "title": "AI リベロ",
+      "strategyNamePlaceholder": "戦略名",
+      "indicatorContextTitle": "指標コンテキスト",
+      "analysisPromptTitle": "分析プロンプト",
+      "analysisPromptPlaceholder": "生成したい取引戦略を説明してください...",
+      "generatedCodeTitle": "生成された AI リベロ戦略コード",
+      "generateLabel": "生成を開始",
+      "generatingLabel": "生成中...",
+      "loadIndicatorTemplateTitle": "指標テンプレートを読み込む"
+    },
+    "traderAIEntry": {
+      "title": "トレーダー AI エントリー",
+      "strategyNamePlaceholder": "戦略名",
+      "generatedCodeTitle": "生成されたトレーダー AI エントリーコード",
+      "generateLabel": "生成を開始",
+      "generatingLabel": "生成中..."
+    },
+    "aiStrategyStudio": {
+      "welcomeTitle": "AI 戦略スタジオ",
+      "welcomeSubtitle": "自然言語で取引戦略を説明してください。エントリールール、退出条件、リスク管理の構築をサポートします。",
+      "chatPlaceholder": "取引戦略を説明してください...",
+      "chatPlaceholderDisabled": "新しいチャットを作成して開始..."
+    }
+  },
+  "ui": {
+    "indicatorSelector": {
+      "title": "指標を選択",
+      "searchPlaceholder": "指標を検索...",
+      "selected": "選択済み",
+      "available": "利用可能"
+    },
+    "regimeSelector": {
+      "title": "市場レジーム",
+      "bullish": "強気",
+      "bearish": "弱気",
+      "sideways": "横ばい",
+      "volatile": "ボラタイル"
+    },
+    "signalModeSelector": {
+      "title": "シグナルモード",
+      "longOnly": "ロングのみ",
+      "shortOnly": "ショートのみ",
+      "directional": "ディレクショナル",
+      "autoReverse": "オートリバース"
+    },
+    "codeDisplay": {
+      "copy": "コピー",
+      "copied": "コピーしました!",
+      "download": "ダウンロード"
+    },
+    "generateActionBar": {
+      "storageMode": {
+        "local": "ローカル",
+        "remote": "リモート",
+        "hybrid": "ハイブリッド"
+      }
+    },
+    "namingDialog": {
+      "useSuggested": "推奨を使用",
+      "useCustom": "カスタムを使用"
+    },
+    "templateToolbar": {
+      "saveAsTemplate": "テンプレートとして保存",
+      "loadTemplate": "テンプレートを読み込む",
+      "templates": "テンプレート"
+    },
+    "collapsiblePanel": {
+      "expand": "展開",
+      "collapse": "折りたたみ"
+    }
+  }
 }

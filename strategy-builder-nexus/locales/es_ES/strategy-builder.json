@@ -138,4 +138,249 @@
     "edit": "Editar",
     "close": "Cerrar"
   }
+  ,
+  "pages": {
+    "common": {
+      "currentStrategy": "Estrategia Actual",
+      "saved": "Guardado",
+      "unsaved": "Sin guardar"
+    },
+    "regimeDetector": {
+      "title": "Detector de Regimen",
+      "defaultStrategyName": "Nueva Estrategia",
+      "validationError": "Por favor agregue al menos un indicador, factor o expresion",
+      "strategyNamePlaceholder": "Nombre de Estrategia",
+      "loadingMessage": "Generando codigo de estrategia...",
+      "generatedCodeTitle": "CODIGO DE ESTRATEGIA GENERADO",
+      "generateLabel": "Iniciar Generacion",
+      "generatingLabel": "Generando..."
+    },
+    "entrySignal": {
+      "title": "Generador de Senal de Entrada",
+      "defaultStrategyName": "Nueva Estrategia de Entrada",
+      "validationError": "Por favor agregue al menos un indicador, factor o expresion",
+      "strategyNamePlaceholder": "Nombre de Estrategia",
+      "loadingMessage": "Generando codigo de senal de entrada...",
+      "generatedCodeTitle": "CODIGO DE ENTRADA GENERADO",
+      "generateLabel": "Iniciar Generacion",
+      "generatingLabel": "Generando..."
+    },
+    "indicatorExit": {
+      "title": "Generador de Salida por Indicador",
+      "subtitle": "Configurar proteccion de emergencia sobre la capa del combinador",
+      "defaultStrategyName": "Nueva Estrategia de Override de Riesgo",
+      "validationError": "Se requiere al menos una regla de override de riesgo habilitada",
+      "strategyNamePlaceholder": "Nombre de Estrategia",
+      "loadingMessage": "Generando codigo de salida de override de riesgo...",
+      "configurationLabel": "Configuracion",
+      "activeRulesLabel": "Reglas Activas",
+      "hardSafetyLabel": "Seguridad Dura",
+      "exitArchitectureLabel": "Arquitectura de Salida",
+      "l0Combinator": "L0: Combinador",
+      "l1RiskOverride": "L1: Override de Riesgo ({{count}})",
+      "l2HardSafety": "L2: Seguridad Dura",
+      "layer1Title": "Capa 1: Reglas de Override de Riesgo",
+      "enabledTotal": "{{enabled}} habilitadas / {{total}} total",
+      "ruleExecutionInfo": "Las reglas se evaluan en orden de prioridad en cada barra. La primera regla activada se ejecuta, las restantes se omiten.",
+      "noRulesConfigured": "No hay reglas de override de riesgo configuradas",
+      "noRulesHint": "Agregue reglas para proteger contra escenarios de fallo del combinador",
+      "addRule": "Agregar Regla",
+      "layer2Title": "Capa 2: Red de Seguridad Dura",
+      "alwaysActive": "Siempre Activo",
+      "ruleDescriptions": {
+        "circuit_breaker": "Cierre forzado al alcanzar umbral de perdida de posicion",
+        "time_limit": "Cierre forzado despues del periodo maximo de retencion",
+        "regime_detection": "Override cuando cambia el regimen de mercado",
+        "drawdown_limit": "Proteccion de drawdown a nivel de portafolio",
+        "indicator_guard": "Override en valores extremos del indicador"
+      },
+      "generatedCodeTitle": "CODIGO DE SALIDA GENERADO",
+      "generateLabel": "Generar Estrategia de Salida",
+      "generatingLabel": "Generando..."
+    },
+    "kronosPredictor": {
+      "title": "Predictor KRONOS",
+      "defaultStrategyName": "Estrategia Kronos",
+      "validationError": "Por favor habilite al menos un filtro de senal",
+      "strategyNamePlaceholder": "Nombre de Estrategia",
+      "loadingMessage": "Generando codigo de estrategia Kronos...",
+      "predictionConfigTitle": "Configuracion de Prediccion",
+      "historicalDataPointsLabel": "Puntos de Datos Historicos (Lookback)",
+      "predictionDataPointsLabel": "Puntos de Datos de Prediccion (Pred Length)",
+      "lookbackRangeText": "Rango: 10 - {{max}} (limitado por contexto del modelo)",
+      "predLenRangeText": "Rango: 1 - 512",
+      "advancedSettingsTitle": "Configuracion Avanzada",
+      "temperatureLabel": "Temperatura",
+      "temperatureHint": "Mayor = mas aleatorio",
+      "topPLabel": "Top-P (Muestreo Nucleo)",
+      "topKLabel": "Top-K",
+      "topKHint": "0 = Deshabilitado",
+      "sampleCountLabel": "Cantidad de Muestras",
+      "sampleCountHint": "(Mayor = mas estable)",
+      "presets": {
+        "quickPreview": "Vista Rapida",
+        "quickPreviewDesc": "Prueba rapida",
+        "standard": "Estandar",
+        "standardDesc": "Uso diario",
+        "highPrecision": "Alta Precision",
+        "highPrecisionDesc": "Resultados estables",
+        "exploreMode": "Modo Exploracion",
+        "exploreModeDesc": "Mas posibilidades"
+      },
+      "errors": {
+        "serviceUnavailable": "El servicio de prediccion Kronos no esta disponible temporalmente",
+        "modelNotFound": "El modelo seleccionado no esta disponible",
+        "invalidParameters": "Parametros de prediccion invalidos",
+        "predictionTimeout": "Tiempo de prediccion agotado, por favor intente de nuevo",
+        "authRequired": "Por favor inicie sesion para usar la prediccion Kronos",
+        "lookbackMin": "El lookback debe ser al menos 10",
+        "predLenMin": "La longitud de prediccion debe ser al menos 1",
+        "filterRequired": "Por favor habilite al menos un filtro de senal",
+        "predictionFailed": "La prediccion Kronos fallo"
+      },
+      "generatedCodeTitle": "Codigo de Estrategia Kronos Generado",
+      "generateLabel": "Iniciar Analisis Kronos",
+      "generatingLabel": "Ejecutando Analisis..."
+    },
+    "kronosAIEntry": {
+      "title": "Entrada Kronos AI",
+      "defaultStrategyName": "Nueva Estrategia Kronos AI",
+      "validationError": "Por favor agregue al menos un indicador e ingrese un prompt (min 10 caracteres)",
+      "strategyNamePlaceholder": "Nombre de Estrategia",
+      "loadingMessage": "Generando estrategia de entrada Kronos AI...",
+      "indicatorContextTitle": "CONTEXTO DE INDICADOR",
+      "analysisPromptTitle": "PROMPT DE ANALISIS",
+      "analysisPromptPlaceholder": "Describe la estrategia de entrada que quieres generar...",
+      "generatedCodeTitle": "CODIGO DE ENTRADA KRONOS AI GENERADO",
+      "generateLabel": "Iniciar Generacion AI",
+      "generatingLabel": "Generando...",
+      "loadIndicatorTemplateTitle": "Cargar Plantilla de Indicador",
+      "noTemplatesAvailable": "No hay plantillas de indicador disponibles"
+    },
+    "kronosIndicatorEntry": {
+      "title": "Entrada Kronos por Indicador",
+      "defaultStrategyName": "Nueva Estrategia de Entrada Kronos",
+      "validationError": "Por favor agregue al menos un indicador, factor o expresion",
+      "strategyNamePlaceholder": "Nombre de Estrategia",
+      "loadingMessage": "Generando codigo de entrada Kronos por indicador...",
+      "generatedCodeTitle": "CODIGO DE ENTRADA KRONOS GENERADO",
+      "generateLabel": "Iniciar Generacion",
+      "generatingLabel": "Generando..."
+    },
+    "marketObserver": {
+      "title": "Observador de Mercado",
+      "defaultStrategyName": "Nuevo Observador",
+      "validationError": "Por favor agregue al menos un indicador, factor o expresion",
+      "strategyNamePlaceholder": "Nombre de Estrategia",
+      "loadingMessage": "Generando codigo de observador...",
+      "generatedCodeTitle": "CODIGO DE OBSERVADOR GENERADO",
+      "generateLabel": "Iniciar Generacion",
+      "generatingLabel": "Generando..."
+    },
+    "aiLibero": {
+      "title": "AI Libero",
+      "defaultStrategyName": "Nueva Estrategia AI Libero",
+      "validationError": "Por favor agregue al menos un indicador e ingrese un prompt (min 10 caracteres)",
+      "strategyNamePlaceholder": "Nombre de Estrategia",
+      "loadingMessage": "Generando estrategia AI Libero...",
+      "indicatorContextTitle": "CONTEXTO DE INDICADOR",
+      "analysisPromptTitle": "PROMPT DE ANALISIS",
+      "analysisPromptPlaceholder": "Describe la estrategia de trading que quieres generar...",
+      "generatedCodeTitle": "CODIGO DE ESTRATEGIA AI LIBERO GENERADO",
+      "generateLabel": "Iniciar Generacion",
+      "generatingLabel": "Generando...",
+      "loadIndicatorTemplateTitle": "Cargar Plantilla de Indicador",
+      "noTemplatesAvailable": "No hay plantillas de indicador disponibles",
+      "templateLoaded": "Plantilla \"{{name}}\" cargada con {{count}} indicadores",
+      "templateSaved": "Plantilla \"{{name}}\" guardada exitosamente",
+      "templateSaveFailed": "Error al guardar plantilla. Por favor intente de nuevo."
+    },
+    "traderAIEntry": {
+      "title": "Entrada Trader AI",
+      "defaultStrategyName": "Nueva Estrategia Trader",
+      "validationError": "Por favor agregue al menos un indicador e ingrese un prompt (min 10 caracteres)",
+      "strategyNamePlaceholder": "Nombre de Estrategia",
+      "loadingMessage": "Generando estrategia Trader AI...",
+      "indicatorContextTitle": "CONTEXTO DE INDICADOR",
+      "analysisPromptTitle": "PROMPT DE ANALISIS",
+      "analysisPromptPlaceholder": "Describe la estrategia de trading que quieres generar...",
+      "generatedCodeTitle": "CODIGO DE ENTRADA TRADER AI GENERADO",
+      "generateLabel": "Iniciar Generacion AI",
+      "generatingLabel": "Generando...",
+      "loadIndicatorTemplateTitle": "Cargar Plantilla de Indicador",
+      "noTemplatesAvailable": "No hay plantillas de indicador disponibles",
+      "templateLoaded": "Plantilla \"{{name}}\" cargada con {{count}} indicadores",
+      "templateSaved": "Plantilla \"{{name}}\" guardada exitosamente",
+      "templateSaveFailed": "Error al guardar plantilla. Por favor intente de nuevo."
+    },
+    "aiStrategyStudio": {
+      "welcomeTitle": "Estudio de Estrategia AI",
+      "welcomeSubtitle": "Describe tu estrategia de trading en lenguaje natural. Te ayudare a construir reglas de entrada, condiciones de salida y gestion de riesgos.",
+      "chatPlaceholder": "Describe tu estrategia de trading...",
+      "chatPlaceholderDisabled": "Crea un nuevo chat para comenzar...",
+      "newStrategyTitle": "Nueva Estrategia",
+      "newStrategyPreview": "Comienza a describir tu estrategia...",
+      "actions": {
+        "generateCode": "Generar Codigo",
+        "saveStrategy": "Guardar Estrategia",
+        "runBacktest": "Ejecutar Backtest"
+      },
+      "actionResults": {
+        "codeGenerated": "Generacion de codigo completada",
+        "strategySaved": "Estrategia guardada exitosamente",
+        "backtestStarted": "Backtest iniciado"
+      },
+      "errorPrefix": "Error: {{message}}",
+      "actionFailedPrefix": "Accion fallida: {{message}}",
+      "newRuleCondition": "Nueva condicion de regla {{type}}",
+      "newRuleDescription": "Agrega tu condicion {{type}} aqui"
+    }
+  },
+  "ui": {
+    "indicatorSelector": {
+      "title": "Seleccionar Indicadores",
+      "searchPlaceholder": "Buscar indicadores...",
+      "selected": "Seleccionado",
+      "available": "Disponible"
+    },
+    "regimeSelector": {
+      "title": "Regimen de Mercado",
+      "bullish": "Alcista",
+      "bearish": "Bajista",
+      "sideways": "Lateral",
+      "volatile": "Volatil"
+    },
+    "signalModeSelector": {
+      "title": "Modo de Senal",
+      "longOnly": "Solo Long",
+      "shortOnly": "Solo Short",
+      "directional": "Direccional",
+      "autoReverse": "Auto Inverso"
+    },
+    "codeDisplay": {
+      "copy": "Copiar",
+      "copied": "Copiado!",
+      "download": "Descargar"
+    },
+    "generateActionBar": {
+      "storageMode": {
+        "local": "Local",
+        "remote": "Remoto",
+        "hybrid": "Hibrido"
+      }
+    },
+    "namingDialog": {
+      "useSuggested": "Usar Sugerido",
+      "useCustom": "Usar Personalizado"
+    },
+    "templateToolbar": {
+      "saveAsTemplate": "Guardar como Plantilla",
+      "loadTemplate": "Cargar Plantilla",
+      "templates": "Plantillas"
+    },
+    "collapsiblePanel": {
+      "expand": "Expandir",
+      "collapse": "Colapsar"
+    }
+  }
 }

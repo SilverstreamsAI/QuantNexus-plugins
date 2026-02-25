@@ -12,6 +12,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -200,6 +201,7 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
   llmProvider = 'NONA',
   llmModel = 'nona-fast',
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // ---------------------------------------------------------------------------
   // Page-specific State (UI inputs)
   // ---------------------------------------------------------------------------
@@ -238,8 +240,8 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
     pageId: 'regime-detector-page',
     llmProvider,
     llmModel,
-    defaultStrategyName: 'New Strategy',
-    validationErrorMessage: 'Please add at least one indicator, factor, or expression',
+    defaultStrategyName: t('pages.regimeDetector.defaultStrategyName'),
+    validationErrorMessage: t('pages.regimeDetector.validationError'),
     buildConfig: buildApiConfig,
     validateConfig: validateMarketRegimeConfig,
     executeApi: executeMarketRegimeAnalysis as (config: MarketRegimeConfig) => Promise<GenerationResult>,
@@ -290,7 +292,7 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
       {/* ================================================================== */}
       <div className="flex-shrink-0 h-12 px-6 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
         <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
-          {pageTitle || 'Strategy Studio'}
+          {pageTitle || t('pages.regimeDetector.title')}
         </h1>
         <button
           onClick={onSettingsClick}
@@ -308,13 +310,13 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
         <div className="w-56 flex-shrink-0 border-r border-color-terminal-border bg-color-terminal-panel/30 p-4 overflow-y-auto">
           <div className="space-y-3">
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Current Strategy
+              {t('pages.common.currentStrategy')}
             </label>
             <input
               type="text"
               value={state.strategyName}
               onChange={handleNameChange}
-              placeholder="Strategy Name"
+              placeholder={t('pages.regimeDetector.strategyNamePlaceholder')}
               className="w-full px-3 py-2 text-xs border rounded focus:outline-none"
               style={{
                 backgroundColor: '#112240',
@@ -335,7 +337,7 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
                   state.isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
                 )}
               >
-                {state.isSaved ? 'Saved' : 'Unsaved'}
+                {state.isSaved ? t('pages.common.saved') : t('pages.common.unsaved')}
               </span>
             </div>
           </div>
@@ -358,7 +360,7 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
             {/* TICKET_077_D3: Wrap input area with GenerateContentWrapper */}
             <GenerateContentWrapper
               isGenerating={state.isGenerating}
-              loadingMessage="Generating strategy code..."
+              loadingMessage={t('pages.regimeDetector.loadingMessage')}
             >
               {/* component2: Regime Selector */}
               <RegimeSelector
@@ -409,7 +411,7 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
                   code={state.generateResult?.code || ''}
                   state={actions.getCodeDisplayState()}
                   errorMessage={state.generateResult?.error}
-                  title="GENERATED STRATEGY CODE"
+                  title={t('pages.regimeDetector.generatedCodeTitle')}
                   showLineNumbers={true}
                   maxHeight="400px"
                 />
@@ -422,8 +424,8 @@ export const RegimeDetectorPage: React.FC<RegimeDetectorPageProps> = ({
             isGenerating={state.isGenerating}
             hasResult={actions.hasResult}
             onGenerate={actions.handleStartGenerate}
-            generateLabel="Start Generate"
-            generatingLabel="Generating..."
+            generateLabel={t('pages.regimeDetector.generateLabel')}
+            generatingLabel={t('pages.regimeDetector.generatingLabel')}
           />
         </div>
       </div>

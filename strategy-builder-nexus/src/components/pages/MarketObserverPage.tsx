@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -165,6 +166,7 @@ export const MarketObserverPage: React.FC<MarketObserverPageProps> = ({
   llmProvider = 'NONA',
   llmModel = 'nona-fast',
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // ---------------------------------------------------------------------------
   // Page-specific State
   // ---------------------------------------------------------------------------
@@ -195,8 +197,8 @@ export const MarketObserverPage: React.FC<MarketObserverPageProps> = ({
     pageId: 'market-observer-page',
     llmProvider,
     llmModel,
-    defaultStrategyName: 'New Observer',
-    validationErrorMessage: 'Please add at least one indicator, factor, or expression',
+    defaultStrategyName: t('pages.marketObserver.defaultStrategyName'),
+    validationErrorMessage: t('pages.marketObserver.validationError'),
     buildConfig: buildApiConfig,
     validateConfig: validateMarketObserverConfig,
     executeApi: executeMarketObserverGeneration as (config: MarketObserverConfig) => Promise<GenerationResult>,
@@ -245,7 +247,7 @@ export const MarketObserverPage: React.FC<MarketObserverPageProps> = ({
       {/* Zone A: Page Header */}
       <div className="flex-shrink-0 h-12 px-6 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
         <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
-          {pageTitle || 'Market Observer'}
+          {pageTitle || t('pages.marketObserver.title')}
         </h1>
         <button
           onClick={onSettingsClick}
@@ -261,13 +263,13 @@ export const MarketObserverPage: React.FC<MarketObserverPageProps> = ({
         <div className="w-56 flex-shrink-0 border-r border-color-terminal-border bg-color-terminal-panel/30 p-4 overflow-y-auto">
           <div className="space-y-3">
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Current Strategy
+              {t('pages.common.currentStrategy')}
             </label>
             <input
               type="text"
               value={state.strategyName}
               onChange={handleNameChange}
-              placeholder="Strategy Name"
+              placeholder={t('pages.marketObserver.strategyNamePlaceholder')}
               className="w-full px-3 py-2 text-xs border rounded focus:outline-none"
               style={{
                 backgroundColor: '#112240',
@@ -288,7 +290,7 @@ export const MarketObserverPage: React.FC<MarketObserverPageProps> = ({
                   state.isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
                 )}
               >
-                {state.isSaved ? 'Saved' : 'Unsaved'}
+                {state.isSaved ? t('pages.common.saved') : t('pages.common.unsaved')}
               </span>
             </div>
           </div>
@@ -300,7 +302,7 @@ export const MarketObserverPage: React.FC<MarketObserverPageProps> = ({
           <div className="flex-1 overflow-y-auto p-6">
             <GenerateContentWrapper
               isGenerating={state.isGenerating}
-              loadingMessage="Generating observer code..."
+              loadingMessage={t('pages.marketObserver.loadingMessage')}
             >
               {/* Indicator Selector */}
               <IndicatorSelector
@@ -339,7 +341,7 @@ export const MarketObserverPage: React.FC<MarketObserverPageProps> = ({
                   code={state.generateResult?.code || ''}
                   state={actions.getCodeDisplayState()}
                   errorMessage={state.generateResult?.error}
-                  title="GENERATED OBSERVER CODE"
+                  title={t('pages.marketObserver.generatedCodeTitle')}
                   showLineNumbers={true}
                   maxHeight="400px"
                 />
@@ -352,8 +354,8 @@ export const MarketObserverPage: React.FC<MarketObserverPageProps> = ({
             isGenerating={state.isGenerating}
             hasResult={actions.hasResult}
             onGenerate={actions.handleStartGenerate}
-            generateLabel="Start Generate"
-            generatingLabel="Generating..."
+            generateLabel={t('pages.marketObserver.generateLabel')}
+            generatingLabel={t('pages.marketObserver.generatingLabel')}
           />
         </div>
       </div>

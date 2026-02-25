@@ -138,4 +138,129 @@
     "edit": "Editar",
     "close": "Fechar"
   }
+  ,
+  "pages": {
+    "regimeDetector": {
+      "title": "Detector de Regime",
+      "strategyNamePlaceholder": "Nome da Estrategia",
+      "generatedCodeTitle": "CODIGO DE ESTRATEGIA GERADO",
+      "generateLabel": "Iniciar Geracao",
+      "generatingLabel": "Gerando..."
+    },
+    "entrySignal": {
+      "title": "Gerador de Sinal de Entrada",
+      "strategyNamePlaceholder": "Nome da Estrategia",
+      "generatedCodeTitle": "CODIGO DE ENTRADA GERADO",
+      "generateLabel": "Iniciar Geracao",
+      "generatingLabel": "Gerando..."
+    },
+    "indicatorExit": {
+      "title": "Gerador de Saida por Indicador",
+      "strategyNamePlaceholder": "Nome da Estrategia",
+      "generatedCodeTitle": "CODIGO DE SAIDA GERADO",
+      "generateLabel": "Iniciar Geracao",
+      "generatingLabel": "Gerando..."
+    },
+    "kronosPredictor": {
+      "title": "Preditor KRONOS",
+      "strategyNamePlaceholder": "Nome da Estrategia",
+      "historicalDataPointsLabel": "Pontos de Dados Historicos (Lookback)",
+      "predictionDataPointsLabel": "Pontos de Dados de Predicao (Pred Length)",
+      "advancedSettingsTitle": "Configuracoes Avancadas",
+      "temperatureLabel": "Temperatura",
+      "topPLabel": "Top-P (Amostragem Nucleo)",
+      "topKLabel": "Top-K",
+      "generatedCodeTitle": "Codigo de Estrategia Kronos Gerado",
+      "generateLabel": "Iniciar Analise Kronos",
+      "generatingLabel": "Executando Analise..."
+    },
+    "kronosAIEntry": {
+      "title": "Entrada Kronos AI",
+      "strategyNamePlaceholder": "Nome da Estrategia",
+      "promptLabel": "Prompt",
+      "promptPlaceholder": "Descreva a estrategia de trading...",
+      "indicatorContextTitle": "CONTEXTO DO INDICADOR",
+      "generatedCodeTitle": "CODIGO DE ENTRADA KRONOS AI GERADO",
+      "generateLabel": "Iniciar Geracao",
+      "generatingLabel": "Gerando..."
+    },
+    "marketObserver": {
+      "title": "Observador de Mercado",
+      "strategyNamePlaceholder": "Nome da Estrategia",
+      "generatedCodeTitle": "CODIGO DE OBSERVADOR GERADO",
+      "generateLabel": "Iniciar Geracao",
+      "generatingLabel": "Gerando..."
+    },
+    "aiLibero": {
+      "title": "AI Libero",
+      "strategyNamePlaceholder": "Nome da Estrategia",
+      "indicatorContextTitle": "CONTEXTO DO INDICADOR",
+      "analysisPromptTitle": "PROMPT DE ANALISE",
+      "analysisPromptPlaceholder": "Descreva a estrategia de trading que deseja gerar...",
+      "generatedCodeTitle": "CODIGO DE ESTRATEGIA AI LIBERO GERADO",
+      "generateLabel": "Iniciar Geracao",
+      "generatingLabel": "Gerando...",
+      "loadIndicatorTemplateTitle": "Carregar Modelo de Indicador"
+    },
+    "traderAIEntry": {
+      "title": "Entrada Trader AI",
+      "strategyNamePlaceholder": "Nome da Estrategia",
+      "generatedCodeTitle": "CODIGO DE ENTRADA TRADER AI GERADO",
+      "generateLabel": "Iniciar Geracao",
+      "generatingLabel": "Gerando..."
+    },
+    "aiStrategyStudio": {
+      "welcomeTitle": "Estudio de Estrategia AI",
+      "welcomeSubtitle": "Descreva sua estrategia de trading em linguagem natural. Vou ajuda-lo a construir regras de entrada, condicoes de saida e gestao de riscos.",
+      "chatPlaceholder": "Descreva sua estrategia de trading...",
+      "chatPlaceholderDisabled": "Crie um novo chat para comecar..."
+    }
+  },
+  "ui": {
+    "indicatorSelector": {
+      "title": "Selecionar Indicadores",
+      "searchPlaceholder": "Pesquisar indicadores...",
+      "selected": "Selecionado",
+      "available": "Disponivel"
+    },
+    "regimeSelector": {
+      "title": "Regime de Mercado",
+      "bullish": "Alta",
+      "bearish": "Baixa",
+      "sideways": "Lateral",
+      "volatile": "Volatil"
+    },
+    "signalModeSelector": {
+      "title": "Modo de Sinal",
+      "longOnly": "Apenas Long",
+      "shortOnly": "Apenas Short",
+      "directional": "Direcional",
+      "autoReverse": "Auto Inverso"
+    },
+    "codeDisplay": {
+      "copy": "Copiar",
+      "copied": "Copiado!",
+      "download": "Baixar"
+    },
+    "generateActionBar": {
+      "storageMode": {
+        "local": "Local",
+        "remote": "Remoto",
+        "hybrid": "Hibrido"
+      }
+    },
+    "namingDialog": {
+      "useSuggested": "Usar Sugerido",
+      "useCustom": "Usar Personalizado"
+    },
+    "templateToolbar": {
+      "saveAsTemplate": "Salvar como Modelo",
+      "loadTemplate": "Carregar Modelo",
+      "templates": "Modelos"
+    },
+    "collapsiblePanel": {
+      "expand": "Expandir",
+      "collapse": "Recolher"
+    }
+  }
 }

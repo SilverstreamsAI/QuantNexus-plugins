@@ -14,6 +14,7 @@
  */
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -194,6 +195,7 @@ export const AILiberoPage: React.FC<AILiberoPageProps> = ({
   llmProvider = 'NONA',
   llmModel = 'nona-fast',
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // ---------------------------------------------------------------------------
   // Page-specific State
   // ---------------------------------------------------------------------------
@@ -234,10 +236,10 @@ export const AILiberoPage: React.FC<AILiberoPageProps> = ({
     }
 
     window.nexus?.window?.showNotification(
-      `Template "${template.name}" loaded with ${template.indicators.length} indicators`,
+      t('pages.aiLibero.templateLoaded', { name: template.name, count: template.indicators.length }),
       'success'
     );
-  }, []);
+  }, [t]);
 
   const handleLoadTemplate = useCallback(() => {
     setIsLoadDialogOpen(true);
@@ -255,13 +257,13 @@ export const AILiberoPage: React.FC<AILiberoPageProps> = ({
       await saveTemplate(template);
       setIsSaveDialogOpen(false);
       window.nexus?.window?.showNotification(
-        `Template "${template.name}" saved successfully`,
+        t('pages.aiLibero.templateSaved', { name: template.name }),
         'success'
       );
     } catch (error) {
       console.error('[AILibero] Failed to save template:', error);
       window.nexus?.window?.showNotification(
-        'Failed to save template. Please try again.',
+        t('pages.aiLibero.templateSaveFailed'),
         'error'
       );
     }
@@ -317,8 +319,8 @@ export const AILiberoPage: React.FC<AILiberoPageProps> = ({
     pageId: 'ai-libero-page',
     llmProvider,
     llmModel,
-    defaultStrategyName: 'New AI Libero Strategy',
-    validationErrorMessage: 'Please add at least one indicator and enter a prompt (min 10 characters)',
+    defaultStrategyName: t('pages.aiLibero.defaultStrategyName'),
+    validationErrorMessage: t('pages.aiLibero.validationError'),
     buildConfig: buildApiConfig,
     validateConfig: validateAILiberoConfig,
     executeApi,
@@ -357,7 +359,7 @@ export const AILiberoPage: React.FC<AILiberoPageProps> = ({
       {/* ================================================================== */}
       <div className="flex-shrink-0 h-12 px-6 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
         <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
-          {pageTitle || 'AI Libero'}
+          {pageTitle || t('pages.aiLibero.title')}
         </h1>
         <button
           onClick={onSettingsClick}
@@ -375,13 +377,13 @@ export const AILiberoPage: React.FC<AILiberoPageProps> = ({
         <div className="w-56 flex-shrink-0 border-r border-color-terminal-border bg-color-terminal-panel/30 p-4 overflow-y-auto">
           <div className="space-y-3">
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Current Strategy
+              {t('pages.common.currentStrategy')}
             </label>
             <input
               type="text"
               value={state.strategyName}
               onChange={handleNameChange}
-              placeholder="Strategy Name"
+              placeholder={t('pages.aiLibero.strategyNamePlaceholder')}
               className={cn(
                 'w-full px-3 py-2 text-xs border rounded focus:outline-none',
                 'bg-color-terminal-bg border-color-terminal-border text-color-terminal-text',
@@ -401,7 +403,7 @@ export const AILiberoPage: React.FC<AILiberoPageProps> = ({
                   state.isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
                 )}
               >
-                {state.isSaved ? 'Saved' : 'Unsaved'}
+                {state.isSaved ? t('pages.common.saved') : t('pages.common.unsaved')}
               </span>
             </div>
           </div>
@@ -415,7 +417,7 @@ export const AILiberoPage: React.FC<AILiberoPageProps> = ({
           <div className="flex-1 overflow-y-auto p-6">
             <GenerateContentWrapper
               isGenerating={state.isGenerating}
-              loadingMessage="Generating AI Libero strategy..."
+              loadingMessage={t('pages.aiLibero.loadingMessage')}
             >
               {/* component19: Template Toolbar */}
               <TemplateToolbar
@@ -433,7 +435,7 @@ export const AILiberoPage: React.FC<AILiberoPageProps> = ({
                     indicators={indicatorData as IndicatorDefinition[]}
                     blocks={indicatorBlocks}
                     onChange={setIndicatorBlocks}
-                    title="INDICATOR CONTEXT"
+                    title={t('pages.aiLibero.indicatorContextTitle')}
                   />
                 </div>
               )}
@@ -462,10 +464,10 @@ export const AILiberoPage: React.FC<AILiberoPageProps> = ({
 
               {/* component24: Prompt Textarea */}
               <PromptTextarea
-                title="ANALYSIS PROMPT"
+                title={t('pages.aiLibero.analysisPromptTitle')}
                 value={prompt}
                 onChange={setPrompt}
-                placeholder="Describe the trading strategy you want to generate..."
+                placeholder={t('pages.aiLibero.analysisPromptPlaceholder')}
                 rows={8}
                 className="mb-6"
               />
@@ -489,7 +491,7 @@ export const AILiberoPage: React.FC<AILiberoPageProps> = ({
                   code={state.generateResult?.code || ''}
                   state={actions.getCodeDisplayState()}
                   errorMessage={state.generateResult?.error}
-                  title="GENERATED AI LIBERO STRATEGY CODE"
+                  title={t('pages.aiLibero.generatedCodeTitle')}
                   showLineNumbers={true}
                   maxHeight="400px"
                 />
@@ -502,8 +504,8 @@ export const AILiberoPage: React.FC<AILiberoPageProps> = ({
             isGenerating={state.isGenerating}
             hasResult={actions.hasResult}
             onGenerate={actions.handleStartGenerate}
-            generateLabel="Start Generate"
-            generatingLabel="Generating..."
+            generateLabel={t('pages.aiLibero.generateLabel')}
+            generatingLabel={t('pages.aiLibero.generatingLabel')}
           />
         </div>
       </div>
@@ -531,8 +533,8 @@ export const AILiberoPage: React.FC<AILiberoPageProps> = ({
         isOpen={isLoadDialogOpen}
         onClose={() => setIsLoadDialogOpen(false)}
         onSelect={handleSelectTemplate}
-        title="Load Indicator Template"
-        emptyMessage="No indicator templates available"
+        title={t('pages.aiLibero.loadIndicatorTemplateTitle')}
+        emptyMessage={t('pages.aiLibero.noTemplatesAvailable')}
       />
 
       {/* TICKET_214: Save Template Dialog */}

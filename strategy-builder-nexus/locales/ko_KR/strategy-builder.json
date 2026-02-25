@@ -138,4 +138,129 @@
     "edit": "편집",
     "close": "닫기"
   }
+  ,
+  "pages": {
+    "regimeDetector": {
+      "title": "레짐 감지기",
+      "strategyNamePlaceholder": "전략 이름",
+      "generatedCodeTitle": "생성된 전략 코드",
+      "generateLabel": "생성 시작",
+      "generatingLabel": "생성 중..."
+    },
+    "entrySignal": {
+      "title": "진입 신호 생성기",
+      "strategyNamePlaceholder": "전략 이름",
+      "generatedCodeTitle": "생성된 진입 코드",
+      "generateLabel": "생성 시작",
+      "generatingLabel": "생성 중..."
+    },
+    "indicatorExit": {
+      "title": "지표 퇴출 생성기",
+      "strategyNamePlaceholder": "전략 이름",
+      "generatedCodeTitle": "생성된 퇴출 코드",
+      "generateLabel": "생성 시작",
+      "generatingLabel": "생성 중..."
+    },
+    "kronosPredictor": {
+      "title": "크로노스 예측기",
+      "strategyNamePlaceholder": "전략 이름",
+      "historicalDataPointsLabel": "히스토리 데이터 포인트 (룩백)",
+      "predictionDataPointsLabel": "예측 데이터 포인트 (예측 길이)",
+      "advancedSettingsTitle": "고급 설정",
+      "temperatureLabel": "온도",
+      "topPLabel": "Top-P (핵 샘플링)",
+      "topKLabel": "Top-K",
+      "generatedCodeTitle": "생성된 크로노스 전략 코드",
+      "generateLabel": "크로노스 분석 시작",
+      "generatingLabel": "분석 실행 중..."
+    },
+    "kronosAIEntry": {
+      "title": "크로노스 AI 진입",
+      "strategyNamePlaceholder": "전략 이름",
+      "promptLabel": "프롬프트",
+      "promptPlaceholder": "거래 전략을 설명하세요...",
+      "indicatorContextTitle": "지표 컨텍스트",
+      "generatedCodeTitle": "생성된 크로노스 AI 진입 코드",
+      "generateLabel": "생성 시작",
+      "generatingLabel": "생성 중..."
+    },
+    "marketObserver": {
+      "title": "시장 관측기",
+      "strategyNamePlaceholder": "전략 이름",
+      "generatedCodeTitle": "생성된 관측기 코드",
+      "generateLabel": "생성 시작",
+      "generatingLabel": "생성 중..."
+    },
+    "aiLibero": {
+      "title": "AI 리베로",
+      "strategyNamePlaceholder": "전략 이름",
+      "indicatorContextTitle": "지표 컨텍스트",
+      "analysisPromptTitle": "분석 프롬프트",
+      "analysisPromptPlaceholder": "생성하려는 거래 전략을 설명하세요...",
+      "generatedCodeTitle": "생성된 AI 리베로 전략 코드",
+      "generateLabel": "생성 시작",
+      "generatingLabel": "생성 중...",
+      "loadIndicatorTemplateTitle": "지표 템플릿 로드"
+    },
+    "traderAIEntry": {
+      "title": "트레이더 AI 진입",
+      "strategyNamePlaceholder": "전략 이름",
+      "generatedCodeTitle": "생성된 트레이더 AI 진입 코드",
+      "generateLabel": "생성 시작",
+      "generatingLabel": "생성 중..."
+    },
+    "aiStrategyStudio": {
+      "welcomeTitle": "AI 전략 스튜디오",
+      "welcomeSubtitle": "자연어로 거래 전략을 설명하세요. 진입 규칙, 퇴출 조건 및 위험 관리 구축을 도와드립니다.",
+      "chatPlaceholder": "거래 전략을 설명하세요...",
+      "chatPlaceholderDisabled": "새 채팅을 만들어 시작..."
+    }
+  },
+  "ui": {
+    "indicatorSelector": {
+      "title": "지표 선택",
+      "searchPlaceholder": "지표 검색...",
+      "selected": "선택됨",
+      "available": "사용 가능"
+    },
+    "regimeSelector": {
+      "title": "시장 레짐",
+      "bullish": "강세",
+      "bearish": "약세",
+      "sideways": "보합",
+      "volatile": "변동성"
+    },
+    "signalModeSelector": {
+      "title": "신호 모드",
+      "longOnly": "롱만",
+      "shortOnly": "숏만",
+      "directional": "디렉셔널",
+      "autoReverse": "오토 리버스"
+    },
+    "codeDisplay": {
+      "copy": "복사",
+      "copied": "복사됨!",
+      "download": "다운로드"
+    },
+    "generateActionBar": {
+      "storageMode": {
+        "local": "로컬",
+        "remote": "리모트",
+        "hybrid": "하이브리드"
+      }
+    },
+    "namingDialog": {
+      "useSuggested": "제안 사용",
+      "useCustom": "사용자 정의 사용"
+    },
+    "templateToolbar": {
+      "saveAsTemplate": "템플릿으로 저장",
+      "loadTemplate": "템플릿 로드",
+      "templates": "템플릿"
+    },
+    "collapsiblePanel": {
+      "expand": "확장",
+      "collapse": "축소"
+    }
+  }
 }

@@ -138,4 +138,249 @@
     "edit": "編輯",
     "close": "關閉"
   }
+  ,
+  "pages": {
+    "common": {
+      "currentStrategy": "目前策略",
+      "saved": "已儲存",
+      "unsaved": "未儲存"
+    },
+    "regimeDetector": {
+      "title": "市場狀態檢測器",
+      "defaultStrategyName": "新策略",
+      "validationError": "請新增至少一個指標、因子或表達式",
+      "strategyNamePlaceholder": "策略名稱",
+      "loadingMessage": "正在生成策略代碼...",
+      "generatedCodeTitle": "生成的策略代碼",
+      "generateLabel": "開始生成",
+      "generatingLabel": "生成中..."
+    },
+    "entrySignal": {
+      "title": "入場信號生成器",
+      "defaultStrategyName": "新入場策略",
+      "validationError": "請新增至少一個指標、因子或表達式",
+      "strategyNamePlaceholder": "策略名稱",
+      "loadingMessage": "正在生成入場信號代碼...",
+      "generatedCodeTitle": "生成的入場信號代碼",
+      "generateLabel": "開始生成",
+      "generatingLabel": "生成中..."
+    },
+    "indicatorExit": {
+      "title": "指標退出生成器",
+      "subtitle": "在組合器層之上配置緊急保護",
+      "defaultStrategyName": "新風險覆蓋策略",
+      "validationError": "至少需要一個啟用的風險覆蓋規則",
+      "strategyNamePlaceholder": "策略名稱",
+      "loadingMessage": "正在生成風險覆蓋退出代碼...",
+      "configurationLabel": "配置",
+      "activeRulesLabel": "活躍規則",
+      "hardSafetyLabel": "硬安全",
+      "exitArchitectureLabel": "退出架構",
+      "l0Combinator": "L0: 組合器",
+      "l1RiskOverride": "L1: 風險覆蓋 ({{count}})",
+      "l2HardSafety": "L2: 硬安全",
+      "layer1Title": "第1層: 風險覆蓋規則",
+      "enabledTotal": "{{enabled}} 已啟用 / {{total}} 總計",
+      "ruleExecutionInfo": "規則按優先順序在每根K線上評估。第一個觸發的規則執行,其餘跳過。",
+      "noRulesConfigured": "未配置風險覆蓋規則",
+      "noRulesHint": "新增規則以防止組合器失敗場景",
+      "addRule": "新增規則",
+      "layer2Title": "第2層: 硬安全網",
+      "alwaysActive": "始終活躍",
+      "ruleDescriptions": {
+        "circuit_breaker": "持倉虧損達到閾值時強制平倉",
+        "time_limit": "超過最大持倉時間後強制平倉",
+        "regime_detection": "市場狀態變化時覆蓋",
+        "drawdown_limit": "投資組合級別回撤保護",
+        "indicator_guard": "指標極端值時覆蓋"
+      },
+      "generatedCodeTitle": "生成的退出信號代碼",
+      "generateLabel": "生成退出策略",
+      "generatingLabel": "生成中..."
+    },
+    "kronosPredictor": {
+      "title": "克洛諾斯預測器",
+      "defaultStrategyName": "克洛諾斯策略",
+      "validationError": "請啟用至少一個信號過濾器",
+      "strategyNamePlaceholder": "策略名稱",
+      "loadingMessage": "正在生成克洛諾斯策略代碼...",
+      "predictionConfigTitle": "預測配置",
+      "historicalDataPointsLabel": "歷史數據點 (回溯)",
+      "predictionDataPointsLabel": "預測數據點 (預測長度)",
+      "lookbackRangeText": "範圍: 10 - {{max}} (受模型上下文限制)",
+      "predLenRangeText": "範圍: 1 - 512",
+      "advancedSettingsTitle": "進階設定",
+      "temperatureLabel": "溫度",
+      "temperatureHint": "越高 = 越隨機",
+      "topPLabel": "Top-P (核採樣)",
+      "topKLabel": "Top-K",
+      "topKHint": "0 = 停用",
+      "sampleCountLabel": "採樣數量",
+      "sampleCountHint": "(越高 = 越穩定)",
+      "presets": {
+        "quickPreview": "快速預覽",
+        "quickPreviewDesc": "快速測試",
+        "standard": "標準",
+        "standardDesc": "日常使用",
+        "highPrecision": "高精度",
+        "highPrecisionDesc": "穩定結果",
+        "exploreMode": "探索模式",
+        "exploreModeDesc": "更多可能性"
+      },
+      "errors": {
+        "serviceUnavailable": "克洛諾斯預測服務暫時不可用",
+        "modelNotFound": "所選模型不可用",
+        "invalidParameters": "無效的預測參數",
+        "predictionTimeout": "預測逾時,請重試",
+        "authRequired": "請登入以使用克洛諾斯預測",
+        "lookbackMin": "回溯至少為10",
+        "predLenMin": "預測長度至少為1",
+        "filterRequired": "請啟用至少一個信號過濾器",
+        "predictionFailed": "克洛諾斯預測失敗"
+      },
+      "generatedCodeTitle": "生成的克洛諾斯策略代碼",
+      "generateLabel": "開始克洛諾斯分析",
+      "generatingLabel": "運行分析中..."
+    },
+    "kronosAIEntry": {
+      "title": "克洛諾斯 AI 入場",
+      "defaultStrategyName": "新克洛諾斯 AI 策略",
+      "validationError": "請新增至少一個指標並輸入提示詞(最少10個字元)",
+      "strategyNamePlaceholder": "策略名稱",
+      "loadingMessage": "正在生成克洛諾斯 AI 入場策略...",
+      "indicatorContextTitle": "指標上下文",
+      "analysisPromptTitle": "分析提示詞",
+      "analysisPromptPlaceholder": "描述您想要生成的入場策略...",
+      "generatedCodeTitle": "生成的克洛諾斯 AI 入場代碼",
+      "generateLabel": "開始 AI 生成",
+      "generatingLabel": "生成中...",
+      "loadIndicatorTemplateTitle": "載入指標範本",
+      "noTemplatesAvailable": "沒有可用的指標範本"
+    },
+    "kronosIndicatorEntry": {
+      "title": "克洛諾斯指標入場",
+      "defaultStrategyName": "新克洛諾斯入場策略",
+      "validationError": "請新增至少一個指標、因子或表達式",
+      "strategyNamePlaceholder": "策略名稱",
+      "loadingMessage": "正在生成克洛諾斯指標入場代碼...",
+      "generatedCodeTitle": "生成的克洛諾斯入場代碼",
+      "generateLabel": "開始生成",
+      "generatingLabel": "生成中..."
+    },
+    "marketObserver": {
+      "title": "市場觀察者",
+      "defaultStrategyName": "新觀察者",
+      "validationError": "請新增至少一個指標、因子或表達式",
+      "strategyNamePlaceholder": "策略名稱",
+      "loadingMessage": "正在生成觀察者代碼...",
+      "generatedCodeTitle": "生成的觀察者代碼",
+      "generateLabel": "開始生成",
+      "generatingLabel": "生成中..."
+    },
+    "aiLibero": {
+      "title": "AI 自由人",
+      "defaultStrategyName": "新 AI 自由人策略",
+      "validationError": "請新增至少一個指標並輸入提示詞(最少10個字元)",
+      "strategyNamePlaceholder": "策略名稱",
+      "loadingMessage": "正在生成 AI 自由人策略...",
+      "indicatorContextTitle": "指標上下文",
+      "analysisPromptTitle": "分析提示詞",
+      "analysisPromptPlaceholder": "描述您想要生成的交易策略...",
+      "generatedCodeTitle": "生成的 AI 自由人策略代碼",
+      "generateLabel": "開始生成",
+      "generatingLabel": "生成中...",
+      "loadIndicatorTemplateTitle": "載入指標範本",
+      "noTemplatesAvailable": "沒有可用的指標範本",
+      "templateLoaded": "範本 \"{{name}}\" 已載入,包含 {{count}} 個指標",
+      "templateSaved": "範本 \"{{name}}\" 儲存成功",
+      "templateSaveFailed": "儲存範本失敗,請重試。"
+    },
+    "traderAIEntry": {
+      "title": "交易員 AI 入場",
+      "defaultStrategyName": "新交易員策略",
+      "validationError": "請新增至少一個指標並輸入提示詞(最少10個字元)",
+      "strategyNamePlaceholder": "策略名稱",
+      "loadingMessage": "正在生成交易員 AI 策略...",
+      "indicatorContextTitle": "指標上下文",
+      "analysisPromptTitle": "分析提示詞",
+      "analysisPromptPlaceholder": "描述您想要生成的交易策略...",
+      "generatedCodeTitle": "生成的交易員 AI 入場代碼",
+      "generateLabel": "開始 AI 生成",
+      "generatingLabel": "生成中...",
+      "loadIndicatorTemplateTitle": "載入指標範本",
+      "noTemplatesAvailable": "沒有可用的指標範本",
+      "templateLoaded": "範本 \"{{name}}\" 已載入,包含 {{count}} 個指標",
+      "templateSaved": "範本 \"{{name}}\" 儲存成功",
+      "templateSaveFailed": "儲存範本失敗,請重試。"
+    },
+    "aiStrategyStudio": {
+      "welcomeTitle": "AI 策略工作室",
+      "welcomeSubtitle": "用自然語言描述您的交易策略。我將幫助您構建入場規則、退出條件和風險管理。",
+      "chatPlaceholder": "描述您的交易策略...",
+      "chatPlaceholderDisabled": "建立新聊天以開始...",
+      "newStrategyTitle": "新策略",
+      "newStrategyPreview": "開始描述您的策略...",
+      "actions": {
+        "generateCode": "生成代碼",
+        "saveStrategy": "儲存策略",
+        "runBacktest": "運行回測"
+      },
+      "actionResults": {
+        "codeGenerated": "代碼生成完成",
+        "strategySaved": "策略儲存成功",
+        "backtestStarted": "回測已啟動"
+      },
+      "errorPrefix": "錯誤: {{message}}",
+      "actionFailedPrefix": "操作失敗: {{message}}",
+      "newRuleCondition": "新 {{type}} 規則條件",
+      "newRuleDescription": "在此新增您的 {{type}} 條件"
+    }
+  },
+  "ui": {
+    "indicatorSelector": {
+      "title": "選擇指標",
+      "searchPlaceholder": "搜索指標...",
+      "selected": "已選擇",
+      "available": "可用"
+    },
+    "regimeSelector": {
+      "title": "市場狀態",
+      "bullish": "看漲",
+      "bearish": "看跌",
+      "sideways": "盤整",
+      "volatile": "波動"
+    },
+    "signalModeSelector": {
+      "title": "信號模式",
+      "longOnly": "僅做多",
+      "shortOnly": "僅做空",
+      "directional": "方向性",
+      "autoReverse": "自動反轉"
+    },
+    "codeDisplay": {
+      "copy": "複製",
+      "copied": "已複製!",
+      "download": "下載"
+    },
+    "generateActionBar": {
+      "storageMode": {
+        "local": "本地",
+        "remote": "遠程",
+        "hybrid": "混合"
+      }
+    },
+    "namingDialog": {
+      "useSuggested": "使用建議",
+      "useCustom": "使用自定義"
+    },
+    "templateToolbar": {
+      "saveAsTemplate": "保存為模板",
+      "loadTemplate": "加載模板",
+      "templates": "模板"
+    },
+    "collapsiblePanel": {
+      "expand": "展開",
+      "collapse": "折疊"
+    }
+  }
 }

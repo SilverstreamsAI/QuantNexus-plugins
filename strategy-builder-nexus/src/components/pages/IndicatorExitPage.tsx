@@ -16,6 +16,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings, Plus, ShieldAlert, OctagonX, Shield } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -71,14 +72,7 @@ interface IndicatorExitPageProps {
   llmModel?: string;
 }
 
-// Rule type descriptions for Add Rule dropdown
-const RULE_DESCRIPTIONS: Record<string, string> = {
-  circuit_breaker: 'Force close on position loss threshold',
-  time_limit: 'Force close after max holding period',
-  regime_detection: 'Override when market regime changes',
-  drawdown_limit: 'Portfolio-level drawdown protection',
-  indicator_guard: 'Override on indicator extreme values',
-};
+// Rule type descriptions are loaded from i18n in the component render
 
 // -----------------------------------------------------------------------------
 // Rule Factory
@@ -190,6 +184,7 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
   llmProvider = 'NONA',
   llmModel = 'nona-fast',
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // ---------------------------------------------------------------------------
   // Page-specific State
   // ---------------------------------------------------------------------------
@@ -273,8 +268,8 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
     pageId: 'indicator-exit-page',
     llmProvider,
     llmModel,
-    defaultStrategyName: 'New Risk Override Strategy',
-    validationErrorMessage: 'At least one enabled risk override rule is required',
+    defaultStrategyName: t('pages.indicatorExit.defaultStrategyName'),
+    validationErrorMessage: t('pages.indicatorExit.validationError'),
     buildConfig: buildApiConfig,
     validateConfig: validateRiskOverrideExitConfig,
     executeApi: executeRiskOverrideExit as (config: RiskOverrideExitConfig) => Promise<GenerationResult>,
@@ -314,10 +309,10 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
       <div className="flex-shrink-0 px-6 py-2 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
         <div>
           <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
-            {pageTitle || 'Risk Manager - Exit Override Rules'}
+            {pageTitle || t('pages.indicatorExit.title')}
           </h1>
           <p className="text-[10px] text-color-terminal-text-muted mt-0.5">
-            Configure emergency protection above the combinator layer
+            {t('pages.indicatorExit.subtitle')}
           </p>
         </div>
         <button
@@ -336,13 +331,13 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
         <div className="w-56 flex-shrink-0 border-r border-color-terminal-border bg-color-terminal-panel/30 p-4 overflow-y-auto">
           <div className="space-y-3">
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Current Strategy
+              {t('pages.common.currentStrategy')}
             </label>
             <input
               type="text"
               value={state.strategyName}
               onChange={handleNameChange}
-              placeholder="Strategy Name"
+              placeholder={t('pages.indicatorExit.strategyNamePlaceholder')}
               className="w-full px-3 py-2 text-xs border rounded focus:outline-none"
               style={{
                 backgroundColor: '#112240',
@@ -363,7 +358,7 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
                   state.isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
                 )}
               >
-                {state.isSaved ? 'Saved' : 'Unsaved'}
+                {state.isSaved ? t('pages.common.saved') : t('pages.common.unsaved')}
               </span>
             </div>
           </div>
@@ -371,12 +366,12 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
           {/* Architecture Summary */}
           <div className="mt-6 space-y-3">
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Configuration
+              {t('pages.indicatorExit.configurationLabel')}
             </label>
 
             {/* Active Rules */}
             <div className="flex items-center justify-between text-[10px]">
-              <span className="text-color-terminal-text-muted">Active Rules</span>
+              <span className="text-color-terminal-text-muted">{t('pages.indicatorExit.activeRulesLabel')}</span>
               <span className={cn(
                 'px-1.5 py-0.5 rounded font-medium',
                 enabledRules.length > 0
@@ -389,7 +384,7 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
 
             {/* Hard Safety */}
             <div className="flex items-center justify-between text-[10px]">
-              <span className="text-color-terminal-text-muted">Hard Safety</span>
+              <span className="text-color-terminal-text-muted">{t('pages.indicatorExit.hardSafetyLabel')}</span>
               <span className="px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 font-medium">
                 {hardSafetyMaxLoss}%
               </span>
@@ -399,23 +394,23 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
           {/* Mini Architecture Diagram */}
           <div className="mt-6 p-3 rounded border border-color-terminal-border/50 bg-color-terminal-bg/50">
             <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-2">
-              Exit Architecture
+              {t('pages.indicatorExit.exitArchitectureLabel')}
             </label>
             <div className="space-y-1.5 text-[10px]">
               <div className="text-color-terminal-text-muted">
-                L0: Combinator
+                {t('pages.indicatorExit.l0Combinator')}
               </div>
               <div className="text-color-terminal-text-muted pl-2">
                 &#8595;
               </div>
               <div className="text-color-terminal-accent-primary font-medium">
-                L1: Risk Override ({enabledRules.length})
+                {t('pages.indicatorExit.l1RiskOverride', { count: enabledRules.length })}
               </div>
               <div className="text-color-terminal-text-muted pl-2">
                 &#8595;
               </div>
               <div className="text-red-400 font-medium">
-                L2: Hard Safety
+                {t('pages.indicatorExit.l2HardSafety')}
               </div>
             </div>
           </div>
@@ -429,7 +424,7 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
           <div className="flex-1 overflow-y-auto p-6">
             <GenerateContentWrapper
               isGenerating={state.isGenerating}
-              loadingMessage="Generating risk override exit code..."
+              loadingMessage={t('pages.indicatorExit.loadingMessage')}
             >
               {/* ======================================================== */}
               {/* Layer 1: Risk Override Rules                               */}
@@ -439,7 +434,7 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
                 <div className="flex items-center gap-2 mb-1 pb-2 border-b border-color-terminal-border/30">
                   <ShieldAlert className="w-4 h-4 text-color-terminal-accent-primary" />
                   <span className="text-[11px] font-bold uppercase tracking-wider text-color-terminal-text">
-                    Layer 1: Risk Override Rules
+                    {t('pages.indicatorExit.layer1Title')}
                   </span>
                   <span className={cn(
                     'ml-auto text-[10px] px-2 py-0.5 rounded font-medium',
@@ -447,13 +442,13 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
                       ? 'bg-color-terminal-accent-teal/20 text-color-terminal-accent-teal'
                       : 'bg-color-terminal-text-muted/20 text-color-terminal-text-muted'
                   )}>
-                    {enabledRules.length} enabled / {rules.length} total
+                    {t('pages.indicatorExit.enabledTotal', { enabled: enabledRules.length, total: rules.length })}
                   </span>
                 </div>
 
                 {/* Rule Execution Info */}
                 <p className="text-[10px] text-color-terminal-text-muted mb-4 mt-2">
-                  Rules evaluated in priority order each bar. First triggered rule executes, remaining skipped.
+                  {t('pages.indicatorExit.ruleExecutionInfo')}
                 </p>
 
                 {/* Rule List or Empty State */}
@@ -461,10 +456,10 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <Shield className="w-10 h-10 text-color-terminal-text-muted/30 mb-3" />
                     <p className="text-xs text-color-terminal-text-muted mb-1">
-                      No risk override rules configured
+                      {t('pages.indicatorExit.noRulesConfigured')}
                     </p>
                     <p className="text-[10px] text-color-terminal-text-muted/70 mb-4">
-                      Add rules to protect against combinator failure scenarios
+                      {t('pages.indicatorExit.noRulesHint')}
                     </p>
                   </div>
                 ) : (
@@ -492,7 +487,7 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
                       className="flex items-center gap-2 px-4 py-2.5 text-xs font-medium border border-dashed border-color-terminal-border rounded-lg hover:border-color-terminal-accent-primary/50 hover:bg-white/5 text-color-terminal-text-muted hover:text-color-terminal-text transition-all w-full justify-center"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      Add Rule
+                      {t('pages.indicatorExit.addRule')}
                     </button>
                     <PortalDropdown
                       isOpen={addRuleOpen}
@@ -517,7 +512,7 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
                             <span className="text-xs text-[#e6f1ff] font-medium">{rt.label}</span>
                           </div>
                           <p className="text-[10px] text-color-terminal-text-muted ml-4 mt-0.5">
-                            {RULE_DESCRIPTIONS[rt.value]}
+                            {t(`pages.indicatorExit.ruleDescriptions.${rt.value}`)}
                           </p>
                         </button>
                       ))}
@@ -533,10 +528,10 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-color-terminal-border/30">
                   <OctagonX className="w-4 h-4 text-red-400" />
                   <span className="text-[11px] font-bold uppercase tracking-wider text-color-terminal-text">
-                    Layer 2: Hard Safety Net
+                    {t('pages.indicatorExit.layer2Title')}
                   </span>
                   <span className="ml-auto text-[10px] px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-medium">
-                    Always Active
+                    {t('pages.indicatorExit.alwaysActive')}
                   </span>
                 </div>
                 <HardSafetyConfig
@@ -556,7 +551,7 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
                   code={state.generateResult?.code || ''}
                   state={actions.getCodeDisplayState()}
                   errorMessage={state.generateResult?.error}
-                  title="GENERATED RISK OVERRIDE CODE"
+                  title={t('pages.indicatorExit.generatedCodeTitle')}
                   showLineNumbers={true}
                   maxHeight="400px"
                 />
@@ -569,8 +564,8 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
             isGenerating={state.isGenerating}
             hasResult={actions.hasResult}
             onGenerate={actions.handleStartGenerate}
-            generateLabel="Generate Exit Strategy"
-            generatingLabel="Generating..."
+            generateLabel={t('pages.indicatorExit.generateLabel')}
+            generatingLabel={t('pages.indicatorExit.generatingLabel')}
           />
         </div>
       </div>

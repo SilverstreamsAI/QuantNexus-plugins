@@ -14,6 +14,7 @@
  */
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -187,6 +188,7 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
   llmProvider = 'NONA',
   llmModel = 'nona-fast',
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // ---------------------------------------------------------------------------
   // Page-specific State
   // ---------------------------------------------------------------------------
@@ -219,10 +221,10 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
     }
 
     window.nexus?.window?.showNotification(
-      `Template "${template.name}" loaded with ${template.indicators.length} indicators`,
+      t('pages.traderAIEntry.templateLoaded', { name: template.name, count: template.indicators.length }),
       'success'
     );
-  }, []);
+  }, [t]);
 
   const handleLoadTemplate = useCallback(() => {
     setIsLoadDialogOpen(true);
@@ -240,13 +242,13 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
       await saveTemplate(template);
       setIsSaveDialogOpen(false);
       window.nexus?.window?.showNotification(
-        `Template "${template.name}" saved successfully`,
+        t('pages.traderAIEntry.templateSaved', { name: template.name }),
         'success'
       );
     } catch (error) {
       console.error('[TraderAIEntry] Failed to save template:', error);
       window.nexus?.window?.showNotification(
-        'Failed to save template. Please try again.',
+        t('pages.traderAIEntry.templateSaveFailed'),
         'error'
       );
     }
@@ -295,8 +297,8 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
     pageId: 'trader-ai-entry-page',
     llmProvider,
     llmModel,
-    defaultStrategyName: 'New Trader Strategy',
-    validationErrorMessage: 'Please add at least one indicator and enter a prompt (min 10 characters)',
+    defaultStrategyName: t('pages.traderAIEntry.defaultStrategyName'),
+    validationErrorMessage: t('pages.traderAIEntry.validationError'),
     buildConfig: buildApiConfig,
     validateConfig: validateTraderAIEntryConfig,
     executeApi,
@@ -335,7 +337,7 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
       {/* ================================================================== */}
       <div className="flex-shrink-0 h-12 px-6 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
         <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
-          {pageTitle || 'Trader Mode AI Entry'}
+          {pageTitle || t('pages.traderAIEntry.title')}
         </h1>
         <button
           onClick={onSettingsClick}
@@ -353,13 +355,13 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
         <div className="w-56 flex-shrink-0 border-r border-color-terminal-border bg-color-terminal-panel/30 p-4 overflow-y-auto">
           <div className="space-y-3">
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Current Strategy
+              {t('pages.common.currentStrategy')}
             </label>
             <input
               type="text"
               value={state.strategyName}
               onChange={handleNameChange}
-              placeholder="Strategy Name"
+              placeholder={t('pages.traderAIEntry.strategyNamePlaceholder')}
               className={cn(
                 'w-full px-3 py-2 text-xs border rounded focus:outline-none',
                 'bg-color-terminal-bg border-color-terminal-border text-color-terminal-text',
@@ -379,7 +381,7 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
                   state.isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
                 )}
               >
-                {state.isSaved ? 'Saved' : 'Unsaved'}
+                {state.isSaved ? t('pages.common.saved') : t('pages.common.unsaved')}
               </span>
             </div>
           </div>
@@ -393,7 +395,7 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
           <div className="flex-1 overflow-y-auto p-6">
             <GenerateContentWrapper
               isGenerating={state.isGenerating}
-              loadingMessage="Generating Trader AI strategy..."
+              loadingMessage={t('pages.traderAIEntry.loadingMessage')}
             >
               {/* component19: Template Toolbar */}
               <TemplateToolbar
@@ -411,7 +413,7 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
                     indicators={indicatorData as IndicatorDefinition[]}
                     blocks={indicatorBlocks}
                     onChange={setIndicatorBlocks}
-                    title="INDICATOR CONTEXT"
+                    title={t('pages.traderAIEntry.indicatorContextTitle')}
                   />
                 </div>
               )}
@@ -440,10 +442,10 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
 
               {/* component24: Prompt Textarea */}
               <PromptTextarea
-                title="ANALYSIS PROMPT"
+                title={t('pages.traderAIEntry.analysisPromptTitle')}
                 value={prompt}
                 onChange={setPrompt}
-                placeholder="Describe the trading strategy you want to generate..."
+                placeholder={t('pages.traderAIEntry.analysisPromptPlaceholder')}
                 rows={8}
                 className="mb-6"
               />
@@ -458,7 +460,7 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
                   code={state.generateResult?.code || ''}
                   state={actions.getCodeDisplayState()}
                   errorMessage={state.generateResult?.error}
-                  title="GENERATED TRADER STRATEGY CODE"
+                  title={t('pages.traderAIEntry.generatedCodeTitle')}
                   showLineNumbers={true}
                   maxHeight="400px"
                 />
@@ -471,8 +473,8 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
             isGenerating={state.isGenerating}
             hasResult={actions.hasResult}
             onGenerate={actions.handleStartGenerate}
-            generateLabel="Start AI Generate"
-            generatingLabel="Generating..."
+            generateLabel={t('pages.traderAIEntry.generateLabel')}
+            generatingLabel={t('pages.traderAIEntry.generatingLabel')}
           />
         </div>
       </div>
@@ -500,8 +502,8 @@ export const TraderAIEntryPage: React.FC<TraderAIEntryPageProps> = ({
         isOpen={isLoadDialogOpen}
         onClose={() => setIsLoadDialogOpen(false)}
         onSelect={handleSelectTemplate}
-        title="Load Indicator Template"
-        emptyMessage="No indicator templates available"
+        title={t('pages.traderAIEntry.loadIndicatorTemplateTitle')}
+        emptyMessage={t('pages.traderAIEntry.noTemplatesAvailable')}
       />
 
       {/* TICKET_214: Save Template Dialog */}

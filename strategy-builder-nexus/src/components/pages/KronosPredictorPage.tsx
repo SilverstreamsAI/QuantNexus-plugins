@@ -13,6 +13,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings, Zap, TrendingUp, CheckCircle, Shuffle } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -368,6 +369,7 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
   llmProvider = 'KRONOS',
   llmModel = 'kronos-small',
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // ---------------------------------------------------------------------------
   // Page-specific State (UI inputs)
   // ---------------------------------------------------------------------------
@@ -427,8 +429,8 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
     pageId: 'kronos-predictor-page',
     llmProvider,
     llmModel,
-    defaultStrategyName: 'Kronos Strategy',
-    validationErrorMessage: 'Please enable at least one signal filter',
+    defaultStrategyName: t('pages.kronosPredictor.defaultStrategyName'),
+    validationErrorMessage: t('pages.kronosPredictor.validationError'),
     buildConfig: buildApiConfig,
     validateConfig: validateKronosConfig,
     executeApi: executeKronosPrediction,
@@ -495,7 +497,7 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
       {/* ================================================================== */}
       <div className="flex-shrink-0 h-12 px-6 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
         <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
-          {pageTitle || 'Kronos AI Predictor'}
+          {pageTitle || t('pages.kronosPredictor.title')}
         </h1>
         <button
           onClick={onSettingsClick}
@@ -513,13 +515,13 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
         <div className="w-56 flex-shrink-0 border-r border-color-terminal-border bg-color-terminal-panel/30 p-4 overflow-y-auto">
           <div className="space-y-3">
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Current Strategy
+              {t('pages.common.currentStrategy')}
             </label>
             <input
               type="text"
               value={state.strategyName}
               onChange={handleNameChange}
-              placeholder="Strategy Name"
+              placeholder={t('pages.kronosPredictor.strategyNamePlaceholder')}
               className="w-full px-3 py-2 text-xs border rounded focus:outline-none"
               style={{
                 backgroundColor: '#112240',
@@ -540,7 +542,7 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
                   state.isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
                 )}
               >
-                {state.isSaved ? 'Saved' : 'Unsaved'}
+                {state.isSaved ? t('pages.common.saved') : t('pages.common.unsaved')}
               </span>
             </div>
           </div>
@@ -555,7 +557,7 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
             {/* TICKET_077_D3: Wrap input area with GenerateContentWrapper */}
             <GenerateContentWrapper
               isGenerating={state.isGenerating}
-              loadingMessage="Generating Kronos strategy code..."
+              loadingMessage={t('pages.kronosPredictor.loadingMessage')}
             >
               {/* Preset Configuration Buttons */}
               <PresetButtonGroup
@@ -581,11 +583,11 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
                   {/* Prediction Configuration */}
                   <div className="border border-color-terminal-border rounded-lg bg-color-terminal-surface p-4">
                     <h3 className="font-mono text-sm font-bold uppercase tracking-widest text-color-terminal-accent-gold mb-4">
-                      Prediction Configuration
+                      {t('pages.kronosPredictor.predictionConfigTitle')}
                     </h3>
                     <div className="space-y-4">
                       <SliderInputGroup
-                        label="Historical Data Points (Lookback)"
+                        label={t('pages.kronosPredictor.historicalDataPointsLabel')}
                         value={lookback}
                         onChange={setLookback}
                         min={10}
@@ -594,13 +596,13 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
                         rangeText={lookbackRangeText}
                       />
                       <SliderInputGroup
-                        label="Prediction Data Points (Pred Length)"
+                        label={t('pages.kronosPredictor.predictionDataPointsLabel')}
                         value={predLen}
                         onChange={setPredLen}
                         min={1}
                         max={512}
                         step={1}
-                        rangeText="Range: 1 - 512"
+                        rangeText={t('pages.kronosPredictor.predLenRangeText')}
                       />
                     </div>
                   </div>
@@ -610,13 +612,13 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
                 <div className="space-y-6">
                   {/* Advanced Settings (Collapsible) */}
                   <CollapsiblePanel
-                    title="Advanced Settings"
+                    title={t('pages.kronosPredictor.advancedSettingsTitle')}
                     defaultExpanded={false}
                   >
                     <div className="space-y-4">
                       <SliderInputGroup
-                        label="Temperature"
-                        hint="Higher = more random"
+                        label={t('pages.kronosPredictor.temperatureLabel')}
+                        hint={t('pages.kronosPredictor.temperatureHint')}
                         value={temperature}
                         onChange={setTemperature}
                         min={0.1}
@@ -625,7 +627,7 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
                         decimals={1}
                       />
                       <SliderInputGroup
-                        label="Top-P (Nucleus Sampling)"
+                        label={t('pages.kronosPredictor.topPLabel')}
                         value={topP}
                         onChange={setTopP}
                         min={0.5}
@@ -634,8 +636,8 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
                         decimals={2}
                       />
                       <SliderInputGroup
-                        label="Top-K"
-                        hint="0 = Disabled"
+                        label={t('pages.kronosPredictor.topKLabel')}
+                        hint={t('pages.kronosPredictor.topKHint')}
                         value={topK}
                         onChange={setTopK}
                         min={0}
@@ -645,9 +647,9 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
                       {/* Sample Count */}
                       <div className="flex flex-col gap-2">
                         <label className="text-[13px] font-medium text-color-terminal-text">
-                          Sample Count
+                          {t('pages.kronosPredictor.sampleCountLabel')}
                           <span className="text-xs text-color-terminal-text-muted ml-1">
-                            (Higher = more stable)
+                            {t('pages.kronosPredictor.sampleCountHint')}
                           </span>
                         </label>
                         <select
@@ -703,7 +705,7 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
                   code={state.generateResult?.code || ''}
                   state={actions.getCodeDisplayState()}
                   errorMessage={state.generateResult?.error}
-                  title="Generated Kronos Strategy Code"
+                  title={t('pages.kronosPredictor.generatedCodeTitle')}
                   language="python"
                   showLineNumbers={true}
                   maxHeight="400px"
@@ -717,8 +719,8 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
             isGenerating={state.isGenerating}
             hasResult={actions.hasResult}
             onGenerate={actions.handleStartGenerate}
-            generateLabel="Start Kronos Analysis"
-            generatingLabel="Running Analysis..."
+            generateLabel={t('pages.kronosPredictor.generateLabel')}
+            generatingLabel={t('pages.kronosPredictor.generatingLabel')}
           />
         </div>
       </div>

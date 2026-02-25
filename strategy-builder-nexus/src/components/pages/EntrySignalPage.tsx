@@ -12,6 +12,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -192,6 +193,7 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
   llmProvider = 'NONA',
   llmModel = 'nona-fast',
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // ---------------------------------------------------------------------------
   // Page-specific State (UI inputs)
   // ---------------------------------------------------------------------------
@@ -230,8 +232,8 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
     pageId: 'entry-signal-page',
     llmProvider,
     llmModel,
-    defaultStrategyName: 'New Entry Strategy',
-    validationErrorMessage: 'Please add at least one indicator, factor, or expression',
+    defaultStrategyName: t('pages.entrySignal.defaultStrategyName'),
+    validationErrorMessage: t('pages.entrySignal.validationError'),
     buildConfig: buildApiConfig,
     validateConfig: validateRegimeIndicatorEntryConfig,
     executeApi: executeRegimeIndicatorEntry as (config: RegimeIndicatorEntryConfig) => Promise<GenerationResult>,
@@ -282,7 +284,7 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
       {/* ================================================================== */}
       <div className="flex-shrink-0 h-12 px-6 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
         <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
-          {pageTitle || 'Indicator Entry Generator'}
+          {pageTitle || t('pages.entrySignal.title')}
         </h1>
         <button
           onClick={onSettingsClick}
@@ -300,13 +302,13 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
         <div className="w-56 flex-shrink-0 border-r border-color-terminal-border bg-color-terminal-panel/30 p-4 overflow-y-auto">
           <div className="space-y-3">
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Current Strategy
+              {t('pages.common.currentStrategy')}
             </label>
             <input
               type="text"
               value={state.strategyName}
               onChange={handleNameChange}
-              placeholder="Strategy Name"
+              placeholder={t('pages.entrySignal.strategyNamePlaceholder')}
               className="w-full px-3 py-2 text-xs border rounded focus:outline-none"
               style={{
                 backgroundColor: '#112240',
@@ -327,7 +329,7 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
                   state.isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
                 )}
               >
-                {state.isSaved ? 'Saved' : 'Unsaved'}
+                {state.isSaved ? t('pages.common.saved') : t('pages.common.unsaved')}
               </span>
             </div>
           </div>
@@ -350,7 +352,7 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
             {/* TICKET_077_D3: Wrap input area with GenerateContentWrapper */}
             <GenerateContentWrapper
               isGenerating={state.isGenerating}
-              loadingMessage="Generating entry signal code..."
+              loadingMessage={t('pages.entrySignal.loadingMessage')}
             >
               {/* component2: Regime Selector */}
               <RegimeSelector
@@ -401,7 +403,7 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
                   code={state.generateResult?.code || ''}
                   state={actions.getCodeDisplayState()}
                   errorMessage={state.generateResult?.error}
-                  title="GENERATED ENTRY SIGNAL CODE"
+                  title={t('pages.entrySignal.generatedCodeTitle')}
                   showLineNumbers={true}
                   maxHeight="400px"
                 />
@@ -414,8 +416,8 @@ export const EntrySignalPage: React.FC<EntrySignalPageProps> = ({
             isGenerating={state.isGenerating}
             hasResult={actions.hasResult}
             onGenerate={actions.handleStartGenerate}
-            generateLabel="Start Generate"
-            generatingLabel="Generating..."
+            generateLabel={t('pages.entrySignal.generateLabel')}
+            generatingLabel={t('pages.entrySignal.generatingLabel')}
           />
         </div>
       </div>

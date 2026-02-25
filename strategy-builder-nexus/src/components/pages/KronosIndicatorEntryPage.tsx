@@ -16,6 +16,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -205,6 +206,7 @@ export const KronosIndicatorEntryPage: React.FC<KronosIndicatorEntryPageProps> =
   llmProvider = 'NONA',
   llmModel = 'nona-fast',
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // ---------------------------------------------------------------------------
   // Page-specific State (UI inputs)
   // NO selectedRegime, NO bespokeData - Kronos mode does not use market regime
@@ -237,8 +239,8 @@ export const KronosIndicatorEntryPage: React.FC<KronosIndicatorEntryPageProps> =
     pageId: 'kronos-indicator-entry-page',
     llmProvider,
     llmModel,
-    defaultStrategyName: 'New Kronos Entry Strategy',
-    validationErrorMessage: 'Please add at least one indicator, factor, or expression',
+    defaultStrategyName: t('pages.kronosIndicatorEntry.defaultStrategyName'),
+    validationErrorMessage: t('pages.kronosIndicatorEntry.validationError'),
     buildConfig: buildApiConfig,
     validateConfig: validateKronosIndicatorEntryConfig,
     executeApi: executeKronosIndicatorEntry as (config: KronosIndicatorEntryConfig) => Promise<GenerationResult>,
@@ -289,7 +291,7 @@ export const KronosIndicatorEntryPage: React.FC<KronosIndicatorEntryPageProps> =
       {/* ================================================================== */}
       <div className="flex-shrink-0 h-12 px-6 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
         <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
-          {pageTitle || 'Kronos Indicator Entry'}
+          {pageTitle || t('pages.kronosIndicatorEntry.title')}
         </h1>
         <button
           onClick={onSettingsClick}
@@ -307,13 +309,13 @@ export const KronosIndicatorEntryPage: React.FC<KronosIndicatorEntryPageProps> =
         <div className="w-56 flex-shrink-0 border-r border-color-terminal-border bg-color-terminal-panel/30 p-4 overflow-y-auto">
           <div className="space-y-3">
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Current Strategy
+              {t('pages.common.currentStrategy')}
             </label>
             <input
               type="text"
               value={state.strategyName}
               onChange={handleNameChange}
-              placeholder="Strategy Name"
+              placeholder={t('pages.kronosIndicatorEntry.strategyNamePlaceholder')}
               className="w-full px-3 py-2 text-xs border rounded focus:outline-none"
               style={{
                 backgroundColor: '#112240',
@@ -334,7 +336,7 @@ export const KronosIndicatorEntryPage: React.FC<KronosIndicatorEntryPageProps> =
                   state.isSaved ? 'text-color-terminal-accent-teal' : 'text-color-terminal-text-muted'
                 )}
               >
-                {state.isSaved ? 'Saved' : 'Unsaved'}
+                {state.isSaved ? t('pages.common.saved') : t('pages.common.unsaved')}
               </span>
             </div>
           </div>
@@ -350,7 +352,7 @@ export const KronosIndicatorEntryPage: React.FC<KronosIndicatorEntryPageProps> =
             {/* TICKET_077_D3: Wrap input area with GenerateContentWrapper */}
             <GenerateContentWrapper
               isGenerating={state.isGenerating}
-              loadingMessage="Generating Kronos indicator entry code..."
+              loadingMessage={t('pages.kronosIndicatorEntry.loadingMessage')}
             >
               {/* NO RegimeSelector - Kronos mode does not use market regime */}
 
@@ -394,7 +396,7 @@ export const KronosIndicatorEntryPage: React.FC<KronosIndicatorEntryPageProps> =
                   code={state.generateResult?.code || ''}
                   state={actions.getCodeDisplayState()}
                   errorMessage={state.generateResult?.error}
-                  title="GENERATED KRONOS ENTRY CODE"
+                  title={t('pages.kronosIndicatorEntry.generatedCodeTitle')}
                   showLineNumbers={true}
                   maxHeight="400px"
                 />
@@ -407,8 +409,8 @@ export const KronosIndicatorEntryPage: React.FC<KronosIndicatorEntryPageProps> =
             isGenerating={state.isGenerating}
             hasResult={actions.hasResult}
             onGenerate={actions.handleStartGenerate}
-            generateLabel="Start Generate"
-            generatingLabel="Generating..."
+            generateLabel={t('pages.kronosIndicatorEntry.generateLabel')}
+            generatingLabel={t('pages.kronosIndicatorEntry.generatingLabel')}
           />
         </div>
       </div>
