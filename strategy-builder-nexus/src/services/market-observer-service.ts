@@ -10,7 +10,7 @@
  * @see ISSUE_7016 - Market Observer API Protocol Specification
  */
 
-import { pluginApiClient, ApiResponse } from './api-client';
+import { pluginApiClient, createStandardPollHandler } from './api-client';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -338,25 +338,18 @@ export async function executeMarketObserverGeneration(
     startEndpoint: API_ENDPOINTS.START,
     pollEndpoint: API_ENDPOINTS.STATUS,
 
-    handlePollResponse: (response: unknown) => {
-      const resp = response as ApiResponse;
-      const status = resp.data?.status;
-      const isComplete = status === 'completed' || status === 'failed' || status === 'rejected';
-      const resultData = resp.data?.result as Record<string, unknown> | undefined;
-
-      return {
-        isComplete,
-        result: {
-          ...(resultData || {}),
-          status: status as MarketObserverResult['status'],
-          validation_status: resultData?.validation_status as MarketObserverResult['validation_status'],
-          reason_code: resultData?.reason_code as string | undefined,
-          strategy_code: resultData?.strategy_code as string | undefined,
-          error: resultData?.error as MarketObserverResult['error'],
-        } as MarketObserverResult,
-        rawResponse: response,
-      };
-    },
+    // TICKET_417: Centralized poll handler
+    handlePollResponse: createStandardPollHandler<MarketObserverResult>(
+      'MarketObserver',
+      (status, result) => ({
+        ...(result || {}),
+        status: status as MarketObserverResult['status'],
+        validation_status: result?.validation_status as MarketObserverResult['validation_status'],
+        reason_code: result?.reason_code as string | undefined,
+        strategy_code: result?.strategy_code as string | undefined,
+        error: result?.error as MarketObserverResult['error'],
+      } as MarketObserverResult),
+    ),
   });
 }
 

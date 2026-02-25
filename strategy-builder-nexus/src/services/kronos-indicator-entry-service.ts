@@ -13,7 +13,7 @@
  * @see TICKET_202 - Builder Page Base Class Mapping
  */
 
-import { pluginApiClient, ApiResponse } from './api-client';
+import { pluginApiClient, createStandardPollHandler } from './api-client';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -275,30 +275,18 @@ export async function executeKronosIndicatorEntry(
     startEndpoint: API_ENDPOINTS.START,
     pollEndpoint: API_ENDPOINTS.STATUS,
 
-    handlePollResponse: (response: unknown) => {
-      const resp = response as ApiResponse;
-      const status = resp.data?.status;
-      const isComplete = status === 'completed' || status === 'failed' || status === 'rejected';
-
-      console.debug('[KronosIndicatorEntry] Poll response:', JSON.stringify(resp, null, 2).substring(0, 2000));
-
-      // TICKET_208: Result is directly under data.result (not nested in kronos_indicator_entry_result)
-      // Response format: { success: true, data: { status: "completed", result: { strategy_code, class_name, ... } } }
-      const result = resp.data?.result as Record<string, unknown> | undefined;
-
-      return {
-        isComplete,
-        result: {
-          status: status as KronosIndicatorEntryResult['status'],
-          validation_status: result?.validation_status as KronosIndicatorEntryResult['validation_status'],
-          reason_code: result?.reason_code as string | undefined,
-          strategy_code: result?.strategy_code as string | undefined,
-          class_name: result?.class_name as string | undefined,
-          error: result?.error as KronosIndicatorEntryResult['error'],
-        } as KronosIndicatorEntryResult,
-        rawResponse: response,
-      };
-    },
+    // TICKET_417: Centralized poll handler
+    handlePollResponse: createStandardPollHandler<KronosIndicatorEntryResult>(
+      'KronosIndicatorEntry',
+      (status, result) => ({
+        status: status as KronosIndicatorEntryResult['status'],
+        validation_status: result?.validation_status as KronosIndicatorEntryResult['validation_status'],
+        reason_code: result?.reason_code as string | undefined,
+        strategy_code: result?.strategy_code as string | undefined,
+        class_name: result?.class_name as string | undefined,
+        error: result?.error as KronosIndicatorEntryResult['error'],
+      }),
+    ),
   });
 }
 

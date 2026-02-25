@@ -23,7 +23,6 @@ import {
   ApiKeyPrompt,
   NamingDialog,
   GenerateContentWrapper,
-  PresetButtonGroup,
   PortalDropdown,
   GenerateActionBar,
 } from '../ui';
@@ -80,13 +79,6 @@ const RULE_DESCRIPTIONS: Record<string, string> = {
   drawdown_limit: 'Portfolio-level drawdown protection',
   indicator_guard: 'Override on indicator extreme values',
 };
-
-// Direction presets for PresetButtonGroup (full variant with descriptions)
-const DIRECTION_PRESETS = [
-  { id: 'long', label: 'Long', description: 'Protect long positions only' },
-  { id: 'short', label: 'Short', description: 'Protect short positions only' },
-  { id: 'both', label: 'Both', description: 'Protect all positions' },
-];
 
 // -----------------------------------------------------------------------------
 // Rule Factory
@@ -156,7 +148,6 @@ function createRule(type: RiskRuleType, priority: number): RiskOverrideRule {
 function buildApiConfig(state: IndicatorExitState, strategyName: string): RiskOverrideExitConfig {
   return {
     strategy_name: strategyName,
-    direction: state.direction,
     rules: state.rules,
     hard_safety: {
       max_loss_percent: state.hardSafety.maxLossPercent,
@@ -180,7 +171,6 @@ async function buildStorageRequestFromResult(
       class_name: extractClassName(result.strategy_code || ''),
     },
     {
-      direction: state.direction,
       rules: state.rules,
       hard_safety: { max_loss_percent: state.hardSafety.maxLossPercent },
       llm_provider: state.llmProvider,
@@ -204,7 +194,6 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
   // Page-specific State
   // ---------------------------------------------------------------------------
 
-  const [direction, setDirection] = useState<'long' | 'short' | 'both'>('both');
   const [rules, setRules] = useState<RiskOverrideRule[]>([]);
   const [hardSafetyMaxLoss, setHardSafetyMaxLoss] = useState<number>(RULE_DEFAULTS.hard_safety.maxLossPercent);
   const [storageMode, setStorageMode] = useState<'local' | 'remote' | 'hybrid'>('local');
@@ -287,13 +276,12 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
   // ---------------------------------------------------------------------------
 
   const currentState: IndicatorExitState = useMemo(() => ({
-    direction,
     rules,
     hardSafety: { maxLossPercent: hardSafetyMaxLoss },
     storageMode,
     llmProvider,
     llmModel,
-  }), [direction, rules, hardSafetyMaxLoss, storageMode, llmProvider, llmModel]);
+  }), [rules, hardSafetyMaxLoss, storageMode, llmProvider, llmModel]);
 
   // Validation items (enabled rules)
   const enabledRules = useMemo(() => rules.filter(r => r.enabled), [rules]);
@@ -403,14 +391,6 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
               Configuration
             </label>
 
-            {/* Direction */}
-            <div className="flex items-center justify-between text-[10px]">
-              <span className="text-color-terminal-text-muted">Direction</span>
-              <span className="px-1.5 py-0.5 rounded bg-color-terminal-accent-primary/20 text-color-terminal-accent-primary font-medium uppercase">
-                {direction}
-              </span>
-            </div>
-
             {/* Active Rules */}
             <div className="flex items-center justify-between text-[10px]">
               <span className="text-color-terminal-text-muted">Active Rules</span>
@@ -468,19 +448,6 @@ export const IndicatorExitPage: React.FC<IndicatorExitPageProps> = ({
               isGenerating={state.isGenerating}
               loadingMessage="Generating risk override exit code..."
             >
-              {/* Direction Selector */}
-              <div className="mb-8">
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-3">
-                  Direction
-                </label>
-                <PresetButtonGroup
-                  presets={DIRECTION_PRESETS}
-                  activePreset={direction}
-                  onSelect={(id) => setDirection(id as 'long' | 'short' | 'both')}
-                  variant="full"
-                />
-              </div>
-
               {/* ======================================================== */}
               {/* Layer 1: Risk Override Rules                               */}
               {/* ======================================================== */}

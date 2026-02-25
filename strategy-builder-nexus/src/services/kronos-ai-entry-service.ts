@@ -15,7 +15,7 @@
  * @see TICKET_202 - Builder Page Base Class Mapping
  */
 
-import { pluginApiClient, ApiResponse } from './api-client';
+import { pluginApiClient, createStandardPollHandler } from './api-client';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -312,30 +312,19 @@ export async function executeKronosAIEntry(
     startEndpoint: API_ENDPOINTS.START,
     pollEndpoint: API_ENDPOINTS.STATUS,
 
-    handlePollResponse: (response: unknown) => {
-      const resp = response as ApiResponse;
-      const status = resp.data?.status;
-      const isComplete = status === 'completed' || status === 'failed' || status === 'rejected';
-
-      console.debug('[KronosAIEntry] Poll response:', JSON.stringify(resp, null, 2).substring(0, 2000));
-
-      // Result is directly under data.result
-      const result = resp.data?.result as Record<string, unknown> | undefined;
-
-      return {
-        isComplete,
-        result: {
-          status: status as KronosAIEntryResult['status'],
-          strategy_id: result?.strategy_id as number | undefined,
-          validation_status: result?.validation_status as KronosAIEntryResult['validation_status'],
-          reason_code: result?.reason_code as string | undefined,
-          strategy_code: result?.strategy_code as string | undefined,
-          class_name: result?.class_name as string | undefined,
-          error: result?.error as KronosAIEntryResult['error'],
-        } as KronosAIEntryResult,
-        rawResponse: response,
-      };
-    },
+    // TICKET_417: Centralized poll handler
+    handlePollResponse: createStandardPollHandler<KronosAIEntryResult>(
+      'KronosAIEntry',
+      (status, result) => ({
+        status: status as KronosAIEntryResult['status'],
+        strategy_id: result?.strategy_id as number | undefined,
+        validation_status: result?.validation_status as KronosAIEntryResult['validation_status'],
+        reason_code: result?.reason_code as string | undefined,
+        strategy_code: result?.strategy_code as string | undefined,
+        class_name: result?.class_name as string | undefined,
+        error: result?.error as KronosAIEntryResult['error'],
+      }),
+    ),
   });
 }
 

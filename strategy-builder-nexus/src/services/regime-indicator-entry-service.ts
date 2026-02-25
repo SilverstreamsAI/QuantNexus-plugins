@@ -16,7 +16,7 @@
  * @see TICKET_203 - Regime Indicator Entry Service Rename
  */
 
-import { pluginApiClient, ApiResponse } from './api-client';
+import { pluginApiClient, createStandardPollHandler } from './api-client';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -296,48 +296,19 @@ export async function executeRegimeIndicatorEntry(
     startEndpoint: API_ENDPOINTS.START,
     pollEndpoint: API_ENDPOINTS.STATUS,
 
-    handlePollResponse: (response: unknown) => {
-      const resp = response as ApiResponse;
-      const status = resp.data?.status;
-      const isComplete = status === 'completed' || status === 'failed' || status === 'rejected';
-
-      // TICKET_201: Debug logging to see full server response
-      console.debug('[RegimeIndicatorEntry] Poll response:', JSON.stringify(resp, null, 2).substring(0, 2000));
-
-      // TICKET_201: Extract result from regime_indicator_entry_result
-      const entryResult = resp.data?.result as Record<string, unknown> | undefined;
-      const regimeResult = entryResult?.regime_indicator_entry_result as Record<string, unknown> | undefined;
-
-      // Strategy code might be in different locations depending on server response
-      let strategyCode = regimeResult?.strategy_code as string | undefined;
-      if (!strategyCode) {
-        strategyCode = entryResult?.strategy_code as string | undefined;
-      }
-
-      let className = regimeResult?.class_name as string | undefined;
-      if (!className) {
-        className = entryResult?.class_name as string | undefined;
-      }
-
-      // Extract validation status
-      let validationStatus = regimeResult?.validation_status as string | undefined;
-      if (!validationStatus) {
-        validationStatus = entryResult?.validation_status as string | undefined;
-      }
-
-      return {
-        isComplete,
-        result: {
-          status: status as RegimeIndicatorEntryResult['status'],
-          validation_status: validationStatus as RegimeIndicatorEntryResult['validation_status'],
-          reason_code: (regimeResult?.reason_code || entryResult?.reason_code) as string | undefined,
-          strategy_code: strategyCode,
-          class_name: className,
-          error: (regimeResult?.error || entryResult?.error) as RegimeIndicatorEntryResult['error'],
-        } as RegimeIndicatorEntryResult,
-        rawResponse: response,
-      };
-    },
+    // TICKET_417: Centralized poll handler
+    // Layer 2 standard: strategy_code and class_name at result top level
+    handlePollResponse: createStandardPollHandler<RegimeIndicatorEntryResult>(
+      'RegimeIndicatorEntry',
+      (status, result) => ({
+        status: status as RegimeIndicatorEntryResult['status'],
+        validation_status: result?.validation_status as RegimeIndicatorEntryResult['validation_status'],
+        reason_code: result?.reason_code as string | undefined,
+        strategy_code: result?.strategy_code as string | undefined,
+        class_name: result?.class_name as string | undefined,
+        error: result?.error as RegimeIndicatorEntryResult['error'],
+      }),
+    ),
   });
 }
 

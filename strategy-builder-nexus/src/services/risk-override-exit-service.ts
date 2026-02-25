@@ -13,7 +13,7 @@
  * @see TICKET_247 - Alpha Factory Architecture (Simons-style)
  */
 
-import { pluginApiClient, ApiResponse } from './api-client';
+import { pluginApiClient, createStandardPollHandler } from './api-client';
 
 // =============================================================================
 // Constants
@@ -82,7 +82,7 @@ export const INDICATOR_CONDITIONS = [
   { value: 'crosses_below', label: 'Crosses Below' },
 ] as const;
 
-/** Direction options */
+/** Direction options for per-rule appliesTo field (e.g. indicator_guard) */
 export const DIRECTION_OPTIONS = [
   { value: 'long', label: 'Long' },
   { value: 'short', label: 'Short' },
@@ -175,7 +175,6 @@ export type RiskRuleType = RiskOverrideRule['type'];
  * Page state interface
  */
 export interface IndicatorExitState {
-  direction: 'long' | 'short' | 'both';
   rules: RiskOverrideRule[];
   hardSafety: {
     maxLossPercent: number;
@@ -190,7 +189,6 @@ export interface IndicatorExitState {
  */
 export interface RiskOverrideExitConfig {
   strategy_name: string;
-  direction: 'long' | 'short' | 'both';
   rules: RiskOverrideRule[];
   hard_safety: {
     max_loss_percent: number;
@@ -285,7 +283,6 @@ interface ServerRequest {
   exit_config: {
     strategy_name: string;
     exit_model: 'risk_override';
-    direction: string;
     rules: ServerRule[];
     hard_safety: {
       max_loss_percent: number;
@@ -382,7 +379,6 @@ function buildServerRequest(config: RiskOverrideExitConfig): ServerRequest {
     exit_config: {
       strategy_name: config.strategy_name || 'Untitled Exit Strategy',
       exit_model: 'risk_override',
-      direction: config.direction,
       rules: serverRules,
       hard_safety: config.hard_safety,
       llm_provider: config.llm_provider || 'NONA',
@@ -416,44 +412,19 @@ export async function executeRiskOverrideExit(
     startEndpoint: API_ENDPOINTS.START,
     pollEndpoint: API_ENDPOINTS.STATUS,
 
-    handlePollResponse: (response: unknown) => {
-      const resp = response as ApiResponse;
-      const status = resp.data?.status;
-      const isComplete = status === 'completed' || status === 'failed' || status === 'rejected';
-
-      console.debug('[RiskOverrideExit] Poll response:', JSON.stringify(resp, null, 2).substring(0, 2000));
-
-      const entryResult = resp.data?.result as Record<string, unknown> | undefined;
-      const exitResult = entryResult?.exit_strategy_result as Record<string, unknown> | undefined;
-
-      let strategyCode = exitResult?.strategy_code as string | undefined;
-      if (!strategyCode) {
-        strategyCode = entryResult?.strategy_code as string | undefined;
-      }
-
-      let className = exitResult?.class_name as string | undefined;
-      if (!className) {
-        className = entryResult?.class_name as string | undefined;
-      }
-
-      let validationStatus = exitResult?.validation_status as string | undefined;
-      if (!validationStatus) {
-        validationStatus = entryResult?.validation_status as string | undefined;
-      }
-
-      return {
-        isComplete,
-        result: {
-          status: status as RiskOverrideExitResult['status'],
-          validation_status: validationStatus as RiskOverrideExitResult['validation_status'],
-          reason_code: (exitResult?.reason_code || entryResult?.reason_code) as string | undefined,
-          strategy_code: strategyCode,
-          class_name: className,
-          error: (exitResult?.error || entryResult?.error) as RiskOverrideExitResult['error'],
-        } as RiskOverrideExitResult,
-        rawResponse: response,
-      };
-    },
+    // TICKET_417: Centralized poll handler
+    // Layer 2 standard: strategy_code and class_name at result top level
+    handlePollResponse: createStandardPollHandler<RiskOverrideExitResult>(
+      'RiskOverrideExit',
+      (status, result) => ({
+        status: status as RiskOverrideExitResult['status'],
+        validation_status: result?.validation_status as RiskOverrideExitResult['validation_status'],
+        reason_code: result?.reason_code as string | undefined,
+        strategy_code: result?.strategy_code as string | undefined,
+        class_name: result?.class_name as string | undefined,
+        error: result?.error as RiskOverrideExitResult['error'],
+      }),
+    ),
   });
 }
 

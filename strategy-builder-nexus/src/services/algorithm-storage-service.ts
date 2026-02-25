@@ -979,7 +979,6 @@ export interface RiskOverrideExitResult {
 
 export interface RiskOverrideExitStorageConfig {
   user_id?: string;
-  direction: 'long' | 'short' | 'both';
   rules: unknown[];
   hard_safety: { max_loss_percent: number };
   llm_provider?: string;
@@ -1010,18 +1009,16 @@ export function buildRiskOverrideExitRequest(
       class_name: result.class_name,
       components: {
         risk_override: {
-          direction: config.direction,
           rule_count: config.rules.length,
           hard_safety: config.hard_safety,
           llm_provider: config.llm_provider,
           llm_model: config.llm_model,
         },
       },
-      tags: ['exit', 'risk_override', config.direction],
+      tags: ['exit', 'risk_override'],
       created_at: result.created_at || new Date().toISOString(),
     },
     strategy_rules: {
-      direction: config.direction,
       rules: config.rules,
       hard_safety: config.hard_safety,
     },

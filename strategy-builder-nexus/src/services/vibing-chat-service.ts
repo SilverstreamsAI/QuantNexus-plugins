@@ -6,7 +6,7 @@
  * @see ISSUE_7029_AI_STRATEGY_STUDIO_MESSAGE_FORMAT_SPECIFICATION.md
  */
 
-import { pluginApiClient, ApiResponse } from './api-client';
+import { pluginApiClient, createStandardPollHandler } from './api-client';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -241,39 +241,23 @@ export async function executeVibingChat(
     pollInterval: 500,
     timeout: 180000, // 3 minutes for LLM generation
 
-    handlePollResponse: (response: unknown) => {
-      const resp = response as ApiResponse & {
-        status?: string;
-        result?: VibingChatResult;
-        session_id?: string;
-        error?: VibingChatResponse['error'];
-        data?: VibingChatResponse['data'];
-        metadata?: VibingChatResponse['metadata'];
-      };
-
-      const status = resp.data?.status || resp.status;
-      const isComplete = status === 'completed' || status === 'failed';
-
-      console.debug('[VibingChat] Poll response:', JSON.stringify(resp, null, 2).substring(0, 2000));
-
-      // Extract result from response
-      const result = (resp.data?.result || resp.result) as VibingChatResult | undefined;
-
-      return {
-        isComplete,
-        result: {
-          success: resp.success !== false && status !== 'failed',
-          task_id: resp.data?.task_id as string || '',
-          session_id: resp.session_id || '',
+    // TICKET_417: Centralized poll handler with VibingChat-specific result mapping
+    handlePollResponse: createStandardPollHandler<VibingChatResponse>(
+      'VibingChat',
+      (status, result) => {
+        const resp = result as Record<string, unknown> | undefined;
+        return {
+          success: status !== 'failed',
+          task_id: '',
+          session_id: (resp?.session_id as string) || '',
           status: status as VibingChatResponse['status'],
-          result: result,
-          error: resp.error,
-          data: resp.data as VibingChatResponse['data'],
-          metadata: resp.metadata,
-        } as VibingChatResponse,
-        rawResponse: response,
-      };
-    },
+          result: resp as unknown as VibingChatResult | undefined,
+          error: resp?.error as VibingChatResponse['error'],
+          data: resp as VibingChatResponse['data'],
+          metadata: resp?.metadata as VibingChatResponse['metadata'],
+        } as VibingChatResponse;
+      },
+    ),
   });
 }
 

@@ -320,14 +320,23 @@ export function useGenerateWorkflow<TConfig, TState>(
       return;
     }
 
-    // Step 2: Validate inputs
+    // Step 2: Validate inputs (rule count etc.)
     if (!validate()) {
       return;
     }
 
-    // Step 3: Show naming dialog
+    // Step 3: Validate config (asset, field-level checks)
+    const apiConfig = config.buildConfig(currentState, strategyName);
+    const validation = config.validateConfig(apiConfig);
+    if (!validation.valid) {
+      console.warn(`[GenerateWorkflow:${config.pageId}] Config validation failed:`, validation.error);
+      globalThis.nexus?.window?.showAlert(validation.error || 'Invalid configuration');
+      return;
+    }
+
+    // Step 4: Show naming dialog
     setNamingDialogVisible(true);
-  }, [llmAccessHook, validate]);
+  }, [llmAccessHook, validate, config, currentState, strategyName]);
 
   /**
    * Handle naming dialog cancel
@@ -350,6 +359,7 @@ export function useGenerateWorkflow<TConfig, TState>(
     const validation = config.validateConfig(apiConfig);
     if (!validation.valid) {
       console.warn(`[GenerateWorkflow:${config.pageId}] Config validation failed:`, validation.error);
+      globalThis.nexus?.window?.showAlert(validation.error || 'Invalid configuration');
       setGenerateResult({ error: validation.error });
       return;
     }

@@ -14,7 +14,7 @@
  * @see TICKET_214 - Page 36 - Trader AI Entry (reference)
  */
 
-import { pluginApiClient, ApiResponse } from './api-client';
+import { pluginApiClient, createStandardPollHandler } from './api-client';
 import type { RawIndicatorBlock } from '../components/ui/RawIndicatorSelector';
 import type { IndicatorTemplate } from '../components/ui/SaveTemplateDialog';
 import type { PredictionConfig } from '../components/ui/AdvancedConfigPanel';
@@ -360,29 +360,19 @@ export async function executeAILibero(
     startEndpoint: API_ENDPOINTS.START,
     pollEndpoint: API_ENDPOINTS.STATUS,
 
-    handlePollResponse: (response: unknown) => {
-      const resp = response as ApiResponse;
-      const status = resp.data?.status;
-      const isComplete = status === 'completed' || status === 'failed' || status === 'rejected';
-
-      console.debug('[AILibero] Poll response:', JSON.stringify(resp, null, 2).substring(0, 2000));
-
-      const result = resp.data?.result as Record<string, unknown> | undefined;
-
-      return {
-        isComplete,
-        result: {
-          status: status as AILiberoResult['status'],
-          validation_status: result?.validation_status as AILiberoResult['validation_status'],
-          reason_code: result?.reason_code as string | undefined,
-          strategy_code: result?.strategy_code as string | undefined,
-          strategy_id: result?.strategy_id as string | undefined,
-          class_name: result?.class_name as string | undefined,
-          error: result?.error as AILiberoResult['error'],
-        } as AILiberoResult,
-        rawResponse: response,
-      };
-    },
+    // TICKET_417: Centralized poll handler
+    handlePollResponse: createStandardPollHandler<AILiberoResult>(
+      'AILibero',
+      (status, result) => ({
+        status: status as AILiberoResult['status'],
+        validation_status: result?.validation_status as AILiberoResult['validation_status'],
+        reason_code: result?.reason_code as string | undefined,
+        strategy_code: result?.strategy_code as string | undefined,
+        strategy_id: result?.strategy_id as string | undefined,
+        class_name: result?.class_name as string | undefined,
+        error: result?.error as AILiberoResult['error'],
+      }),
+    ),
   });
 }
 

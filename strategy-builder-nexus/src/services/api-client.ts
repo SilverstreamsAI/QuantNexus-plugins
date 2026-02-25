@@ -235,11 +235,8 @@ class PluginApiClient {
       throw error;
     }
 
-    // TICKET_208: Support both response formats
-    // Format 1: { success: true, data: { task_id: "..." } } (regime APIs)
-    // Format 2: { success: true, task_id: "..." } (kronos APIs)
-    const taskId = startResponse.data?.task_id ||
-      (startResponse as unknown as { task_id?: string }).task_id;
+    // TICKET_417: All endpoints must return { success: true, data: { task_id: "..." } }
+    const taskId = startResponse.data?.task_id;
     if (!taskId) {
       throw new Error('No task_id returned from server');
     }
@@ -292,3 +289,38 @@ class PluginApiClient {
 }
 
 export const pluginApiClient = new PluginApiClient();
+
+// -----------------------------------------------------------------------------
+// TICKET_417: Centralized Poll Response Handler Factory
+// -----------------------------------------------------------------------------
+
+/**
+ * Creates a standard handlePollResponse function for executeWithPolling.
+ *
+ * Centralizes envelope parsing (ApiResponse -> status + result), completion
+ * detection, and debug logging. Each service only provides a mapResult
+ * function to extract its specific typed fields from the raw result object.
+ *
+ * @param tag - Service tag for debug logging (e.g., 'KronosIndicatorEntry')
+ * @param mapResult - Maps raw (status, result) to the service-specific result type
+ */
+export function createStandardPollHandler<T>(
+  tag: string,
+  mapResult: (status: string | undefined, result: Record<string, unknown> | undefined) => T,
+): (response: unknown) => { isComplete: boolean; result: T; rawResponse: unknown } {
+  return (response: unknown) => {
+    const resp = response as ApiResponse;
+    const status = resp.data?.status;
+    const isComplete = status === 'completed' || status === 'failed' || status === 'rejected';
+
+    console.debug(`[${tag}] Poll response:`, JSON.stringify(resp, null, 2).substring(0, 2000));
+
+    const result = resp.data?.result as Record<string, unknown> | undefined;
+
+    return {
+      isComplete,
+      result: mapResult(status, result),
+      rawResponse: response,
+    };
+  };
+}
