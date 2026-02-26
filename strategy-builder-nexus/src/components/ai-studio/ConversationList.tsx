@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MessageSquare, Trash2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { formatTimestamp } from '@shared/utils/format-locale';
@@ -146,7 +147,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
                 ? 'hover:bg-color-terminal-bg/20 text-color-terminal-bg/70 hover:text-color-terminal-bg'
                 : 'hover:bg-red-500/10 text-color-terminal-text-muted hover:text-red-500'
             )}
-            aria-label="Delete conversation"
+            aria-label={t('aiStudio.deleteConversation')}
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -165,9 +166,11 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   activeId,
   onSelect,
   onDelete,
-  emptyText = 'Your conversations will appear here',
+  emptyText,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  const displayEmptyText = emptyText ?? t('aiStudio.emptyConversations');
   // Empty state
   if (conversations.length === 0) {
     return (
@@ -179,9 +182,9 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         )}
       >
         <MessageSquare className="w-10 h-10 text-color-terminal-text-muted/50 mb-3" />
-        <p className="text-sm text-color-terminal-text-muted">{emptyText}</p>
+        <p className="text-sm text-color-terminal-text-muted">{displayEmptyText}</p>
         <p className="text-xs text-color-terminal-text-muted/70 mt-1">
-          Start a new chat to begin
+          {t('aiStudio.startNewChat')}
         </p>
       </div>
     );

@@ -188,6 +188,43 @@
     "close": "Schliessen",
     "closeAll": "Alle schliessen"
   },
+  "messages": {
+    "resumeApiNotAvailable": "Resume-API nicht verfuegbar",
+    "resumingFromCheckpoint": "Backtest wird vom Checkpoint fortgesetzt...",
+    "resumeFailed": "Fortsetzung fehlgeschlagen: {{message}}",
+    "deleteCheckpointFailed": "Checkpoint konnte nicht geloescht werden",
+    "noWorkflowConfig": "Keine Workflow-Konfiguration gefunden",
+    "missingAlgorithm": "Analyse- oder Einstiegsalgorithmus fehlt",
+    "exportedToQuantLab": "\"{{name}}\" nach Quant Lab exportiert",
+    "exportToQuantLabFailed": "Export nach Quant Lab fehlgeschlagen",
+    "startDateAdjustedLookback": "Startdatum automatisch auf {{date}} angepasst (maxLookback-Einschraenkung)",
+    "startDateAdjustedTimeframe": "Startdatum automatisch auf {{date}} angepasst (Zeitrahmen geaendert)",
+    "generatingStrategy": "Strategie wird generiert ({{current}}/{{total}})...",
+    "runningBacktest": "Backtest wird ausgefuehrt ({{current}}/{{total}})...",
+    "noWorkflowsConfigured": "Keine Workflows konfiguriert. Bitte fuegen Sie mindestens eine Algorithmusauswahl hinzu.",
+    "loadingMarketData": "Marktdaten fuer {{symbol}} werden geladen...",
+    "caseFailed": "Fall {{index}} fehlgeschlagen: {{message}}",
+    "executionFailed": "Backtest-Ausfuehrung fehlgeschlagen. Bitte ueberpruefen Sie die Logs."
+  },
+  "validation": {
+    "symbolRequired": "Symbol ist erforderlich",
+    "dataSourceRequired": "Datenquelle ist erforderlich",
+    "startDateRequired": "Startdatum ist erforderlich",
+    "endDateRequired": "Enddatum ist erforderlich",
+    "endDateAfterStart": "Enddatum muss nach dem Startdatum liegen",
+    "initialCapitalPositive": "Anfangskapital muss positiv sein",
+    "orderSizePositive": "Ordergroesse muss positiv sein"
+  },
+  "settings": {
+    "back": "Zurueck",
+    "title": "Einstellungen",
+    "secrets": "Geheimnisse",
+    "deleteSecret": "Geheimnis loeschen",
+    "deleteSecretConfirm": "Sind Sie sicher, dass Sie loeschen moechten",
+    "deleteSecretWarning": "Diese Aktion kann nicht rueckgaengig gemacht werden.",
+    "save": "Speichern",
+    "saving": "Speichern..."
+  },
   "resultPanel": {
     "tabs": {
       "charts": "DIAGRAMME",
@@ -219,6 +256,11 @@
       "showingOf": "Zeige {{shown}} von {{total}} Trades",
       "noTrades": "Keine Trades"
     },
+    "llmEstimate": "LLM-Aufrufschaetzung (Trockenlauf)",
+    "barsProcessed": "Verarbeitete Balken",
+    "calls": "Aufrufe",
+    "totalLlmCalls": "Gesamte LLM-Aufrufe",
+    "elapsed": "Vergangen",
     "status": {
       "noResults": "Keine Ergebnisse verfuegbar",
       "case": "Fall {{index}}",

@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   List,
   Plus,
@@ -68,31 +69,31 @@ export interface StrategyRulesPanelProps {
 
 const RULE_CONFIG: Record<RuleType, {
   icon: React.FC<{ className?: string }>;
-  label: string;
+  labelKey: string;
   color: string;
   bgColor: string;
 }> = {
   entry: {
     icon: TrendingUp,
-    label: 'Entry',
+    labelKey: 'aiStudio.ruleTypeEntry',
     color: 'text-green-500',
     bgColor: 'bg-green-500/10',
   },
   exit: {
     icon: TrendingDown,
-    label: 'Exit',
+    labelKey: 'aiStudio.ruleTypeExit',
     color: 'text-red-500',
     bgColor: 'bg-red-500/10',
   },
   filter: {
     icon: Filter,
-    label: 'Filter',
+    labelKey: 'aiStudio.ruleTypeFilter',
     color: 'text-blue-500',
     bgColor: 'bg-blue-500/10',
   },
   risk: {
     icon: Shield,
-    label: 'Risk',
+    labelKey: 'aiStudio.ruleTypeRisk',
     color: 'text-yellow-500',
     bgColor: 'bg-yellow-500/10',
   },
@@ -117,6 +118,7 @@ const RuleItem: React.FC<RuleItemProps> = ({
   onToggle,
   readOnly = false,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const [isExpanded, setIsExpanded] = useState(false);
   const config = RULE_CONFIG[rule.type];
   const Icon = config.icon;
@@ -162,7 +164,7 @@ const RuleItem: React.FC<RuleItemProps> = ({
         >
           <Icon className={cn('w-3.5 h-3.5', config.color)} />
           <span className={cn('text-[10px] font-bold uppercase', config.color)}>
-            {config.label}
+            {t(config.labelKey)}
           </span>
         </div>
 
@@ -216,7 +218,7 @@ const RuleItem: React.FC<RuleItemProps> = ({
                   className="w-3.5 h-3.5 rounded border-color-terminal-border"
                 />
                 <span className="text-[10px] text-color-terminal-text-muted">
-                  Enabled
+                  {t('aiStudio.enabled')}
                 </span>
               </label>
 
@@ -229,7 +231,7 @@ const RuleItem: React.FC<RuleItemProps> = ({
                   'hover:bg-red-500/10 hover:text-red-500',
                   'transition-colors duration-200'
                 )}
-                aria-label="Delete rule"
+                aria-label={t('aiStudio.deleteRule')}
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
@@ -250,6 +252,7 @@ interface AddRuleMenuProps {
 }
 
 const AddRuleMenu: React.FC<AddRuleMenuProps> = ({ onAdd }) => {
+  const { t } = useTranslation('strategy-builder');
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -270,7 +273,7 @@ const AddRuleMenu: React.FC<AddRuleMenuProps> = ({ onAdd }) => {
         )}
       >
         <Plus className="w-4 h-4" />
-        <span>Add Rule</span>
+        <span>{t('aiStudio.addRule')}</span>
       </button>
 
       {/* Dropdown Menu */}
@@ -317,10 +320,10 @@ const AddRuleMenu: React.FC<AddRuleMenuProps> = ({ onAdd }) => {
                   </div>
                   <div>
                     <div className="text-sm font-medium text-color-terminal-text">
-                      {config.label} Rule
+                      {t('aiStudio.ruleLabel', { label: t(config.labelKey) })}
                     </div>
                     <div className="text-[10px] text-color-terminal-text-muted">
-                      Add {config.label.toLowerCase()} condition
+                      {t('aiStudio.addCondition', { label: t(config.labelKey).toLowerCase() })}
                     </div>
                   </div>
                 </button>
@@ -348,6 +351,7 @@ export const StrategyRulesPanel: React.FC<StrategyRulesPanelProps> = ({
   readOnly = false,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // Group rules by type
   const groupedRules = React.useMemo(() => {
     const groups: Record<RuleType, StrategyRule[]> = {
@@ -382,7 +386,7 @@ export const StrategyRulesPanel: React.FC<StrategyRulesPanelProps> = ({
       <div className="flex items-center gap-2 px-4 py-4 border-b border-color-terminal-border">
         <List className="w-5 h-5 text-color-terminal-accent-primary" />
         <h3 className="text-sm font-bold uppercase tracking-wide text-color-terminal-text">
-          Strategy Rules
+          {t('aiStudio.strategyRules')}
         </h3>
         {totalRules > 0 && (
           <span className="ml-auto text-xs font-mono text-color-terminal-text-muted">
@@ -398,10 +402,10 @@ export const StrategyRulesPanel: React.FC<StrategyRulesPanelProps> = ({
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <List className="w-12 h-12 text-color-terminal-text-muted/30 mb-3" />
             <p className="text-sm text-color-terminal-text-muted mb-1">
-              No rules defined yet
+              {t('aiStudio.noRulesDefined')}
             </p>
             <p className="text-xs text-color-terminal-text-muted/70">
-              Add rules to build your strategy
+              {t('aiStudio.addRulesToBuild')}
             </p>
           </div>
         )}
@@ -444,7 +448,7 @@ export const StrategyRulesPanel: React.FC<StrategyRulesPanelProps> = ({
                     config.color
                   )}
                 >
-                  {count} {config.label}
+                  {count} {t(config.labelKey)}
                 </span>
               );
             })}

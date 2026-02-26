@@ -232,6 +232,43 @@
     "close": "Close",
     "closeAll": "Close All"
   },
+  "messages": {
+    "resumeApiNotAvailable": "Resume API not available",
+    "resumingFromCheckpoint": "Resuming backtest from checkpoint...",
+    "resumeFailed": "Resume failed: {{message}}",
+    "deleteCheckpointFailed": "Failed to delete checkpoint",
+    "noWorkflowConfig": "No workflow configuration found",
+    "missingAlgorithm": "Missing analysis or entry algorithm",
+    "exportedToQuantLab": "Exported \"{{name}}\" to Quant Lab",
+    "exportToQuantLabFailed": "Failed to export to Quant Lab",
+    "startDateAdjustedLookback": "Start date auto-adjusted to {{date}} (maxLookback constraint)",
+    "startDateAdjustedTimeframe": "Start date auto-adjusted to {{date}} (timeframe changed)",
+    "generatingStrategy": "Generating strategy ({{current}}/{{total}})...",
+    "runningBacktest": "Running backtest ({{current}}/{{total}})...",
+    "noWorkflowsConfigured": "No workflows configured. Please add at least one algorithm selection.",
+    "loadingMarketData": "Loading market data for {{symbol}}...",
+    "caseFailed": "Case {{index}} failed: {{message}}",
+    "executionFailed": "Failed to execute backtest. Please check the logs."
+  },
+  "validation": {
+    "symbolRequired": "Symbol is required",
+    "dataSourceRequired": "Data source is required",
+    "startDateRequired": "Start date is required",
+    "endDateRequired": "End date is required",
+    "endDateAfterStart": "End date must be after start date",
+    "initialCapitalPositive": "Initial capital must be positive",
+    "orderSizePositive": "Order size must be positive"
+  },
+  "settings": {
+    "back": "Back",
+    "title": "Settings",
+    "secrets": "Secrets",
+    "deleteSecret": "Delete Secret",
+    "deleteSecretConfirm": "Are you sure you want to delete",
+    "deleteSecretWarning": "This action cannot be undone.",
+    "save": "Save",
+    "saving": "Saving..."
+  },
   "resultPanel": {
     "tabs": {
       "charts": "CHARTS",
@@ -265,6 +302,11 @@
       "showingOf": "Showing {{shown}} of {{total}} trades",
       "noTrades": "No trades"
     },
+    "llmEstimate": "LLM Call Estimate (Dry Run)",
+    "barsProcessed": "Bars Processed",
+    "calls": "calls",
+    "totalLlmCalls": "Total LLM Calls",
+    "elapsed": "Elapsed",
     "status": {
       "noResults": "No results available",
       "case": "Case {{index}}",

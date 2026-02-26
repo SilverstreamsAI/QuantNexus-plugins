@@ -142,12 +142,7 @@ const PRESETS: Record<string, PresetConfig> = {
   explore: { lookback: 400, predLen: 120, temperature: 1.5, topP: 0.85, topK: 0, sampleCount: 3 },
 };
 
-const MODEL_PRESETS: PresetOption[] = [
-  { id: 'quick', label: 'Quick Preview', icon: <Zap className="w-5 h-5" />, description: 'Fast testing' },
-  { id: 'standard', label: 'Standard', icon: <TrendingUp className="w-5 h-5" />, description: 'Daily use' },
-  { id: 'precision', label: 'High Precision', icon: <CheckCircle className="w-5 h-5" />, description: 'Stable results' },
-  { id: 'explore', label: 'Explore Mode', icon: <Shuffle className="w-5 h-5" />, description: 'More possibilities' },
-];
+// MODEL_PRESETS: moved inside component as useMemo (needs t() for i18n)
 
 const DEFAULT_SIGNAL_FILTER: SignalFilterConfig = {
   confidence: { enabled: true, value: 60 },
@@ -158,13 +153,7 @@ const DEFAULT_SIGNAL_FILTER: SignalFilterConfig = {
   combinationLogic: 'AND',
 };
 
-const KRONOS_ERROR_MESSAGES: Record<string, string> = {
-  KRONOS_SERVICE_UNAVAILABLE: 'Kronos prediction service is temporarily unavailable',
-  MODEL_NOT_FOUND: 'Selected model is not available',
-  INVALID_PARAMETERS: 'Invalid prediction parameters',
-  PREDICTION_TIMEOUT: 'Prediction timed out, please try again',
-  AUTH_REQUIRED: 'Please log in to use Kronos prediction',
-};
+// KRONOS_ERROR_MESSAGES: moved inside component as useMemo (needs t() for i18n)
 
 function getCurrentDateTimeLocal(): string {
   const now = new Date();
@@ -343,21 +332,7 @@ async function buildStorageRequestFromResult(
   );
 }
 
-/**
- * Get error message from result
- */
-function getKronosErrorMessage(result: GenerationResult): string {
-  if (result.reason_code && KRONOS_ERROR_MESSAGES[result.reason_code]) {
-    return KRONOS_ERROR_MESSAGES[result.reason_code];
-  }
-  if (typeof result.error === 'string') {
-    return result.error;
-  }
-  if (result.error && typeof result.error === 'object') {
-    return result.error.message || result.error.error_message || 'Unknown error';
-  }
-  return 'Kronos prediction failed';
-}
+// getKronosErrorMessage: moved inside component (needs access to translated errorMessages)
 
 // -----------------------------------------------------------------------------
 // KronosPredictorPage Component
@@ -370,6 +345,36 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
   llmModel = 'kronos-small',
 }) => {
   const { t } = useTranslation('strategy-builder');
+
+  // TICKET_422_3: i18n'd constants (moved from module scope to use t())
+  const MODEL_PRESETS: PresetOption[] = useMemo(() => [
+    { id: 'quick', label: t('pages.kronosPredictor.presets.quickPreview'), icon: <Zap className="w-5 h-5" />, description: t('pages.kronosPredictor.presets.quickPreviewDesc') },
+    { id: 'standard', label: t('pages.kronosPredictor.presets.standard'), icon: <TrendingUp className="w-5 h-5" />, description: t('pages.kronosPredictor.presets.standardDesc') },
+    { id: 'precision', label: t('pages.kronosPredictor.presets.highPrecision'), icon: <CheckCircle className="w-5 h-5" />, description: t('pages.kronosPredictor.presets.highPrecisionDesc') },
+    { id: 'explore', label: t('pages.kronosPredictor.presets.exploreMode'), icon: <Shuffle className="w-5 h-5" />, description: t('pages.kronosPredictor.presets.exploreModeDesc') },
+  ], [t]);
+
+  const KRONOS_ERROR_MESSAGES: Record<string, string> = useMemo(() => ({
+    KRONOS_SERVICE_UNAVAILABLE: t('pages.kronosPredictor.errors.serviceUnavailable'),
+    MODEL_NOT_FOUND: t('pages.kronosPredictor.errors.modelNotFound'),
+    INVALID_PARAMETERS: t('pages.kronosPredictor.errors.invalidParameters'),
+    PREDICTION_TIMEOUT: t('pages.kronosPredictor.errors.predictionTimeout'),
+    AUTH_REQUIRED: t('pages.kronosPredictor.errors.authRequired'),
+  }), [t]);
+
+  const getKronosErrorMessage = useCallback((result: GenerationResult): string => {
+    if (result.reason_code && KRONOS_ERROR_MESSAGES[result.reason_code]) {
+      return KRONOS_ERROR_MESSAGES[result.reason_code];
+    }
+    if (typeof result.error === 'string') {
+      return result.error;
+    }
+    if (result.error && typeof result.error === 'object') {
+      return result.error.message || result.error.error_message || t('pages.kronosPredictor.errors.predictionFailed');
+    }
+    return t('pages.kronosPredictor.errors.predictionFailed');
+  }, [KRONOS_ERROR_MESSAGES, t]);
+
   // ---------------------------------------------------------------------------
   // Page-specific State (UI inputs)
   // ---------------------------------------------------------------------------
@@ -437,7 +442,7 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
     buildStorageRequest: buildStorageRequestFromResult,
     errorMessages: KRONOS_ERROR_MESSAGES,
     getErrorMessage: getKronosErrorMessage,
-  }), [llmProvider, llmModel]);
+  }), [llmProvider, llmModel, t, KRONOS_ERROR_MESSAGES, getKronosErrorMessage]);
 
   // ---------------------------------------------------------------------------
   // Unified Generate Workflow Hook
@@ -483,7 +488,7 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
 
   // Build range text for lookback slider
   const lookbackRangeText = useMemo(() => {
-    return `Range: 10 - ${maxLookback} (limited by model context)`;
+    return t('pages.kronosPredictor.lookbackRangeText', { max: maxLookback });
   }, [maxLookback]);
 
   // ---------------------------------------------------------------------------
@@ -738,7 +743,7 @@ export const KronosPredictorPage: React.FC<KronosPredictorPageProps> = ({
       {/* TICKET_199: Naming Dialog */}
       <NamingDialog
         visible={state.namingDialogVisible}
-        contextData={{ algorithm: 'Kronos Predictor' }}
+        contextData={{ algorithm: t('pages.kronosPredictor.title') }}
         onConfirm={actions.handleConfirmNaming}
         onCancel={actions.handleCancelNaming}
       />

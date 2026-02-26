@@ -188,6 +188,43 @@
     "close": "Chiudi",
     "closeAll": "Chiudi tutto"
   },
+  "messages": {
+    "resumeApiNotAvailable": "API di ripresa non disponibile",
+    "resumingFromCheckpoint": "Ripresa del backtest dal checkpoint...",
+    "resumeFailed": "Ripresa fallita: {{message}}",
+    "deleteCheckpointFailed": "Eliminazione del checkpoint fallita",
+    "noWorkflowConfig": "Nessuna configurazione workflow trovata",
+    "missingAlgorithm": "Algoritmo di analisi o di ingresso mancante",
+    "exportedToQuantLab": "\"{{name}}\" esportato in Quant Lab",
+    "exportToQuantLabFailed": "Esportazione in Quant Lab fallita",
+    "startDateAdjustedLookback": "Data di inizio auto-adattata a {{date}} (vincolo maxLookback)",
+    "startDateAdjustedTimeframe": "Data di inizio auto-adattata a {{date}} (cambio di timeframe)",
+    "generatingStrategy": "Generazione strategia ({{current}}/{{total}})...",
+    "runningBacktest": "Esecuzione backtest ({{current}}/{{total}})...",
+    "noWorkflowsConfigured": "Nessun workflow configurato. Aggiungere almeno una selezione di algoritmo.",
+    "loadingMarketData": "Caricamento dati di mercato per {{symbol}}...",
+    "caseFailed": "Caso {{index}} fallito: {{message}}",
+    "executionFailed": "Esecuzione del backtest fallita. Controllare i log."
+  },
+  "validation": {
+    "symbolRequired": "Il simbolo e obbligatorio",
+    "dataSourceRequired": "La fonte dati e obbligatoria",
+    "startDateRequired": "La data di inizio e obbligatoria",
+    "endDateRequired": "La data di fine e obbligatoria",
+    "endDateAfterStart": "La data di fine deve essere successiva alla data di inizio",
+    "initialCapitalPositive": "Il capitale iniziale deve essere positivo",
+    "orderSizePositive": "La dimensione dell'ordine deve essere positiva"
+  },
+  "settings": {
+    "back": "Indietro",
+    "title": "Impostazioni",
+    "secrets": "Segreti",
+    "deleteSecret": "Elimina Segreto",
+    "deleteSecretConfirm": "Sei sicuro di voler eliminare",
+    "deleteSecretWarning": "Questa azione non puo essere annullata.",
+    "save": "Salva",
+    "saving": "Salvataggio..."
+  },
   "resultPanel": {
     "tabs": {
       "charts": "GRAFICI",
@@ -219,6 +256,11 @@
       "showingOf": "Mostrando {{shown}} di {{total}} operazioni",
       "noTrades": "Nessuna operazione"
     },
+    "llmEstimate": "Stima Chiamate LLM (Esecuzione a Secco)",
+    "barsProcessed": "Barre Elaborate",
+    "calls": "chiamate",
+    "totalLlmCalls": "Totale Chiamate LLM",
+    "elapsed": "Trascorso",
     "status": {
       "noResults": "Nessun risultato disponibile",
       "case": "Caso {{index}}",

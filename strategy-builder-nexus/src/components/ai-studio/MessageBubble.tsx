@@ -8,6 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, Bot, Info, Copy, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { formatTimestamp } from '@shared/utils/format-locale';
@@ -50,7 +51,7 @@ export interface MessageBubbleProps {
 
 const MESSAGE_CONFIG: Record<MessageType, {
   icon: React.FC<{ className?: string }>;
-  role: string;
+  roleKey: string;
   avatarClass: string;
   contentClass: string;
   alignClass: string;
@@ -58,7 +59,7 @@ const MESSAGE_CONFIG: Record<MessageType, {
 }> = {
   user: {
     icon: User,
-    role: 'You',
+    roleKey: 'aiStudio.roleUser',
     avatarClass: 'bg-gradient-to-br from-color-terminal-accent-primary to-color-terminal-accent-primary/80 text-color-terminal-bg',
     contentClass: 'bg-color-terminal-accent-primary text-color-terminal-bg rounded-br-sm',
     alignClass: 'flex-row-reverse',
@@ -66,7 +67,7 @@ const MESSAGE_CONFIG: Record<MessageType, {
   },
   assistant: {
     icon: Bot,
-    role: 'AI Assistant',
+    roleKey: 'aiStudio.roleAssistant',
     avatarClass: 'bg-gradient-to-br from-purple-500 to-purple-600 text-white',
     contentClass: 'bg-color-terminal-surface border border-color-terminal-border text-color-terminal-text rounded-bl-sm',
     alignClass: 'flex-row',
@@ -74,7 +75,7 @@ const MESSAGE_CONFIG: Record<MessageType, {
   },
   system: {
     icon: Info,
-    role: 'System',
+    roleKey: 'aiStudio.roleSystem',
     avatarClass: 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white',
     contentClass: 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-none shadow-lg shadow-indigo-500/30',
     alignClass: 'justify-center',
@@ -117,6 +118,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   showCopyButton = true,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const [copied, setCopied] = React.useState(false);
 
   const config = MESSAGE_CONFIG[message.type];
@@ -207,7 +209,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         {message.type !== 'system' && (showTimestamp || showAvatar) && (
           <div className="flex items-center gap-2 px-1">
             <span className="text-xs font-semibold text-color-terminal-text-secondary">
-              {config.role}
+              {t(config.roleKey)}
             </span>
             {showTimestamp && message.timestamp && (
               <span className="text-[10px] text-color-terminal-text-muted">
@@ -244,7 +246,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 'hover:text-color-terminal-text',
                 'shadow-sm'
               )}
-              aria-label={copied ? 'Copied!' : 'Copy message'}
+              aria-label={copied ? t('aiStudio.copied') : t('aiStudio.copyMessage')}
             >
               {copied ? (
                 <Check className="w-3.5 h-3.5 text-green-500" />

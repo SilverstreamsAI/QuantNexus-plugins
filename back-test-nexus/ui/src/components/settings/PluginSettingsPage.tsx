@@ -11,6 +11,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import { SecretsTab } from './SecretsTab';
 
@@ -105,6 +106,7 @@ interface SettingsHeaderBarProps {
 }
 
 const SettingsHeaderBar: React.FC<SettingsHeaderBarProps> = ({ pluginName, onBack }) => {
+  const { t } = useTranslation('backtest');
   const nameplateText = pluginName.toUpperCase();
 
   return (
@@ -118,13 +120,13 @@ const SettingsHeaderBar: React.FC<SettingsHeaderBarProps> = ({ pluginName, onBac
               className="flex items-center gap-1.5 text-color-terminal-text-muted hover:text-color-terminal-accent-teal transition-colors"
             >
               <ArrowLeftIcon className="w-4 h-4" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Back</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest">{t('settings.back')}</span>
             </button>
             <div className="h-4 w-px bg-white/20" />
           </>
         )}
         <span className="text-[10px] font-bold uppercase tracking-widest text-color-terminal-text-muted">
-          Settings
+          {t('settings.title')}
         </span>
       </div>
 
@@ -137,7 +139,7 @@ const SettingsHeaderBar: React.FC<SettingsHeaderBarProps> = ({ pluginName, onBac
       <div className="inline-flex border border-dashed border-white/20 rounded">
         <div className="flex items-center gap-1.5 px-4 py-1.5 bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal rounded">
           <KeyIcon className="w-3 h-3" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Secrets</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest">{t('settings.secrets')}</span>
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -38,10 +39,12 @@ export const ConversationSearch: React.FC<ConversationSearchProps> = ({
   value,
   onChange,
   onClear,
-  placeholder = 'Search conversations...',
+  placeholder,
   disabled = false,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  const displayPlaceholder = placeholder ?? t('aiStudio.searchConversations');
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       onChange(e.target.value);
@@ -86,10 +89,10 @@ export const ConversationSearch: React.FC<ConversationSearchProps> = ({
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder}
+        placeholder={displayPlaceholder}
         disabled={disabled}
         autoComplete="off"
-        aria-label="Search conversations"
+        aria-label={t('aiStudio.searchConversationsLabel')}
         className={cn(
           // Layout
           'w-full',
@@ -123,7 +126,7 @@ export const ConversationSearch: React.FC<ConversationSearchProps> = ({
             'hover:text-color-terminal-text',
             'hover:bg-color-terminal-surface-hover'
           )}
-          aria-label="Clear search"
+          aria-label={t('aiStudio.clearSearch')}
         >
           <X className="w-3.5 h-3.5" />
         </button>

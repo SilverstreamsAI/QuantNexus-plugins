@@ -214,19 +214,19 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
       {dryRunResult && (
         <div className="mx-3 mt-2 rounded border border-color-terminal-accent-primary/30 bg-color-terminal-accent-primary/5 p-3">
           <div className="text-[11px] font-bold uppercase tracking-wider text-color-terminal-accent-primary mb-2">
-            LLM Call Estimate (Dry Run)
+            {t('resultPanel.llmEstimate')}
           </div>
           <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
-            <div className="text-color-terminal-text-muted">Bars Processed</div>
+            <div className="text-color-terminal-text-muted">{t('resultPanel.barsProcessed')}</div>
             <div className="text-color-terminal-text font-mono">{dryRunResult.totalBars.toLocaleString()}</div>
             {dryRunResult.llmCalls.map((call, idx) => (
               <React.Fragment key={idx}>
                 <div className="text-color-terminal-text-muted">{call.label}</div>
-                <div className="text-color-terminal-text font-mono">{call.count.toLocaleString()} calls</div>
+                <div className="text-color-terminal-text font-mono">{call.count.toLocaleString()} {t('resultPanel.calls')}</div>
               </React.Fragment>
             ))}
             <div className="col-span-2 border-t border-color-terminal-border/30 my-1" />
-            <div className="text-color-terminal-text font-bold">Total LLM Calls</div>
+            <div className="text-color-terminal-text font-bold">{t('resultPanel.totalLlmCalls')}</div>
             <div className="text-color-terminal-accent-primary font-mono font-bold">
               {dryRunResult.totalLlmCalls.toLocaleString()}
             </div>
@@ -263,7 +263,7 @@ export const BacktestResultPanel: React.FC<BacktestResultPanelProps> = ({
         {/* Center: Elapsed Timer */}
         {displayTimeMs > 0 && (
           <div className="flex items-center gap-1.5 font-mono text-xs text-color-terminal-text-muted">
-            <span className="text-[10px] uppercase tracking-wider">Elapsed</span>
+            <span className="text-[10px] uppercase tracking-wider">{t('resultPanel.elapsed')}</span>
             <span className={cn(
               'tabular-nums',
               isExecuting ? 'text-color-terminal-accent-primary' : 'text-color-terminal-text'

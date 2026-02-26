@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Info } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -35,9 +36,7 @@ export interface ExpressionInputProps {
 // Constants
 // -----------------------------------------------------------------------------
 
-const DEFAULT_PLACEHOLDER = 'Example: ATR(14) > 0.5 AND RSI(14) < 30';
-const DEFAULT_HELP_TEXT = 'Enter custom logic expression. Syntax help will be shown in Assistant.';
-const DEFAULT_BUTTON_LABEL = 'Add Strategy';
+// Default keys moved to i18n: ui.expressionInput.*
 const DEFAULT_MIN_LENGTH = 3;
 const ERROR_FLASH_DURATION = 2000;
 
@@ -46,13 +45,17 @@ const ERROR_FLASH_DURATION = 2000;
 // -----------------------------------------------------------------------------
 
 export const ExpressionInput: React.FC<ExpressionInputProps> = ({
-  placeholder = DEFAULT_PLACEHOLDER,
-  helpText = DEFAULT_HELP_TEXT,
-  buttonLabel = DEFAULT_BUTTON_LABEL,
+  placeholder,
+  helpText,
+  buttonLabel,
   minLength = DEFAULT_MIN_LENGTH,
   onAdd,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  const displayPlaceholder = placeholder ?? t('ui.expressionInput.placeholder');
+  const displayHelpText = helpText ?? t('ui.expressionInput.helpText');
+  const displayButtonLabel = buttonLabel ?? t('ui.expressionInput.buttonLabel');
   const [value, setValue] = useState('');
   const [hasError, setHasError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -107,7 +110,7 @@ export const ExpressionInput: React.FC<ExpressionInputProps> = ({
         value={value}
         onChange={handleChange}
         onKeyPress={handleKeyPress}
-        placeholder={placeholder}
+        placeholder={displayPlaceholder}
         className={cn(
           'w-full px-4 py-3 text-xs terminal-mono',
           'border rounded',
@@ -126,7 +129,7 @@ export const ExpressionInput: React.FC<ExpressionInputProps> = ({
       {/* Help Text */}
       <div className="flex items-start gap-2 text-[10px] text-color-terminal-text-muted">
         <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
-        <span>{helpText}</span>
+        <span>{displayHelpText}</span>
       </div>
 
       {/* Add Button */}
@@ -143,7 +146,7 @@ export const ExpressionInput: React.FC<ExpressionInputProps> = ({
           )}
         >
           <Plus className="w-4 h-4" />
-          {buttonLabel}
+          {displayButtonLabel}
         </button>
       </div>
     </div>

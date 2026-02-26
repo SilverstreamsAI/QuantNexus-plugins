@@ -188,6 +188,43 @@
     "close": "닫기",
     "closeAll": "모두 닫기"
   },
+  "messages": {
+    "resumeApiNotAvailable": "재개 API를 사용할 수 없습니다",
+    "resumingFromCheckpoint": "체크포인트에서 백테스트 재개 중...",
+    "resumeFailed": "재개 실패: {{message}}",
+    "deleteCheckpointFailed": "체크포인트 삭제 실패",
+    "noWorkflowConfig": "워크플로우 구성을 찾을 수 없습니다",
+    "missingAlgorithm": "분석 또는 진입 알고리즘이 없습니다",
+    "exportedToQuantLab": "\"{{name}}\"을(를) Quant Lab으로 내보냈습니다",
+    "exportToQuantLabFailed": "Quant Lab으로 내보내기 실패",
+    "startDateAdjustedLookback": "시작일이 {{date}}로 자동 조정되었습니다 (maxLookback 제약)",
+    "startDateAdjustedTimeframe": "시작일이 {{date}}로 자동 조정되었습니다 (타임프레임 변경)",
+    "generatingStrategy": "전략 생성 중 ({{current}}/{{total}})...",
+    "runningBacktest": "백테스트 실행 중 ({{current}}/{{total}})...",
+    "noWorkflowsConfigured": "구성된 워크플로우가 없습니다. 최소 하나의 알고리즘 선택을 추가하세요.",
+    "loadingMarketData": "{{symbol}} 시장 데이터 로딩 중...",
+    "caseFailed": "케이스 {{index}} 실패: {{message}}",
+    "executionFailed": "백테스트 실행에 실패했습니다. 로그를 확인하세요."
+  },
+  "validation": {
+    "symbolRequired": "심볼은 필수입니다",
+    "dataSourceRequired": "데이터 소스는 필수입니다",
+    "startDateRequired": "시작일은 필수입니다",
+    "endDateRequired": "종료일은 필수입니다",
+    "endDateAfterStart": "종료일은 시작일 이후여야 합니다",
+    "initialCapitalPositive": "초기 자본은 양수여야 합니다",
+    "orderSizePositive": "주문 크기는 양수여야 합니다"
+  },
+  "settings": {
+    "back": "뒤로",
+    "title": "설정",
+    "secrets": "시크릿",
+    "deleteSecret": "시크릿 삭제",
+    "deleteSecretConfirm": "정말 삭제하시겠습니까",
+    "deleteSecretWarning": "이 작업은 되돌릴 수 없습니다.",
+    "save": "저장",
+    "saving": "저장 중..."
+  },
   "resultPanel": {
     "tabs": {
       "charts": "차트",
@@ -219,6 +256,11 @@
       "showingOf": "{{total}} 건 중 {{shown}} 건 표시",
       "noTrades": "거래 없음"
     },
+    "llmEstimate": "LLM 호출 추정 (드라이 런)",
+    "barsProcessed": "처리된 봉 수",
+    "calls": "호출",
+    "totalLlmCalls": "총 LLM 호출",
+    "elapsed": "경과 시간",
     "status": {
       "noResults": "결과 없음",
       "case": "케이스 {{index}}",

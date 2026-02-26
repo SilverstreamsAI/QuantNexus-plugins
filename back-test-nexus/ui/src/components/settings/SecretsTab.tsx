@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { cn } from '../../lib/utils';
 // PLUGIN_TICKET_018: Data provider config from Tier 0 data-plugin
@@ -159,6 +160,7 @@ interface DeleteConfirmDialogProps {
 }
 
 function DeleteConfirmDialog({ visible, secretKey, onConfirm, onCancel }: DeleteConfirmDialogProps): JSX.Element | null {
+  const { t } = useTranslation('backtest');
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!visible) return;
@@ -211,7 +213,7 @@ function DeleteConfirmDialog({ visible, secretKey, onConfirm, onCancel }: Delete
             'flex-1 font-mono text-xs font-semibold',
             'text-color-terminal-text uppercase tracking-wider'
           )}>
-            Delete Secret
+            {t('settings.deleteSecret')}
           </span>
           <button
             onClick={onCancel}
@@ -224,8 +226,8 @@ function DeleteConfirmDialog({ visible, secretKey, onConfirm, onCancel }: Delete
         {/* Body */}
         <div className="px-4 py-6">
           <p className="font-mono text-xs leading-relaxed text-color-terminal-text text-center">
-            Are you sure you want to delete <span className="text-red-400 font-semibold">{secretKey}</span>?
-            This action cannot be undone.
+            {t('settings.deleteSecretConfirm')} <span className="text-red-400 font-semibold">{secretKey}</span>?
+            {t('settings.deleteSecretWarning')}
           </p>
         </div>
 
@@ -245,7 +247,7 @@ function DeleteConfirmDialog({ visible, secretKey, onConfirm, onCancel }: Delete
               'transition-all duration-200'
             )}
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             onClick={onConfirm}
@@ -335,6 +337,7 @@ interface CredentialItemProps {
 }
 
 function CredentialItem({ credential, pluginId, allCredentials, testResult, onTestResultChange, onUpdate }: CredentialItemProps): JSX.Element {
+  const { t } = useTranslation('backtest');
   const [editing, setEditing] = useState(false);
   const [showValue, setShowValue] = useState(false);
   const [value, setValue] = useState<string | null>(null);
@@ -580,10 +583,10 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
               disabled={loading || !inputValue.trim()}
               className="rounded-lg px-4 py-2 bg-color-terminal-accent-teal text-black text-sm font-medium hover:bg-color-terminal-accent-teal/90 disabled:opacity-50"
             >
-              {loading ? 'Saving...' : 'Save'}
+              {loading ? t('settings.saving') : t('settings.save')}
             </button>
             <button onClick={handleCancel} className="rounded-lg px-4 py-2 text-sm hover:bg-white/5">
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
           {error && <div className="text-xs text-red-500">{error}</div>}

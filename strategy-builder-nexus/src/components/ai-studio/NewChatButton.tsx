@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -33,9 +34,11 @@ export interface NewChatButtonProps {
 export const NewChatButton: React.FC<NewChatButtonProps> = ({
   onClick,
   disabled = false,
-  label = 'New Chat',
+  label,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  const displayLabel = label ?? t('aiStudio.newChat');
   return (
     <button
       type="button"
@@ -62,10 +65,10 @@ export const NewChatButton: React.FC<NewChatButtonProps> = ({
         'disabled:active:scale-100',
         className
       )}
-      aria-label={label}
+      aria-label={displayLabel}
     >
       <Plus className="w-4 h-4" />
-      <span>{label}</span>
+      <span>{displayLabel}</span>
     </button>
   );
 };

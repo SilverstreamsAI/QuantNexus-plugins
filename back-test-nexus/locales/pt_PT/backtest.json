@@ -188,6 +188,43 @@
     "close": "Fechar",
     "closeAll": "Fechar tudo"
   },
+  "messages": {
+    "resumeApiNotAvailable": "API de retoma nao disponivel",
+    "resumingFromCheckpoint": "A retomar backtest a partir do checkpoint...",
+    "resumeFailed": "Falha na retoma: {{message}}",
+    "deleteCheckpointFailed": "Falha ao eliminar o checkpoint",
+    "noWorkflowConfig": "Nenhuma configuracao de workflow encontrada",
+    "missingAlgorithm": "Algoritmo de analise ou de entrada em falta",
+    "exportedToQuantLab": "\"{{name}}\" exportado para Quant Lab",
+    "exportToQuantLabFailed": "Falha ao exportar para Quant Lab",
+    "startDateAdjustedLookback": "Data de inicio auto-ajustada para {{date}} (restricao maxLookback)",
+    "startDateAdjustedTimeframe": "Data de inicio auto-ajustada para {{date}} (alteracao de timeframe)",
+    "generatingStrategy": "A gerar estrategia ({{current}}/{{total}})...",
+    "runningBacktest": "A executar backtest ({{current}}/{{total}})...",
+    "noWorkflowsConfigured": "Nenhum workflow configurado. Por favor adicione pelo menos uma selecao de algoritmo.",
+    "loadingMarketData": "A carregar dados de mercado para {{symbol}}...",
+    "caseFailed": "Caso {{index}} falhou: {{message}}",
+    "executionFailed": "Falha ao executar o backtest. Por favor verifique os logs."
+  },
+  "validation": {
+    "symbolRequired": "O simbolo e obrigatorio",
+    "dataSourceRequired": "A fonte de dados e obrigatoria",
+    "startDateRequired": "A data de inicio e obrigatoria",
+    "endDateRequired": "A data de fim e obrigatoria",
+    "endDateAfterStart": "A data de fim deve ser posterior a data de inicio",
+    "initialCapitalPositive": "O capital inicial deve ser positivo",
+    "orderSizePositive": "O tamanho da ordem deve ser positivo"
+  },
+  "settings": {
+    "back": "Voltar",
+    "title": "Definicoes",
+    "secrets": "Segredos",
+    "deleteSecret": "Eliminar Segredo",
+    "deleteSecretConfirm": "Tem a certeza de que deseja eliminar",
+    "deleteSecretWarning": "Esta acao nao pode ser desfeita.",
+    "save": "Guardar",
+    "saving": "A guardar..."
+  },
   "resultPanel": {
     "tabs": {
       "charts": "GRAFICOS",
@@ -219,6 +256,11 @@
       "showingOf": "Mostrando {{shown}} de {{total}} operacoes",
       "noTrades": "Sem operacoes"
     },
+    "llmEstimate": "Estimativa de Chamadas LLM (Execucao a Seco)",
+    "barsProcessed": "Barras Processadas",
+    "calls": "chamadas",
+    "totalLlmCalls": "Total de Chamadas LLM",
+    "elapsed": "Decorrido",
     "status": {
       "noResults": "Sem resultados disponiveis",
       "case": "Caso {{index}}",

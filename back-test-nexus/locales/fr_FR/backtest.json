@@ -188,6 +188,43 @@
     "close": "Fermer",
     "closeAll": "Tout fermer"
   },
+  "messages": {
+    "resumeApiNotAvailable": "API de reprise non disponible",
+    "resumingFromCheckpoint": "Reprise du backtest depuis le checkpoint...",
+    "resumeFailed": "Echec de la reprise : {{message}}",
+    "deleteCheckpointFailed": "Echec de la suppression du checkpoint",
+    "noWorkflowConfig": "Aucune configuration de workflow trouvee",
+    "missingAlgorithm": "Algorithme d'analyse ou d'entree manquant",
+    "exportedToQuantLab": "\"{{name}}\" exporte vers Quant Lab",
+    "exportToQuantLabFailed": "Echec de l'exportation vers Quant Lab",
+    "startDateAdjustedLookback": "Date de debut auto-ajustee a {{date}} (contrainte maxLookback)",
+    "startDateAdjustedTimeframe": "Date de debut auto-ajustee a {{date}} (changement de periode)",
+    "generatingStrategy": "Generation de la strategie ({{current}}/{{total}})...",
+    "runningBacktest": "Execution du backtest ({{current}}/{{total}})...",
+    "noWorkflowsConfigured": "Aucun workflow configure. Veuillez ajouter au moins une selection d'algorithme.",
+    "loadingMarketData": "Chargement des donnees de marche pour {{symbol}}...",
+    "caseFailed": "Cas {{index}} echoue : {{message}}",
+    "executionFailed": "Echec de l'execution du backtest. Veuillez verifier les logs."
+  },
+  "validation": {
+    "symbolRequired": "Le symbole est requis",
+    "dataSourceRequired": "La source de donnees est requise",
+    "startDateRequired": "La date de debut est requise",
+    "endDateRequired": "La date de fin est requise",
+    "endDateAfterStart": "La date de fin doit etre posterieure a la date de debut",
+    "initialCapitalPositive": "Le capital initial doit etre positif",
+    "orderSizePositive": "La taille de l'ordre doit etre positive"
+  },
+  "settings": {
+    "back": "Retour",
+    "title": "Parametres",
+    "secrets": "Secrets",
+    "deleteSecret": "Supprimer le Secret",
+    "deleteSecretConfirm": "Etes-vous sur de vouloir supprimer",
+    "deleteSecretWarning": "Cette action est irreversible.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement..."
+  },
   "resultPanel": {
     "tabs": {
       "charts": "GRAPHIQUES",
@@ -219,6 +256,11 @@
       "showingOf": "Affichage {{shown}} sur {{total}} transactions",
       "noTrades": "Pas de transactions"
     },
+    "llmEstimate": "Estimation des Appels LLM (Essai a Sec)",
+    "barsProcessed": "Barres Traitees",
+    "calls": "appels",
+    "totalLlmCalls": "Total des Appels LLM",
+    "elapsed": "Ecoule",
     "status": {
       "noResults": "Aucun resultat disponible",
       "case": "Cas {{index}}",

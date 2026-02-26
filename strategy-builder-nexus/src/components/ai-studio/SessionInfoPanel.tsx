@@ -8,6 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -127,10 +128,11 @@ export const SessionInfoPanel: React.FC<SessionInfoPanelProps> = ({
   messageCount,
   tokenUsage,
   showCompressionWarning = false,
-  compressionWarningText = 'Conversation may be compressed soon',
+  compressionWarningText,
   visible = true,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // Calculate token usage percentage and level
   const { percentage, usageLevel, displayCurrent, displayLimit } = useMemo(() => {
     const pct = tokenUsage.limit > 0 ? tokenUsage.current / tokenUsage.limit : 0;
@@ -161,15 +163,15 @@ export const SessionInfoPanel: React.FC<SessionInfoPanelProps> = ({
     >
       {/* Session Info Row */}
       <div className="flex items-center justify-between mb-3">
-        <InfoItem label="Session" value={truncateSessionId(sessionId)} />
-        <InfoItem label="Messages" value={messageCount} />
+        <InfoItem label={t('aiStudio.session')} value={truncateSessionId(sessionId)} />
+        <InfoItem label={t('aiStudio.messages')} value={messageCount} />
       </div>
 
       {/* Token Usage Row */}
       <div className="mb-2">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-color-terminal-text-muted">
-            Token Usage:
+            {t('aiStudio.tokenUsage')}:
           </span>
           <span className="text-xs font-medium text-color-terminal-text font-mono">
             {displayCurrent} / {displayLimit}
@@ -190,7 +192,7 @@ export const SessionInfoPanel: React.FC<SessionInfoPanelProps> = ({
             aria-valuenow={tokenUsage.current}
             aria-valuemin={0}
             aria-valuemax={tokenUsage.limit}
-            aria-label={`Token usage: ${percentage.toFixed(0)}%`}
+            aria-label={t('aiStudio.tokenUsageLabel', { percent: percentage.toFixed(0) })}
           />
         </div>
       </div>
@@ -208,7 +210,7 @@ export const SessionInfoPanel: React.FC<SessionInfoPanelProps> = ({
         >
           <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0" />
           <span className="text-xs font-medium text-yellow-700">
-            {compressionWarningText}
+            {compressionWarningText ?? t('aiStudio.compressionWarning')}
           </span>
         </div>
       )}

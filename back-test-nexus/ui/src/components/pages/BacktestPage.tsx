@@ -543,7 +543,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
     const api = (window as any).electronAPI;
     if (!api?.backtest?.resumeBacktest) {
-      messageAPI?.error('Resume API not available');
+      messageAPI?.error(t('messages.resumeApiNotAvailable'));
       return;
     }
 
@@ -555,7 +555,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
 
 
     try {
-      messageAPI?.info('Resuming backtest from checkpoint...');
+      messageAPI?.info(t('messages.resumingFromCheckpoint'));
       const result = await api.backtest.resumeBacktest({
         taskId: checkpointInfo.taskId,
         originalConfig: dataConfig,
@@ -570,7 +570,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       setCheckpointInfo(null);
     } catch (error) {
       console.error('[BacktestPage] Resume failed:', error);
-      messageAPI?.error(`Resume failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      messageAPI?.error(t('messages.resumeFailed', { message: error instanceof Error ? error.message : 'Unknown error' }));
       setIsExecuting(false);
       setShowCheckpointPanel(true);
     } finally {
@@ -597,7 +597,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
       setShowCheckpointPanel(false);
     } catch (error) {
       console.error('[BacktestPage] Failed to delete checkpoint:', error);
-      messageAPI?.error('Failed to delete checkpoint');
+      messageAPI?.error(t('messages.deleteCheckpointFailed'));
     }
   }, [checkpointInfo, messageAPI]);
 
@@ -653,7 +653,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     // WorkflowRow has: analysisSelections, preConditionSelections, stepSelections, postConditionSelections
     const firstRow = workflowRows[0];
     if (!firstRow) {
-      messageAPI?.error('No workflow configuration found');
+      messageAPI?.error(t('messages.noWorkflowConfig'));
       return;
     }
 
@@ -662,7 +662,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     const exitSelection = firstRow.postConditionSelections[0];
 
     if (!analysisSelection || !entrySelection) {
-      messageAPI?.error('Missing analysis or entry algorithm');
+      messageAPI?.error(t('messages.missingAlgorithm'));
       return;
     }
 
@@ -709,10 +709,10 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         },
       });
 
-      messageAPI?.success(`Exported "${finalName}" to Quant Lab`);
+      messageAPI?.success(t('messages.exportedToQuantLab', { name: finalName }));
     } catch (error) {
       console.error('[BacktestPage] Export error:', error);
-      messageAPI?.error('Failed to export to Quant Lab');
+      messageAPI?.error(t('messages.exportToQuantLabFailed'));
     }
   }, [workflowRows, dataConfig, selectedHistoryResult, exportWorkflow, messageAPI]);
 
@@ -958,7 +958,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   const handleDataConfigChange = useCallback((newConfig: BacktestDataConfig) => {
     const adjusted = constrainStartDate(newConfig);
     if (adjusted.startDate !== newConfig.startDate) {
-      messageAPI?.info(`Start date auto-adjusted to ${adjusted.startDate} (maxLookback constraint)`);
+      messageAPI?.info(t('messages.startDateAdjustedLookback', { date: adjusted.startDate }));
     }
     setDataConfig(adjusted);
   }, [constrainStartDate, messageAPI]);
@@ -967,7 +967,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
   useEffect(() => {
     const adjusted = constrainStartDate(dataConfig);
     if (adjusted.startDate !== dataConfig.startDate) {
-      messageAPI?.info(`Start date auto-adjusted to ${adjusted.startDate} (timeframe changed)`);
+      messageAPI?.info(t('messages.startDateAdjustedTimeframe', { date: adjusted.startDate }));
       setDataConfig(adjusted);
     }
   }, [workflowRows]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -1061,7 +1061,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     const workflowTimeframe = getWorkflowTimeframe();
 
     // Generate strategy for this specific workflow
-    messageAPI?.info(`Generating strategy (${caseIndex}/${totalWorkflows})...`);
+    messageAPI?.info(t('messages.generatingStrategy', { current: caseIndex, total: totalWorkflows }));
     const genResult = await api?.generateWorkflowStrategy({
       workflows: [workflow],
       symbol: config.symbol,
@@ -1078,7 +1078,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     console.debug(`[BacktestPage] Strategy ${caseIndex} generated at:`, genResult.strategyPath);
 
     // Run backtest
-    messageAPI?.info(`Running backtest (${caseIndex}/${totalWorkflows})...`);
+    messageAPI?.info(t('messages.runningBacktest', { current: caseIndex, total: totalWorkflows }));
 
     // TICKET_414_4: Extract server_strategy_id from entry algorithm's classification_metadata
     const entrySelection = workflow.stepSelections[0];
@@ -1294,23 +1294,23 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     const errors: Partial<Record<keyof BacktestDataConfig, string>> = {};
 
     if (!config.symbol) {
-      errors.symbol = 'Symbol is required';
+      errors.symbol = t('validation.symbolRequired');
     }
 
     if (!config.dataSource) {
-      errors.dataSource = 'Data source is required';
+      errors.dataSource = t('validation.dataSourceRequired');
     }
 
     if (!config.startDate) {
-      errors.startDate = 'Start date is required';
+      errors.startDate = t('validation.startDateRequired');
     }
 
     if (!config.endDate) {
-      errors.endDate = 'End date is required';
+      errors.endDate = t('validation.endDateRequired');
     }
 
     if (config.startDate && config.endDate && config.startDate >= config.endDate) {
-      errors.endDate = 'End date must be after start date';
+      errors.endDate = t('validation.endDateAfterStart');
     }
 
     // TICKET_305 Phase 3: Validate date range against maxLookback for selected timeframes
@@ -1335,11 +1335,11 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     }
 
     if (config.initialCapital <= 0) {
-      errors.initialCapital = 'Initial capital must be positive';
+      errors.initialCapital = t('validation.initialCapitalPositive');
     }
 
     if (config.orderSize <= 0) {
-      errors.orderSize = 'Order size must be positive';
+      errors.orderSize = t('validation.orderSizePositive');
     }
 
     setDataConfigErrors(errors);
@@ -1373,7 +1373,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     // Filter workflows with content
     const activeWorkflows = workflowRows.filter(hasWorkflowContent);
     if (activeWorkflows.length === 0) {
-      messageAPI?.error('No workflows configured. Please add at least one algorithm selection.');
+      messageAPI?.error(t('messages.noWorkflowsConfigured'));
       return;
     }
 
@@ -1412,7 +1412,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     setIsExecuting(true);
 
     try {
-      messageAPI?.info(`Loading market data for ${dataConfig.symbol}...`);
+      messageAPI?.info(t('messages.loadingMarketData', { symbol: dataConfig.symbol }));
 
       // TICKET_375_1: Sequential case execution to prevent concurrent file writes
       // TICKET_375_2: Create tab per case only when that case starts (not all upfront)
@@ -1438,14 +1438,14 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         } catch (error) {
           const msg = error instanceof Error ? error.message : 'Unknown error';
           console.error(`[BacktestPage] Case ${i + 1} failed:`, error);
-          messageAPI?.error(`Case ${i + 1} failed: ${msg}`);
+          messageAPI?.error(t('messages.caseFailed', { index: i + 1, message: msg }));
           failures.push({ caseIndex: i + 1, error: msg });
         }
       }
 
       setIsExecuting(false);
     } catch (error) {
-      messageAPI?.error('Failed to execute backtest. Please check the logs.');
+      messageAPI?.error(t('messages.executionFailed'));
       console.error('[BacktestPage] Execute error:', error);
       setExecuteError(error instanceof Error ? error.message : 'Execution failed');
       setIsExecuting(false);

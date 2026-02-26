@@ -188,6 +188,43 @@
     "close": "關閉",
     "closeAll": "全部關閉"
   },
+  "messages": {
+    "resumeApiNotAvailable": "恢復API不可用",
+    "resumingFromCheckpoint": "正在從檢查點恢復回測...",
+    "resumeFailed": "恢復失敗: {{message}}",
+    "deleteCheckpointFailed": "刪除檢查點失敗",
+    "noWorkflowConfig": "未找到工作流程配置",
+    "missingAlgorithm": "缺少分析或進場演算法",
+    "exportedToQuantLab": "已將 \"{{name}}\" 匯出到 Quant Lab",
+    "exportToQuantLabFailed": "匯出到 Quant Lab 失敗",
+    "startDateAdjustedLookback": "開始日期已自動調整為 {{date}} (maxLookback 限制)",
+    "startDateAdjustedTimeframe": "開始日期已自動調整為 {{date}} (時間週期已變更)",
+    "generatingStrategy": "正在產生策略 ({{current}}/{{total}})...",
+    "runningBacktest": "正在執行回測 ({{current}}/{{total}})...",
+    "noWorkflowsConfigured": "未配置工作流程。請至少新增一個演算法選擇。",
+    "loadingMarketData": "正在載入 {{symbol}} 的市場資料...",
+    "caseFailed": "案例 {{index}} 失敗: {{message}}",
+    "executionFailed": "回測執行失敗。請檢查日誌。"
+  },
+  "validation": {
+    "symbolRequired": "交易品種為必填項",
+    "dataSourceRequired": "資料來源為必填項",
+    "startDateRequired": "開始日期為必填項",
+    "endDateRequired": "結束日期為必填項",
+    "endDateAfterStart": "結束日期必須晚於開始日期",
+    "initialCapitalPositive": "初始資金必須為正數",
+    "orderSizePositive": "訂單大小必須為正數"
+  },
+  "settings": {
+    "back": "返回",
+    "title": "設定",
+    "secrets": "密鑰",
+    "deleteSecret": "刪除密鑰",
+    "deleteSecretConfirm": "確定要刪除嗎",
+    "deleteSecretWarning": "此操作無法撤銷。",
+    "save": "儲存",
+    "saving": "儲存中..."
+  },
   "resultPanel": {
     "tabs": {
       "charts": "圖表",
@@ -219,6 +256,11 @@
       "showingOf": "顯示 {{shown}} / {{total}} 筆交易",
       "noTrades": "無交易記錄"
     },
+    "llmEstimate": "LLM 呼叫估算 (模擬執行)",
+    "barsProcessed": "已處理K線數",
+    "calls": "次呼叫",
+    "totalLlmCalls": "LLM 呼叫總數",
+    "elapsed": "已用時間",
     "status": {
       "noResults": "暫無結果",
       "case": "案例 {{index}}",

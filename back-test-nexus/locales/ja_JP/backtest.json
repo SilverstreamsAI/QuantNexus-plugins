@@ -188,6 +188,43 @@
     "close": "閉じる",
     "closeAll": "すべて閉じる"
   },
+  "messages": {
+    "resumeApiNotAvailable": "再開APIが利用できません",
+    "resumingFromCheckpoint": "チェックポイントからバックテストを再開中...",
+    "resumeFailed": "再開に失敗しました: {{message}}",
+    "deleteCheckpointFailed": "チェックポイントの削除に失敗しました",
+    "noWorkflowConfig": "ワークフロー設定が見つかりません",
+    "missingAlgorithm": "分析またはエントリーアルゴリズムがありません",
+    "exportedToQuantLab": "\"{{name}}\" をQuant Labにエクスポートしました",
+    "exportToQuantLabFailed": "Quant Labへのエクスポートに失敗しました",
+    "startDateAdjustedLookback": "開始日が {{date}} に自動調整されました (maxLookback制約)",
+    "startDateAdjustedTimeframe": "開始日が {{date}} に自動調整されました (タイムフレーム変更)",
+    "generatingStrategy": "戦略を生成中 ({{current}}/{{total}})...",
+    "runningBacktest": "バックテスト実行中 ({{current}}/{{total}})...",
+    "noWorkflowsConfigured": "ワークフローが設定されていません。少なくとも1つのアルゴリズム選択を追加してください。",
+    "loadingMarketData": "{{symbol}} の市場データを読み込み中...",
+    "caseFailed": "ケース {{index}} が失敗しました: {{message}}",
+    "executionFailed": "バックテストの実行に失敗しました。ログを確認してください。"
+  },
+  "validation": {
+    "symbolRequired": "シンボルは必須です",
+    "dataSourceRequired": "データソースは必須です",
+    "startDateRequired": "開始日は必須です",
+    "endDateRequired": "終了日は必須です",
+    "endDateAfterStart": "終了日は開始日より後でなければなりません",
+    "initialCapitalPositive": "初期資金は正の値でなければなりません",
+    "orderSizePositive": "注文サイズは正の値でなければなりません"
+  },
+  "settings": {
+    "back": "戻る",
+    "title": "設定",
+    "secrets": "シークレット",
+    "deleteSecret": "シークレットを削除",
+    "deleteSecretConfirm": "本当に削除しますか",
+    "deleteSecretWarning": "この操作は元に戻せません。",
+    "save": "保存",
+    "saving": "保存中..."
+  },
   "resultPanel": {
     "tabs": {
       "charts": "チャート",
@@ -219,6 +256,11 @@
       "showingOf": "{{total}} 件中 {{shown}} 件を表示",
       "noTrades": "取引なし"
     },
+    "llmEstimate": "LLM呼び出し見積もり (ドライラン)",
+    "barsProcessed": "処理済みバー数",
+    "calls": "呼び出し",
+    "totalLlmCalls": "LLM呼び出し合計",
+    "elapsed": "経過時間",
     "status": {
       "noResults": "結果がありません",
       "case": "ケース {{index}}",

@@ -277,8 +277,8 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
       // Create conversation in SQLite
       const result = await conversationService.createConversation({
         userId,
-        title: 'New Strategy',
-        preview: 'Start describing your strategy...',
+        title: t('pages.aiStrategyStudio.newStrategyTitle'),
+        preview: t('pages.aiStrategyStudio.newStrategyPreview'),
       });
 
       if (result.success && result.data) {
@@ -435,7 +435,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
         const response: VibingChatResponse = await executeVibingChat({
           session_id: sessionId,
           message: content,
-          strategy_name: initialStrategyName || 'New Strategy',
+          strategy_name: initialStrategyName || t('pages.aiStrategyStudio.newStrategyTitle'),
           strategy_id: strategyId,
           current_strategy_rules: currentRules,
           output_format: 'v3',
@@ -669,7 +669,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
         const errorResult = await conversationService.addMessage({
           conversationId: activeDbId,
           type: 'system',
-          content: `Action failed: ${errorMessage}`,
+          content: t('pages.aiStrategyStudio.actionFailedPrefix', { message: errorMessage }),
           tokenCount: 0,
         });
 
@@ -691,7 +691,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
         const errorResult = await conversationService.addMessage({
           conversationId: activeDbId,
           type: 'system',
-          content: `Action failed: ${errorMessage}`,
+          content: t('pages.aiStrategyStudio.actionFailedPrefix', { message: errorMessage }),
           tokenCount: 0,
         });
 

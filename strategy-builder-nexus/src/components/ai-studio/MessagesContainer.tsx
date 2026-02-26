@@ -8,6 +8,7 @@
  */
 
 import React, { useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Sparkles } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { MessageBubble, Message } from './MessageBubble';
@@ -117,11 +118,14 @@ export const MessagesContainer: React.FC<MessagesContainerProps> = ({
   messages,
   isLoading = false,
   autoScroll = true,
-  welcomeTitle = 'AI Strategy Studio',
-  welcomeSubtitle = 'Describe your trading strategy in natural language, and I\'ll help you build it.',
+  welcomeTitle,
+  welcomeSubtitle,
   onScrollToBottom,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  const displayTitle = welcomeTitle ?? t('pages.aiStrategyStudio.welcomeTitle');
+  const displaySubtitle = welcomeSubtitle ?? t('pages.aiStrategyStudio.welcomeSubtitle');
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -163,7 +167,7 @@ export const MessagesContainer: React.FC<MessagesContainerProps> = ({
           className
         )}
       >
-        <WelcomeMessage title={welcomeTitle} subtitle={welcomeSubtitle} />
+        <WelcomeMessage title={displayTitle} subtitle={displaySubtitle} />
       </div>
     );
   }

@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import { NewChatButton } from './NewChatButton';
 import { ConversationSearch } from './ConversationSearch';
@@ -54,6 +55,7 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
   width = 280,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // Internal search state
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -121,8 +123,8 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
         onDelete={onDeleteConversation}
         emptyText={
           searchQuery
-            ? 'No conversations match your search'
-            : 'Your conversations will appear here'
+            ? t('aiStudio.noSearchResults')
+            : t('aiStudio.emptyConversations')
         }
       />
 

@@ -8,6 +8,7 @@
  */
 
 import React, { useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Send, Paperclip, Image } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -50,13 +51,15 @@ export const ChatInputArea: React.FC<ChatInputAreaProps> = ({
   onSend,
   onAttachImage,
   disabled = false,
-  placeholder = 'Describe your trading strategy...',
+  placeholder,
   maxLength = 5000,
   minRows = 3,
   maxRows = 8,
   showCharCount = true,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  const displayPlaceholder = placeholder ?? t('aiStudio.chatPlaceholder');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea
@@ -151,7 +154,7 @@ export const ChatInputArea: React.FC<ChatInputAreaProps> = ({
           value={value}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={displayPlaceholder}
           disabled={disabled}
           maxLength={maxLength}
           rows={minRows}
@@ -168,7 +171,7 @@ export const ChatInputArea: React.FC<ChatInputAreaProps> = ({
             // Disabled
             'disabled:opacity-50 disabled:cursor-not-allowed'
           )}
-          aria-label="Message input"
+          aria-label={t('aiStudio.messageInput')}
         />
 
         {/* Toolbar */}
@@ -200,7 +203,7 @@ export const ChatInputArea: React.FC<ChatInputAreaProps> = ({
                   'disabled:opacity-50 disabled:cursor-not-allowed',
                   'disabled:hover:translate-y-0'
                 )}
-                aria-label="Attach image"
+                aria-label={t('aiStudio.attachImage')}
               >
                 <Paperclip className="w-4 h-4" />
               </button>
@@ -237,7 +240,7 @@ export const ChatInputArea: React.FC<ChatInputAreaProps> = ({
               'disabled:hover:translate-y-0',
               'disabled:hover:shadow-none'
             )}
-            aria-label="Send message"
+            aria-label={t('aiStudio.sendMessage')}
           >
             <Send className="w-4 h-4" />
           </button>
@@ -246,8 +249,8 @@ export const ChatInputArea: React.FC<ChatInputAreaProps> = ({
 
       {/* Helper Text */}
       <p className="text-[10px] text-color-terminal-text-muted/60 mt-2 text-center">
-        Press <kbd className="px-1 py-0.5 bg-color-terminal-surface rounded text-[9px]">Enter</kbd> to send,{' '}
-        <kbd className="px-1 py-0.5 bg-color-terminal-surface rounded text-[9px]">Shift+Enter</kbd> for new line
+        Press <kbd className="px-1 py-0.5 bg-color-terminal-surface rounded text-[9px]">{t('aiStudio.helperEnter')}</kbd> {t('aiStudio.helperSendText')}{' '}
+        <kbd className="px-1 py-0.5 bg-color-terminal-surface rounded text-[9px]">{t('aiStudio.helperShiftEnter')}</kbd> {t('aiStudio.helperNewLineText')}
       </p>
     </div>
   );

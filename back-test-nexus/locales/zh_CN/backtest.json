@@ -230,6 +230,43 @@
     "close": "关闭",
     "closeAll": "全部关闭"
   },
+  "messages": {
+    "resumeApiNotAvailable": "恢复API不可用",
+    "resumingFromCheckpoint": "正在从检查点恢复回测...",
+    "resumeFailed": "恢复失败: {{message}}",
+    "deleteCheckpointFailed": "删除检查点失败",
+    "noWorkflowConfig": "未找到工作流配置",
+    "missingAlgorithm": "缺少分析或入场算法",
+    "exportedToQuantLab": "已将 \"{{name}}\" 导出到 Quant Lab",
+    "exportToQuantLabFailed": "导出到 Quant Lab 失败",
+    "startDateAdjustedLookback": "开始日期已自动调整为 {{date}} (maxLookback 约束)",
+    "startDateAdjustedTimeframe": "开始日期已自动调整为 {{date}} (时间周期已更改)",
+    "generatingStrategy": "正在生成策略 ({{current}}/{{total}})...",
+    "runningBacktest": "正在运行回测 ({{current}}/{{total}})...",
+    "noWorkflowsConfigured": "未配置工作流。请至少添加一个算法选择。",
+    "loadingMarketData": "正在加载 {{symbol}} 的市场数据...",
+    "caseFailed": "案例 {{index}} 失败: {{message}}",
+    "executionFailed": "回测执行失败。请检查日志。"
+  },
+  "validation": {
+    "symbolRequired": "交易品种为必填项",
+    "dataSourceRequired": "数据源为必填项",
+    "startDateRequired": "开始日期为必填项",
+    "endDateRequired": "结束日期为必填项",
+    "endDateAfterStart": "结束日期必须晚于开始日期",
+    "initialCapitalPositive": "初始资金必须为正数",
+    "orderSizePositive": "订单大小必须为正数"
+  },
+  "settings": {
+    "back": "返回",
+    "title": "设置",
+    "secrets": "密钥",
+    "deleteSecret": "删除密钥",
+    "deleteSecretConfirm": "确定要删除吗",
+    "deleteSecretWarning": "此操作无法撤销。",
+    "save": "保存",
+    "saving": "保存中..."
+  },
   "resultPanel": {
     "tabs": {
       "charts": "图表",
@@ -263,6 +300,11 @@
       "showingOf": "显示 {{shown}} / {{total}} 笔交易",
       "noTrades": "无交易记录"
     },
+    "llmEstimate": "LLM 调用估算 (模拟运行)",
+    "barsProcessed": "已处理K线数",
+    "calls": "次调用",
+    "totalLlmCalls": "LLM 调用总数",
+    "elapsed": "已用时间",
     "status": {
       "noResults": "暂无结果",
       "case": "案例 {{index}}",
