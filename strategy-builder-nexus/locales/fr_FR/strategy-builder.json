@@ -422,6 +422,52 @@
     "collapsiblePanel": {
       "expand": "Etendre",
       "collapse": "Reduire"
+    },
+    "indicatorConfig": {
+      "title": "CONFIGURATION DES INDICATEURS",
+      "newIndicator": "Nouvel Indicateur",
+      "indicatorType": "Type d'Indicateur",
+      "selectIndicator": "Selectionner un indicateur...",
+      "parameters": "Parametres",
+      "strategyTemplate": "Modele de Strategie",
+      "templateType": "Type de Modele",
+      "selectTemplate": "Selectionner modele...",
+      "templateInfoType": "Type:",
+      "templateInfoDesc": "Description:",
+      "ruleLogic": "Logique de Regle",
+      "whenIndicator": "Quand Indicateur",
+      "selectOperator": "Selectionner...",
+      "thresholdValue": "Valeur Seuil",
+      "addIndicator": "Ajouter Indicateur"
+    },
+    "regimeSelectorLabels": {
+      "title": "LOGIQUE DES INDICATEURS DE REGIME DE MARCHE",
+      "trend": "Tendance",
+      "range": "Plage",
+      "consolidation": "Consolidation",
+      "oscillation": "Oscillation",
+      "bespoke": "Sur mesure",
+      "bespokeName": "Nom Sur Mesure",
+      "bespokeNamePlaceholder": "Entrez un nom de regime personnalise",
+      "notes": "Notes",
+      "notesOptional": "(Optionnel)",
+      "notesPlaceholder": "Entrez des notes ou description"
+    },
+    "signalModeSelectorLabels": {
+      "title": "Mode de Signal",
+      "autoReverse": "Auto-Inverse",
+      "manual": "Manuel",
+      "detectorAutoReverse": "Plage = inverse de Tendance",
+      "detectorManual": "Definir les deux conditions",
+      "entryAutoReverse": "Short = inverse de Long",
+      "entryManual": "Definir les deux conditions"
+    },
+    "codeDisplayLabels": {
+      "title": "CODE DE STRATEGIE GENERE",
+      "copied": "Copie!",
+      "copy": "Copier",
+      "errorDefault": "Une erreur s'est produite",
+      "noCode": "Aucun code a afficher"
     }
   }
 }

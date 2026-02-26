@@ -9,6 +9,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 // -----------------------------------------------------------------------------
@@ -41,21 +42,6 @@ export interface SignalModeSelectorProps {
 }
 
 // -----------------------------------------------------------------------------
-// Constants
-// -----------------------------------------------------------------------------
-
-const DESCRIPTIONS: Record<SignalModeContext, Record<SignalMode, string>> = {
-  detector: {
-    'auto-reverse': 'Range = inverse of Trend',
-    'manual': 'Define both conditions',
-  },
-  entry: {
-    'auto-reverse': 'Short = inverse of Long',
-    'manual': 'Define both conditions',
-  },
-};
-
-// -----------------------------------------------------------------------------
 // Component
 // -----------------------------------------------------------------------------
 
@@ -65,13 +51,15 @@ export const SignalModeSelector: React.FC<SignalModeSelectorProps> = ({
   context,
   className,
 }) => {
-  const description = DESCRIPTIONS[context][value];
+  const { t } = useTranslation('strategy-builder');
+  
+  const description = t(`ui.signalModeSelectorLabels.${context}${value === 'auto-reverse' ? 'AutoReverse' : 'Manual'}`);
 
   return (
     <div className={cn('space-y-2', className)}>
       {/* Label */}
       <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-        Signal Mode
+        {t('ui.signalModeSelectorLabels.title')}
       </label>
 
       {/* Segmented Control */}
@@ -88,7 +76,7 @@ export const SignalModeSelector: React.FC<SignalModeSelectorProps> = ({
               : 'bg-transparent text-color-terminal-text-muted hover:text-color-terminal-accent-teal hover:bg-white/5'
           )}
         >
-          <span className="text-[9px] font-bold uppercase tracking-widest">Auto-Reverse</span>
+          <span className="text-[9px] font-bold uppercase tracking-widest">{t('ui.signalModeSelectorLabels.autoReverse')}</span>
         </button>
 
         {/* Manual Button */}
@@ -102,7 +90,7 @@ export const SignalModeSelector: React.FC<SignalModeSelectorProps> = ({
               : 'bg-transparent text-color-terminal-text-muted hover:text-color-terminal-accent-teal hover:bg-white/5'
           )}
         >
-          <span className="text-[9px] font-bold uppercase tracking-widest">Manual</span>
+          <span className="text-[9px] font-bold uppercase tracking-widest">{t('ui.signalModeSelectorLabels.manual')}</span>
         </button>
       </div>
 

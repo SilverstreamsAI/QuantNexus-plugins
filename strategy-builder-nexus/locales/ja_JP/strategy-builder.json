@@ -422,6 +422,52 @@
     "collapsiblePanel": {
       "expand": "展開",
       "collapse": "折りたたみ"
+    },
+    "indicatorConfig": {
+      "title": "インジケーター設定",
+      "newIndicator": "新規インジケーター",
+      "indicatorType": "インジケータータイプ",
+      "selectIndicator": "インジケーターを選択...",
+      "parameters": "パラメータ",
+      "strategyTemplate": "戦略テンプレート",
+      "templateType": "テンプレートタイプ",
+      "selectTemplate": "テンプレートを選択...",
+      "templateInfoType": "タイプ:",
+      "templateInfoDesc": "説明:",
+      "ruleLogic": "ルールロジック",
+      "whenIndicator": "インジケーターが",
+      "selectOperator": "選択...",
+      "thresholdValue": "閾値",
+      "addIndicator": "インジケーターを追加"
+    },
+    "regimeSelectorLabels": {
+      "title": "市場レジームインジケーターロジック",
+      "trend": "トレンド",
+      "range": "レンジ",
+      "consolidation": "コンソリデーション",
+      "oscillation": "オシレーション",
+      "bespoke": "カスタム",
+      "bespokeName": "カスタム名",
+      "bespokeNamePlaceholder": "カスタムレジーム名を入力",
+      "notes": "メモ",
+      "notesOptional": "(オプション)",
+      "notesPlaceholder": "メモまたは説明を入力"
+    },
+    "signalModeSelectorLabels": {
+      "title": "シグナルモード",
+      "autoReverse": "オートリバース",
+      "manual": "マニュアル",
+      "detectorAutoReverse": "レンジ = トレンドの逆",
+      "detectorManual": "両方の条件を定義",
+      "entryAutoReverse": "ショート = ロングの逆",
+      "entryManual": "両方の条件を定義"
+    },
+    "codeDisplayLabels": {
+      "title": "生成された戦略コード",
+      "copied": "コピーしました!",
+      "copy": "コピー",
+      "errorDefault": "エラーが発生しました",
+      "noCode": "表示するコードがありません"
     }
   }
 }

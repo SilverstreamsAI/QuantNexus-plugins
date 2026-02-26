@@ -422,6 +422,52 @@
     "collapsiblePanel": {
       "expand": "展開",
       "collapse": "折疊"
+    },
+    "indicatorConfig": {
+      "title": "指標配置",
+      "newIndicator": "新建指標",
+      "indicatorType": "指標類型",
+      "selectIndicator": "選擇指標...",
+      "parameters": "參數",
+      "strategyTemplate": "策略範本",
+      "templateType": "範本類型",
+      "selectTemplate": "選擇範本...",
+      "templateInfoType": "類型:",
+      "templateInfoDesc": "描述:",
+      "ruleLogic": "規則邏輯",
+      "whenIndicator": "當指標",
+      "selectOperator": "選擇...",
+      "thresholdValue": "閾值",
+      "addIndicator": "新增指標"
+    },
+    "regimeSelectorLabels": {
+      "title": "市場狀態指標邏輯",
+      "trend": "趨勢",
+      "range": "區間",
+      "consolidation": "盤整",
+      "oscillation": "震盪",
+      "bespoke": "訂製",
+      "bespokeName": "訂製名稱",
+      "bespokeNamePlaceholder": "輸入自訂狀態名稱",
+      "notes": "備註",
+      "notesOptional": "(選填)",
+      "notesPlaceholder": "輸入備註或描述"
+    },
+    "signalModeSelectorLabels": {
+      "title": "信號模式",
+      "autoReverse": "自動反轉",
+      "manual": "手動",
+      "detectorAutoReverse": "區間 = 趨勢的反向",
+      "detectorManual": "定義兩個條件",
+      "entryAutoReverse": "做空 = 做多的反向",
+      "entryManual": "定義兩個條件"
+    },
+    "codeDisplayLabels": {
+      "title": "生成的策略代碼",
+      "copied": "已複製!",
+      "copy": "複製",
+      "errorDefault": "發生錯誤",
+      "noCode": "沒有可顯示的代碼"
     }
   }
 }

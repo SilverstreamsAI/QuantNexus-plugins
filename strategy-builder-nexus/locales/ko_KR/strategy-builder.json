@@ -422,6 +422,52 @@
     "collapsiblePanel": {
       "expand": "확장",
       "collapse": "축소"
+    },
+    "indicatorConfig": {
+      "title": "지표 설정",
+      "newIndicator": "새 지표",
+      "indicatorType": "지표 유형",
+      "selectIndicator": "지표 선택...",
+      "parameters": "매개변수",
+      "strategyTemplate": "전략 템플릿",
+      "templateType": "템플릿 유형",
+      "selectTemplate": "템플릿 선택...",
+      "templateInfoType": "유형:",
+      "templateInfoDesc": "설명:",
+      "ruleLogic": "규칙 로직",
+      "whenIndicator": "지표가",
+      "selectOperator": "선택...",
+      "thresholdValue": "임계값",
+      "addIndicator": "지표 추가"
+    },
+    "regimeSelectorLabels": {
+      "title": "시장 레짐 지표 로직",
+      "trend": "트렌드",
+      "range": "레인지",
+      "consolidation": "통합",
+      "oscillation": "오실레이션",
+      "bespoke": "맞춤형",
+      "bespokeName": "맞춤형 이름",
+      "bespokeNamePlaceholder": "맞춤형 레짐 이름 입력",
+      "notes": "메모",
+      "notesOptional": "(선택사항)",
+      "notesPlaceholder": "메모 또는 설명 입력"
+    },
+    "signalModeSelectorLabels": {
+      "title": "신호 모드",
+      "autoReverse": "오토 리버스",
+      "manual": "수동",
+      "detectorAutoReverse": "레인지 = 트렌드의 반대",
+      "detectorManual": "두 조건 모두 정의",
+      "entryAutoReverse": "숏 = 롱의 반대",
+      "entryManual": "두 조건 모두 정의"
+    },
+    "codeDisplayLabels": {
+      "title": "생성된 전략 코드",
+      "copied": "복사됨!",
+      "copy": "복사",
+      "errorDefault": "오류가 발생했습니다",
+      "noCode": "표시할 코드가 없습니다"
     }
   }
 }

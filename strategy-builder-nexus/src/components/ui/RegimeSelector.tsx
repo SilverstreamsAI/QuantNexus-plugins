@@ -10,6 +10,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TrendingUp, ArrowLeftRight, Minus, Activity, Pencil } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -49,8 +50,6 @@ export interface RegimeSelectorProps {
 // Constants
 // -----------------------------------------------------------------------------
 
-const DEFAULT_TITLE = 'MARKET REGIME INDICATORS LOGIC';
-
 const DEFAULT_OPTIONS: RegimeOption[] = [
   { key: 'trend', label: 'Trend', icon: TrendingUp },
   { key: 'range', label: 'Range', icon: ArrowLeftRight },
@@ -64,7 +63,7 @@ const DEFAULT_OPTIONS: RegimeOption[] = [
 // -----------------------------------------------------------------------------
 
 export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
-  title = DEFAULT_TITLE,
+  title,
   selectedRegime,
   onSelect,
   options = DEFAULT_OPTIONS,
@@ -72,6 +71,10 @@ export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
   onBespokeChange,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  
+  const displayTitle = title ?? t('ui.regimeSelectorLabels.title');
+  
   const handleSelect = useCallback((key: string) => {
     onSelect(key);
   }, [onSelect]);
@@ -90,7 +93,7 @@ export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
     <div className={cn('regime-selector', className)}>
       {/* Title - follows Unified Component Title Format */}
       <h2 className="text-sm font-bold terminal-mono uppercase tracking-widest text-color-terminal-accent-gold mb-4">
-        {title}
+        {displayTitle}
       </h2>
 
       {/* Regime Cards - 5 equal columns spanning full width */}
@@ -146,7 +149,7 @@ export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
                     : 'text-color-terminal-text-secondary'
                 )}
               >
-                {option.label}
+                {t(`ui.regimeSelectorLabels.${option.key}`)}
               </span>
             </button>
           );
@@ -159,13 +162,13 @@ export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
           {/* Bespoke Name Input */}
           <div className="space-y-2">
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Bespoke Name <span className="text-red-500">*</span>
+              {t('ui.regimeSelectorLabels.bespokeName')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={bespokeData.name}
               onChange={handleBespokeNameChange}
-              placeholder="Enter custom regime name"
+              placeholder={t('ui.regimeSelectorLabels.bespokeNamePlaceholder')}
               className="w-full px-4 py-3 text-xs terminal-mono border rounded focus:outline-none"
               style={{
                 backgroundColor: '#112240',
@@ -178,13 +181,13 @@ export const RegimeSelector: React.FC<RegimeSelectorProps> = ({
           {/* Bespoke Notes Input */}
           <div className="space-y-2">
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Notes <span className="text-color-terminal-text-muted">(Optional)</span>
+              {t('ui.regimeSelectorLabels.notes')} <span className="text-color-terminal-text-muted">{t('ui.regimeSelectorLabels.notesOptional')}</span>
             </label>
             <input
               type="text"
               value={bespokeData.notes}
               onChange={handleBespokeNotesChange}
-              placeholder="Enter notes or description"
+              placeholder={t('ui.regimeSelectorLabels.notesPlaceholder')}
               className="w-full px-4 py-3 text-xs terminal-mono border rounded focus:outline-none"
               style={{
                 backgroundColor: '#112240',

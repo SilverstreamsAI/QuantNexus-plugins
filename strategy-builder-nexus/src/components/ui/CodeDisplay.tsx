@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Copy, Check, AlertCircle, Code } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -41,7 +42,6 @@ export interface CodeDisplayProps {
 // Constants
 // -----------------------------------------------------------------------------
 
-const DEFAULT_TITLE = 'GENERATED STRATEGY CODE';
 const DEFAULT_MAX_HEIGHT = '400px';
 const COPY_FEEDBACK_DURATION = 2000;
 const SKELETON_LINES = 8;
@@ -223,9 +223,11 @@ function getPlainCode(code: string): string {
 interface CopyButtonProps {
   onCopy: () => void;
   copied: boolean;
+  copyLabel: string;
+  copiedLabel: string;
 }
 
-const CopyButton: React.FC<CopyButtonProps> = ({ onCopy, copied }) => (
+const CopyButton: React.FC<CopyButtonProps> = ({ onCopy, copied, copyLabel, copiedLabel }) => (
   <button
     onClick={onCopy}
     className={cn(
@@ -240,12 +242,12 @@ const CopyButton: React.FC<CopyButtonProps> = ({ onCopy, copied }) => (
     {copied ? (
       <>
         <Check className="w-3 h-3" />
-        Copied!
+        {copiedLabel}
       </>
     ) : (
       <>
         <Copy className="w-3 h-3" />
-        Copy
+        {copyLabel}
       </>
     )}
   </button>
@@ -292,10 +294,10 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ message }) => (
   </div>
 );
 
-const EmptyDisplay: React.FC = () => (
+const EmptyDisplay: React.FC<{ noCodeLabel: string }> = ({ noCodeLabel }) => (
   <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
     <Code className="w-8 h-8 text-color-terminal-text-muted mb-3" />
-    <p className="text-xs text-color-terminal-text-muted">No code to display</p>
+    <p className="text-xs text-color-terminal-text-muted">{noCodeLabel}</p>
   </div>
 );
 
@@ -322,15 +324,23 @@ const LineNumbers: React.FC<LineNumbersProps> = ({ count }) => (
 // -----------------------------------------------------------------------------
 
 export const CodeDisplay: React.FC<CodeDisplayProps> = ({
-  title = DEFAULT_TITLE,
+  title,
   code,
   language = 'python',
   state = 'idle',
-  errorMessage = 'An error occurred',
+  errorMessage,
   showLineNumbers = true,
   maxHeight = DEFAULT_MAX_HEIGHT,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  
+  const displayTitle = title ?? t('ui.codeDisplayLabels.title');
+  const displayErrorMessage = errorMessage ?? t('ui.codeDisplayLabels.errorDefault');
+  const copyLabel = t('ui.codeDisplayLabels.copy');
+  const copiedLabel = t('ui.codeDisplayLabels.copied');
+  const noCodeLabel = t('ui.codeDisplayLabels.noCode');
+  
   const [copied, setCopied] = useState(false);
   const codeRef = useRef<HTMLDivElement>(null);
 
@@ -375,11 +385,11 @@ export const CodeDisplay: React.FC<CodeDisplayProps> = ({
     }
 
     if (state === 'error') {
-      return <ErrorDisplay message={errorMessage} />;
+      return <ErrorDisplay message={displayErrorMessage} />;
     }
 
     if (!code || !code.trim()) {
-      return <EmptyDisplay />;
+      return <EmptyDisplay noCodeLabel={noCodeLabel} />;
     }
 
     return (
@@ -415,10 +425,10 @@ export const CodeDisplay: React.FC<CodeDisplayProps> = ({
             letterSpacing: '0.1em',
           }}
         >
-          {title}
+          {displayTitle}
         </h3>
         {code && state !== 'loading' && state !== 'error' && (
-          <CopyButton onCopy={handleCopy} copied={copied} />
+          <CopyButton onCopy={handleCopy} copied={copied} copyLabel={copyLabel} copiedLabel={copiedLabel} />
         )}
       </div>
 

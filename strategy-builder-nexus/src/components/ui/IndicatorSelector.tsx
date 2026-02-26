@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, ChevronDown } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { PortalDropdown } from './PortalDropdown';
@@ -93,8 +94,6 @@ export interface IndicatorSelectorProps {
 // Constants
 // -----------------------------------------------------------------------------
 
-const DEFAULT_TITLE = 'INDICATOR CONFIGURATION';
-
 // -----------------------------------------------------------------------------
 // Section Title Component
 // -----------------------------------------------------------------------------
@@ -115,6 +114,7 @@ interface IndicatorBlockItemProps {
   templates: Record<string, StrategyTemplate>;
   onUpdate: (block: IndicatorBlock) => void;
   onDelete: (id: string) => void;
+  t: (key: string) => string;
 }
 
 const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
@@ -123,6 +123,7 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
   templates,
   onUpdate,
   onDelete,
+  t,
 }) => {
   const [isIndicatorOpen, setIsIndicatorOpen] = useState(false);
   const [isTemplateOpen, setIsTemplateOpen] = useState(false);
@@ -220,7 +221,7 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
       {/* Card Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-color-terminal-surface/50 border-b border-color-terminal-border">
         <span className="text-sm font-bold text-color-terminal-text">
-          {selectedIndicator?.name || 'New Indicator'}
+          {selectedIndicator?.name || t('ui.indicatorConfig.newIndicator')}
         </span>
         <button
           onClick={() => onDelete(block.id)}
@@ -234,7 +235,7 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
         {/* Indicator Type Dropdown */}
         <div className="space-y-2">
           <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-            Indicator Type
+            {t('ui.indicatorConfig.indicatorType')}
           </label>
           <button
             ref={indicatorTriggerRef}
@@ -254,7 +255,7 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
             <span>
               {selectedIndicator
                 ? `${selectedIndicator.name} (${selectedIndicator.slug})`
-                : 'Select an indicator...'}
+                : t('ui.indicatorConfig.selectIndicator')}
             </span>
             <ChevronDown className={cn('w-4 h-4 transition-transform', isIndicatorOpen && 'rotate-180')} />
           </button>
@@ -287,7 +288,7 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
         {/* PARAMETERS Section */}
         {selectedIndicator && selectedIndicator.params.length > 0 && (
           <div className="space-y-3">
-            <SectionTitle>Parameters</SectionTitle>
+            <SectionTitle>{t('ui.indicatorConfig.parameters')}</SectionTitle>
             <div className="space-y-3">
               {selectedIndicator.params.map((param) => (
                 <div key={param.name} className="space-y-1">
@@ -338,12 +339,12 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
         {/* STRATEGY TEMPLATE Section */}
         {selectedIndicator && availableTemplates.length > 0 && (
           <div className="space-y-3">
-            <SectionTitle>Strategy Template</SectionTitle>
+            <SectionTitle>{t('ui.indicatorConfig.strategyTemplate')}</SectionTitle>
 
             {/* Template Type Dropdown */}
             <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-                Template Type
+                {t('ui.indicatorConfig.templateType')}
               </label>
               <button
                 ref={templateTriggerRef}
@@ -359,7 +360,7 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
                     : 'border-color-terminal-border'
                 )}
               >
-                <span>{selectedTemplate?.label || 'Select template...'}</span>
+                <span>{selectedTemplate?.label || t('ui.indicatorConfig.selectTemplate')}</span>
                 <ChevronDown className={cn('w-4 h-4 transition-transform', isTemplateOpen && 'rotate-180')} />
               </button>
 
@@ -391,11 +392,11 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
             {selectedTemplate && (
               <div className="p-3 border-l-2 border-color-terminal-accent-teal bg-color-terminal-surface/50 rounded-r text-xs space-y-1">
                 <div>
-                  <span className="text-color-terminal-accent-teal font-bold">Type:</span>
+                  <span className="text-color-terminal-accent-teal font-bold">{t('ui.indicatorConfig.templateInfoType')}</span>
                   <span className="ml-2 text-color-terminal-text">{selectedTemplate.type}</span>
                 </div>
                 <div>
-                  <span className="text-color-terminal-accent-teal font-bold">Description:</span>
+                  <span className="text-color-terminal-accent-teal font-bold">{t('ui.indicatorConfig.templateInfoDesc')}</span>
                   <span className="ml-2 text-color-terminal-text-secondary">{selectedTemplate.description}</span>
                 </div>
               </div>
@@ -406,13 +407,13 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
         {/* RULE LOGIC Section */}
         {selectedIndicator && selectedTemplate && (
           <div className="space-y-3">
-            <SectionTitle>Rule Logic</SectionTitle>
+            <SectionTitle>{t('ui.indicatorConfig.ruleLogic')}</SectionTitle>
 
             {/* When Indicator Dropdown */}
             {selectedTemplate.rule_options?.operators && (
               <div className="space-y-1">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-                  When Indicator
+                  {t('ui.indicatorConfig.whenIndicator')}
                 </label>
                 <button
                   ref={operatorTriggerRef}
@@ -429,7 +430,7 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
                   )}
                 >
                   <span>
-                    {selectedTemplate.rule_options.operators.find(op => op.value === block.ruleOperator)?.label || 'Select...'}
+                    {selectedTemplate.rule_options.operators.find(op => op.value === block.ruleOperator)?.label || t('ui.indicatorConfig.selectOperator')}
                   </span>
                   <ChevronDown className={cn('w-4 h-4 transition-transform', isOperatorOpen && 'rotate-180')} />
                 </button>
@@ -463,7 +464,7 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
             {(selectedTemplate.type === 'threshold_level' || selectedTemplate.default_rule?.threshold_value !== undefined) && (
               <div className="space-y-1">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-                  Threshold Value
+                  {t('ui.indicatorConfig.thresholdValue')}
                 </label>
                 <input
                   type="number"
@@ -490,13 +491,17 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
 // -----------------------------------------------------------------------------
 
 export const IndicatorSelector: React.FC<IndicatorSelectorProps> = ({
-  title = DEFAULT_TITLE,
+  title,
   indicators,
   templates,
   blocks,
   onChange,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  
+  const displayTitle = title ?? t('ui.indicatorConfig.title');
+  
   // Add new indicator block
   const handleAddBlock = useCallback(() => {
     const newBlock: IndicatorBlock = {
@@ -524,7 +529,7 @@ export const IndicatorSelector: React.FC<IndicatorSelectorProps> = ({
     <div className={cn('indicator-selector', className)}>
       {/* Title - follows Unified Component Title Format */}
       <h2 className="text-sm font-bold terminal-mono uppercase tracking-widest text-color-terminal-accent-gold mb-4">
-        {title}
+        {displayTitle}
       </h2>
 
       {/* Indicator Blocks */}
@@ -538,6 +543,7 @@ export const IndicatorSelector: React.FC<IndicatorSelectorProps> = ({
               templates={templates}
               onUpdate={handleUpdateBlock}
               onDelete={handleDeleteBlock}
+              t={t}
             />
           ))}
         </div>
@@ -557,7 +563,7 @@ export const IndicatorSelector: React.FC<IndicatorSelectorProps> = ({
           )}
         >
           <Plus className="w-4 h-4" />
-          Add Indicator
+          {t('ui.indicatorConfig.addIndicator')}
         </button>
       </div>
     </div>

@@ -422,6 +422,52 @@
     "collapsiblePanel": {
       "expand": "展开",
       "collapse": "折叠"
+    },
+    "indicatorConfig": {
+      "title": "指标配置",
+      "newIndicator": "新建指标",
+      "indicatorType": "指标类型",
+      "selectIndicator": "选择指标...",
+      "parameters": "参数",
+      "strategyTemplate": "策略模板",
+      "templateType": "模板类型",
+      "selectTemplate": "选择模板...",
+      "templateInfoType": "类型:",
+      "templateInfoDesc": "描述:",
+      "ruleLogic": "规则逻辑",
+      "whenIndicator": "当指标",
+      "selectOperator": "选择...",
+      "thresholdValue": "阈值",
+      "addIndicator": "添加指标"
+    },
+    "regimeSelectorLabels": {
+      "title": "市场状态指标逻辑",
+      "trend": "趋势",
+      "range": "区间",
+      "consolidation": "盘整",
+      "oscillation": "震荡",
+      "bespoke": "定制",
+      "bespokeName": "定制名称",
+      "bespokeNamePlaceholder": "输入自定义状态名称",
+      "notes": "备注",
+      "notesOptional": "(可选)",
+      "notesPlaceholder": "输入备注或描述"
+    },
+    "signalModeSelectorLabels": {
+      "title": "信号模式",
+      "autoReverse": "自动反转",
+      "manual": "手动",
+      "detectorAutoReverse": "区间 = 趋势的反向",
+      "detectorManual": "定义两个条件",
+      "entryAutoReverse": "做空 = 做多的反向",
+      "entryManual": "定义两个条件"
+    },
+    "codeDisplayLabels": {
+      "title": "生成的策略代码",
+      "copied": "已复制!",
+      "copy": "复制",
+      "errorDefault": "发生错误",
+      "noCode": "没有可显示的代码"
     }
   }
 }
