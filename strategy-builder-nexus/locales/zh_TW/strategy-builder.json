@@ -36,7 +36,7 @@
   "validation": {
     "success": "策略驗證通過",
     "failed": "策略驗證失敗",
-    "missingField": "缺少必填欄位: {{field}}",
+    "missingField": "缺少必填欄位：{{field}}",
     "invalidValue": "{{field}} 的值無效"
   },
   "generation": {
@@ -48,7 +48,7 @@
     "loadFailed": "載入策略失敗",
     "saveFailed": "儲存策略失敗",
     "deleteFailed": "刪除策略失敗",
-    "validationFailed": "策略驗證失敗: {{reason}}"
+    "validationFailed": "策略驗證失敗：{{reason}}"
   },
   "namingDialog": {
     "title": "命名您的策略",
@@ -136,9 +136,11 @@
     "save": "儲存",
     "delete": "刪除",
     "edit": "編輯",
-    "close": "關閉"
-  }
-  ,
+    "close": "關閉",
+    "load": "載入",
+    "add": "新增",
+    "clear": "全部清除"
+  },
   "pages": {
     "common": {
       "currentStrategy": "目前策略",
@@ -179,13 +181,13 @@
       "l0Combinator": "L0: 組合器",
       "l1RiskOverride": "L1: 風險覆蓋 ({{count}})",
       "l2HardSafety": "L2: 硬安全",
-      "layer1Title": "第1層: 風險覆蓋規則",
+      "layer1Title": "第 1 層：風險覆蓋規則",
       "enabledTotal": "{{enabled}} 已啟用 / {{total}} 總計",
-      "ruleExecutionInfo": "規則按優先順序在每根K線上評估。第一個觸發的規則執行,其餘跳過。",
+      "ruleExecutionInfo": "規則按優先順序在每根 K 線上評估。第一個觸發的規則執行，其餘跳過。",
       "noRulesConfigured": "未配置風險覆蓋規則",
       "noRulesHint": "新增規則以防止組合器失敗場景",
       "addRule": "新增規則",
-      "layer2Title": "第2層: 硬安全網",
+      "layer2Title": "第 2 層：硬安全網",
       "alwaysActive": "始終活躍",
       "ruleDescriptions": {
         "circuit_breaker": "持倉虧損達到閾值時強制平倉",
@@ -207,8 +209,8 @@
       "predictionConfigTitle": "預測配置",
       "historicalDataPointsLabel": "歷史數據點 (回溯)",
       "predictionDataPointsLabel": "預測數據點 (預測長度)",
-      "lookbackRangeText": "範圍: 10 - {{max}} (受模型上下文限制)",
-      "predLenRangeText": "範圍: 1 - 512",
+      "lookbackRangeText": "範圍：10 - {{max}} (受模型上下文限制)",
+      "predLenRangeText": "範圍：1 - 512",
       "advancedSettingsTitle": "進階設定",
       "temperatureLabel": "溫度",
       "temperatureHint": "越高 = 越隨機",
@@ -231,10 +233,10 @@
         "serviceUnavailable": "克洛諾斯預測服務暫時不可用",
         "modelNotFound": "所選模型不可用",
         "invalidParameters": "無效的預測參數",
-        "predictionTimeout": "預測逾時,請重試",
+        "predictionTimeout": "預測逾時，請重試",
         "authRequired": "請登入以使用克洛諾斯預測",
-        "lookbackMin": "回溯至少為10",
-        "predLenMin": "預測長度至少為1",
+        "lookbackMin": "回溯至少為 10",
+        "predLenMin": "預測長度至少為 1",
         "filterRequired": "請啟用至少一個信號過濾器",
         "predictionFailed": "克洛諾斯預測失敗"
       },
@@ -245,7 +247,7 @@
     "kronosAIEntry": {
       "title": "克洛諾斯 AI 入場",
       "defaultStrategyName": "新克洛諾斯 AI 策略",
-      "validationError": "請新增至少一個指標並輸入提示詞(最少10個字元)",
+      "validationError": "請新增至少一個指標並輸入提示詞 (最少 10 個字元)",
       "strategyNamePlaceholder": "策略名稱",
       "loadingMessage": "正在生成克洛諾斯 AI 入場策略...",
       "indicatorContextTitle": "指標上下文",
@@ -280,7 +282,7 @@
     "aiLibero": {
       "title": "AI 自由人",
       "defaultStrategyName": "新 AI 自由人策略",
-      "validationError": "請新增至少一個指標並輸入提示詞(最少10個字元)",
+      "validationError": "請新增至少一個指標並輸入提示詞 (最少 10 個字元)",
       "strategyNamePlaceholder": "策略名稱",
       "loadingMessage": "正在生成 AI 自由人策略...",
       "indicatorContextTitle": "指標上下文",
@@ -291,14 +293,14 @@
       "generatingLabel": "生成中...",
       "loadIndicatorTemplateTitle": "載入指標範本",
       "noTemplatesAvailable": "沒有可用的指標範本",
-      "templateLoaded": "範本 \"{{name}}\" 已載入,包含 {{count}} 個指標",
+      "templateLoaded": "範本 \"{{name}}\" 已載入，包含 {{count}} 個指標",
       "templateSaved": "範本 \"{{name}}\" 儲存成功",
-      "templateSaveFailed": "儲存範本失敗,請重試。"
+      "templateSaveFailed": "儲存範本失敗，請重試。"
     },
     "traderAIEntry": {
       "title": "交易員 AI 入場",
       "defaultStrategyName": "新交易員策略",
-      "validationError": "請新增至少一個指標並輸入提示詞(最少10個字元)",
+      "validationError": "請新增至少一個指標並輸入提示詞 (最少 10 個字元)",
       "strategyNamePlaceholder": "策略名稱",
       "loadingMessage": "正在生成交易員 AI 策略...",
       "indicatorContextTitle": "指標上下文",
@@ -309,17 +311,17 @@
       "generatingLabel": "生成中...",
       "loadIndicatorTemplateTitle": "載入指標範本",
       "noTemplatesAvailable": "沒有可用的指標範本",
-      "templateLoaded": "範本 \"{{name}}\" 已載入,包含 {{count}} 個指標",
+      "templateLoaded": "範本 \"{{name}}\" 已載入，包含 {{count}} 個指標",
       "templateSaved": "範本 \"{{name}}\" 儲存成功",
-      "templateSaveFailed": "儲存範本失敗,請重試。"
+      "templateSaveFailed": "儲存範本失敗，請重試。"
     },
     "aiStrategyStudio": {
       "welcomeTitle": "AI 策略工作室",
       "welcomeSubtitle": "用自然語言描述您的交易策略。我將幫助您構建入場規則、退出條件和風險管理。",
       "chatPlaceholder": "描述您的交易策略...",
       "chatPlaceholderDisabled": "建立新聊天以開始...",
-      "newStrategyTitle": "新策略",
-      "newStrategyPreview": "開始描述您的策略...",
+      "newChatTitle": "新策略",
+      "newChatPreview": "開始描述您的策略...",
       "actions": {
         "generateCode": "生成代碼",
         "saveStrategy": "儲存策略",
@@ -330,8 +332,8 @@
         "strategySaved": "策略儲存成功",
         "backtestStarted": "回測已啟動"
       },
-      "errorPrefix": "錯誤: {{message}}",
-      "actionFailedPrefix": "操作失敗: {{message}}",
+      "errorPrefix": "錯誤：{{message}}",
+      "actionFailedPrefix": "操作失敗：{{message}}",
       "newRuleCondition": "新 {{type}} 規則條件",
       "newRuleDescription": "在此新增您的 {{type}} 條件"
     }
@@ -349,7 +351,7 @@
     "messages": "訊息",
     "tokenUsage": "Token 使用量",
     "compressionWarning": "對話可能很快被壓縮",
-    "tokenUsageLabel": "Token 使用量: {{percent}}%",
+    "tokenUsageLabel": "Token 使用量：{{percent}}%",
     "roleUser": "您",
     "roleAssistant": "AI 助理",
     "roleSystem": "系統",
@@ -423,6 +425,43 @@
       "expand": "展開",
       "collapse": "折疊"
     },
+    "signalFilterPanel": {
+      "title": "信號過濾器",
+      "badge": "推薦",
+      "subtitle": "基於質量閾值過濾預測信號",
+      "quickPresets": "快速預設",
+      "presetTest": "測試",
+      "presetAggressive": "激進",
+      "presetBalanced": "平衡",
+      "presetConservative": "保守",
+      "confidenceThreshold": "置信度閾值",
+      "moreSignals": "更多信號",
+      "higherQuality": "更高質量",
+      "expectedReturn": "預期收益",
+      "smallReturns": "小收益",
+      "largeReturnsOnly": "僅大收益",
+      "directionFilter": "方向過濾器",
+      "directionBoth": "兩者 (做多和做空)",
+      "directionBuyOnly": "僅買入 (做多)",
+      "directionSellOnly": "僅賣出 (做空)",
+      "priceMagnitude": "價格幅度",
+      "smallMoves": "小波動",
+      "largeMovesOnly": "僅大波動",
+      "sampleConsistency": "樣本一致性",
+      "multiSample": "多樣本",
+      "flexible": "靈活",
+      "highAgreement": "高一致性",
+      "filterLogic": "過濾邏輯",
+      "logicAnd": "與",
+      "logicAndDesc": "所有啟用的過濾器必須通過",
+      "logicOr": "或",
+      "logicOrDesc": "任何啟用的過濾器通過即可",
+      "filterWarning": "必須啟用至少一個過濾器",
+      "expectedFrequency": "預期信號頻率:",
+      "frequencyHigh": "高",
+      "frequencyModerate": "中等",
+      "frequencyLow": "低"
+    },
     "indicatorConfig": {
       "title": "指標配置",
       "newIndicator": "新建指標",
@@ -439,6 +478,14 @@
       "selectOperator": "選擇...",
       "thresholdValue": "閾值",
       "addIndicator": "新增指標"
+    },
+    "generateActionBarLabels": {
+      "startGenerate": "開始生成",
+      "generating": "生成中...",
+      "regenerateConfirmMsg": "這將覆蓋當前策略。繼續？",
+      "regenerateConfirmTitle": "重新生成策略",
+      "regenerate": "重新生成",
+      "return": "返回"
     },
     "regimeSelectorLabels": {
       "title": "市場狀態指標邏輯",
@@ -462,12 +509,312 @@
       "entryAutoReverse": "做空 = 做多的反向",
       "entryManual": "定義兩個條件"
     },
+    "expressionInput": {
+      "placeholder": "示例：ATR(14) > 0.5 AND RSI(14) < 30",
+      "helpText": "輸入自訂邏輯表達式。語法幫助將在助手中顯示。",
+      "buttonLabel": "新增策略"
+    },
     "codeDisplayLabels": {
       "title": "生成的策略代碼",
       "copied": "已複製!",
       "copy": "複製",
       "errorDefault": "發生錯誤",
       "noCode": "沒有可顯示的代碼"
+    },
+    "timeRangeSelector": {
+      "title": "時間範圍",
+      "latestLabel": "使用最新數據",
+      "customLabel": "自訂開始時間",
+      "timeInputLabel": "開始時間"
+    },
+    "promptTextarea": {
+      "title": "提示詞",
+      "placeholder": "輸入您的自訂提示詞..."
+    },
+    "algorithmDialog": {
+      "title": "載入範本",
+      "emptyMessage": "未找到儲存的範本",
+      "loadFailed": "載入範本失敗",
+      "searchPlaceholder": "搜尋範本...",
+      "cancel": "取消",
+      "load": "載入",
+      "close": "關閉"
+    },
+    "advancedConfig": {
+      "title": "進階配置",
+      "batchSize": "批次大小",
+      "warmupPeriod": "預熱期",
+      "lookbackBars": "回溯 K 線數",
+      "analysisInterval": "分析間隔",
+      "modeBaseline": "基準",
+      "modeMonk": "修行者",
+      "modeWarrior": "戰士",
+      "modeBespoke": "訂製",
+      "currentConfig": "當前配置:",
+      "batchSizeLabel": "批次大小:",
+      "warmupLabel": "預熱:",
+      "lookbackLabel": "回溯:",
+      "intervalLabel": "間隔:",
+      "customizeParams": "自訂參數",
+      "predictionConfig": "預測配置",
+      "custom": "自訂",
+      "reset": "重置",
+      "rangeText": "範圍：{{min}} - {{max}}"
+    },
+    "watchlistConfig": {
+      "title": "觀察列表配置",
+      "symbols": "交易對",
+      "symbolPlaceholder": "輸入交易對 (如 BTCUSDT)",
+      "add": "新增",
+      "timeframe": "時間週期",
+      "dataSource": "數據源",
+      "timeframes": {
+        "1M": "1 分鐘",
+        "5M": "5 分鐘",
+        "15M": "15 分鐘",
+        "1H": "1 小時",
+        "4H": "4 小時",
+        "1D": "1 天"
+      },
+      "dataSources": {
+        "clickhouse": "CLICKHOUSE",
+        "local": "本地"
+      }
+    },
+    "bespokeConfig": {
+      "title": "訂製參數",
+      "lookbackBars": "回溯 K 線數",
+      "positionLimits": "倉位限制",
+      "leverage": "槓桿",
+      "tradingFrequency": "交易頻率",
+      "typicalYield": "典型收益率",
+      "maxDrawdown": "最大回撤",
+      "rangeText": "範圍：{{min}} - {{max}}"
+    },
+    "modeDetails": {
+      "baselineTitle": "基準模式",
+      "baselineDesc": "最大化絕對收益，無額外約束。",
+      "monkTitle": "修行者模式",
+      "monkDesc": "嚴格紀律，穩定性，風險調整後收益。",
+      "warriorTitle": "戰士模式",
+      "warriorDesc": "激進進攻，高槓桿高風險。",
+      "bespokeTitle": "訂製模式",
+      "bespokeDesc": "完全根據您的特定需求定制的策略。",
+      "coreGoal": "核心目標",
+      "riskTolerance": "風險承受能力",
+      "positionLimits": "倉位限制",
+      "tradingFrequency": "交易頻率",
+      "leverage": "槓桿",
+      "riskMetrics": "風險指標",
+      "decisionInputs": "決策輸入",
+      "modelRequirements": "模型要求",
+      "baselineCoreGoal": "最大化絕對收益，無額外約束",
+      "baselineRiskTolerance": "中等到高 (模型決定)",
+      "baselinePositionLimits": "無或非常寬鬆",
+      "baselineTradingFrequency": "無限制 (高頻或長期)",
+      "baselineLeverage": "1 倍 (無槓桿) 或非常低",
+      "baselineRiskMetrics": "夏普比率，最大回撤",
+      "baselineDecisionInputs": "市場數據，新聞，基本面",
+      "baselineModelRequirements": "全面能力",
+      "monkCoreGoal": "嚴格限制下的穩定性和風險調整後收益",
+      "monkRiskTolerance": "非常低 (強制規則)",
+      "monkPositionLimits": "嚴格 (如每筆交易<2%，行業限制)",
+      "monkTradingFrequency": "非常低 (每日/每週上限，強制節制)",
+      "monkLeverage": "禁止",
+      "monkRiskMetrics": "索提諾比率，最大回撤，波動率",
+      "monkDecisionInputs": "過濾短期噪音，關注長期趨勢",
+      "monkModelRequirements": "風險紀律，規則遵守",
+      "warriorCoreGoal": "通過積極的市場參與最大化收益",
+      "warriorRiskTolerance": "非常高 (積極追求)",
+      "warriorPositionLimits": "靈活 (允許集中持倉)",
+      "warriorTradingFrequency": "高 (積極市場參與)",
+      "warriorLeverage": "高 (5-10 倍或更高)",
+      "warriorRiskMetrics": "絕對收益，恢復速度",
+      "warriorDecisionInputs": "實時數據，動量，波動率",
+      "warriorModelRequirements": "精確執行，快速適應，止損紀律",
+      "bespokeCoreGoal": "基於用戶配置的訂製目標",
+      "bespokeRiskTolerance": "用戶定義",
+      "bespokePositionLimits": "用戶定義",
+      "bespokeTradingFrequency": "用戶定義",
+      "bespokeLeverage": "用戶定義",
+      "bespokeRiskMetrics": "用戶定義",
+      "bespokeDecisionInputs": "用戶定義",
+      "bespokeModelRequirements": "根據特定需求定制"
+    },
+    "directionalIndicatorSelector": {
+      "title": "入場信號配置",
+      "addButton": "+ 新增入場信號",
+      "long": "做多",
+      "short": "做空",
+      "selectIndicator": "選擇入場指標",
+      "selectDirectionFirst": "請先選擇做多或做空方向",
+      "indicatorType": "指標類型",
+      "selectIndicatorPlaceholder": "選擇指標...",
+      "parameters": "參數",
+      "strategyTemplate": "策略範本",
+      "templateType": "範本類型",
+      "selectTemplate": "選擇範本...",
+      "templateInfoType": "類型:",
+      "templateInfoDesc": "描述:",
+      "ruleLogic": "規則邏輯",
+      "whenIndicator": "當指標",
+      "selectOperator": "選擇...",
+      "thresholdValue": "閾值"
+    },
+    "circuitBreakerConfig": {
+      "scopeLabel": "範圍",
+      "actionLabel": "操作",
+      "triggerPnL": "觸發盈虧",
+      "lossThreshold": "損失閾值",
+      "closeAll": "全部平倉",
+      "reduceTo": "減倉至%",
+      "reduceToLabel": "減倉至",
+      "cooldown": "冷卻時間",
+      "barsBeforeReentry": "重新入場前 K 線數",
+      "scopeDefault": "每筆持倉",
+      "actionDefault": "全部平倉"
+    },
+    "drawdownLimitConfig": {
+      "actionReduceAll": "減少所有持倉",
+      "actionCloseAll": "全部平倉",
+      "actionHalt": "停止交易",
+      "actionDefault": "停止交易",
+      "recoveryDefault": "自動",
+      "maxDrawdown": "最大回撤",
+      "fromPeakEquity": "從峰值權益",
+      "action": "操作",
+      "recoveryMode": "恢復模式",
+      "reduceBy": "減少比例",
+      "recoveryAfter": "恢復後",
+      "barsOfStability": "穩定 K 線數"
+    },
+    "hardSafetyConfig": {
+      "title": "硬安全網",
+      "badge": "始終激活",
+      "description": "絕對緊急停止。當所有其他規則失效時激活的最後保護。",
+      "descriptionNote": "此功能無法禁用。",
+      "maxLoss": "最大損失",
+      "fromEntry": "從入場"
+    },
+    "indicatorGuardConfig": {
+      "title": "指標保護",
+      "addButton": "+ 選擇指標",
+      "conditionDefault": ">",
+      "appliesToDefault": "兩者",
+      "actionDefault": "平倉",
+      "condition": "條件",
+      "threshold": "閾值",
+      "appliesTo": "適用於",
+      "action": "操作",
+      "closePosition": "平倉",
+      "reduceToPercent": "減倉至%",
+      "reduceTo": "減倉至"
+    },
+    "indicatorTemplateDialog": {
+      "title": "載入指標範本",
+      "emptyMessage": "沒有可用範本",
+      "searchPlaceholder": "搜尋範本...",
+      "cancel": "取消",
+      "load": "載入範本",
+      "indicatorsCount": "{{count}} 個指標"
+    },
+    "presetButtonGroup": {
+      "test": "測試",
+      "aggressive": "激進",
+      "balanced": "平衡",
+      "conservative": "保守"
+    },
+    "rawIndicatorSelector": {
+      "title": "指標配置",
+      "addButton": "+ 新增指標",
+      "newIndicator": "新建指標",
+      "deleteTitle": "刪除指標",
+      "indicatorType": "指標類型",
+      "selectIndicator": "選擇指標...",
+      "dataField": "數據字段",
+      "parameters": "參數",
+      "fields": {
+        "close": "收盤價",
+        "open": "開盤價",
+        "high": "最高價",
+        "low": "最低價",
+        "volume": "成交量"
+      }
+    },
+    "regimeDetectionConfig": {
+      "title": "狀態指標",
+      "addButton": "+ 選擇指標",
+      "conditionDefault": ">",
+      "actionReduceAll": "減少所有持倉",
+      "actionCloseAll": "全部平倉",
+      "actionHalt": "停止新入場",
+      "actionDefault": "全部減少",
+      "recoveryDefault": "自動",
+      "condition": "條件",
+      "threshold": "閾值",
+      "action": "操作",
+      "reduceBy": "減少比例",
+      "recoveryMode": "恢復模式"
+    },
+    "riskOverrideRuleCard": {
+      "ruleCircuitBreaker": "熔斷器",
+      "ruleTimeLimit": "時間限制",
+      "ruleRegimeDetection": "狀態檢測",
+      "ruleDrawdownLimit": "回撤限制",
+      "ruleIndicatorGuard": "指標保護",
+      "scopePerPosition": "每筆持倉",
+      "scopePerGroup": "每組",
+      "scopePortfolio": "投資組合",
+      "noDecay": "無衰減",
+      "decay": "衰減",
+      "na": "不適用",
+      "reduce": "減少",
+      "closeAll": "全部平倉",
+      "haltEntry": "停止入場",
+      "recovery": "恢復",
+      "haltTrading": "停止交易",
+      "closePosition": "平倉",
+      "drawdownLabel": "回撤 <"
+    },
+    "strategyCard": {
+      "headerLabel": "自訂策略",
+      "deleteTitle": "刪除"
+    },
+    "templateToolbar": {
+      "loadLabel": "載入範本",
+      "saveLabel": "儲存",
+      "clearLabel": "全部清除",
+      "addLabel": "+ 新增指標"
+    },
+    "timeLimitConfig": {
+      "unitDefault": "小時",
+      "decayDefault": "無",
+      "actionDefault": "全部平倉",
+      "maxHolding": "最大持倉時間",
+      "unit": "單位",
+      "decaySchedule": "衰減計劃",
+      "actionAtExpiry": "到期時操作",
+      "closeAll": "全部平倉",
+      "reduceToPercent": "減倉至%",
+      "reduceTo": "減倉至"
+    },
+    "validateInput": {
+      "errorDefault": "請新增至少一個指標",
+      "consolePrefix": "[ValidateInputBeforeGenerate]",
+      "hookConsolePrefix": "[useValidateBeforeGenerate]"
+    },
+    "sliderInputGroup": {
+      "rangeText": "範圍：{{min}} - {{max}}"
+    },
+    "generateContentWrapper": {
+      "loadingMessage": "生成中..."
+    },
+    "ohlcvFields": {
+      "close": "收盤價",
+      "open": "開盤價",
+      "high": "最高價",
+      "low": "最低價",
+      "volume": "成交量"
     }
   }
 }

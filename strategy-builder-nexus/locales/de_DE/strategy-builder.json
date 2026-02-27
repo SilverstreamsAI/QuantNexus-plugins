@@ -136,9 +136,11 @@
     "save": "Speichern",
     "delete": "Loeschen",
     "edit": "Bearbeiten",
-    "close": "Schliessen"
-  }
-  ,
+    "close": "Schliessen",
+    "load": "Laden",
+    "add": "Hinzufuegen",
+    "clear": "Alle loeschen"
+  },
   "pages": {
     "common": {
       "currentStrategy": "Aktuelle Strategie",
@@ -317,9 +319,9 @@
       "welcomeTitle": "AI Strategie Studio",
       "welcomeSubtitle": "Beschreibe deine Handelsstrategie in natuerlicher Sprache. Ich helfe dir Einstiegsregeln, Ausstiegsbedingungen und Risikomanagement zu erstellen.",
       "chatPlaceholder": "Beschreibe deine Handelsstrategie...",
-      "chatPlaceholderDisabled": "Erstelle einen neuen Chat um zu starten...",
-      "newStrategyTitle": "Neue Strategie",
-      "newStrategyPreview": "Beginne deine Strategie zu beschreiben...",
+      "chatPlaceholderDisabled": "Starte eine Beschreibung deiner Strategie...",
+      "newChatTitle": "Neue Strategie",
+      "newChatPreview": "Beginne deine Strategie zu beschreiben...",
       "actions": {
         "generateCode": "Code generieren",
         "saveStrategy": "Strategie speichern",
@@ -423,6 +425,43 @@
       "expand": "Erweitern",
       "collapse": "Einklappen"
     },
+    "signalFilterPanel": {
+      "title": "Signalfilter",
+      "badge": "Empfohlen",
+      "subtitle": "Filtern Sie Vorhersagesignale basierend auf Qualitaetsschwellenwerten",
+      "quickPresets": "Schnellvoreinstellungen",
+      "presetTest": "Test",
+      "presetAggressive": "Aggressiv",
+      "presetBalanced": "Ausgewogen",
+      "presetConservative": "Konservativ",
+      "confidenceThreshold": "Konfidenzschwelle",
+      "moreSignals": "Mehr Signale",
+      "higherQuality": "Hoehere Qualitaet",
+      "expectedReturn": "Erwartete Rendite",
+      "smallReturns": "Kleine Renditen",
+      "largeReturnsOnly": "Nur grosse Renditen",
+      "directionFilter": "Richtungsfilter",
+      "directionBoth": "Beide (Long & Short)",
+      "directionBuyOnly": "Nur Kauf (Long)",
+      "directionSellOnly": "Nur Verkauf (Short)",
+      "priceMagnitude": "Preismagnitude",
+      "smallMoves": "Kleine Bewegungen",
+      "largeMovesOnly": "Nur grosse Bewegungen",
+      "sampleConsistency": "Stichprobenkonsistenz",
+      "multiSample": "Mehrere Stichproben",
+      "flexible": "Flexibel",
+      "highAgreement": "Hohe Uebereinstimmung",
+      "filterLogic": "Filterlogik",
+      "logicAnd": "UND",
+      "logicAndDesc": "Alle aktivierten Filter muessen bestehen",
+      "logicOr": "ODER",
+      "logicOrDesc": "Beliebiger aktivierter Filter besteht",
+      "filterWarning": "Mindestens ein Filter muss aktiviert sein",
+      "expectedFrequency": "Erwartete Signalfrequenz:",
+      "frequencyHigh": "Hoch",
+      "frequencyModerate": "Moderat",
+      "frequencyLow": "Niedrig"
+    },
     "indicatorConfig": {
       "title": "INDIKATOR KONFIGURATION",
       "newIndicator": "Neuer Indikator",
@@ -439,6 +478,14 @@
       "selectOperator": "Auswaehlen...",
       "thresholdValue": "Schwellenwert",
       "addIndicator": "Indikator hinzufuegen"
+    },
+    "generateActionBarLabels": {
+      "startGenerate": "Generieren starten",
+      "generating": "Generiere...",
+      "regenerateConfirmMsg": "Dies wird die aktuelle Strategie ueberschreiben. Fortfahren?",
+      "regenerateConfirmTitle": "Strategie regenerieren",
+      "regenerate": "Regenerieren",
+      "return": "Zurueck"
     },
     "regimeSelectorLabels": {
       "title": "MARKT REGIME INDIKATOREN LOGIK",
@@ -462,12 +509,312 @@
       "entryAutoReverse": "Short = invers von Long",
       "entryManual": "Beide Bedingungen definieren"
     },
+    "expressionInput": {
+      "placeholder": "Beispiel: ATR(14) > 0.5 UND RSI(14) < 30",
+      "helpText": "Geben Sie benutzerdefinierte Logikausdruecke ein. Syntaxhilfe wird im Assistenten angezeigt.",
+      "buttonLabel": "Strategie hinzufuegen"
+    },
     "codeDisplayLabels": {
       "title": "GENERIERTER STRATEGIE CODE",
       "copied": "Kopiert!",
       "copy": "Kopieren",
       "errorDefault": "Ein Fehler ist aufgetreten",
       "noCode": "Kein Code zum Anzeigen"
+    },
+    "timeRangeSelector": {
+      "title": "ZEITBEREICH",
+      "latestLabel": "Neueste Daten verwenden",
+      "customLabel": "Benutzerdefinierte Startzeit",
+      "timeInputLabel": "Startzeit"
+    },
+    "promptTextarea": {
+      "title": "PROMPT",
+      "placeholder": "Geben Sie Ihren benutzerdefinierten Prompt ein..."
+    },
+    "algorithmDialog": {
+      "title": "Vorlage laden",
+      "emptyMessage": "Keine gespeicherten Vorlagen gefunden",
+      "loadFailed": "Laden der Vorlagen fehlgeschlagen",
+      "searchPlaceholder": "Vorlagen suchen...",
+      "cancel": "Abbrechen",
+      "load": "Laden",
+      "close": "Schliessen"
+    },
+    "advancedConfig": {
+      "title": "ERWEITERTE KONFIGURATION",
+      "batchSize": "Batch-Groesse",
+      "warmupPeriod": "Aufwaermperiode",
+      "lookbackBars": "Lookback-Balken",
+      "analysisInterval": "Analyseintervall",
+      "modeBaseline": "Basis",
+      "modeMonk": "Moench",
+      "modeWarrior": "Krieger",
+      "modeBespoke": "Massgeschneidert",
+      "currentConfig": "Aktuelle Konfiguration:",
+      "batchSizeLabel": "Batch-Groesse:",
+      "warmupLabel": "Aufwaermen:",
+      "lookbackLabel": "Lookback:",
+      "intervalLabel": "Intervall:",
+      "customizeParams": "Parameter anpassen",
+      "predictionConfig": "Vorhersagekonfiguration",
+      "custom": "Benutzerdefiniert",
+      "reset": "Zuruecksetzen",
+      "rangeText": "Bereich: {{min}} - {{max}}"
+    },
+    "watchlistConfig": {
+      "title": "WATCHLIST KONFIGURATION",
+      "symbols": "Symbole",
+      "symbolPlaceholder": "Symbol eingeben (z.B. BTCUSDT)",
+      "add": "Hinzufuegen",
+      "timeframe": "Zeitrahmen",
+      "dataSource": "Datenquelle",
+      "timeframes": {
+        "1M": "1M",
+        "5M": "5M",
+        "15M": "15M",
+        "1H": "1H",
+        "4H": "4H",
+        "1D": "1D"
+      },
+      "dataSources": {
+        "clickhouse": "CLICKHOUSE",
+        "local": "LOKAL"
+      }
+    },
+    "bespokeConfig": {
+      "title": "MASSGESCHNEIDERTE PARAMETER",
+      "lookbackBars": "Lookback-Balken",
+      "positionLimits": "Positionslimits",
+      "leverage": "Hebel",
+      "tradingFrequency": "Handelsfrequenz",
+      "typicalYield": "Typische Rendite",
+      "maxDrawdown": "Max Drawdown",
+      "rangeText": "Bereich: {{min}} - {{max}}"
+    },
+    "modeDetails": {
+      "baselineTitle": "Basis-Modus",
+      "baselineDesc": "Maximiere absolute Renditen ohne zusaetzliche Einschraenkungen.",
+      "monkTitle": "Moench-Modus",
+      "monkDesc": "Strenge Disziplin, Stabilitaet und risikobereinigte Renditen.",
+      "warriorTitle": "Krieger-Modus",
+      "warriorDesc": "Aggressiver Angriff mit hohem Hebel und Risiko.",
+      "bespokeTitle": "Massgeschneiderter Modus",
+      "bespokeDesc": "Vollstaendig auf Ihre spezifischen Beduerfnisse zugeschnittene Strategie.",
+      "coreGoal": "Kernziel",
+      "riskTolerance": "Risikotoleranz",
+      "positionLimits": "Positionslimits",
+      "tradingFrequency": "Handelsfrequenz",
+      "leverage": "Hebel",
+      "riskMetrics": "Risikokennzahlen",
+      "decisionInputs": "Entscheidungsinputs",
+      "modelRequirements": "Modellanforderungen",
+      "baselineCoreGoal": "Maximiere absolute Renditen ohne zusaetzliche Einschraenkungen",
+      "baselineRiskTolerance": "Mittel bis Hoch (Modellentscheidung)",
+      "baselinePositionLimits": "Keine oder sehr locker",
+      "baselineTradingFrequency": "Unbegrenzt (Hochfrequenz oder langfristig)",
+      "baselineLeverage": "1x (Kein Hebel) oder sehr niedrig",
+      "baselineRiskMetrics": "Sharpe Ratio, Max Drawdown",
+      "baselineDecisionInputs": "Marktdaten, Nachrichten, Fundamentaldaten",
+      "baselineModelRequirements": "Umfassende Faehigkeiten",
+      "monkCoreGoal": "Stabilitaet und risikobereinigte Renditen unter strengen Limits",
+      "monkRiskTolerance": "Sehr niedrig (Obligatorische Regeln)",
+      "monkPositionLimits": "Streng (z.B. <2% pro Trade, Sektorgrenzen)",
+      "monkTradingFrequency": "Sehr niedrig (Taegliche/Woechentliche Caps, erzwungene Askese)",
+      "monkLeverage": "Verboten",
+      "monkRiskMetrics": "Sortino Ratio, Max Drawdown, Volatilitaet",
+      "monkDecisionInputs": "Kurzfristiges Rauschen filtern, Fokus auf langfristige Trends",
+      "monkModelRequirements": "Risikodisziplin, Regelbefolgung",
+      "warriorCoreGoal": "Renditen durch aggressives Markengagement maximieren",
+      "warriorRiskTolerance": "Sehr hoch (Aggressives Streben)",
+      "warriorPositionLimits": "Flexibel (Konzentrierte Positionen erlaubt)",
+      "warriorTradingFrequency": "Hoch (Aktive Marktteilnahme)",
+      "warriorLeverage": "Hoch (5x-10x oder mehr)",
+      "warriorRiskMetrics": "Absolute Renditen, Erholungsgeschwindigkeit",
+      "warriorDecisionInputs": "Echtzeitdaten, Momentum, Volatilitaet",
+      "warriorModelRequirements": "Prazise Ausfuehrung, Schnelle Anpassung, Stop-Loss-Disziplin",
+      "bespokeCoreGoal": "Angepasste Ziele basierend auf Benutzerkonfiguration",
+      "bespokeRiskTolerance": "Benutzerdefiniert",
+      "bespokePositionLimits": "Benutzerdefiniert",
+      "bespokeTradingFrequency": "Benutzerdefiniert",
+      "bespokeLeverage": "Benutzerdefiniert",
+      "bespokeRiskMetrics": "Benutzerdefiniert",
+      "bespokeDecisionInputs": "Benutzerdefiniert",
+      "bespokeModelRequirements": "Auf spezifische Beduerfnisse zugeschnitten"
+    },
+    "directionalIndicatorSelector": {
+      "title": "EINSTIEGSSIGNAL KONFIGURATION",
+      "addButton": "+ Einstiegssignal hinzufuegen",
+      "long": "Long",
+      "short": "Short",
+      "selectIndicator": "Einstiegsindikator auswaehlen",
+      "selectDirectionFirst": "Bitte zunaechst Long- oder Short-Richtung auswaehlen",
+      "indicatorType": "Indikator Typ",
+      "selectIndicatorPlaceholder": "Indikator auswaehlen...",
+      "parameters": "Parameter",
+      "strategyTemplate": "Strategie Vorlage",
+      "templateType": "Vorlagen Typ",
+      "selectTemplate": "Vorlage auswaehlen...",
+      "templateInfoType": "Typ:",
+      "templateInfoDesc": "Beschreibung:",
+      "ruleLogic": "Regel Logik",
+      "whenIndicator": "Wenn Indikator",
+      "selectOperator": "Auswaehlen...",
+      "thresholdValue": "Schwellenwert"
+    },
+    "circuitBreakerConfig": {
+      "scopeLabel": "Bereich",
+      "actionLabel": "Aktion",
+      "triggerPnL": "PnL ausloesen",
+      "lossThreshold": "Verlustschwelle",
+      "closeAll": "Alle schliessen",
+      "reduceTo": "Reduzieren auf %",
+      "reduceToLabel": "Reduzieren auf",
+      "cooldown": "Cooldown",
+      "barsBeforeReentry": "Balken vor Wiedereinstieg",
+      "scopeDefault": "Pro Position",
+      "actionDefault": "Alle schliessen"
+    },
+    "drawdownLimitConfig": {
+      "actionReduceAll": "Alle Positionen reduzieren",
+      "actionCloseAll": "Alle schliessen",
+      "actionHalt": "Handel stoppen",
+      "actionDefault": "Handel stoppen",
+      "recoveryDefault": "Auto",
+      "maxDrawdown": "Max Drawdown",
+      "fromPeakEquity": "vom Hoechststand",
+      "action": "Aktion",
+      "recoveryMode": "Erholungsmodus",
+      "reduceBy": "Reduzieren um",
+      "recoveryAfter": "Erholung nach",
+      "barsOfStability": "Balken der Stabilitaet"
+    },
+    "hardSafetyConfig": {
+      "title": "Hartes Sicherheitsnetz",
+      "badge": "Immer aktiv",
+      "description": "Absoluter Notfallstopp. Letzte Schutzmassnahme, die aktiviert wird, wenn alle anderen Regeln versagen.",
+      "descriptionNote": "Dies kann nicht deaktiviert werden.",
+      "maxLoss": "Max Verlust",
+      "fromEntry": "vom Einstieg"
+    },
+    "indicatorGuardConfig": {
+      "title": "INDIKATOR SCHUTZ",
+      "addButton": "+ Indikator auswaehlen",
+      "conditionDefault": ">",
+      "appliesToDefault": "Beide",
+      "actionDefault": "Position schliessen",
+      "condition": "Bedingung",
+      "threshold": "Schwelle",
+      "appliesTo": "Gilt fuer",
+      "action": "Aktion",
+      "closePosition": "Position schliessen",
+      "reduceToPercent": "Reduzieren auf %",
+      "reduceTo": "Reduzieren auf"
+    },
+    "indicatorTemplateDialog": {
+      "title": "Indikator Vorlage laden",
+      "emptyMessage": "Keine Vorlagen verfuegbar",
+      "searchPlaceholder": "Vorlagen suchen...",
+      "cancel": "Abbrechen",
+      "load": "Vorlage laden",
+      "indicatorsCount": "{{count}} Indikatoren"
+    },
+    "presetButtonGroup": {
+      "test": "Test",
+      "aggressive": "Aggressiv",
+      "balanced": "Ausgewogen",
+      "conservative": "Konservativ"
+    },
+    "rawIndicatorSelector": {
+      "title": "INDIKATOR KONFIGURATION",
+      "addButton": "+ Indikator hinzufuegen",
+      "newIndicator": "Neuer Indikator",
+      "deleteTitle": "Indikator loeschen",
+      "indicatorType": "Indikator Typ",
+      "selectIndicator": "Indikator auswaehlen...",
+      "dataField": "Datenfeld",
+      "parameters": "Parameter",
+      "fields": {
+        "close": "Schluss",
+        "open": "Oeffnung",
+        "high": "Hoch",
+        "low": "Tief",
+        "volume": "Volumen"
+      }
+    },
+    "regimeDetectionConfig": {
+      "title": "REGIME INDIKATOR",
+      "addButton": "+ Indikator auswaehlen",
+      "conditionDefault": ">",
+      "actionReduceAll": "Alle Positionen reduzieren",
+      "actionCloseAll": "Alle schliessen",
+      "actionHalt": "Neuen Einstieg stoppen",
+      "actionDefault": "Alle reduzieren",
+      "recoveryDefault": "Auto",
+      "condition": "Bedingung",
+      "threshold": "Schwelle",
+      "action": "Aktion",
+      "reduceBy": "Reduzieren um",
+      "recoveryMode": "Erholungsmodus"
+    },
+    "riskOverrideRuleCard": {
+      "ruleCircuitBreaker": "Circuit Breaker",
+      "ruleTimeLimit": "Zeitlimit",
+      "ruleRegimeDetection": "Regime Erkennung",
+      "ruleDrawdownLimit": "Drawdown Limit",
+      "ruleIndicatorGuard": "Indikator Schutz",
+      "scopePerPosition": "Pro Position",
+      "scopePerGroup": "Pro Gruppe",
+      "scopePortfolio": "Portfolio",
+      "noDecay": "Kein Zerfall",
+      "decay": "Zerfall",
+      "na": "N/A",
+      "reduce": "Reduzieren",
+      "closeAll": "Alle schliessen",
+      "haltEntry": "Einstieg stoppen",
+      "recovery": "Erholung",
+      "haltTrading": "Handel stoppen",
+      "closePosition": "Position schliessen",
+      "drawdownLabel": "DD <"
+    },
+    "strategyCard": {
+      "headerLabel": "Benutzerdefinierte Strategie",
+      "deleteTitle": "Loeschen"
+    },
+    "templateToolbar": {
+      "loadLabel": "Vorlage laden",
+      "saveLabel": "Speichern",
+      "clearLabel": "Alle loeschen",
+      "addLabel": "+ Indikator hinzufuegen"
+    },
+    "timeLimitConfig": {
+      "unitDefault": "Stunden",
+      "decayDefault": "Keine",
+      "actionDefault": "Alle schliessen",
+      "maxHolding": "Max Haltedauer",
+      "unit": "Einheit",
+      "decaySchedule": "Zerfallsplan",
+      "actionAtExpiry": "Aktion bei Ablauf",
+      "closeAll": "Alle schliessen",
+      "reduceToPercent": "Reduzieren auf %",
+      "reduceTo": "Reduzieren auf"
+    },
+    "validateInput": {
+      "errorDefault": "Bitte fuegen Sie mindestens einen Indikator hinzu",
+      "consolePrefix": "[ValidateInputBeforeGenerate]",
+      "hookConsolePrefix": "[useValidateBeforeGenerate]"
+    },
+    "sliderInputGroup": {
+      "rangeText": "Bereich: {{min}} - {{max}}"
+    },
+    "generateContentWrapper": {
+      "loadingMessage": "Generiere..."
+    },
+    "ohlcvFields": {
+      "close": "Schluss",
+      "open": "Oeffnung",
+      "high": "Hoch",
+      "low": "Tief",
+      "volume": "Volumen"
     }
   }
 }

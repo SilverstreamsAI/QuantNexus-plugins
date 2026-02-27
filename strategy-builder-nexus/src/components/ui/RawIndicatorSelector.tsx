@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, ChevronDown } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { PortalDropdown } from './PortalDropdown';
@@ -296,13 +297,17 @@ const RawIndicatorBlockItem: React.FC<RawIndicatorBlockItemProps> = ({
 // -----------------------------------------------------------------------------
 
 export const RawIndicatorSelector: React.FC<RawIndicatorSelectorProps> = ({
-  title = DEFAULT_TITLE,
+  title,
   indicators,
   blocks,
   onChange,
-  addButtonLabel = DEFAULT_ADD_LABEL,
+  addButtonLabel,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  const componentTitle = title || t('ui.rawIndicatorSelector.title');
+  const addLabel = addButtonLabel || t('ui.rawIndicatorSelector.addButton');
+
   // Add new indicator block
   const handleAddBlock = useCallback(() => {
     const newBlock: RawIndicatorBlock = {
@@ -328,7 +333,7 @@ export const RawIndicatorSelector: React.FC<RawIndicatorSelectorProps> = ({
     <div className={cn('raw-indicator-selector', className)}>
       {/* Title */}
       <h2 className="text-sm font-bold terminal-mono uppercase tracking-widest text-color-terminal-accent-gold mb-4">
-        {title}
+        {componentTitle}
       </h2>
 
       {/* Indicator Blocks */}
@@ -356,7 +361,7 @@ export const RawIndicatorSelector: React.FC<RawIndicatorSelectorProps> = ({
           )}
         >
           <Plus className="w-5 h-5" />
-          <span className="text-sm font-medium">{addButtonLabel}</span>
+          <span className="text-sm font-medium">{addLabel}</span>
         </button>
       </div>
     </div>

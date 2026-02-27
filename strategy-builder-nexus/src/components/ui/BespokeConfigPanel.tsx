@@ -11,6 +11,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pencil } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { SliderInputGroup } from './SliderInputGroup';
@@ -124,12 +125,14 @@ export const DEFAULT_BESPOKE_CONFIG: BespokeConfig = {
 // -----------------------------------------------------------------------------
 
 export const BespokeConfigPanel: React.FC<BespokeConfigPanelProps> = ({
-  title = 'BESPOKE PARAMETERS',
+  title,
   config,
   onChange,
   sliderConfigs = DEFAULT_SLIDER_CONFIGS,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+
   // Handle individual slider value change
   const handleSliderChange = useCallback(
     (key: keyof BespokeConfig, value: number) => {
@@ -146,7 +149,7 @@ export const BespokeConfigPanel: React.FC<BespokeConfigPanelProps> = ({
     const { min, max, unit } = sliderConfig;
     const minLabel = unit ? `${min}${unit}` : String(min);
     const maxLabel = unit ? `${max}${unit}` : String(max);
-    return `Range: ${minLabel} - ${maxLabel}`;
+    return t('ui.bespokeConfig.rangeText', { min: minLabel, max: maxLabel });
   };
 
   return (
@@ -163,7 +166,7 @@ export const BespokeConfigPanel: React.FC<BespokeConfigPanelProps> = ({
       {/* Title with Icon */}
       <h3 className="flex items-center gap-2 text-sm font-bold terminal-mono uppercase tracking-widest text-color-terminal-accent-gold mb-6">
         <Pencil className="w-5 h-5 text-color-terminal-accent-teal" />
-        {title}
+        {title || t('ui.bespokeConfig.title')}
       </h3>
 
       {/* Slider Grid */}

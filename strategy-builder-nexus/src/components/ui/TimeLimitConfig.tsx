@@ -8,6 +8,7 @@
  */
 
 import React, { useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SliderInputGroup } from './SliderInputGroup';
 import { PortalDropdown } from './PortalDropdown';
 import { TIME_UNITS, DECAY_SCHEDULES, RULE_DEFAULTS } from '../../services/risk-override-exit-service';
@@ -30,6 +31,7 @@ export const TimeLimitConfig: React.FC<TimeLimitConfigProps> = ({
   rule,
   onChange,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const unitRef = useRef<HTMLButtonElement>(null);
   const decayRef = useRef<HTMLButtonElement>(null);
   const actionRef = useRef<HTMLButtonElement>(null);
@@ -37,9 +39,9 @@ export const TimeLimitConfig: React.FC<TimeLimitConfigProps> = ({
   const [decayOpen, setDecayOpen] = useState(false);
   const [actionOpen, setActionOpen] = useState(false);
 
-  const unitLabel = TIME_UNITS.find(u => u.value === rule.unit)?.label || 'Hours';
-  const decayLabel = DECAY_SCHEDULES.find(d => d.value === rule.decay)?.label || 'None';
-  const actionLabel = rule.action === 'close_all' ? 'Close All' : 'Reduce To %';
+  const unitLabel = TIME_UNITS.find(u => u.value === rule.unit)?.label || t('ui.timeLimitConfig.unitDefault');
+  const decayLabel = DECAY_SCHEDULES.find(d => d.value === rule.decay)?.label || t('ui.timeLimitConfig.decayDefault');
+  const actionLabel = rule.action === 'close_all' ? t('ui.timeLimitConfig.closeAll') : t('ui.timeLimitConfig.reduceToPercent');
 
   const handleFieldChange = useCallback((field: string, value: unknown) => {
     onChange({ ...rule, [field]: value });
@@ -49,19 +51,19 @@ export const TimeLimitConfig: React.FC<TimeLimitConfigProps> = ({
     <div className="space-y-4">
       {/* Max Holding */}
       <SliderInputGroup
-        label="Max Holding"
+        label={t('ui.timeLimitConfig.maxHolding')}
         value={rule.maxHolding}
         onChange={(v) => handleFieldChange('maxHolding', v)}
         min={1}
         max={rule.unit === 'hours' ? 720 : 500}
         step={1}
-        rangeText={`Default: ${RULE_DEFAULTS.time_limit.maxHolding} ${RULE_DEFAULTS.time_limit.unit}`}
+        rangeText={t('ui.sliderInputGroup.rangeText', { min: 1, max: rule.unit === 'hours' ? 720 : 500 })}
       />
 
       {/* Unit Selector */}
       <div>
         <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-1.5">
-          Unit
+          {t('ui.timeLimitConfig.unit')}
         </label>
         <button
           ref={unitRef}
@@ -86,7 +88,7 @@ export const TimeLimitConfig: React.FC<TimeLimitConfigProps> = ({
       {/* Decay Selector */}
       <div>
         <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-1.5">
-          Decay Schedule
+          {t('ui.timeLimitConfig.decaySchedule')}
         </label>
         <button
           ref={decayRef}
@@ -111,7 +113,7 @@ export const TimeLimitConfig: React.FC<TimeLimitConfigProps> = ({
       {/* Action Selector */}
       <div>
         <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-1.5">
-          Action at Expiry
+          {t('ui.timeLimitConfig.actionAtExpiry')}
         </label>
         <button
           ref={actionRef}
@@ -127,7 +129,7 @@ export const TimeLimitConfig: React.FC<TimeLimitConfigProps> = ({
               onClick={() => { handleFieldChange('action', a); setActionOpen(false); }}
               className="w-full px-3 py-2 text-xs text-left hover:bg-white/10 text-[#e6f1ff] transition-colors"
             >
-              {a === 'close_all' ? 'Close All' : 'Reduce To %'}
+              {a === 'close_all' ? t('ui.timeLimitConfig.closeAll') : t('ui.timeLimitConfig.reduceToPercent')}
             </button>
           ))}
         </PortalDropdown>
@@ -136,7 +138,7 @@ export const TimeLimitConfig: React.FC<TimeLimitConfigProps> = ({
       {/* Reduce To % (conditional) */}
       {rule.action === 'reduce_to' && (
         <SliderInputGroup
-          label="Reduce To"
+          label={t('ui.timeLimitConfig.reduceTo')}
           value={rule.reduceToPercent ?? 50}
           onChange={(v) => handleFieldChange('reduceToPercent', v)}
           min={5}

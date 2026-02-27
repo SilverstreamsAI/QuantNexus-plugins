@@ -9,6 +9,7 @@
  */
 
 import React, { useCallback, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 // -----------------------------------------------------------------------------
@@ -16,7 +17,7 @@ import { cn } from '../../lib/utils';
 // -----------------------------------------------------------------------------
 
 export interface SliderInputGroupProps {
-  /** Field label */
+  /** Field label (plain text or translation key starting with 'ui.') */
   label: string;
   /** Optional hint shown after label in parentheses */
   hint?: string;
@@ -60,7 +61,11 @@ export const SliderInputGroup: React.FC<SliderInputGroupProps> = ({
   disabled = false,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const inputId = useId();
+
+  // Resolve label - check if it's a translation key
+  const displayLabel = label.startsWith('ui.') ? t(label) : label;
 
   // Format value for display
   const formatValue = useCallback(
@@ -126,7 +131,7 @@ export const SliderInputGroup: React.FC<SliderInputGroupProps> = ({
           htmlFor={inputId}
           className="text-[13px] font-medium text-color-terminal-text"
         >
-          {label}
+          {displayLabel}
         </label>
         {hint && (
           <span className="text-xs text-color-terminal-text-muted">

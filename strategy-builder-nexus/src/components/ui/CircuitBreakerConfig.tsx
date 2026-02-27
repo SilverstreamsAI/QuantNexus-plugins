@@ -8,6 +8,7 @@
  */
 
 import React, { useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SliderInputGroup } from './SliderInputGroup';
 import { PortalDropdown } from './PortalDropdown';
 import { CB_SCOPES, RULE_DEFAULTS } from '../../services/risk-override-exit-service';
@@ -30,13 +31,14 @@ export const CircuitBreakerConfig: React.FC<CircuitBreakerConfigProps> = ({
   rule,
   onChange,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const scopeRef = useRef<HTMLButtonElement>(null);
   const actionRef = useRef<HTMLButtonElement>(null);
   const [scopeOpen, setScopeOpen] = useState(false);
   const [actionOpen, setActionOpen] = useState(false);
 
-  const scopeLabel = CB_SCOPES.find(s => s.value === rule.scope)?.label || 'Per Position';
-  const actionLabel = rule.action === 'close_all' ? 'Close All' : 'Reduce To %';
+  const scopeLabel = CB_SCOPES.find(s => s.value === rule.scope)?.label || t('ui.circuitBreakerConfig.scopeDefault');
+  const actionLabel = rule.action === 'close_all' ? t('ui.circuitBreakerConfig.closeAll') : t('ui.circuitBreakerConfig.reduceTo');
 
   const handleFieldChange = useCallback((field: string, value: unknown) => {
     onChange({ ...rule, [field]: value });
@@ -46,8 +48,8 @@ export const CircuitBreakerConfig: React.FC<CircuitBreakerConfigProps> = ({
     <div className="space-y-4">
       {/* Trigger PnL */}
       <SliderInputGroup
-        label="Trigger PnL"
-        hint="loss threshold"
+        label={t('ui.circuitBreakerConfig.triggerPnL')}
+        hint={t('ui.circuitBreakerConfig.lossThreshold')}
         value={rule.triggerPnlPercent}
         onChange={(v) => handleFieldChange('triggerPnlPercent', v)}
         min={-50}
@@ -55,13 +57,13 @@ export const CircuitBreakerConfig: React.FC<CircuitBreakerConfigProps> = ({
         step={0.5}
         suffix="%"
         decimals={1}
-        rangeText={`Default: ${RULE_DEFAULTS.circuit_breaker.triggerPnlPercent}%`}
+        rangeText={t('ui.sliderInputGroup.rangeText', { min: -50, max: -0.5 })}
       />
 
       {/* Scope Selector */}
       <div>
         <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-1.5">
-          Scope
+          {t('ui.circuitBreakerConfig.scopeLabel')}
         </label>
         <button
           ref={scopeRef}
@@ -86,7 +88,7 @@ export const CircuitBreakerConfig: React.FC<CircuitBreakerConfigProps> = ({
       {/* Action Selector */}
       <div>
         <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-1.5">
-          Action
+          {t('ui.circuitBreakerConfig.actionLabel')}
         </label>
         <button
           ref={actionRef}
@@ -102,7 +104,7 @@ export const CircuitBreakerConfig: React.FC<CircuitBreakerConfigProps> = ({
               onClick={() => { handleFieldChange('action', a); setActionOpen(false); }}
               className="w-full px-3 py-2 text-xs text-left hover:bg-white/10 text-[#e6f1ff] transition-colors"
             >
-              {a === 'close_all' ? 'Close All' : 'Reduce To %'}
+              {a === 'close_all' ? t('ui.circuitBreakerConfig.closeAll') : t('ui.circuitBreakerConfig.reduceToPercent')}
             </button>
           ))}
         </PortalDropdown>
@@ -111,7 +113,7 @@ export const CircuitBreakerConfig: React.FC<CircuitBreakerConfigProps> = ({
       {/* Reduce To % (conditional) */}
       {rule.action === 'reduce_to' && (
         <SliderInputGroup
-          label="Reduce To"
+          label={t('ui.circuitBreakerConfig.reduceToLabel')}
           value={rule.reduceToPercent ?? 50}
           onChange={(v) => handleFieldChange('reduceToPercent', v)}
           min={5}
@@ -123,14 +125,14 @@ export const CircuitBreakerConfig: React.FC<CircuitBreakerConfigProps> = ({
 
       {/* Cooldown Bars */}
       <SliderInputGroup
-        label="Cooldown"
-        hint="bars before re-entry"
+        label={t('ui.circuitBreakerConfig.cooldown')}
+        hint={t('ui.circuitBreakerConfig.barsBeforeReentry')}
         value={rule.cooldownBars}
         onChange={(v) => handleFieldChange('cooldownBars', v)}
         min={0}
         max={100}
         step={1}
-        rangeText={`Default: ${RULE_DEFAULTS.circuit_breaker.cooldownBars} bars`}
+        rangeText={t('ui.sliderInputGroup.rangeText', { min: 0, max: 100 })}
       />
     </div>
   );

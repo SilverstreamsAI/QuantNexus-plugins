@@ -9,6 +9,7 @@
  */
 
 import React, { useCallback, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FileText } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -46,14 +47,17 @@ const DEFAULT_ROWS = 12;
 // -----------------------------------------------------------------------------
 
 export const PromptTextarea: React.FC<PromptTextareaProps> = ({
-  title = DEFAULT_TITLE,
+  title,
   value,
   onChange,
-  placeholder = DEFAULT_PLACEHOLDER,
+  placeholder,
   rows = DEFAULT_ROWS,
   disabled = false,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  const componentTitle = title || t('ui.promptTextarea.title');
+  const placeholderText = placeholder || t('ui.promptTextarea.placeholder');
   const textareaId = useId();
 
   const handleChange = useCallback(
@@ -80,7 +84,7 @@ export const PromptTextarea: React.FC<PromptTextareaProps> = ({
         className="flex items-center gap-2 text-sm font-bold terminal-mono uppercase tracking-widest text-color-terminal-accent-gold mb-4"
       >
         <FileText className="w-5 h-5 text-color-terminal-accent-teal" />
-        {title}
+        {componentTitle}
       </label>
 
       {/* Textarea */}
@@ -88,7 +92,7 @@ export const PromptTextarea: React.FC<PromptTextareaProps> = ({
         id={textareaId}
         value={value}
         onChange={handleChange}
-        placeholder={placeholder}
+        placeholder={placeholderText}
         rows={rows}
         disabled={disabled}
         className={cn(

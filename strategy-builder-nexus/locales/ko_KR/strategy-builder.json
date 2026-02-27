@@ -12,7 +12,7 @@
   "editor": {
     "save": "전략 저장",
     "validate": "검증",
-    "generate": "AI로 생성",
+    "generate": "AI 로 생성",
     "preview": "미리보기",
     "configure": "구성"
   },
@@ -36,7 +36,7 @@
   "validation": {
     "success": "전략 검증 통과",
     "failed": "전략 검증 실패",
-    "missingField": "필수 필드 누락: {{field}}",
+    "missingField": "필수 필드 누락：{{field}}",
     "invalidValue": "{{field}}의 값이 유효하지 않습니다"
   },
   "generation": {
@@ -48,7 +48,7 @@
     "loadFailed": "전략 로드 실패",
     "saveFailed": "전략 저장 실패",
     "deleteFailed": "전략 삭제 실패",
-    "validationFailed": "전략 검증 실패: {{reason}}"
+    "validationFailed": "전략 검증 실패：{{reason}}"
   },
   "namingDialog": {
     "title": "전략 이름 지정",
@@ -69,7 +69,7 @@
     "payPerUse": "사용한 만큼만 지불",
     "keyStoredLocally": "키는 로컬에만 저장되며 업로드되지 않습니다",
     "configureKey": "키 구성",
-    "upgradeToPro": "PRO로 업그레이드",
+    "upgradeToPro": "PRO 로 업그레이드",
     "recommended": "추천",
     "unlimitedGenerations": "무제한 AI 생성",
     "noApiKeyRequired": "API 키 불필요",
@@ -95,7 +95,7 @@
     "remove": "제거",
     "model": "모델",
     "providersConfigured": "개 제공업체 구성됨",
-    "configureAtLeastOne": "AI 기능을 사용하려면 최소 1개의 제공업체를 구성하세요",
+    "configureAtLeastOne": "AI 기능을 사용하려면 최소 1 개의 제공업체를 구성하세요",
     "active": "현재:"
   },
   "pluginSettings": {
@@ -127,7 +127,7 @@
     "indicatorsToSave": "저장할 지표:",
     "saveTemplate": "템플릿 저장",
     "nameRequired": "템플릿 이름은 필수입니다",
-    "nameTooShort": "이름은 3자 이상이어야 합니다",
+    "nameTooShort": "이름은 3 자 이상이어야 합니다",
     "nameExists": "같은 이름의 템플릿이 이미 존재합니다"
   },
   "common": {
@@ -136,9 +136,11 @@
     "save": "저장",
     "delete": "삭제",
     "edit": "편집",
-    "close": "닫기"
-  }
-  ,
+    "close": "닫기",
+    "load": "로드",
+    "add": "추가",
+    "clear": "모두 지우기"
+  },
   "pages": {
     "common": {
       "currentStrategy": "현재 전략",
@@ -233,8 +235,8 @@
         "invalidParameters": "유효하지 않은 예측 매개변수",
         "predictionTimeout": "예측 시간 초과, 다시 시도하세요",
         "authRequired": "크로노스 예측을 사용하려면 로그인하세요",
-        "lookbackMin": "룩백은 최소 10이어야 합니다",
-        "predLenMin": "예측 길이는 최소 1이어야 합니다",
+        "lookbackMin": "룩백은 최소 10 이어야 합니다",
+        "predLenMin": "예측 길이는 최소 1 이어야 합니다",
         "filterRequired": "최소 하나의 신호 필터를 활성화하세요",
         "predictionFailed": "크로노스 예측 실패"
       },
@@ -245,7 +247,7 @@
     "kronosAIEntry": {
       "title": "크로노스 AI 진입",
       "defaultStrategyName": "새 크로노스 AI 전략",
-      "validationError": "최소 하나의 지표를 추가하고 프롬프트를 입력하세요 (최소 10자)",
+      "validationError": "최소 하나의 지표를 추가하고 프롬프트를 입력하세요 (최소 10 자)",
       "strategyNamePlaceholder": "전략 이름",
       "loadingMessage": "크로노스 AI 진입 전략 생성 중...",
       "indicatorContextTitle": "지표 컨텍스트",
@@ -280,7 +282,7 @@
     "aiLibero": {
       "title": "AI 리베로",
       "defaultStrategyName": "새 AI 리베로 전략",
-      "validationError": "최소 하나의 지표를 추가하고 프롬프트를 입력하세요 (최소 10자)",
+      "validationError": "최소 하나의 지표를 추가하고 프롬프트를 입력하세요 (최소 10 자)",
       "strategyNamePlaceholder": "전략 이름",
       "loadingMessage": "AI 리베로 전략 생성 중...",
       "indicatorContextTitle": "지표 컨텍스트",
@@ -298,7 +300,7 @@
     "traderAIEntry": {
       "title": "트레이더 AI 진입",
       "defaultStrategyName": "새 트레이더 전략",
-      "validationError": "최소 하나의 지표를 추가하고 프롬프트를 입력하세요 (최소 10자)",
+      "validationError": "최소 하나의 지표를 추가하고 프롬프트를 입력하세요 (최소 10 자)",
       "strategyNamePlaceholder": "전략 이름",
       "loadingMessage": "트레이더 AI 전략 생성 중...",
       "indicatorContextTitle": "지표 컨텍스트",
@@ -317,9 +319,9 @@
       "welcomeTitle": "AI 전략 스튜디오",
       "welcomeSubtitle": "자연어로 거래 전략을 설명하세요. 진입 규칙, 퇴출 조건 및 위험 관리 구축을 도와드립니다.",
       "chatPlaceholder": "거래 전략을 설명하세요...",
-      "chatPlaceholderDisabled": "새 채팅을 만들어 시작...",
-      "newStrategyTitle": "새 전략",
-      "newStrategyPreview": "전략 설명을 시작하세요...",
+      "chatPlaceholderDisabled": "전략 설명을 시작하세요...",
+      "newChatTitle": "새 전략",
+      "newChatPreview": "전략 설명을 시작하세요...",
       "actions": {
         "generateCode": "코드 생성",
         "saveStrategy": "전략 저장",
@@ -423,6 +425,43 @@
       "expand": "확장",
       "collapse": "축소"
     },
+    "signalFilterPanel": {
+      "title": "신호 필터",
+      "badge": "추천",
+      "subtitle": "품질 임계값을 기반으로 예측 신호 필터링",
+      "quickPresets": "빠른 프리셋",
+      "presetTest": "테스트",
+      "presetAggressive": "공격적",
+      "presetBalanced": "균형",
+      "presetConservative": "보수적",
+      "confidenceThreshold": "신뢰도 임계값",
+      "moreSignals": "더 많은 신호",
+      "higherQuality": "더 높은 품질",
+      "expectedReturn": "예상 수익",
+      "smallReturns": "작은 수익",
+      "largeReturnsOnly": "큰 수익만",
+      "directionFilter": "방향 필터",
+      "directionBoth": "둘 다 (롱 & 숏)",
+      "directionBuyOnly": "매수만 (롱)",
+      "directionSellOnly": "매도만 (숏)",
+      "priceMagnitude": "가격 변동폭",
+      "smallMoves": "작은 움직임",
+      "largeMovesOnly": "큰 움직임만",
+      "sampleConsistency": "샘플 일관성",
+      "multiSample": "멀티 샘플",
+      "flexible": "유연함",
+      "highAgreement": "높은 일치",
+      "filterLogic": "필터 로직",
+      "logicAnd": "AND",
+      "logicAndDesc": "모든 활성화된 필터를 통과해야 함",
+      "logicOr": "OR",
+      "logicOrDesc": "활성화된 필터 중 하나라도 통과",
+      "filterWarning": "최소 하나의 필터를 활성화해야 합니다",
+      "expectedFrequency": "예상 신호 빈도:",
+      "frequencyHigh": "높음",
+      "frequencyModerate": "보통",
+      "frequencyLow": "낮음"
+    },
     "indicatorConfig": {
       "title": "지표 설정",
       "newIndicator": "새 지표",
@@ -439,6 +478,14 @@
       "selectOperator": "선택...",
       "thresholdValue": "임계값",
       "addIndicator": "지표 추가"
+    },
+    "generateActionBarLabels": {
+      "startGenerate": "생성 시작",
+      "generating": "생성 중...",
+      "regenerateConfirmMsg": "현재 전략을 덮어씁니다. 계속하시겠습니까?",
+      "regenerateConfirmTitle": "전략 재생성",
+      "regenerate": "재생성",
+      "return": "돌아가기"
     },
     "regimeSelectorLabels": {
       "title": "시장 레짐 지표 로직",
@@ -462,12 +509,312 @@
       "entryAutoReverse": "숏 = 롱의 반대",
       "entryManual": "두 조건 모두 정의"
     },
+    "expressionInput": {
+      "placeholder": "예시: ATR(14) > 0.5 AND RSI(14) < 30",
+      "helpText": "사용자 정의 로직 표현식을 입력하세요. 구문 도움말은 어시스턴트에 표시됩니다.",
+      "buttonLabel": "전략 추가"
+    },
     "codeDisplayLabels": {
       "title": "생성된 전략 코드",
       "copied": "복사됨!",
       "copy": "복사",
       "errorDefault": "오류가 발생했습니다",
       "noCode": "표시할 코드가 없습니다"
+    },
+    "timeRangeSelector": {
+      "title": "시간 범위",
+      "latestLabel": "최신 데이터 사용",
+      "customLabel": "사용자 지정 시작 시간",
+      "timeInputLabel": "시작 시간"
+    },
+    "promptTextarea": {
+      "title": "프롬프트",
+      "placeholder": "사용자 정의 프롬프트를 입력하세요..."
+    },
+    "algorithmDialog": {
+      "title": "템플릿 로드",
+      "emptyMessage": "저장된 템플릿을 찾을 수 없습니다",
+      "loadFailed": "템플릿 로드 실패",
+      "searchPlaceholder": "템플릿 검색...",
+      "cancel": "취소",
+      "load": "로드",
+      "close": "닫기"
+    },
+    "advancedConfig": {
+      "title": "고급 구성",
+      "batchSize": "배치 크기",
+      "warmupPeriod": "워밍업 기간",
+      "lookbackBars": "룩백 바",
+      "analysisInterval": "분석 간격",
+      "modeBaseline": "베이스라인",
+      "modeMonk": "몽크",
+      "modeWarrior": "워리어",
+      "modeBespoke": "맞춤형",
+      "currentConfig": "현재 구성:",
+      "batchSizeLabel": "배치 크기:",
+      "warmupLabel": "워밍업:",
+      "lookbackLabel": "룩백:",
+      "intervalLabel": "간격:",
+      "customizeParams": "매개변수 사용자 지정",
+      "predictionConfig": "예측 구성",
+      "custom": "사용자 지정",
+      "reset": "재설정",
+      "rangeText": "범위: {{min}} - {{max}}"
+    },
+    "watchlistConfig": {
+      "title": "워치리스트 구성",
+      "symbols": "심볼",
+      "symbolPlaceholder": "심볼 입력 (예: BTCUSDT)",
+      "add": "추가",
+      "timeframe": "타임프레임",
+      "dataSource": "데이터 소스",
+      "timeframes": {
+        "1M": "1 분",
+        "5M": "5 분",
+        "15M": "15 분",
+        "1H": "1 시간",
+        "4H": "4 시간",
+        "1D": "1 일"
+      },
+      "dataSources": {
+        "clickhouse": "CLICKHOUSE",
+        "local": "로컬"
+      }
+    },
+    "bespokeConfig": {
+      "title": "맞춤형 매개변수",
+      "lookbackBars": "룩백 바",
+      "positionLimits": "포지션 제한",
+      "leverage": "레버리지",
+      "tradingFrequency": "거래 빈도",
+      "typicalYield": "일반 수익률",
+      "maxDrawdown": "최대 드로다운",
+      "rangeText": "범위: {{min}} - {{max}}"
+    },
+    "modeDetails": {
+      "baselineTitle": "베이스라인 모드",
+      "baselineDesc": "추가 제약 없이 절대 수익을 최대화합니다.",
+      "monkTitle": "몽크 모드",
+      "monkDesc": "엄격한 규율, 안정성, 위험 조정 수익.",
+      "warriorTitle": "워리어 모드",
+      "warriorDesc": "높은 레버리지와 위험으로 공격적 공세.",
+      "bespokeTitle": "맞춤형 모드",
+      "bespokeDesc": "특정 요구 사항에 맞게 완전히 맞춤화된 전략.",
+      "coreGoal": "핵심 목표",
+      "riskTolerance": "위험 허용 범위",
+      "positionLimits": "포지션 제한",
+      "tradingFrequency": "거래 빈도",
+      "leverage": "레버리지",
+      "riskMetrics": "위험 지표",
+      "decisionInputs": "결정 입력",
+      "modelRequirements": "모델 요구 사항",
+      "baselineCoreGoal": "추가 제약 없이 절대 수익 최대화",
+      "baselineRiskTolerance": "중간 ~ 높음 (모델 결정)",
+      "baselinePositionLimits": "없음 또는 매우 느슨함",
+      "baselineTradingFrequency": "무제한 (고빈도 또는 장기)",
+      "baselineLeverage": "1x (레버리지 없음) 또는 매우 낮음",
+      "baselineRiskMetrics": "샤프 비율, 최대 드로다운",
+      "baselineDecisionInputs": "시장 데이터, 뉴스, 펀더멘털",
+      "baselineModelRequirements": "포괄적인 기능",
+      "monkCoreGoal": "엄격한 제한 하에서 안정성과 위험 조정 수익",
+      "monkRiskTolerance": "매우 낮음 (필수 규칙)",
+      "monkPositionLimits": "엄격함 (예: 거래당 <2%, 섹터 제한)",
+      "monkTradingFrequency": "매우 낮음 (일일/주간 제한, 강제 금욕)",
+      "monkLeverage": "금지",
+      "monkRiskMetrics": "소르티노 비율, 최대 드로다운, 변동성",
+      "monkDecisionInputs": "단기 노이즈 필터링, 장기 트렌드 집중",
+      "monkModelRequirements": "위험 규율, 규칙 준수",
+      "warriorCoreGoal": "공격적인 시장 참여를 통해 수익 극대화",
+      "warriorRiskTolerance": "매우 높음 (공격적 추구)",
+      "warriorPositionLimits": "유연함 (집중 포지션 허용)",
+      "warriorTradingFrequency": "높음 (적극적인 시장 참여)",
+      "warriorLeverage": "높음 (5x-10x 이상)",
+      "warriorRiskMetrics": "절대 수익, 회복 속도",
+      "warriorDecisionInputs": "실시간 데이터, 모멘텀, 변동성",
+      "warriorModelRequirements": "정확한 실행, 빠른 적응, 손절매 규율",
+      "bespokeCoreGoal": "사용자 구성을 기반으로 한 맞춤화된 목표",
+      "bespokeRiskTolerance": "사용자 정의",
+      "bespokePositionLimits": "사용자 정의",
+      "bespokeTradingFrequency": "사용자 정의",
+      "bespokeLeverage": "사용자 정의",
+      "bespokeRiskMetrics": "사용자 정의",
+      "bespokeDecisionInputs": "사용자 정의",
+      "bespokeModelRequirements": "특정 요구 사항에 맞게 조정"
+    },
+    "directionalIndicatorSelector": {
+      "title": "진입 신호 구성",
+      "addButton": "+ 진입 신호 추가",
+      "long": "롱",
+      "short": "숏",
+      "selectIndicator": "진입 지표 선택",
+      "selectDirectionFirst": "먼저 롱 또는 숏 방향을 선택하세요",
+      "indicatorType": "지표 유형",
+      "selectIndicatorPlaceholder": "지표 선택...",
+      "parameters": "매개변수",
+      "strategyTemplate": "전략 템플릿",
+      "templateType": "템플릿 유형",
+      "selectTemplate": "템플릿 선택...",
+      "templateInfoType": "유형:",
+      "templateInfoDesc": "설명:",
+      "ruleLogic": "규칙 로직",
+      "whenIndicator": "지표가",
+      "selectOperator": "선택...",
+      "thresholdValue": "임계값"
+    },
+    "circuitBreakerConfig": {
+      "scopeLabel": "범위",
+      "actionLabel": "작업",
+      "triggerPnL": "트리거 PnL",
+      "lossThreshold": "손실 임계값",
+      "closeAll": "모두 청산",
+      "reduceTo": "다음으로 축소%",
+      "reduceToLabel": "다음으로 축소",
+      "cooldown": "쿨다운",
+      "barsBeforeReentry": "재진입 전 바",
+      "scopeDefault": "포지션당",
+      "actionDefault": "모두 청산"
+    },
+    "drawdownLimitConfig": {
+      "actionReduceAll": "모든 포지션 축소",
+      "actionCloseAll": "모두 청산",
+      "actionHalt": "거래 중지",
+      "actionDefault": "거래 중지",
+      "recoveryDefault": "자동",
+      "maxDrawdown": "최대 드로다운",
+      "fromPeakEquity": "피크 자본에서",
+      "action": "작업",
+      "recoveryMode": "복구 모드",
+      "reduceBy": "축소 비율",
+      "recoveryAfter": "복구 후",
+      "barsOfStability": "안정성 바"
+    },
+    "hardSafetyConfig": {
+      "title": "하드 세이프티 넷",
+      "badge": "항상 활성",
+      "description": "절대적인 비상 정지. 다른 모든 규칙이 실패할 때 활성화되는 마지막 보호 장치.",
+      "descriptionNote": "이것은 비활성화할 수 없습니다.",
+      "maxLoss": "최대 손실",
+      "fromEntry": "진입에서"
+    },
+    "indicatorGuardConfig": {
+      "title": "지표 가드",
+      "addButton": "+ 지표 선택",
+      "conditionDefault": ">",
+      "appliesToDefault": "둘 다",
+      "actionDefault": "포지션 청산",
+      "condition": "조건",
+      "threshold": "임계값",
+      "appliesTo": "적용 대상",
+      "action": "작업",
+      "closePosition": "포지션 청산",
+      "reduceToPercent": "다음으로 축소%",
+      "reduceTo": "다음으로 축소"
+    },
+    "indicatorTemplateDialog": {
+      "title": "지표 템플릿 로드",
+      "emptyMessage": "사용 가능한 템플릿 없음",
+      "searchPlaceholder": "템플릿 검색...",
+      "cancel": "취소",
+      "load": "템플릿 로드",
+      "indicatorsCount": "{{count}}개 지표"
+    },
+    "presetButtonGroup": {
+      "test": "테스트",
+      "aggressive": "공격적",
+      "balanced": "균형",
+      "conservative": "보수적"
+    },
+    "rawIndicatorSelector": {
+      "title": "지표 구성",
+      "addButton": "+ 지표 추가",
+      "newIndicator": "새 지표",
+      "deleteTitle": "지표 삭제",
+      "indicatorType": "지표 유형",
+      "selectIndicator": "지표 선택...",
+      "dataField": "데이터 필드",
+      "parameters": "매개변수",
+      "fields": {
+        "close": "종가",
+        "open": "시가",
+        "high": "고가",
+        "low": "저가",
+        "volume": "거래량"
+      }
+    },
+    "regimeDetectionConfig": {
+      "title": "레짐 지표",
+      "addButton": "+ 지표 선택",
+      "conditionDefault": ">",
+      "actionReduceAll": "모든 포지션 축소",
+      "actionCloseAll": "모두 청산",
+      "actionHalt": "신규 진입 중지",
+      "actionDefault": "모두 축소",
+      "recoveryDefault": "자동",
+      "condition": "조건",
+      "threshold": "임계값",
+      "action": "작업",
+      "reduceBy": "축소 비율",
+      "recoveryMode": "복구 모드"
+    },
+    "riskOverrideRuleCard": {
+      "ruleCircuitBreaker": "서킷 브레이커",
+      "ruleTimeLimit": "시간 제한",
+      "ruleRegimeDetection": "레짐 감지",
+      "ruleDrawdownLimit": "드로다운 제한",
+      "ruleIndicatorGuard": "지표 가드",
+      "scopePerPosition": "포지션당",
+      "scopePerGroup": "그룹당",
+      "scopePortfolio": "포트폴리오",
+      "noDecay": "감쇠 없음",
+      "decay": "감쇠",
+      "na": "N/A",
+      "reduce": "축소",
+      "closeAll": "모두 청산",
+      "haltEntry": "진입 중지",
+      "recovery": "복구",
+      "haltTrading": "거래 중지",
+      "closePosition": "포지션 청산",
+      "drawdownLabel": "DD <"
+    },
+    "strategyCard": {
+      "headerLabel": "사용자 지정 전략",
+      "deleteTitle": "삭제"
+    },
+    "templateToolbar": {
+      "loadLabel": "템플릿 로드",
+      "saveLabel": "저장",
+      "clearLabel": "모두 지우기",
+      "addLabel": "+ 지표 추가"
+    },
+    "timeLimitConfig": {
+      "unitDefault": "시간",
+      "decayDefault": "없음",
+      "actionDefault": "모두 청산",
+      "maxHolding": "최대 보유 기간",
+      "unit": "단위",
+      "decaySchedule": "감쇠 일정",
+      "actionAtExpiry": "만료 시 작업",
+      "closeAll": "모두 청산",
+      "reduceToPercent": "다음으로 축소%",
+      "reduceTo": "다음으로 축소"
+    },
+    "validateInput": {
+      "errorDefault": "최소 하나의 지표를 추가하세요",
+      "consolePrefix": "[ValidateInputBeforeGenerate]",
+      "hookConsolePrefix": "[useValidateBeforeGenerate]"
+    },
+    "sliderInputGroup": {
+      "rangeText": "범위: {{min}} - {{max}}"
+    },
+    "generateContentWrapper": {
+      "loadingMessage": "생성 중..."
+    },
+    "ohlcvFields": {
+      "close": "종가",
+      "open": "시가",
+      "high": "고가",
+      "low": "저가",
+      "volume": "거래량"
     }
   }
 }

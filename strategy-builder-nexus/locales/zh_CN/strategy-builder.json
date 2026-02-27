@@ -36,7 +36,7 @@
   "validation": {
     "success": "策略验证通过",
     "failed": "策略验证失败",
-    "missingField": "缺少必填字段: {{field}}",
+    "missingField": "缺少必填字段：{{field}}",
     "invalidValue": "{{field}} 的值无效"
   },
   "generation": {
@@ -48,7 +48,7 @@
     "loadFailed": "加载策略失败",
     "saveFailed": "保存策略失败",
     "deleteFailed": "删除策略失败",
-    "validationFailed": "策略验证失败: {{reason}}"
+    "validationFailed": "策略验证失败：{{reason}}"
   },
   "namingDialog": {
     "title": "命名您的策略",
@@ -136,9 +136,11 @@
     "save": "保存",
     "delete": "删除",
     "edit": "编辑",
-    "close": "关闭"
-  }
-  ,
+    "close": "关闭",
+    "load": "加载",
+    "add": "添加",
+    "clear": "全部清除"
+  },
   "pages": {
     "common": {
       "currentStrategy": "当前策略",
@@ -179,13 +181,13 @@
       "l0Combinator": "L0: 组合器",
       "l1RiskOverride": "L1: 风险覆盖 ({{count}})",
       "l2HardSafety": "L2: 硬安全",
-      "layer1Title": "第1层: 风险覆盖规则",
+      "layer1Title": "第 1 层：风险覆盖规则",
       "enabledTotal": "{{enabled}} 已启用 / {{total}} 总计",
-      "ruleExecutionInfo": "规则按优先级顺序在每根K线上评估。第一个触发的规则执行,其余跳过。",
+      "ruleExecutionInfo": "规则按优先级顺序在每根 K 线上评估。第一个触发的规则执行，其余跳过。",
       "noRulesConfigured": "未配置风险覆盖规则",
       "noRulesHint": "添加规则以防止组合器失败场景",
       "addRule": "添加规则",
-      "layer2Title": "第2层: 硬安全网",
+      "layer2Title": "第 2 层：硬安全网",
       "alwaysActive": "始终活跃",
       "ruleDescriptions": {
         "circuit_breaker": "持仓亏损达到阈值时强制平仓",
@@ -207,8 +209,8 @@
       "predictionConfigTitle": "预测配置",
       "historicalDataPointsLabel": "历史数据点 (回溯)",
       "predictionDataPointsLabel": "预测数据点 (预测长度)",
-      "lookbackRangeText": "范围: 10 - {{max}} (受模型上下文限制)",
-      "predLenRangeText": "范围: 1 - 512",
+      "lookbackRangeText": "范围：10 - {{max}} (受模型上下文限制)",
+      "predLenRangeText": "范围：1 - 512",
       "advancedSettingsTitle": "高级设置",
       "temperatureLabel": "温度",
       "temperatureHint": "越高 = 越随机",
@@ -231,10 +233,10 @@
         "serviceUnavailable": "克洛诺斯预测服务暂时不可用",
         "modelNotFound": "所选模型不可用",
         "invalidParameters": "无效的预测参数",
-        "predictionTimeout": "预测超时,请重试",
+        "predictionTimeout": "预测超时，请重试",
         "authRequired": "请登录以使用克洛诺斯预测",
-        "lookbackMin": "回溯至少为10",
-        "predLenMin": "预测长度至少为1",
+        "lookbackMin": "回溯至少为 10",
+        "predLenMin": "预测长度至少为 1",
         "filterRequired": "请启用至少一个信号过滤器",
         "predictionFailed": "克洛诺斯预测失败"
       },
@@ -245,7 +247,7 @@
     "kronosAIEntry": {
       "title": "克洛诺斯 AI 入场",
       "defaultStrategyName": "新克洛诺斯 AI 策略",
-      "validationError": "请添加至少一个指标并输入提示词(最少10个字符)",
+      "validationError": "请添加至少一个指标并输入提示词 (最少 10 个字符)",
       "strategyNamePlaceholder": "策略名称",
       "loadingMessage": "正在生成克洛诺斯 AI 入场策略...",
       "indicatorContextTitle": "指标上下文",
@@ -280,7 +282,7 @@
     "aiLibero": {
       "title": "AI 自由人",
       "defaultStrategyName": "新 AI 自由人策略",
-      "validationError": "请添加至少一个指标并输入提示词(最少10个字符)",
+      "validationError": "请添加至少一个指标并输入提示词 (最少 10 个字符)",
       "strategyNamePlaceholder": "策略名称",
       "loadingMessage": "正在生成 AI 自由人策略...",
       "indicatorContextTitle": "指标上下文",
@@ -291,14 +293,14 @@
       "generatingLabel": "生成中...",
       "loadIndicatorTemplateTitle": "加载指标模板",
       "noTemplatesAvailable": "没有可用的指标模板",
-      "templateLoaded": "模板 \"{{name}}\" 已加载,包含 {{count}} 个指标",
+      "templateLoaded": "模板 \"{{name}}\" 已加载，包含 {{count}} 个指标",
       "templateSaved": "模板 \"{{name}}\" 保存成功",
-      "templateSaveFailed": "保存模板失败,请重试。"
+      "templateSaveFailed": "保存模板失败，请重试。"
     },
     "traderAIEntry": {
       "title": "交易员 AI 入场",
       "defaultStrategyName": "新交易员策略",
-      "validationError": "请添加至少一个指标并输入提示词(最少10个字符)",
+      "validationError": "请添加至少一个指标并输入提示词 (最少 10 个字符)",
       "strategyNamePlaceholder": "策略名称",
       "loadingMessage": "正在生成交易员 AI 策略...",
       "indicatorContextTitle": "指标上下文",
@@ -309,17 +311,17 @@
       "generatingLabel": "生成中...",
       "loadIndicatorTemplateTitle": "加载指标模板",
       "noTemplatesAvailable": "没有可用的指标模板",
-      "templateLoaded": "模板 \"{{name}}\" 已加载,包含 {{count}} 个指标",
+      "templateLoaded": "模板 \"{{name}}\" 已加载，包含 {{count}} 个指标",
       "templateSaved": "模板 \"{{name}}\" 保存成功",
-      "templateSaveFailed": "保存模板失败,请重试。"
+      "templateSaveFailed": "保存模板失败，请重试。"
     },
     "aiStrategyStudio": {
       "welcomeTitle": "AI 策略工作室",
       "welcomeSubtitle": "用自然语言描述您的交易策略。我将帮助您构建入场规则、退出条件和风险管理。",
       "chatPlaceholder": "描述您的交易策略...",
-      "chatPlaceholderDisabled": "创建新聊天以开始...",
-      "newStrategyTitle": "新策略",
-      "newStrategyPreview": "开始描述您的策略...",
+      "chatPlaceholderDisabled": "开始描述您的策略...",
+      "newChatTitle": "新策略",
+      "newChatPreview": "开始描述您的策略...",
       "actions": {
         "generateCode": "生成代码",
         "saveStrategy": "保存策略",
@@ -330,8 +332,8 @@
         "strategySaved": "策略保存成功",
         "backtestStarted": "回测已启动"
       },
-      "errorPrefix": "错误: {{message}}",
-      "actionFailedPrefix": "操作失败: {{message}}",
+      "errorPrefix": "错误：{{message}}",
+      "actionFailedPrefix": "操作失败：{{message}}",
       "newRuleCondition": "新 {{type}} 规则条件",
       "newRuleDescription": "在此添加您的 {{type}} 条件"
     }
@@ -349,7 +351,7 @@
     "messages": "消息",
     "tokenUsage": "Token 使用量",
     "compressionWarning": "对话可能很快被压缩",
-    "tokenUsageLabel": "Token 使用量: {{percent}}%",
+    "tokenUsageLabel": "Token 使用量：{{percent}}%",
     "roleUser": "您",
     "roleAssistant": "AI 助手",
     "roleSystem": "系统",
@@ -423,6 +425,43 @@
       "expand": "展开",
       "collapse": "折叠"
     },
+    "signalFilterPanel": {
+      "title": "信号过滤器",
+      "badge": "推荐",
+      "subtitle": "基于质量阈值过滤预测信号",
+      "quickPresets": "快速预设",
+      "presetTest": "测试",
+      "presetAggressive": "激进",
+      "presetBalanced": "平衡",
+      "presetConservative": "保守",
+      "confidenceThreshold": "置信度阈值",
+      "moreSignals": "更多信号",
+      "higherQuality": "更高质量",
+      "expectedReturn": "预期收益",
+      "smallReturns": "小收益",
+      "largeReturnsOnly": "仅大收益",
+      "directionFilter": "方向过滤器",
+      "directionBoth": "两者 (做多和做空)",
+      "directionBuyOnly": "仅买入 (做多)",
+      "directionSellOnly": "仅卖出 (做空)",
+      "priceMagnitude": "价格幅度",
+      "smallMoves": "小波动",
+      "largeMovesOnly": "仅大波动",
+      "sampleConsistency": "样本一致性",
+      "multiSample": "多样本",
+      "flexible": "灵活",
+      "highAgreement": "高一致性",
+      "filterLogic": "过滤逻辑",
+      "logicAnd": "与",
+      "logicAndDesc": "所有启用的过滤器必须通过",
+      "logicOr": "或",
+      "logicOrDesc": "任何启用的过滤器通过即可",
+      "filterWarning": "必须启用至少一个过滤器",
+      "expectedFrequency": "预期信号频率:",
+      "frequencyHigh": "高",
+      "frequencyModerate": "中等",
+      "frequencyLow": "低"
+    },
     "indicatorConfig": {
       "title": "指标配置",
       "newIndicator": "新建指标",
@@ -439,6 +478,14 @@
       "selectOperator": "选择...",
       "thresholdValue": "阈值",
       "addIndicator": "添加指标"
+    },
+    "generateActionBarLabels": {
+      "startGenerate": "开始生成",
+      "generating": "生成中...",
+      "regenerateConfirmMsg": "这将覆盖当前策略。继续？",
+      "regenerateConfirmTitle": "重新生成策略",
+      "regenerate": "重新生成",
+      "return": "返回"
     },
     "regimeSelectorLabels": {
       "title": "市场状态指标逻辑",
@@ -462,12 +509,312 @@
       "entryAutoReverse": "做空 = 做多的反向",
       "entryManual": "定义两个条件"
     },
+    "expressionInput": {
+      "placeholder": "示例：ATR(14) > 0.5 AND RSI(14) < 30",
+      "helpText": "输入自定义逻辑表达式。语法帮助将在助手中显示。",
+      "buttonLabel": "添加策略"
+    },
     "codeDisplayLabels": {
       "title": "生成的策略代码",
       "copied": "已复制!",
       "copy": "复制",
       "errorDefault": "发生错误",
       "noCode": "没有可显示的代码"
+    },
+    "timeRangeSelector": {
+      "title": "时间范围",
+      "latestLabel": "使用最新数据",
+      "customLabel": "自定义开始时间",
+      "timeInputLabel": "开始时间"
+    },
+    "promptTextarea": {
+      "title": "提示词",
+      "placeholder": "输入您的自定义提示词..."
+    },
+    "algorithmDialog": {
+      "title": "加载模板",
+      "emptyMessage": "未找到保存的模板",
+      "loadFailed": "加载模板失败",
+      "searchPlaceholder": "搜索模板...",
+      "cancel": "取消",
+      "load": "加载",
+      "close": "关闭"
+    },
+    "advancedConfig": {
+      "title": "高级配置",
+      "batchSize": "批次大小",
+      "warmupPeriod": "预热期",
+      "lookbackBars": "回溯 K 线数",
+      "analysisInterval": "分析间隔",
+      "modeBaseline": "基准",
+      "modeMonk": "修行者",
+      "modeWarrior": "战士",
+      "modeBespoke": "定制",
+      "currentConfig": "当前配置:",
+      "batchSizeLabel": "批次大小:",
+      "warmupLabel": "预热:",
+      "lookbackLabel": "回溯:",
+      "intervalLabel": "间隔:",
+      "customizeParams": "自定义参数",
+      "predictionConfig": "预测配置",
+      "custom": "自定义",
+      "reset": "重置",
+      "rangeText": "范围：{{min}} - {{max}}"
+    },
+    "watchlistConfig": {
+      "title": "观察列表配置",
+      "symbols": "交易对",
+      "symbolPlaceholder": "输入交易对 (如 BTCUSDT)",
+      "add": "添加",
+      "timeframe": "时间周期",
+      "dataSource": "数据源",
+      "timeframes": {
+        "1M": "1 分钟",
+        "5M": "5 分钟",
+        "15M": "15 分钟",
+        "1H": "1 小时",
+        "4H": "4 小时",
+        "1D": "1 天"
+      },
+      "dataSources": {
+        "clickhouse": "CLICKHOUSE",
+        "local": "本地"
+      }
+    },
+    "bespokeConfig": {
+      "title": "定制参数",
+      "lookbackBars": "回溯 K 线数",
+      "positionLimits": "仓位限制",
+      "leverage": "杠杆",
+      "tradingFrequency": "交易频率",
+      "typicalYield": "典型收益率",
+      "maxDrawdown": "最大回撤",
+      "rangeText": "范围：{{min}} - {{max}}"
+    },
+    "modeDetails": {
+      "baselineTitle": "基准模式",
+      "baselineDesc": "最大化绝对收益，无额外约束。",
+      "monkTitle": "修行者模式",
+      "monkDesc": "严格纪律，稳定性，风险调整后收益。",
+      "warriorTitle": "战士模式",
+      "warriorDesc": "激进进攻，高杠杆高风险。",
+      "bespokeTitle": "定制模式",
+      "bespokeDesc": "完全根据您的特定需求定制的策略。",
+      "coreGoal": "核心目标",
+      "riskTolerance": "风险承受能力",
+      "positionLimits": "仓位限制",
+      "tradingFrequency": "交易频率",
+      "leverage": "杠杆",
+      "riskMetrics": "风险指标",
+      "decisionInputs": "决策输入",
+      "modelRequirements": "模型要求",
+      "baselineCoreGoal": "最大化绝对收益，无额外约束",
+      "baselineRiskTolerance": "中等到高 (模型决定)",
+      "baselinePositionLimits": "无或非常宽松",
+      "baselineTradingFrequency": "无限制 (高频或长期)",
+      "baselineLeverage": "1 倍 (无杠杆) 或非常低",
+      "baselineRiskMetrics": "夏普比率，最大回撤",
+      "baselineDecisionInputs": "市场数据，新闻，基本面",
+      "baselineModelRequirements": "全面能力",
+      "monkCoreGoal": "严格限制下的稳定性和风险调整后收益",
+      "monkRiskTolerance": "非常低 (强制规则)",
+      "monkPositionLimits": "严格 (如每笔交易<2%，行业限制)",
+      "monkTradingFrequency": "非常低 (每日/每周上限，强制节制)",
+      "monkLeverage": "禁止",
+      "monkRiskMetrics": "索提诺比率，最大回撤，波动率",
+      "monkDecisionInputs": "过滤短期噪音，关注长期趋势",
+      "monkModelRequirements": "风险纪律，规则遵守",
+      "warriorCoreGoal": "通过积极的市场参与最大化收益",
+      "warriorRiskTolerance": "非常高 (积极追求)",
+      "warriorPositionLimits": "灵活 (允许集中持仓)",
+      "warriorTradingFrequency": "高 (积极市场参与)",
+      "warriorLeverage": "高 (5-10 倍或更高)",
+      "warriorRiskMetrics": "绝对收益，恢复速度",
+      "warriorDecisionInputs": "实时数据，动量，波动率",
+      "warriorModelRequirements": "精确执行，快速适应，止损纪律",
+      "bespokeCoreGoal": "基于用户配置的定制目标",
+      "bespokeRiskTolerance": "用户定义",
+      "bespokePositionLimits": "用户定义",
+      "bespokeTradingFrequency": "用户定义",
+      "bespokeLeverage": "用户定义",
+      "bespokeRiskMetrics": "用户定义",
+      "bespokeDecisionInputs": "用户定义",
+      "bespokeModelRequirements": "根据特定需求定制"
+    },
+    "directionalIndicatorSelector": {
+      "title": "入场信号配置",
+      "addButton": "+ 添加入场信号",
+      "long": "做多",
+      "short": "做空",
+      "selectIndicator": "选择入场指标",
+      "selectDirectionFirst": "请先选择做多或做空方向",
+      "indicatorType": "指标类型",
+      "selectIndicatorPlaceholder": "选择指标...",
+      "parameters": "参数",
+      "strategyTemplate": "策略模板",
+      "templateType": "模板类型",
+      "selectTemplate": "选择模板...",
+      "templateInfoType": "类型:",
+      "templateInfoDesc": "描述:",
+      "ruleLogic": "规则逻辑",
+      "whenIndicator": "当指标",
+      "selectOperator": "选择...",
+      "thresholdValue": "阈值"
+    },
+    "circuitBreakerConfig": {
+      "scopeLabel": "范围",
+      "actionLabel": "操作",
+      "triggerPnL": "触发盈亏",
+      "lossThreshold": "损失阈值",
+      "closeAll": "全部平仓",
+      "reduceTo": "减仓至%",
+      "reduceToLabel": "减仓至",
+      "cooldown": "冷却时间",
+      "barsBeforeReentry": "重新入场前 K 线数",
+      "scopeDefault": "每笔持仓",
+      "actionDefault": "全部平仓"
+    },
+    "drawdownLimitConfig": {
+      "actionReduceAll": "减少所有持仓",
+      "actionCloseAll": "全部平仓",
+      "actionHalt": "停止交易",
+      "actionDefault": "停止交易",
+      "recoveryDefault": "自动",
+      "maxDrawdown": "最大回撤",
+      "fromPeakEquity": "从峰值权益",
+      "action": "操作",
+      "recoveryMode": "恢复模式",
+      "reduceBy": "减少比例",
+      "recoveryAfter": "恢复后",
+      "barsOfStability": "稳定 K 线数"
+    },
+    "hardSafetyConfig": {
+      "title": "硬安全网",
+      "badge": "始终激活",
+      "description": "绝对紧急停止。当所有其他规则失效时激活的最后保护。",
+      "descriptionNote": "此功能无法禁用。",
+      "maxLoss": "最大损失",
+      "fromEntry": "从入场"
+    },
+    "indicatorGuardConfig": {
+      "title": "指标保护",
+      "addButton": "+ 选择指标",
+      "conditionDefault": ">",
+      "appliesToDefault": "两者",
+      "actionDefault": "平仓",
+      "condition": "条件",
+      "threshold": "阈值",
+      "appliesTo": "适用于",
+      "action": "操作",
+      "closePosition": "平仓",
+      "reduceToPercent": "减仓至%",
+      "reduceTo": "减仓至"
+    },
+    "indicatorTemplateDialog": {
+      "title": "加载指标模板",
+      "emptyMessage": "没有可用模板",
+      "searchPlaceholder": "搜索模板...",
+      "cancel": "取消",
+      "load": "加载模板",
+      "indicatorsCount": "{{count}} 个指标"
+    },
+    "presetButtonGroup": {
+      "test": "测试",
+      "aggressive": "激进",
+      "balanced": "平衡",
+      "conservative": "保守"
+    },
+    "rawIndicatorSelector": {
+      "title": "指标配置",
+      "addButton": "+ 添加指标",
+      "newIndicator": "新建指标",
+      "deleteTitle": "删除指标",
+      "indicatorType": "指标类型",
+      "selectIndicator": "选择指标...",
+      "dataField": "数据字段",
+      "parameters": "参数",
+      "fields": {
+        "close": "收盘价",
+        "open": "开盘价",
+        "high": "最高价",
+        "low": "最低价",
+        "volume": "成交量"
+      }
+    },
+    "regimeDetectionConfig": {
+      "title": "状态指标",
+      "addButton": "+ 选择指标",
+      "conditionDefault": ">",
+      "actionReduceAll": "减少所有持仓",
+      "actionCloseAll": "全部平仓",
+      "actionHalt": "停止新入场",
+      "actionDefault": "全部减少",
+      "recoveryDefault": "自动",
+      "condition": "条件",
+      "threshold": "阈值",
+      "action": "操作",
+      "reduceBy": "减少比例",
+      "recoveryMode": "恢复模式"
+    },
+    "riskOverrideRuleCard": {
+      "ruleCircuitBreaker": "熔断器",
+      "ruleTimeLimit": "时间限制",
+      "ruleRegimeDetection": "状态检测",
+      "ruleDrawdownLimit": "回撤限制",
+      "ruleIndicatorGuard": "指标保护",
+      "scopePerPosition": "每笔持仓",
+      "scopePerGroup": "每组",
+      "scopePortfolio": "投资组合",
+      "noDecay": "无衰减",
+      "decay": "衰减",
+      "na": "不适用",
+      "reduce": "减少",
+      "closeAll": "全部平仓",
+      "haltEntry": "停止入场",
+      "recovery": "恢复",
+      "haltTrading": "停止交易",
+      "closePosition": "平仓",
+      "drawdownLabel": "回撤 <"
+    },
+    "strategyCard": {
+      "headerLabel": "自定义策略",
+      "deleteTitle": "删除"
+    },
+    "templateToolbar": {
+      "loadLabel": "加载模板",
+      "saveLabel": "保存",
+      "clearLabel": "全部清除",
+      "addLabel": "+ 添加指标"
+    },
+    "timeLimitConfig": {
+      "unitDefault": "小时",
+      "decayDefault": "无",
+      "actionDefault": "全部平仓",
+      "maxHolding": "最大持仓时间",
+      "unit": "单位",
+      "decaySchedule": "衰减计划",
+      "actionAtExpiry": "到期时操作",
+      "closeAll": "全部平仓",
+      "reduceToPercent": "减仓至%",
+      "reduceTo": "减仓至"
+    },
+    "validateInput": {
+      "errorDefault": "请添加至少一个指标",
+      "consolePrefix": "[ValidateInputBeforeGenerate]",
+      "hookConsolePrefix": "[useValidateBeforeGenerate]"
+    },
+    "sliderInputGroup": {
+      "rangeText": "范围：{{min}} - {{max}}"
+    },
+    "generateContentWrapper": {
+      "loadingMessage": "生成中..."
+    },
+    "ohlcvFields": {
+      "close": "收盘价",
+      "open": "开盘价",
+      "high": "最高价",
+      "low": "最低价",
+      "volume": "成交量"
     }
   }
 }

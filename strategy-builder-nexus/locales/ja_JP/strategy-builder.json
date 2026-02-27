@@ -12,7 +12,7 @@
   "editor": {
     "save": "戦略を保存",
     "validate": "検証",
-    "generate": "AIで生成",
+    "generate": "AI で生成",
     "preview": "プレビュー",
     "configure": "設定"
   },
@@ -20,23 +20,23 @@
     "regimeMode": "相場検出器",
     "indicatorEntry": "インジケーターエントリー生成器",
     "kronosPredictor": "クロノス予測器",
-    "aiEntry": "AIエントリー",
+    "aiEntry": "AI エントリー",
     "marketObserver": "マーケットオブザーバー",
-    "aiEntryGenerator": "AIエントリー生成器",
+    "aiEntryGenerator": "AI エントリー生成器",
     "indicatorExit": "インジケーターイグジット生成器",
-    "aiLibero": "AIリベロ"
+    "aiLibero": "AI リベロ"
   },
   "modes": {
     "regime": "相場モード",
     "kronos": "クロノスモード",
     "trader": "トレーダーモード",
     "riskManager": "リスク管理",
-    "aiCommand": "AIコマンドセンター"
+    "aiCommand": "AI コマンドセンター"
   },
   "validation": {
     "success": "戦略の検証に成功しました",
     "failed": "戦略の検証に失敗しました",
-    "missingField": "必須フィールドが不足しています: {{field}}",
+    "missingField": "必須フィールドが不足しています：{{field}}",
     "invalidValue": "{{field}} の値が無効です"
   },
   "generation": {
@@ -48,7 +48,7 @@
     "loadFailed": "戦略の読み込みに失敗しました",
     "saveFailed": "戦略の保存に失敗しました",
     "deleteFailed": "戦略の削除に失敗しました",
-    "validationFailed": "戦略の検証に失敗しました: {{reason}}"
+    "validationFailed": "戦略の検証に失敗しました：{{reason}}"
   },
   "namingDialog": {
     "title": "戦略に名前を付ける",
@@ -62,40 +62,40 @@
     "confirmGenerate": "確認して生成"
   },
   "apiKeyPrompt": {
-    "title": "AI機能の設定が必要です",
-    "subtitle": "AIコード生成を有効にするオプションを選択してください",
+    "title": "AI 機能の設定が必要です",
+    "subtitle": "AI コード生成を有効にするオプションを選択してください",
     "useOwnKey": "自分のキーを使用",
     "useOwnKeyDesc": "Claude、OpenAI などの API キーを設定",
     "payPerUse": "使用した分だけ支払い",
     "keyStoredLocally": "キーはローカルに保存され、アップロードされません",
     "configureKey": "キーを設定",
-    "upgradeToPro": "PROにアップグレード",
+    "upgradeToPro": "PRO にアップグレード",
     "recommended": "おすすめ",
-    "unlimitedGenerations": "無制限のAI生成",
-    "noApiKeyRequired": "APIキー不要",
+    "unlimitedGenerations": "無制限の AI 生成",
+    "noApiKeyRequired": "API キー不要",
     "prioritySupport": "優先サポートと高度な機能",
     "loginUpgrade": "ログインしてアップグレード",
     "upgradeNow": "今すぐアップグレード",
-    "securityNote": "APIキーは暗号化されローカルにのみ保存されます",
+    "securityNote": "API キーは暗号化されローカルにのみ保存されます",
     "maybeLater": "後で"
   },
   "llmSettings": {
-    "title": "LLMプロバイダー設定",
-    "subtitle": "AIコード生成用のAPIキーを設定します。APIキーが設定されたプロバイダーのみ利用可能です。",
-    "apiKeyEmpty": "APIキーは空にできません",
-    "invalidKeyFormat": "{{provider}} のAPIキー形式が無効です",
+    "title": "LLM プロバイダー設定",
+    "subtitle": "AI コード生成用の API キーを設定します。API キーが設定されたプロバイダーのみ利用可能です。",
+    "apiKeyEmpty": "API キーは空にできません",
+    "invalidKeyFormat": "{{provider}} の API キー形式が無効です",
     "error": "エラー:",
-    "getApiKey": "APIキーを取得",
-    "apiKeyConfigured": "APIキー設定済み",
-    "apiKeyRequired": "APIキーが必要です",
+    "getApiKey": "API キーを取得",
+    "apiKeyConfigured": "API キー設定済み",
+    "apiKeyRequired": "API キーが必要です",
     "selected": "選択済み",
     "select": "選択",
-    "updateApiKey": "APIキーを更新",
-    "setApiKey": "APIキーを設定",
+    "updateApiKey": "API キーを更新",
+    "setApiKey": "API キーを設定",
     "remove": "削除",
     "model": "モデル",
     "providersConfigured": "個のプロバイダーが設定済み",
-    "configureAtLeastOne": "AI機能を使用するには、少なくとも1つのプロバイダーを設定してください",
+    "configureAtLeastOne": "AI 機能を使用するには、少なくとも 1 つのプロバイダーを設定してください",
     "active": "現在:"
   },
   "pluginSettings": {
@@ -127,7 +127,7 @@
     "indicatorsToSave": "保存する指標：",
     "saveTemplate": "テンプレートを保存",
     "nameRequired": "テンプレート名は必須です",
-    "nameTooShort": "名前は3文字以上必要です",
+    "nameTooShort": "名前は 3 文字以上必要です",
     "nameExists": "同じ名前のテンプレートが既に存在します"
   },
   "common": {
@@ -136,9 +136,11 @@
     "save": "保存",
     "delete": "削除",
     "edit": "編集",
-    "close": "閉じる"
-  }
-  ,
+    "close": "閉じる",
+    "load": "読み込み",
+    "add": "追加",
+    "clear": "すべてクリア"
+  },
   "pages": {
     "common": {
       "currentStrategy": "現在の戦略",
@@ -148,7 +150,7 @@
     "regimeDetector": {
       "title": "レジーム検出器",
       "defaultStrategyName": "新しい戦略",
-      "validationError": "少なくとも1つの指標、ファクター、または式を追加してください",
+      "validationError": "少なくとも 1 つの指標、ファクター、または式を追加してください",
       "strategyNamePlaceholder": "戦略名",
       "loadingMessage": "戦略コードを生成中...",
       "generatedCodeTitle": "生成された戦略コード",
@@ -158,7 +160,7 @@
     "entrySignal": {
       "title": "エントリーシグナル生成器",
       "defaultStrategyName": "新しいエントリー戦略",
-      "validationError": "少なくとも1つの指標、ファクター、または式を追加してください",
+      "validationError": "少なくとも 1 つの指標、ファクター、または式を追加してください",
       "strategyNamePlaceholder": "戦略名",
       "loadingMessage": "エントリーシグナルコードを生成中...",
       "generatedCodeTitle": "生成されたエントリーコード",
@@ -169,7 +171,7 @@
       "title": "指標退出生成器",
       "subtitle": "コンビネーター層の上に緊急保護を設定",
       "defaultStrategyName": "新しいリスクオーバーライド戦略",
-      "validationError": "少なくとも1つの有効なリスクオーバーライドルールが必要です",
+      "validationError": "少なくとも 1 つの有効なリスクオーバーライドルールが必要です",
       "strategyNamePlaceholder": "戦略名",
       "loadingMessage": "リスクオーバーライド退出コードを生成中...",
       "configurationLabel": "設定",
@@ -179,13 +181,13 @@
       "l0Combinator": "L0: コンビネーター",
       "l1RiskOverride": "L1: リスクオーバーライド ({{count}})",
       "l2HardSafety": "L2: ハードセーフティ",
-      "layer1Title": "レイヤー1: リスクオーバーライドルール",
+      "layer1Title": "レイヤー 1: リスクオーバーライドルール",
       "enabledTotal": "{{enabled}} 有効 / {{total}} 合計",
       "ruleExecutionInfo": "ルールは各バーで優先順位に従って評価されます。最初にトリガーされたルールが実行され、残りはスキップされます。",
       "noRulesConfigured": "リスクオーバーライドルールが設定されていません",
       "noRulesHint": "コンビネーター障害シナリオから保護するルールを追加してください",
       "addRule": "ルールを追加",
-      "layer2Title": "レイヤー2: ハードセーフティネット",
+      "layer2Title": "レイヤー 2: ハードセーフティネット",
       "alwaysActive": "常にアクティブ",
       "ruleDescriptions": {
         "circuit_breaker": "ポジション損失閾値で強制決済",
@@ -201,14 +203,14 @@
     "kronosPredictor": {
       "title": "クロノス予測器",
       "defaultStrategyName": "クロノス戦略",
-      "validationError": "少なくとも1つのシグナルフィルターを有効にしてください",
+      "validationError": "少なくとも 1 つのシグナルフィルターを有効にしてください",
       "strategyNamePlaceholder": "戦略名",
       "loadingMessage": "クロノス戦略コードを生成中...",
       "predictionConfigTitle": "予測設定",
       "historicalDataPointsLabel": "履歴データポイント (ルックバック)",
       "predictionDataPointsLabel": "予測データポイント (予測長)",
-      "lookbackRangeText": "範囲: 10 - {{max}} (モデルコンテキストによる制限)",
-      "predLenRangeText": "範囲: 1 - 512",
+      "lookbackRangeText": "範囲：10 - {{max}} (モデルコンテキストによる制限)",
+      "predLenRangeText": "範囲：1 - 512",
       "advancedSettingsTitle": "詳細設定",
       "temperatureLabel": "温度",
       "temperatureHint": "高い = よりランダム",
@@ -233,9 +235,9 @@
         "invalidParameters": "無効な予測パラメータ",
         "predictionTimeout": "予測がタイムアウトしました。もう一度お試しください",
         "authRequired": "クロノス予測を使用するにはログインしてください",
-        "lookbackMin": "ルックバックは最低10が必要です",
-        "predLenMin": "予測長は最低1が必要です",
-        "filterRequired": "少なくとも1つのシグナルフィルターを有効にしてください",
+        "lookbackMin": "ルックバックは最低 10 が必要です",
+        "predLenMin": "予測長は最低 1 が必要です",
+        "filterRequired": "少なくとも 1 つのシグナルフィルターを有効にしてください",
         "predictionFailed": "クロノス予測に失敗しました"
       },
       "generatedCodeTitle": "生成されたクロノス戦略コード",
@@ -245,14 +247,14 @@
     "kronosAIEntry": {
       "title": "クロノス AI エントリー",
       "defaultStrategyName": "新しいクロノス AI 戦略",
-      "validationError": "少なくとも1つの指標を追加し、プロンプトを入力してください（最低10文字）",
+      "validationError": "少なくとも 1 つの指標を追加し、プロンプトを入力してください（最低 10 文字）",
       "strategyNamePlaceholder": "戦略名",
       "loadingMessage": "クロノス AI エントリー戦略を生成中...",
       "indicatorContextTitle": "指標コンテキスト",
       "analysisPromptTitle": "分析プロンプト",
       "analysisPromptPlaceholder": "生成したいエントリー戦略を説明してください...",
       "generatedCodeTitle": "生成されたクロノス AI エントリーコード",
-      "generateLabel": "AI生成を開始",
+      "generateLabel": "AI 生成を開始",
       "generatingLabel": "生成中...",
       "loadIndicatorTemplateTitle": "指標テンプレートを読み込む",
       "noTemplatesAvailable": "利用可能な指標テンプレートがありません"
@@ -260,7 +262,7 @@
     "kronosIndicatorEntry": {
       "title": "クロノス指標エントリー",
       "defaultStrategyName": "新しいクロノスエントリー戦略",
-      "validationError": "少なくとも1つの指標、ファクター、または式を追加してください",
+      "validationError": "少なくとも 1 つの指標、ファクター、または式を追加してください",
       "strategyNamePlaceholder": "戦略名",
       "loadingMessage": "クロノス指標エントリーコードを生成中...",
       "generatedCodeTitle": "生成されたクロノスエントリーコード",
@@ -270,7 +272,7 @@
     "marketObserver": {
       "title": "市場観測器",
       "defaultStrategyName": "新しいオブザーバー",
-      "validationError": "少なくとも1つの指標、ファクター、または式を追加してください",
+      "validationError": "少なくとも 1 つの指標、ファクター、または式を追加してください",
       "strategyNamePlaceholder": "戦略名",
       "loadingMessage": "オブザーバーコードを生成中...",
       "generatedCodeTitle": "生成された観測器コード",
@@ -280,7 +282,7 @@
     "aiLibero": {
       "title": "AI リベロ",
       "defaultStrategyName": "新しい AI リベロ戦略",
-      "validationError": "少なくとも1つの指標を追加し、プロンプトを入力してください（最低10文字）",
+      "validationError": "少なくとも 1 つの指標を追加し、プロンプトを入力してください（最低 10 文字）",
       "strategyNamePlaceholder": "戦略名",
       "loadingMessage": "AI リベロ戦略を生成中...",
       "indicatorContextTitle": "指標コンテキスト",
@@ -298,14 +300,14 @@
     "traderAIEntry": {
       "title": "トレーダー AI エントリー",
       "defaultStrategyName": "新しいトレーダー戦略",
-      "validationError": "少なくとも1つの指標を追加し、プロンプトを入力してください（最低10文字）",
+      "validationError": "少なくとも 1 つの指標を追加し、プロンプトを入力してください（最低 10 文字）",
       "strategyNamePlaceholder": "戦略名",
       "loadingMessage": "トレーダー AI 戦略を生成中...",
       "indicatorContextTitle": "指標コンテキスト",
       "analysisPromptTitle": "分析プロンプト",
       "analysisPromptPlaceholder": "生成したい取引戦略を説明してください...",
       "generatedCodeTitle": "生成されたトレーダー AI エントリーコード",
-      "generateLabel": "AI生成を開始",
+      "generateLabel": "AI 生成を開始",
       "generatingLabel": "生成中...",
       "loadIndicatorTemplateTitle": "指標テンプレートを読み込む",
       "noTemplatesAvailable": "利用可能な指標テンプレートがありません",
@@ -317,9 +319,9 @@
       "welcomeTitle": "AI 戦略スタジオ",
       "welcomeSubtitle": "自然言語で取引戦略を説明してください。エントリールール、退出条件、リスク管理の構築をサポートします。",
       "chatPlaceholder": "取引戦略を説明してください...",
-      "chatPlaceholderDisabled": "新しいチャットを作成して開始...",
-      "newStrategyTitle": "新しい戦略",
-      "newStrategyPreview": "戦略の説明を始めてください...",
+      "chatPlaceholderDisabled": "戦略の説明を始めてください...",
+      "newChatTitle": "新しい戦略",
+      "newChatPreview": "戦略の説明を始めてください...",
       "actions": {
         "generateCode": "コードを生成",
         "saveStrategy": "戦略を保存",
@@ -330,8 +332,8 @@
         "strategySaved": "戦略が正常に保存されました",
         "backtestStarted": "バックテストが開始されました"
       },
-      "errorPrefix": "エラー: {{message}}",
-      "actionFailedPrefix": "アクション失敗: {{message}}",
+      "errorPrefix": "エラー：{{message}}",
+      "actionFailedPrefix": "アクション失敗：{{message}}",
       "newRuleCondition": "新しい {{type}} ルール条件",
       "newRuleDescription": "ここに {{type}} 条件を追加してください"
     }
@@ -349,9 +351,9 @@
     "messages": "メッセージ",
     "tokenUsage": "トークン使用量",
     "compressionWarning": "会話がまもなく圧縮される可能性があります",
-    "tokenUsageLabel": "トークン使用量: {{percent}}%",
+    "tokenUsageLabel": "トークン使用量：{{percent}}%",
     "roleUser": "あなた",
-    "roleAssistant": "AIアシスタント",
+    "roleAssistant": "AI アシスタント",
     "roleSystem": "システム",
     "copyMessage": "メッセージをコピー",
     "copied": "コピーしました!",
@@ -423,6 +425,43 @@
       "expand": "展開",
       "collapse": "折りたたみ"
     },
+    "signalFilterPanel": {
+      "title": "シグナルフィルター",
+      "badge": "推奨",
+      "subtitle": "品質閾値に基づいて予測シグナルをフィルタリング",
+      "quickPresets": "クイックプリセット",
+      "presetTest": "テスト",
+      "presetAggressive": "アグレッシブ",
+      "presetBalanced": "バランス",
+      "presetConservative": "コンサバティブ",
+      "confidenceThreshold": "信頼度閾値",
+      "moreSignals": "より多くのシグナル",
+      "higherQuality": "より高い品質",
+      "expectedReturn": "期待リターン",
+      "smallReturns": "小さなリターン",
+      "largeReturnsOnly": "大きなリターンのみ",
+      "directionFilter": "方向フィルター",
+      "directionBoth": "両方 (ロング＆ショート)",
+      "directionBuyOnly": "買いのみ (ロング)",
+      "directionSellOnly": "売りのみ (ショート)",
+      "priceMagnitude": "価格変動幅",
+      "smallMoves": "小さな動き",
+      "largeMovesOnly": "大きな動きのみ",
+      "sampleConsistency": "サンプル一貫性",
+      "multiSample": "マルチサンプル",
+      "flexible": "柔軟",
+      "highAgreement": "高い一致",
+      "filterLogic": "フィルターロジック",
+      "logicAnd": "AND",
+      "logicAndDesc": "すべての有効なフィルターに合格する必要があります",
+      "logicOr": "OR",
+      "logicOrDesc": "いずれかの有効なフィルターに合格",
+      "filterWarning": "少なくとも 1 つのフィルターを有効にする必要があります",
+      "expectedFrequency": "予想シグナル頻度:",
+      "frequencyHigh": "高",
+      "frequencyModerate": "中",
+      "frequencyLow": "低"
+    },
     "indicatorConfig": {
       "title": "インジケーター設定",
       "newIndicator": "新規インジケーター",
@@ -439,6 +478,14 @@
       "selectOperator": "選択...",
       "thresholdValue": "閾値",
       "addIndicator": "インジケーターを追加"
+    },
+    "generateActionBarLabels": {
+      "startGenerate": "生成を開始",
+      "generating": "生成中...",
+      "regenerateConfirmMsg": "現在の戦略を上書きします。続行しますか？",
+      "regenerateConfirmTitle": "戦略を再生成",
+      "regenerate": "再生成",
+      "return": "戻る"
     },
     "regimeSelectorLabels": {
       "title": "市場レジームインジケーターロジック",
@@ -462,12 +509,312 @@
       "entryAutoReverse": "ショート = ロングの逆",
       "entryManual": "両方の条件を定義"
     },
+    "expressionInput": {
+      "placeholder": "例：ATR(14) > 0.5 AND RSI(14) < 30",
+      "helpText": "カスタムロジック式を入力してください。構文ヘルプはアシスタントに表示されます。",
+      "buttonLabel": "戦略を追加"
+    },
     "codeDisplayLabels": {
       "title": "生成された戦略コード",
       "copied": "コピーしました!",
       "copy": "コピー",
       "errorDefault": "エラーが発生しました",
       "noCode": "表示するコードがありません"
+    },
+    "timeRangeSelector": {
+      "title": "時間範囲",
+      "latestLabel": "最新データを使用",
+      "customLabel": "カスタム開始時間",
+      "timeInputLabel": "開始時間"
+    },
+    "promptTextarea": {
+      "title": "プロンプト",
+      "placeholder": "カスタムプロンプトを入力..."
+    },
+    "algorithmDialog": {
+      "title": "テンプレートを読み込む",
+      "emptyMessage": "保存されたテンプレートが見つかりません",
+      "loadFailed": "テンプレートの読み込みに失敗しました",
+      "searchPlaceholder": "テンプレートを検索...",
+      "cancel": "キャンセル",
+      "load": "読み込む",
+      "close": "閉じる"
+    },
+    "advancedConfig": {
+      "title": "詳細設定",
+      "batchSize": "バッチサイズ",
+      "warmupPeriod": "ウォームアップ期間",
+      "lookbackBars": "ルックバックバー",
+      "analysisInterval": "分析間隔",
+      "modeBaseline": "ベースライン",
+      "modeMonk": "モンク",
+      "modeWarrior": "ウォリアー",
+      "modeBespoke": "カスタム",
+      "currentConfig": "現在の設定:",
+      "batchSizeLabel": "バッチサイズ:",
+      "warmupLabel": "ウォームアップ:",
+      "lookbackLabel": "ルックバック:",
+      "intervalLabel": "間隔:",
+      "customizeParams": "パラメータをカスタマイズ",
+      "predictionConfig": "予測設定",
+      "custom": "カスタム",
+      "reset": "リセット",
+      "rangeText": "範囲：{{min}} - {{max}}"
+    },
+    "watchlistConfig": {
+      "title": "ウォッチリスト設定",
+      "symbols": "シンボル",
+      "symbolPlaceholder": "シンボルを入力 (例：BTCUSDT)",
+      "add": "追加",
+      "timeframe": "時間足",
+      "dataSource": "データソース",
+      "timeframes": {
+        "1M": "1 分",
+        "5M": "5 分",
+        "15M": "15 分",
+        "1H": "1 時間",
+        "4H": "4 時間",
+        "1D": "1 日"
+      },
+      "dataSources": {
+        "clickhouse": "CLICKHOUSE",
+        "local": "ローカル"
+      }
+    },
+    "bespokeConfig": {
+      "title": "カスタムパラメータ",
+      "lookbackBars": "ルックバックバー",
+      "positionLimits": "ポジション制限",
+      "leverage": "レバレッジ",
+      "tradingFrequency": "取引頻度",
+      "typicalYield": "典型的な利回り",
+      "maxDrawdown": "最大ドローダウン",
+      "rangeText": "範囲：{{min}} - {{max}}"
+    },
+    "modeDetails": {
+      "baselineTitle": "ベースラインモード",
+      "baselineDesc": "追加の制約なしで絶対リターンを最大化。",
+      "monkTitle": "モンクモード",
+      "monkDesc": "厳格な規律、安定性、リスク調整後リターン。",
+      "warriorTitle": "ウォリアーモード",
+      "warriorDesc": "高レバレッジと高リスクで積極的に攻撃。",
+      "bespokeTitle": "カスタムモード",
+      "bespokeDesc": "特定のニーズに合わせて完全にカスタマイズされた戦略。",
+      "coreGoal": "コア目標",
+      "riskTolerance": "リスク許容度",
+      "positionLimits": "ポジション制限",
+      "tradingFrequency": "取引頻度",
+      "leverage": "レバレッジ",
+      "riskMetrics": "リスク指標",
+      "decisionInputs": "決定入力",
+      "modelRequirements": "モデル要件",
+      "baselineCoreGoal": "追加の制約なしで絶対リターンを最大化",
+      "baselineRiskTolerance": "中～高（モデル決定）",
+      "baselinePositionLimits": "なしまたは非常に緩い",
+      "baselineTradingFrequency": "無制限（高頻度または長期）",
+      "baselineLeverage": "1x（レバレッジなし）または非常に低い",
+      "baselineRiskMetrics": "シャープレシオ、最大ドローダウン",
+      "baselineDecisionInputs": "市場データ、ニュース、ファンダメンタルズ",
+      "baselineModelRequirements": "包括的な機能",
+      "monkCoreGoal": "厳格な制限下での安定性とリスク調整後リターン",
+      "monkRiskTolerance": "非常に低い（必須ルール）",
+      "monkPositionLimits": "厳格（例：1 取引あたり<2%、セクター制限）",
+      "monkTradingFrequency": "非常に低い（日次/週次キャップ、強制禁欲）",
+      "monkLeverage": "禁止",
+      "monkRiskMetrics": "ソルティノレシオ、最大ドローダウン、ボラティリティ",
+      "monkDecisionInputs": "短期ノイズをフィルタリング、長期トレンドに注力",
+      "monkModelRequirements": "リスク規律、ルール遵守",
+      "warriorCoreGoal": "積極的な市場参加を通じてリターンを最大化",
+      "warriorRiskTolerance": "非常に高い（積極的追求）",
+      "warriorPositionLimits": "柔軟（集中ポジション許可）",
+      "warriorTradingFrequency": "高い（積極的な市場参加）",
+      "warriorLeverage": "高い（5x-10x 以上）",
+      "warriorRiskMetrics": "絶対リターン、回復速度",
+      "warriorDecisionInputs": "リアルタイムデータ、モメンタム、ボラティリティ",
+      "warriorModelRequirements": "正確な実行、迅速な適応、ストップロス規律",
+      "bespokeCoreGoal": "ユーザー設定に基づくカスタマイズされた目標",
+      "bespokeRiskTolerance": "ユーザー定義",
+      "bespokePositionLimits": "ユーザー定義",
+      "bespokeTradingFrequency": "ユーザー定義",
+      "bespokeLeverage": "ユーザー定義",
+      "bespokeRiskMetrics": "ユーザー定義",
+      "bespokeDecisionInputs": "ユーザー定義",
+      "bespokeModelRequirements": "特定のニーズに合わせて調整"
+    },
+    "directionalIndicatorSelector": {
+      "title": "エントリーシグナル設定",
+      "addButton": "+ エントリーシグナルを追加",
+      "long": "ロング",
+      "short": "ショート",
+      "selectIndicator": "エントリー指標を選択",
+      "selectDirectionFirst": "最初にロングまたはショート方向を選択してください",
+      "indicatorType": "指標タイプ",
+      "selectIndicatorPlaceholder": "指標を選択...",
+      "parameters": "パラメータ",
+      "strategyTemplate": "戦略テンプレート",
+      "templateType": "テンプレートタイプ",
+      "selectTemplate": "テンプレートを選択...",
+      "templateInfoType": "タイプ:",
+      "templateInfoDesc": "説明:",
+      "ruleLogic": "ルールロジック",
+      "whenIndicator": "指標が",
+      "selectOperator": "選択...",
+      "thresholdValue": "閾値"
+    },
+    "circuitBreakerConfig": {
+      "scopeLabel": "範囲",
+      "actionLabel": "アクション",
+      "triggerPnL": "トリガー PnL",
+      "lossThreshold": "損失閾値",
+      "closeAll": "すべて決済",
+      "reduceTo": "～に削減%",
+      "reduceToLabel": "～に削減",
+      "cooldown": "クールダウン",
+      "barsBeforeReentry": "再エントリー前のバー",
+      "scopeDefault": "ポジションごと",
+      "actionDefault": "すべて決済"
+    },
+    "drawdownLimitConfig": {
+      "actionReduceAll": "すべてのポジションを削減",
+      "actionCloseAll": "すべて決済",
+      "actionHalt": "取引を停止",
+      "actionDefault": "取引を停止",
+      "recoveryDefault": "自動",
+      "maxDrawdown": "最大ドローダウン",
+      "fromPeakEquity": "ピークエクイティから",
+      "action": "アクション",
+      "recoveryMode": "回復モード",
+      "reduceBy": "削減率",
+      "recoveryAfter": "回復後",
+      "barsOfStability": "安定のバー"
+    },
+    "hardSafetyConfig": {
+      "title": "ハードセーフティネット",
+      "badge": "常にアクティブ",
+      "description": "絶対的な緊急停止。他のすべてのルールが失敗したときに作動する最後の保護。",
+      "descriptionNote": "これは無効にできません。",
+      "maxLoss": "最大損失",
+      "fromEntry": "エントリーから"
+    },
+    "indicatorGuardConfig": {
+      "title": "インジケーターガード",
+      "addButton": "+ 指標を選択",
+      "conditionDefault": ">",
+      "appliesToDefault": "両方",
+      "actionDefault": "ポジションを決済",
+      "condition": "条件",
+      "threshold": "閾値",
+      "appliesTo": "適用対象",
+      "action": "アクション",
+      "closePosition": "ポジションを決済",
+      "reduceToPercent": "～に削減%",
+      "reduceTo": "～に削減"
+    },
+    "indicatorTemplateDialog": {
+      "title": "指標テンプレートを読み込む",
+      "emptyMessage": "利用可能なテンプレートがありません",
+      "searchPlaceholder": "テンプレートを検索...",
+      "cancel": "キャンセル",
+      "load": "テンプレートを読み込む",
+      "indicatorsCount": "{{count}} 個の指標"
+    },
+    "presetButtonGroup": {
+      "test": "テスト",
+      "aggressive": "アグレッシブ",
+      "balanced": "バランス",
+      "conservative": "コンサバティブ"
+    },
+    "rawIndicatorSelector": {
+      "title": "指標設定",
+      "addButton": "+ 指標を追加",
+      "newIndicator": "新規指標",
+      "deleteTitle": "指標を削除",
+      "indicatorType": "指標タイプ",
+      "selectIndicator": "指標を選択...",
+      "dataField": "データフィールド",
+      "parameters": "パラメータ",
+      "fields": {
+        "close": "終値",
+        "open": "始値",
+        "high": "高値",
+        "low": "安値",
+        "volume": "出来高"
+      }
+    },
+    "regimeDetectionConfig": {
+      "title": "レジーム指標",
+      "addButton": "+ 指標を選択",
+      "conditionDefault": ">",
+      "actionReduceAll": "すべてのポジションを削減",
+      "actionCloseAll": "すべて決済",
+      "actionHalt": "新規エントリーを停止",
+      "actionDefault": "すべて削減",
+      "recoveryDefault": "自動",
+      "condition": "条件",
+      "threshold": "閾値",
+      "action": "アクション",
+      "reduceBy": "削減率",
+      "recoveryMode": "回復モード"
+    },
+    "riskOverrideRuleCard": {
+      "ruleCircuitBreaker": "サーキットブレーカー",
+      "ruleTimeLimit": "時間制限",
+      "ruleRegimeDetection": "レジーム検出",
+      "ruleDrawdownLimit": "ドローダウン制限",
+      "ruleIndicatorGuard": "指標ガード",
+      "scopePerPosition": "ポジションごと",
+      "scopePerGroup": "グループごと",
+      "scopePortfolio": "ポートフォリオ",
+      "noDecay": "減衰なし",
+      "decay": "減衰",
+      "na": "N/A",
+      "reduce": "削減",
+      "closeAll": "すべて決済",
+      "haltEntry": "エントリーを停止",
+      "recovery": "回復",
+      "haltTrading": "取引を停止",
+      "closePosition": "ポジションを決済",
+      "drawdownLabel": "DD <"
+    },
+    "strategyCard": {
+      "headerLabel": "カスタム戦略",
+      "deleteTitle": "削除"
+    },
+    "templateToolbar": {
+      "loadLabel": "テンプレートを読み込む",
+      "saveLabel": "保存",
+      "clearLabel": "すべてクリア",
+      "addLabel": "+ 指標を追加"
+    },
+    "timeLimitConfig": {
+      "unitDefault": "時間",
+      "decayDefault": "なし",
+      "actionDefault": "すべて決済",
+      "maxHolding": "最大保有期間",
+      "unit": "単位",
+      "decaySchedule": "減衰スケジュール",
+      "actionAtExpiry": "満期時のアクション",
+      "closeAll": "すべて決済",
+      "reduceToPercent": "～に削減%",
+      "reduceTo": "～に削減"
+    },
+    "validateInput": {
+      "errorDefault": "少なくとも 1 つの指標を追加してください",
+      "consolePrefix": "[ValidateInputBeforeGenerate]",
+      "hookConsolePrefix": "[useValidateBeforeGenerate]"
+    },
+    "sliderInputGroup": {
+      "rangeText": "範囲：{{min}} - {{max}}"
+    },
+    "generateContentWrapper": {
+      "loadingMessage": "生成中..."
+    },
+    "ohlcvFields": {
+      "close": "終値",
+      "open": "始値",
+      "high": "高値",
+      "low": "安値",
+      "volume": "出来高"
     }
   }
 }

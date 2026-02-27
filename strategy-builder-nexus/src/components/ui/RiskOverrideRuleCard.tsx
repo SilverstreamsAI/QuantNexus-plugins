@@ -9,6 +9,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Zap,
   Clock,
@@ -136,10 +137,14 @@ export const RiskOverrideRuleCard: React.FC<RiskOverrideRuleCardProps> = ({
   onMoveUp,
   onMoveDown,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const [expanded, setExpanded] = useState(true);
 
   const meta = RULE_META[rule.type] || RULE_META.circuit_breaker;
   const Icon = meta.icon;
+
+  // Get translated rule label
+  const ruleLabel = t(`ui.riskOverrideRuleCard.rule${rule.type.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('')}` as any) || meta.label;
 
   return (
     <div
@@ -178,7 +183,7 @@ export const RiskOverrideRuleCard: React.FC<RiskOverrideRuleCardProps> = ({
         {/* Rule type badge */}
         <span className={cn('flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider', meta.badgeBg)}>
           <Icon className="w-3 h-3" />
-          {meta.label}
+          {ruleLabel}
         </span>
 
         {/* Expand/collapse toggle */}

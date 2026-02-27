@@ -10,6 +10,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BarChart3, AlertTriangle } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { SliderInputGroup } from './SliderInputGroup';
@@ -158,6 +159,7 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
   defaultExpanded = true,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   // Detect active preset
   const activePreset = useMemo(() => detectActivePreset(config), [config]);
 
@@ -205,9 +207,9 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
 
   return (
     <CollapsiblePanel
-      title="Signal Filter"
-      badge="Recommended"
-      subtitle="Filter prediction signals based on quality thresholds"
+      title={t('ui.signalFilterPanel.title')}
+      badge={t('ui.signalFilterPanel.badge')}
+      subtitle={t('ui.signalFilterPanel.subtitle')}
       defaultExpanded={defaultExpanded}
       className={className}
     >
@@ -215,7 +217,7 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
         {/* Quick Presets */}
         <div>
           <label className="block text-xs font-medium text-color-terminal-text-secondary mb-2">
-            Quick Presets
+            {t('ui.signalFilterPanel.quickPresets')}
           </label>
           <PresetButtonGroup
             presets={FILTER_PRESETS}
@@ -233,7 +235,7 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
             onEnabledChange={(enabled) =>
               updateConfig({ confidence: { ...config.confidence, enabled } })
             }
-            label="Confidence Threshold"
+            label={t('ui.signalFilterPanel.confidenceThreshold')}
           >
             <SliderInputGroup
               label=""
@@ -247,7 +249,7 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
               suffix="%"
               disabled={!config.confidence.enabled}
             />
-            <FilterScale left="More Signals" right="Higher Quality" />
+            <FilterScale left={t('ui.signalFilterPanel.moreSignals')} right={t('ui.signalFilterPanel.higherQuality')} />
           </FilterItem>
 
           {/* Expected Return */}
@@ -256,7 +258,7 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
             onEnabledChange={(enabled) =>
               updateConfig({ expectedReturn: { ...config.expectedReturn, enabled } })
             }
-            label="Expected Return"
+            label={t('ui.signalFilterPanel.expectedReturn')}
           >
             <SliderInputGroup
               label=""
@@ -271,7 +273,7 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
               suffix="%"
               disabled={!config.expectedReturn.enabled}
             />
-            <FilterScale left="Small Returns" right="Large Returns Only" />
+            <FilterScale left={t('ui.signalFilterPanel.smallReturns')} right={t('ui.signalFilterPanel.largeReturnsOnly')} />
           </FilterItem>
 
           {/* Direction Filter */}
@@ -280,7 +282,7 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
             onEnabledChange={(enabled) =>
               updateConfig({ direction: { ...config.direction, enabled } })
             }
-            label="Direction Filter"
+            label={t('ui.signalFilterPanel.directionFilter')}
           >
             <select
               value={config.direction.mode}
@@ -317,7 +319,7 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
             onEnabledChange={(enabled) =>
               updateConfig({ magnitude: { ...config.magnitude, enabled } })
             }
-            label="Price Magnitude"
+            label={t('ui.signalFilterPanel.priceMagnitude')}
           >
             <SliderInputGroup
               label=""
@@ -332,7 +334,7 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
               suffix="%"
               disabled={!config.magnitude.enabled}
             />
-            <FilterScale left="Small Moves" right="Large Moves Only" />
+            <FilterScale left={t('ui.signalFilterPanel.smallMoves')} right={t('ui.signalFilterPanel.largeMovesOnly')} />
           </FilterItem>
 
           {/* Sample Consistency (conditional) */}
@@ -342,8 +344,8 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
               onEnabledChange={(enabled) =>
                 updateConfig({ consistency: { ...config.consistency, enabled } })
               }
-              label="Sample Consistency"
-              badge="Multi-Sample"
+              label={t('ui.signalFilterPanel.sampleConsistency')}
+              badge={t('ui.signalFilterPanel.multiSample')}
             >
               <SliderInputGroup
                 label=""
@@ -357,7 +359,7 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
                 suffix="%"
                 disabled={!config.consistency.enabled}
               />
-              <FilterScale left="Flexible" right="High Agreement" />
+              <FilterScale left={t('ui.signalFilterPanel.flexible')} right={t('ui.signalFilterPanel.highAgreement')} />
             </FilterItem>
           )}
         </div>
@@ -365,18 +367,18 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
         {/* Filter Logic */}
         <div>
           <label className="block text-xs font-medium text-color-terminal-text-secondary mb-2">
-            Filter Logic
+            {t('ui.signalFilterPanel.filterLogic')}
           </label>
           <div className="flex gap-3">
             <LogicOption
-              label="AND"
-              description="All enabled filters must pass"
+              label={t('ui.signalFilterPanel.logicAnd')}
+              description={t('ui.signalFilterPanel.logicAndDesc')}
               selected={config.combinationLogic === 'AND'}
               onSelect={() => updateConfig({ combinationLogic: 'AND' })}
             />
             <LogicOption
-              label="OR"
-              description="Any enabled filter passes"
+              label={t('ui.signalFilterPanel.logicOr')}
+              description={t('ui.signalFilterPanel.logicOrDesc')}
               selected={config.combinationLogic === 'OR'}
               onSelect={() => updateConfig({ combinationLogic: 'OR' })}
             />
@@ -388,7 +390,7 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
           <div className="flex items-center gap-2 px-3 py-2 bg-yellow-500/10 border border-yellow-500/30 rounded">
             <AlertTriangle className="w-4 h-4 text-yellow-500" />
             <span className="text-xs text-yellow-500">
-              At least one filter must be enabled
+              {t('ui.signalFilterPanel.filterWarning')}
             </span>
           </div>
         )}
@@ -398,7 +400,7 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
           <BarChart3 className="w-4 h-4 text-color-terminal-text-muted" />
           <div className="flex items-center gap-2">
             <span className="text-xs text-color-terminal-text-secondary">
-              Expected Signal Frequency:
+              {t('ui.signalFilterPanel.expectedFrequency')}
             </span>
             <span
               className={cn(
@@ -408,7 +410,7 @@ export const SignalFilterPanel: React.FC<SignalFilterPanelProps> = ({
                 frequency === 'Low' && 'text-red-500'
               )}
             >
-              {frequency}
+              {t(`ui.signalFilterPanel.frequency${frequency}` as any) || frequency}
             </span>
           </div>
         </div>

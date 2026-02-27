@@ -10,6 +10,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { TraderPresetMode } from './TraderPresetSelector';
@@ -105,6 +106,8 @@ export const ModeDetailsPanel: React.FC<ModeDetailsPanelProps> = ({
   modeDetails = DEFAULT_MODE_DETAILS,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+
   // Hide panel when bespoke mode is selected
   if (mode === 'bespoke') {
     return null;
@@ -114,6 +117,10 @@ export const ModeDetailsPanel: React.FC<ModeDetailsPanelProps> = ({
   if (!currentMode) {
     return null;
   }
+
+  // Get translated title
+  const translatedTitle = t(`ui.modeDetails.${mode}Title` as any) || currentMode.title;
+  const translatedDesc = t(`ui.modeDetails.${mode}Desc` as any) || currentMode.description;
 
   const detailEntries = Object.entries(currentMode.details);
 
@@ -131,12 +138,12 @@ export const ModeDetailsPanel: React.FC<ModeDetailsPanelProps> = ({
       {/* Title with Icon */}
       <h3 className="flex items-center gap-2 text-base font-semibold text-color-terminal-text mb-2">
         <Settings className="w-5 h-5 text-color-terminal-accent-teal" />
-        {currentMode.title}
+        {translatedTitle}
       </h3>
 
       {/* Description */}
       <p className="text-sm text-color-terminal-text-secondary mb-4 leading-relaxed">
-        {currentMode.description}
+        {translatedDesc}
       </p>
 
       {/* Details Table */}

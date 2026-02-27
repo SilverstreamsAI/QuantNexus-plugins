@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -48,10 +49,12 @@ export interface GenerateContentWrapperProps {
  */
 export const GenerateContentWrapper: React.FC<GenerateContentWrapperProps> = ({
   isGenerating,
-  loadingMessage = 'Generating...',
+  loadingMessage,
   children,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  const message = loadingMessage || t('ui.generateContentWrapper.loadingMessage');
   return (
     <div className={cn('relative', className)}>
       {/* Content area - disabled when generating */}
@@ -97,7 +100,7 @@ export const GenerateContentWrapper: React.FC<GenerateContentWrapperProps> = ({
 
             {/* Loading message */}
             <span className="text-sm font-medium text-color-terminal-text-secondary terminal-mono uppercase tracking-wider">
-              {loadingMessage}
+              {message}
             </span>
 
             {/* Animated dots */}

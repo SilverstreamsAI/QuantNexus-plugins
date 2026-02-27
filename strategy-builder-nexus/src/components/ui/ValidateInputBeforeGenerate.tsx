@@ -9,6 +9,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -78,7 +79,9 @@ export const ValidateInputBeforeGenerate: React.FC<ValidateInputBeforeGeneratePr
   disabled = false,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const { items, customValidator, errorMessage } = config;
+  const defaultErrorMsg = errorMessage || t('ui.validateInput.errorDefault');
 
   const handleClick = useCallback(() => {
     if (disabled) return;
@@ -90,15 +93,15 @@ export const ValidateInputBeforeGenerate: React.FC<ValidateInputBeforeGeneratePr
     if (isValid) {
       onValidationPass();
     } else {
-      const message = errorMessage || 'Please add at least one indicator';
+      const message = errorMessage || defaultErrorMsg;
       if (onValidationFail) {
         onValidationFail(message);
       } else {
         // Default: show alert (can be replaced with toast/notification)
-        console.warn('[ValidateInputBeforeGenerate]', message);
+        console.warn(t('ui.validateInput.consolePrefix'), message);
       }
     }
-  }, [items, customValidator, errorMessage, onValidationPass, onValidationFail, disabled]);
+  }, [items, customValidator, errorMessage, onValidationPass, onValidationFail, disabled, t, defaultErrorMsg]);
 
   return (
     <div className={className} onClick={handleClick}>
@@ -142,6 +145,7 @@ export interface UseValidateBeforeGenerateOptions {
  * ```
  */
 export function useValidateBeforeGenerate(options: UseValidateBeforeGenerateOptions) {
+  const { t } = useTranslation('strategy-builder');
   const { items, customValidator, errorMessage, onValidationFail } = options;
 
   const validator = customValidator || defaultValidator;
@@ -150,15 +154,15 @@ export function useValidateBeforeGenerate(options: UseValidateBeforeGenerateOpti
   const validate = useCallback((): boolean => {
     const valid = validator(items);
     if (!valid) {
-      const message = errorMessage || 'Please add at least one indicator';
+      const message = errorMessage || t('ui.validateInput.errorDefault');
       if (onValidationFail) {
         onValidationFail(message);
       } else {
-        console.warn('[useValidateBeforeGenerate]', message);
+        console.warn(t('ui.validateInput.hookConsolePrefix'), message);
       }
     }
     return valid;
-  }, [items, validator, errorMessage, onValidationFail]);
+  }, [items, validator, errorMessage, onValidationFail, t]);
 
   return {
     validate,

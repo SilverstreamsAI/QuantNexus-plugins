@@ -17,6 +17,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings, RotateCcw, ChevronRight, Box } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { CollapsiblePanel } from './CollapsiblePanel';
@@ -110,28 +111,28 @@ interface SliderConfig {
 const PREDICTION_SLIDER_CONFIGS: SliderConfig[] = [
   {
     key: 'batchSize',
-    label: 'Batch Size',
+    label: 'ui.advancedConfig.batchSize',
     min: 50,
     max: 500,
     step: 50,
   },
   {
     key: 'warmupPeriod',
-    label: 'Warmup Period',
+    label: 'ui.advancedConfig.warmupPeriod',
     min: 50,
     max: 500,
     step: 50,
   },
   {
     key: 'lookbackBars',
-    label: 'Lookback Bars',
+    label: 'ui.advancedConfig.lookbackBars',
     min: 20,
     max: 200,
     step: 10,
   },
   {
     key: 'analysisInterval',
-    label: 'Analysis Interval',
+    label: 'ui.advancedConfig.analysisInterval',
     min: 1,
     max: 100,
     step: 1,
@@ -154,7 +155,7 @@ const MODE_LABELS: Record<TraderPresetMode, string> = {
 // -----------------------------------------------------------------------------
 
 export const AdvancedConfigPanel: React.FC<AdvancedConfigPanelProps> = ({
-  title = 'ADVANCED CONFIGURATION',
+  title,
   presetMode,
   predictionConfig,
   onPredictionConfigChange,
@@ -162,9 +163,10 @@ export const AdvancedConfigPanel: React.FC<AdvancedConfigPanelProps> = ({
   defaultExpanded = false,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const [showManualControls, setShowManualControls] = useState(false);
 
-  // Handle individual slider value change
+  // Handle individual slider change
   const handleSliderChange = useCallback(
     (key: keyof PredictionConfig, value: number) => {
       onPredictionConfigChange({
@@ -197,10 +199,13 @@ export const AdvancedConfigPanel: React.FC<AdvancedConfigPanelProps> = ({
     );
   }, [presetMode, predictionConfig]);
 
+  // Get mode label from translation or fallback to constant
+  const modeLabel = MODE_LABELS[presetMode];
+
   return (
     <CollapsiblePanel
-      title={title}
-      badge={isCustomized ? 'Custom' : undefined}
+      title={title || t('ui.advancedConfig.title')}
+      badge={isCustomized ? t('ui.advancedConfig.custom') : undefined}
       badgeVariant={isCustomized ? 'warning' : 'default'}
       defaultExpanded={defaultExpanded}
       className={className}
@@ -213,24 +218,24 @@ export const AdvancedConfigPanel: React.FC<AdvancedConfigPanelProps> = ({
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm font-medium text-color-terminal-text">
-                  Current Configuration:
+                  {t('ui.advancedConfig.currentConfig')}
                 </span>
                 <span className="text-sm font-bold text-color-terminal-accent-teal">
-                  {MODE_LABELS[presetMode]}
+                  {modeLabel}
                 </span>
               </div>
               <div className="flex flex-wrap gap-4 text-xs text-color-terminal-text-secondary">
                 <span>
-                  Batch Size: <span className="text-color-terminal-accent-gold font-semibold">{predictionConfig.batchSize}</span>
+                  {t('ui.advancedConfig.batchSizeLabel')} <span className="text-color-terminal-accent-gold font-semibold">{predictionConfig.batchSize}</span>
                 </span>
                 <span>
-                  Warmup: <span className="text-color-terminal-accent-gold font-semibold">{predictionConfig.warmupPeriod}</span>
+                  {t('ui.advancedConfig.warmupLabel')} <span className="text-color-terminal-accent-gold font-semibold">{predictionConfig.warmupPeriod}</span>
                 </span>
                 <span>
-                  Lookback: <span className="text-color-terminal-accent-gold font-semibold">{predictionConfig.lookbackBars}</span>
+                  {t('ui.advancedConfig.lookbackLabel')} <span className="text-color-terminal-accent-gold font-semibold">{predictionConfig.lookbackBars}</span>
                 </span>
                 <span>
-                  Interval: <span className="text-color-terminal-accent-gold font-semibold">{predictionConfig.analysisInterval}</span>
+                  {t('ui.advancedConfig.intervalLabel')} <span className="text-color-terminal-accent-gold font-semibold">{predictionConfig.analysisInterval}</span>
                 </span>
               </div>
             </div>
@@ -249,7 +254,7 @@ export const AdvancedConfigPanel: React.FC<AdvancedConfigPanelProps> = ({
                 'transition-all duration-200'
               )}
             >
-              Customize Parameters
+              {t('ui.advancedConfig.customizeParams')}
               <ChevronRight className="w-3 h-3" />
             </button>
           </div>
@@ -263,11 +268,11 @@ export const AdvancedConfigPanel: React.FC<AdvancedConfigPanelProps> = ({
               <div className="flex items-center gap-2">
                 <Box className="w-4 h-4 text-color-terminal-accent-teal" />
                 <span className="text-sm font-semibold text-color-terminal-text">
-                  Prediction Configuration
+                  {t('ui.advancedConfig.predictionConfig')}
                 </span>
                 {isCustomized && (
                   <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide rounded bg-color-terminal-accent-gold text-color-terminal-bg">
-                    Custom
+                    {t('ui.advancedConfig.custom')}
                   </span>
                 )}
               </div>
@@ -285,7 +290,7 @@ export const AdvancedConfigPanel: React.FC<AdvancedConfigPanelProps> = ({
                 )}
               >
                 <RotateCcw className="w-3 h-3" />
-                Reset
+                {t('ui.advancedConfig.reset')}
               </button>
             </div>
 
@@ -300,7 +305,7 @@ export const AdvancedConfigPanel: React.FC<AdvancedConfigPanelProps> = ({
                   min={sliderConfig.min}
                   max={sliderConfig.max}
                   step={sliderConfig.step}
-                  rangeText={`Range: ${sliderConfig.min} - ${sliderConfig.max}`}
+                  rangeText={t('ui.advancedConfig.rangeText', { min: sliderConfig.min, max: sliderConfig.max })}
                 />
               ))}
             </div>

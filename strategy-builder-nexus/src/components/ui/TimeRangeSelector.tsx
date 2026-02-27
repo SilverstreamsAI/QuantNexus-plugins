@@ -9,6 +9,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 // -----------------------------------------------------------------------------
@@ -67,7 +68,7 @@ function getCurrentDateTimeLocal(): string {
 // -----------------------------------------------------------------------------
 
 export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
-  title = DEFAULT_TITLE,
+  title,
   mode,
   customTime,
   onModeChange,
@@ -76,7 +77,12 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
   timeInputLabel = DEFAULT_TIME_INPUT_LABEL,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const mergedLabels = { ...DEFAULT_LABELS, ...labels };
+  const componentTitle = title || t('ui.timeRangeSelector.title');
+  const latestLabel = mergedLabels.latest || t('ui.timeRangeSelector.latestLabel');
+  const customLabel = mergedLabels.custom || t('ui.timeRangeSelector.customLabel');
+  const timeInputLbl = timeInputLabel || t('ui.timeRangeSelector.timeInputLabel');
 
   // Set default custom time when switching to custom mode
   useEffect(() => {
@@ -105,11 +111,11 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     <div className={cn('flex flex-col gap-4', className)}>
       {/* Title */}
       <h3 className="font-mono text-sm font-bold uppercase tracking-widest text-color-terminal-accent-gold">
-        {title}
+        {componentTitle}
       </h3>
 
       {/* Radio Options */}
-      <div className="flex flex-col gap-2" role="radiogroup" aria-label={title}>
+      <div className="flex flex-col gap-2" role="radiogroup" aria-label={componentTitle}>
         {/* Latest Option */}
         <label className="flex items-center gap-2.5 cursor-pointer">
           <div
@@ -135,7 +141,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
             className="sr-only"
           />
           <span className="text-[13px] text-color-terminal-text">
-            {mergedLabels.latest}
+            {latestLabel}
           </span>
         </label>
 
@@ -164,7 +170,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
             className="sr-only"
           />
           <span className="text-[13px] text-color-terminal-text">
-            {mergedLabels.custom}
+            {customLabel}
           </span>
         </label>
       </div>
@@ -179,7 +185,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
         <div className="overflow-hidden">
           <div className="pt-1 pl-7">
             <label className="block text-xs font-medium text-color-terminal-text-secondary mb-1.5">
-              {timeInputLabel}
+              {timeInputLbl}
             </label>
             <input
               type="datetime-local"

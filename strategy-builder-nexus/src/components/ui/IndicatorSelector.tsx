@@ -226,6 +226,7 @@ const IndicatorBlockItem: React.FC<IndicatorBlockItemProps> = ({
         <button
           onClick={() => onDelete(block.id)}
           className="p-1 text-color-terminal-text-muted hover:text-red-500 transition-colors"
+          title={t('common.delete')}
         >
           <Trash2 className="w-4 h-4" />
         </button>

@@ -8,6 +8,7 @@
  */
 
 import React, { useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SliderInputGroup } from './SliderInputGroup';
 import { PortalDropdown } from './PortalDropdown';
 import { RawIndicatorSelector } from './RawIndicatorSelector';
@@ -50,6 +51,7 @@ export const IndicatorGuardConfig: React.FC<IndicatorGuardConfigProps> = ({
   rule,
   onChange,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const conditionRef = useRef<HTMLButtonElement>(null);
   const appliesToRef = useRef<HTMLButtonElement>(null);
   const actionRef = useRef<HTMLButtonElement>(null);
@@ -57,9 +59,9 @@ export const IndicatorGuardConfig: React.FC<IndicatorGuardConfigProps> = ({
   const [appliesToOpen, setAppliesToOpen] = useState(false);
   const [actionOpen, setActionOpen] = useState(false);
 
-  const conditionLabel = GUARD_CONDITIONS.find(c => c.value === rule.condition)?.label || '>';
-  const appliesToLabel = DIRECTION_OPTIONS.find(d => d.value === rule.appliesTo)?.label || 'Both';
-  const actionLabel = GUARD_ACTIONS.find(a => a.value === rule.action)?.label || 'Close Position';
+  const conditionLabel = GUARD_CONDITIONS.find(c => c.value === rule.condition)?.label || t('ui.indicatorGuardConfig.conditionDefault');
+  const appliesToLabel = DIRECTION_OPTIONS.find(d => d.value === rule.appliesTo)?.label || t('ui.indicatorGuardConfig.appliesToDefault');
+  const actionLabel = GUARD_ACTIONS.find(a => a.value === rule.action)?.label || t('ui.indicatorGuardConfig.actionDefault');
 
   const handleFieldChange = useCallback((field: string, value: unknown) => {
     onChange({ ...rule, [field]: value });
@@ -95,17 +97,17 @@ export const IndicatorGuardConfig: React.FC<IndicatorGuardConfigProps> = ({
     <div className="space-y-4">
       {/* Indicator Selector */}
       <RawIndicatorSelector
-        title="GUARD INDICATOR"
+        title={t('ui.indicatorGuardConfig.title')}
         indicators={indicatorData as IndicatorDefinition[]}
         blocks={indicatorBlocks}
         onChange={handleIndicatorChange}
-        addButtonLabel="+ Select Indicator"
+        addButtonLabel={t('ui.indicatorGuardConfig.addButton')}
       />
 
       {/* Condition Selector */}
       <div>
         <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-1.5">
-          Condition
+          {t('ui.indicatorGuardConfig.condition')}
         </label>
         <button
           ref={conditionRef}
@@ -129,19 +131,19 @@ export const IndicatorGuardConfig: React.FC<IndicatorGuardConfigProps> = ({
 
       {/* Threshold */}
       <SliderInputGroup
-        label="Threshold"
+        label={t('ui.indicatorGuardConfig.threshold')}
         value={rule.threshold}
         onChange={(v) => handleFieldChange('threshold', v)}
         min={0}
         max={100}
         step={1}
-        rangeText={`Default: ${RULE_DEFAULTS.indicator_guard.threshold}`}
+        rangeText={t('ui.sliderInputGroup.rangeText', { min: 0, max: 100 })}
       />
 
       {/* Applies To Selector */}
       <div>
         <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-1.5">
-          Applies To
+          {t('ui.indicatorGuardConfig.appliesTo')}
         </label>
         <button
           ref={appliesToRef}
@@ -166,7 +168,7 @@ export const IndicatorGuardConfig: React.FC<IndicatorGuardConfigProps> = ({
       {/* Action Selector */}
       <div>
         <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-1.5">
-          Action
+          {t('ui.indicatorGuardConfig.action')}
         </label>
         <button
           ref={actionRef}
@@ -191,7 +193,7 @@ export const IndicatorGuardConfig: React.FC<IndicatorGuardConfigProps> = ({
       {/* Reduce To % (conditional) */}
       {rule.action === 'reduce_to' && (
         <SliderInputGroup
-          label="Reduce To"
+          label={t('ui.indicatorGuardConfig.reduceTo')}
           value={rule.reduceToPercent ?? 50}
           onChange={(v) => handleFieldChange('reduceToPercent', v)}
           min={5}

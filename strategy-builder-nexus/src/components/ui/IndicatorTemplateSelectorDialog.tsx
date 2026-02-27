@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Search, LayoutTemplate, Loader2, TrendingUp, Zap, Activity, BarChart3 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { RawIndicatorBlock } from './RawIndicatorSelector';
@@ -213,15 +214,24 @@ export const IndicatorTemplateSelectorDialog: React.FC<IndicatorTemplateSelector
   isOpen,
   onClose,
   onSelect,
-  title = 'Load Indicator Template',
-  emptyMessage = 'No templates available',
+  title,
+  emptyMessage,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const [templates, setTemplates] = useState<IndicatorTemplate[]>([]);
   const [filteredTemplates, setFilteredTemplates] = useState<IndicatorTemplate[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Use translation keys if title/emptyMessage not provided
+  const dialogTitle = title || t('ui.indicatorTemplateDialog.title');
+  const emptyMsg = emptyMessage || t('ui.indicatorTemplateDialog.emptyMessage');
+  const searchPlaceholder = t('ui.indicatorTemplateDialog.searchPlaceholder');
+  const cancelLabel = t('common.cancel');
+  const loadLabel = t('ui.indicatorTemplateDialog.load');
+  const indicatorsCountLabel = (count: number) => t('ui.indicatorTemplateDialog.indicatorsCount', { count });
 
   // Load templates when dialog opens
   useEffect(() => {
@@ -299,12 +309,12 @@ export const IndicatorTemplateSelectorDialog: React.FC<IndicatorTemplateSelector
       <div className={dialogStyles} onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className={headerStyles}>
-          <h2 className={titleStyles}>{title}</h2>
+          <h2 className={titleStyles}>{dialogTitle}</h2>
           <button
             type="button"
             onClick={onClose}
             className={closeButtonStyles}
-            aria-label="Close"
+            aria-label={cancelLabel}
           >
             <X className="w-4 h-4" />
           </button>
@@ -318,7 +328,7 @@ export const IndicatorTemplateSelectorDialog: React.FC<IndicatorTemplateSelector
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search templates..."
+              placeholder={searchPlaceholder}
               className={cn(searchInputStyles, 'pl-9')}
               autoFocus
             />
@@ -338,7 +348,7 @@ export const IndicatorTemplateSelectorDialog: React.FC<IndicatorTemplateSelector
           ) : filteredTemplates.length === 0 ? (
             <div className={emptyStyles}>
               <LayoutTemplate className="w-10 h-10 mb-3 opacity-50" />
-              <p>{emptyMessage}</p>
+              <p>{emptyMsg}</p>
             </div>
           ) : (
             filteredTemplates.map(template => (
@@ -357,7 +367,7 @@ export const IndicatorTemplateSelectorDialog: React.FC<IndicatorTemplateSelector
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className={itemNameStyles}>{template.name}</span>
-                    <span className={itemBadgeStyles}>{template.indicators.length} indicators</span>
+                    <span className={itemBadgeStyles}>{indicatorsCountLabel(template.indicators.length)}</span>
                   </div>
                   <div className={itemDescStyles}>{template.description}</div>
                 </div>
@@ -373,7 +383,7 @@ export const IndicatorTemplateSelectorDialog: React.FC<IndicatorTemplateSelector
             onClick={onClose}
             className={cancelButtonStyles}
           >
-            Cancel
+            {cancelLabel}
           </button>
           <button
             type="button"
@@ -381,7 +391,7 @@ export const IndicatorTemplateSelectorDialog: React.FC<IndicatorTemplateSelector
             disabled={selectedId === null}
             className={selectButtonStyles}
           >
-            Load Template
+            {loadLabel}
           </button>
         </div>
       </div>

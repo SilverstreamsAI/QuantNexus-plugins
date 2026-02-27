@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { PortalDropdown } from './PortalDropdown';
@@ -84,6 +85,7 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
   onUpdate,
   onDelete,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const [isIndicatorOpen, setIsIndicatorOpen] = useState(false);
   const [isTemplateOpen, setIsTemplateOpen] = useState(false);
   const [isOperatorOpen, setIsOperatorOpen] = useState(false);
@@ -184,7 +186,7 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
       {/* Card Header with Direction Toggle */}
       <div className="flex items-center justify-between px-4 py-3 bg-color-terminal-surface/50 border-b border-color-terminal-border">
         <span className="text-sm font-bold text-color-terminal-text">
-          {selectedIndicator?.name || 'Select Entry Indicator'}
+          {selectedIndicator?.name || t('ui.directionalIndicatorSelector.selectIndicator')}
         </span>
 
         <div className="flex items-center gap-3">
@@ -201,7 +203,7 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
               )}
             >
               <TrendingUp className="w-3 h-3" />
-              Long
+              {t('ui.directionalIndicatorSelector.long')}
             </button>
             <button
               onClick={() => handleSelectDirection('short')}
@@ -214,7 +216,7 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
               )}
             >
               <TrendingDown className="w-3 h-3" />
-              Short
+              {t('ui.directionalIndicatorSelector.short')}
             </button>
           </div>
 
@@ -237,7 +239,7 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
             <TrendingDown className="w-5 h-5 text-red-500" />
           </div>
           <p className="text-sm text-color-terminal-text-muted">
-            Please select Long or Short direction first
+            {t('ui.directionalIndicatorSelector.selectDirectionFirst')}
           </p>
         </div>
       ) : (
@@ -246,7 +248,7 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
           {/* Indicator Type Dropdown */}
           <div className="space-y-2">
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-              Indicator Type
+              {t('ui.directionalIndicatorSelector.indicatorType')}
             </label>
             <button
               ref={indicatorTriggerRef}
@@ -266,7 +268,7 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
               <span>
                 {selectedIndicator
                   ? `${selectedIndicator.name} (${selectedIndicator.slug})`
-                  : 'Select an indicator...'}
+                  : t('ui.directionalIndicatorSelector.selectIndicatorPlaceholder')}
               </span>
               <ChevronDown className={cn('w-4 h-4 transition-transform', isIndicatorOpen && 'rotate-180')} />
             </button>
@@ -299,7 +301,7 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
           {/* PARAMETERS Section */}
           {selectedIndicator && selectedIndicator.params.length > 0 && (
             <div className="space-y-3">
-              <SectionTitle>Parameters</SectionTitle>
+              <SectionTitle>{t('ui.directionalIndicatorSelector.parameters')}</SectionTitle>
               <div className="space-y-3">
                 {selectedIndicator.params.map((param: IndicatorParam) => (
                   <div key={param.name} className="space-y-1">
@@ -350,12 +352,12 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
           {/* STRATEGY TEMPLATE Section */}
           {selectedIndicator && availableTemplates.length > 0 && (
             <div className="space-y-3">
-              <SectionTitle>Strategy Template</SectionTitle>
+              <SectionTitle>{t('ui.directionalIndicatorSelector.strategyTemplate')}</SectionTitle>
 
               {/* Template Type Dropdown */}
               <div className="space-y-1">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-                  Template Type
+                  {t('ui.directionalIndicatorSelector.templateType')}
                 </label>
                 <button
                   ref={templateTriggerRef}
@@ -371,7 +373,7 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
                       : 'border-color-terminal-border'
                   )}
                 >
-                  <span>{selectedTemplate?.label || 'Select template...'}</span>
+                  <span>{selectedTemplate?.label || t('ui.directionalIndicatorSelector.selectTemplate')}</span>
                   <ChevronDown className={cn('w-4 h-4 transition-transform', isTemplateOpen && 'rotate-180')} />
                 </button>
 
@@ -403,11 +405,11 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
               {selectedTemplate && (
                 <div className="p-3 border-l-2 border-color-terminal-accent-teal bg-color-terminal-surface/50 rounded-r text-xs space-y-1">
                   <div>
-                    <span className="text-color-terminal-accent-teal font-bold">Type:</span>
+                    <span className="text-color-terminal-accent-teal font-bold">{t('ui.directionalIndicatorSelector.templateInfoType')}</span>
                     <span className="ml-2 text-color-terminal-text">{selectedTemplate.type}</span>
                   </div>
                   <div>
-                    <span className="text-color-terminal-accent-teal font-bold">Description:</span>
+                    <span className="text-color-terminal-accent-teal font-bold">{t('ui.directionalIndicatorSelector.templateInfoDesc')}</span>
                     <span className="ml-2 text-color-terminal-text-secondary">{selectedTemplate.description}</span>
                   </div>
                 </div>
@@ -418,13 +420,13 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
           {/* RULE LOGIC Section */}
           {selectedIndicator && selectedTemplate && (
             <div className="space-y-3">
-              <SectionTitle>Rule Logic</SectionTitle>
+              <SectionTitle>{t('ui.directionalIndicatorSelector.ruleLogic')}</SectionTitle>
 
               {/* When Indicator Dropdown */}
               {selectedTemplate.rule_options?.operators && (
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-                    When Indicator
+                    {t('ui.directionalIndicatorSelector.whenIndicator')}
                   </label>
                   <button
                     ref={operatorTriggerRef}
@@ -441,7 +443,7 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
                     )}
                   >
                     <span>
-                      {selectedTemplate.rule_options.operators.find(op => op.value === block.ruleOperator)?.label || 'Select...'}
+                      {selectedTemplate.rule_options.operators.find(op => op.value === block.ruleOperator)?.label || t('ui.directionalIndicatorSelector.selectOperator')}
                     </span>
                     <ChevronDown className={cn('w-4 h-4 transition-transform', isOperatorOpen && 'rotate-180')} />
                   </button>
@@ -475,7 +477,7 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
               {(selectedTemplate.type === 'threshold_level' || selectedTemplate.default_rule?.threshold_value !== undefined) && (
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-                    Threshold Value
+                    {t('ui.directionalIndicatorSelector.thresholdValue')}
                   </label>
                   <input
                     type="number"
@@ -503,14 +505,18 @@ const DirectionalBlockItem: React.FC<DirectionalBlockItemProps> = ({
 // -----------------------------------------------------------------------------
 
 export const DirectionalIndicatorSelector: React.FC<DirectionalIndicatorSelectorProps> = ({
-  title = DEFAULT_TITLE,
+  title,
   indicators,
   templates,
   blocks,
   onChange,
-  addButtonLabel = DEFAULT_ADD_BUTTON_LABEL,
+  addButtonLabel,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  const componentTitle = title || t('ui.directionalIndicatorSelector.title');
+  const addLabel = addButtonLabel || t('ui.directionalIndicatorSelector.addButton');
+
   // Add new block
   const handleAddBlock = useCallback(() => {
     const newBlock: DirectionalIndicatorBlock = {
@@ -539,7 +545,7 @@ export const DirectionalIndicatorSelector: React.FC<DirectionalIndicatorSelector
     <div className={cn('directional-indicator-selector', className)}>
       {/* Title - follows Unified Component Title Format */}
       <h2 className="text-sm font-bold terminal-mono uppercase tracking-widest text-color-terminal-accent-gold mb-4">
-        {title}
+        {componentTitle}
       </h2>
 
       {/* Indicator Blocks */}
@@ -571,7 +577,7 @@ export const DirectionalIndicatorSelector: React.FC<DirectionalIndicatorSelector
         )}
       >
         <Plus className="w-4 h-4" />
-        {addButtonLabel}
+        {addLabel}
       </button>
     </div>
   );

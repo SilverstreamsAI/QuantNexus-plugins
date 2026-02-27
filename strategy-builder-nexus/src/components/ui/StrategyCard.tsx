@@ -9,6 +9,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, FileText } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -37,6 +38,7 @@ export const StrategyCard: React.FC<StrategyCardProps> = ({
   onDelete,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const handleDelete = () => {
     onDelete(id);
   };
@@ -56,7 +58,7 @@ export const StrategyCard: React.FC<StrategyCardProps> = ({
         <div className="flex items-center gap-2">
           <FileText className="w-3 h-3 text-color-terminal-accent-teal" />
           <span className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary">
-            Custom Strategy
+            {t('ui.strategyCard.headerLabel')}
           </span>
         </div>
         <button
@@ -66,7 +68,7 @@ export const StrategyCard: React.FC<StrategyCardProps> = ({
             'text-color-terminal-text-muted hover:text-red-400',
             'hover:bg-red-500/10 transition-all'
           )}
-          title="Delete"
+          title={t('ui.strategyCard.deleteTitle')}
         >
           <X className="w-3 h-3" />
         </button>

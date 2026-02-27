@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Search, FileCode, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { AlgorithmListItem } from '../../services/algorithm-storage-service';
@@ -170,15 +171,24 @@ export const AlgorithmSelectorDialog: React.FC<AlgorithmSelectorDialogProps> = (
   onClose,
   onSelect,
   fetchAlgorithms,
-  title = 'Load Template',
-  emptyMessage = 'No saved templates found',
+  title,
+  emptyMessage,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const [algorithms, setAlgorithms] = useState<AlgorithmListItem[]>([]);
   const [filteredAlgorithms, setFilteredAlgorithms] = useState<AlgorithmListItem[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Use translation keys if title/emptyMessage not provided
+  const dialogTitle = title || t('ui.algorithmDialog.title');
+  const emptyMsg = emptyMessage || t('ui.algorithmDialog.emptyMessage');
+  const searchPlaceholder = t('ui.algorithmDialog.searchPlaceholder');
+  const cancelLabel = t('common.cancel');
+  const loadLabel = t('ui.algorithmDialog.load');
+  const closeLabel = t('common.close');
 
   // Fetch algorithms when dialog opens
   useEffect(() => {
@@ -194,13 +204,13 @@ export const AlgorithmSelectorDialog: React.FC<AlgorithmSelectorDialogProps> = (
             setAlgorithms(result.data);
             setFilteredAlgorithms(result.data);
           } else {
-            setError('Failed to load templates');
+            setError(t('ui.algorithmDialog.loadFailed'));
             setAlgorithms([]);
             setFilteredAlgorithms([]);
           }
         })
         .catch(err => {
-          setError(err.message || 'Failed to load templates');
+          setError(err.message || t('ui.algorithmDialog.loadFailed'));
           setAlgorithms([]);
           setFilteredAlgorithms([]);
         })
@@ -208,7 +218,7 @@ export const AlgorithmSelectorDialog: React.FC<AlgorithmSelectorDialogProps> = (
           setLoading(false);
         });
     }
-  }, [isOpen, fetchAlgorithms]);
+  }, [isOpen, fetchAlgorithms, t]);
 
   // Filter algorithms based on search query
   useEffect(() => {
@@ -261,12 +271,12 @@ export const AlgorithmSelectorDialog: React.FC<AlgorithmSelectorDialogProps> = (
       <div className={dialogStyles} onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className={headerStyles}>
-          <h2 className={titleStyles}>{title}</h2>
+          <h2 className={titleStyles}>{dialogTitle}</h2>
           <button
             type="button"
             onClick={onClose}
             className={closeButtonStyles}
-            aria-label="Close"
+            aria-label={closeLabel}
           >
             <X className="w-4 h-4" />
           </button>
@@ -280,7 +290,7 @@ export const AlgorithmSelectorDialog: React.FC<AlgorithmSelectorDialogProps> = (
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search templates..."
+              placeholder={searchPlaceholder}
               className={cn(searchInputStyles, 'pl-9')}
               autoFocus
             />
@@ -300,7 +310,7 @@ export const AlgorithmSelectorDialog: React.FC<AlgorithmSelectorDialogProps> = (
           ) : filteredAlgorithms.length === 0 ? (
             <div className={emptyStyles}>
               <FileCode className="w-10 h-10 mb-3 opacity-50" />
-              <p>{emptyMessage}</p>
+              <p>{emptyMsg}</p>
             </div>
           ) : (
             filteredAlgorithms.map(algo => (
@@ -332,7 +342,7 @@ export const AlgorithmSelectorDialog: React.FC<AlgorithmSelectorDialogProps> = (
             onClick={onClose}
             className={cancelButtonStyles}
           >
-            Cancel
+            {cancelLabel}
           </button>
           <button
             type="button"
@@ -340,7 +350,7 @@ export const AlgorithmSelectorDialog: React.FC<AlgorithmSelectorDialogProps> = (
             disabled={selectedId === null}
             className={selectButtonStyles}
           >
-            Load
+            {loadLabel}
           </button>
         </div>
       </div>

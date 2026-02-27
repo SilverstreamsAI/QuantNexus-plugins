@@ -10,6 +10,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -75,15 +76,18 @@ const DEFAULT_DATASOURCE_OPTIONS: DataSourceOption[] = [
 // -----------------------------------------------------------------------------
 
 export const WatchlistConfigPanel: React.FC<WatchlistConfigPanelProps> = ({
-  title = DEFAULT_TITLE,
+  title,
   value,
   onChange,
   timeframeOptions = DEFAULT_TIMEFRAME_OPTIONS,
   dataSourceOptions = DEFAULT_DATASOURCE_OPTIONS,
-  symbolPlaceholder = 'Enter symbol (e.g., BTCUSDT)',
+  symbolPlaceholder,
   className,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const [symbolInput, setSymbolInput] = useState('');
+  const componentTitle = title || t('ui.watchlistConfig.title');
+  const placeholderText = symbolPlaceholder || t('ui.watchlistConfig.symbolPlaceholder');
 
   // ---------------------------------------------------------------------------
   // Handlers
@@ -132,13 +136,13 @@ export const WatchlistConfigPanel: React.FC<WatchlistConfigPanelProps> = ({
       <div className="p-4 border border-color-terminal-border rounded-lg bg-color-terminal-panel/20">
         {/* Title */}
         <h3 className="text-xs font-bold uppercase tracking-wider text-color-terminal-accent-teal mb-4">
-          {title}
+          {componentTitle}
         </h3>
 
         {/* Symbols Section */}
         <div className="mb-4">
           <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-2 block">
-            Symbols
+            {t('ui.watchlistConfig.symbols')}
           </label>
           <div className="flex gap-2 mb-2">
             <input
@@ -146,7 +150,7 @@ export const WatchlistConfigPanel: React.FC<WatchlistConfigPanelProps> = ({
               value={symbolInput}
               onChange={(e) => setSymbolInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={symbolPlaceholder}
+              placeholder={placeholderText}
               className="flex-1 px-3 py-2 text-xs terminal-mono border rounded focus:outline-none focus:border-color-terminal-accent-teal"
               style={{
                 backgroundColor: '#112240',
@@ -164,7 +168,7 @@ export const WatchlistConfigPanel: React.FC<WatchlistConfigPanelProps> = ({
                   : 'border-color-terminal-border text-color-terminal-text-muted cursor-not-allowed'
               )}
             >
-              Add
+              {t('ui.watchlistConfig.add')}
             </button>
           </div>
 
@@ -195,7 +199,7 @@ export const WatchlistConfigPanel: React.FC<WatchlistConfigPanelProps> = ({
           {/* Timeframe */}
           <div>
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-2 block">
-              Timeframe
+              {t('ui.watchlistConfig.timeframe')}
             </label>
             <div className="flex flex-wrap gap-1.5">
               {timeframeOptions.map((opt) => (
@@ -218,7 +222,7 @@ export const WatchlistConfigPanel: React.FC<WatchlistConfigPanelProps> = ({
           {/* Data Source */}
           <div>
             <label className="text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-2 block">
-              Data Source
+              {t('ui.watchlistConfig.dataSource')}
             </label>
             <div className="flex flex-wrap gap-1.5">
               {dataSourceOptions.map((opt) => (

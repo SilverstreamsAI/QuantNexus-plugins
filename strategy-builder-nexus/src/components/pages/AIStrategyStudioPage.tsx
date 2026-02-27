@@ -32,7 +32,6 @@ import { getCurrentUserIdAsString } from '../../utils/auth-utils';
 import {
   ConversationSidebar,
   Conversation,
-  SessionInfoPanel,
   MessagesContainer,
   Message,
   ChatInputArea,
@@ -168,7 +167,6 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
   // -------------------------------------------------------------------------
   // Session State
   // -------------------------------------------------------------------------
-  const [tokenUsage, setTokenUsage] = useState({ current: 0, limit: 128000 });
 
   // -------------------------------------------------------------------------
   // Strategy Rules State
@@ -245,7 +243,6 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
           setConversations([newConversation, ...cleanedConversations]);
           setActiveConversationId(newConversation.id);
           setActiveDbId(createResult.data.id);
-          setTokenUsage({ current: 0, limit: createResult.data.token_limit });
         } else {
           // Fallback: just load existing conversations
           setConversations(cleanedConversations);
@@ -288,7 +285,6 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
         setActiveDbId(result.data.id);
         setMessages([]);
         setStrategyRules([]);
-        setTokenUsage({ current: 0, limit: result.data.token_limit });
       }
     } catch (error) {
       console.error('[AIStrategyStudio] Failed to create conversation:', error);
@@ -312,13 +308,9 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
         setMessages(messagesResult.data.map(toMessage));
       }
 
-      // Load conversation details for token usage and rules
+      // Load conversation details for rules
       const convResult = await conversationService.getConversation(dbId);
       if (convResult.success && convResult.data) {
-        setTokenUsage({
-          current: convResult.data.token_usage,
-          limit: convResult.data.token_limit,
-        });
 
         // Parse strategy rules if stored
         if (convResult.data.strategy_rules) {
@@ -405,11 +397,6 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
           )
         );
 
-        // Update token usage
-        setTokenUsage({
-          current: userResult.data.conversation.token_usage,
-          limit: userResult.data.conversation.token_limit,
-        });
       }
 
       // Call vibing_chat API
@@ -468,11 +455,6 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
             };
             setMessages((prev) => [...prev, assistantMessage]);
 
-            // Update token usage
-            setTokenUsage({
-              current: assistantResult.data.conversation.token_usage,
-              limit: assistantResult.data.conversation.token_limit,
-            });
 
             // Update conversation message count
             setConversations((prev) =>
@@ -810,15 +792,6 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
 
         {/* Main Area - Chat Interface */}
         <main className="flex-1 flex flex-col overflow-hidden">
-          {/* Session Info Panel */}
-          <SessionInfoPanel
-            sessionId={activeConversationId || ''}
-            messageCount={messages.length}
-            tokenUsage={tokenUsage}
-            showCompressionWarning={tokenUsage.current / tokenUsage.limit > 0.85}
-            visible={messages.length > 0}
-          />
-
           {/* Messages Container */}
           <MessagesContainer
             messages={messages}

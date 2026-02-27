@@ -8,6 +8,7 @@
  */
 
 import React, { useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SliderInputGroup } from './SliderInputGroup';
 import { PortalDropdown } from './PortalDropdown';
 import { RECOVERY_MODES, RULE_DEFAULTS } from '../../services/risk-override-exit-service';
@@ -37,13 +38,14 @@ export const DrawdownLimitConfig: React.FC<DrawdownLimitConfigProps> = ({
   rule,
   onChange,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const actionRef = useRef<HTMLButtonElement>(null);
   const recoveryRef = useRef<HTMLButtonElement>(null);
   const [actionOpen, setActionOpen] = useState(false);
   const [recoveryOpen, setRecoveryOpen] = useState(false);
 
-  const actionLabel = DRAWDOWN_ACTIONS.find(a => a.value === rule.action)?.label || 'Halt Trading';
-  const recoveryLabel = RECOVERY_MODES.find(r => r.value === rule.recovery)?.label || 'Auto';
+  const actionLabel = DRAWDOWN_ACTIONS.find(a => a.value === rule.action)?.label || t('ui.drawdownLimitConfig.actionDefault');
+  const recoveryLabel = RECOVERY_MODES.find(r => r.value === rule.recovery)?.label || t('ui.drawdownLimitConfig.recoveryDefault');
 
   const handleFieldChange = useCallback((field: string, value: unknown) => {
     onChange({ ...rule, [field]: value });
@@ -53,8 +55,8 @@ export const DrawdownLimitConfig: React.FC<DrawdownLimitConfigProps> = ({
     <div className="space-y-4">
       {/* Max Drawdown */}
       <SliderInputGroup
-        label="Max Drawdown"
-        hint="from peak equity"
+        label={t('ui.drawdownLimitConfig.maxDrawdown')}
+        hint={t('ui.drawdownLimitConfig.fromPeakEquity')}
         value={rule.maxDrawdownPercent}
         onChange={(v) => handleFieldChange('maxDrawdownPercent', v)}
         min={-50}
@@ -62,13 +64,13 @@ export const DrawdownLimitConfig: React.FC<DrawdownLimitConfigProps> = ({
         step={0.5}
         suffix="%"
         decimals={1}
-        rangeText={`Default: ${RULE_DEFAULTS.drawdown_limit.maxDrawdownPercent}%`}
+        rangeText={t('ui.sliderInputGroup.rangeText', { min: -50, max: -1 })}
       />
 
       {/* Action Selector */}
       <div>
         <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-1.5">
-          Action
+          {t('ui.drawdownLimitConfig.action')}
         </label>
         <button
           ref={actionRef}
@@ -93,7 +95,7 @@ export const DrawdownLimitConfig: React.FC<DrawdownLimitConfigProps> = ({
       {/* Reduce Percent (conditional) */}
       {rule.action === 'reduce_all' && (
         <SliderInputGroup
-          label="Reduce By"
+          label={t('ui.drawdownLimitConfig.reduceBy')}
           value={rule.reducePercent ?? 50}
           onChange={(v) => handleFieldChange('reducePercent', v)}
           min={10}
@@ -106,7 +108,7 @@ export const DrawdownLimitConfig: React.FC<DrawdownLimitConfigProps> = ({
       {/* Recovery Selector */}
       <div>
         <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-1.5">
-          Recovery Mode
+          {t('ui.drawdownLimitConfig.recoveryMode')}
         </label>
         <button
           ref={recoveryRef}
@@ -131,8 +133,8 @@ export const DrawdownLimitConfig: React.FC<DrawdownLimitConfigProps> = ({
       {/* Recovery Bars (conditional) */}
       {rule.recovery === 'auto' && (
         <SliderInputGroup
-          label="Recovery After"
-          hint="bars of stability"
+          label={t('ui.drawdownLimitConfig.recoveryAfter')}
+          hint={t('ui.drawdownLimitConfig.barsOfStability')}
           value={rule.recoveryBars ?? 20}
           onChange={(v) => handleFieldChange('recoveryBars', v)}
           min={5}

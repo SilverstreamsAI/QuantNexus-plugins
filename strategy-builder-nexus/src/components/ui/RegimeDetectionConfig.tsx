@@ -8,6 +8,7 @@
  */
 
 import React, { useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SliderInputGroup } from './SliderInputGroup';
 import { PortalDropdown } from './PortalDropdown';
 import { RawIndicatorSelector } from './RawIndicatorSelector';
@@ -51,6 +52,7 @@ export const RegimeDetectionConfig: React.FC<RegimeDetectionConfigProps> = ({
   rule,
   onChange,
 }) => {
+  const { t } = useTranslation('strategy-builder');
   const conditionRef = useRef<HTMLButtonElement>(null);
   const actionRef = useRef<HTMLButtonElement>(null);
   const recoveryRef = useRef<HTMLButtonElement>(null);
@@ -58,9 +60,9 @@ export const RegimeDetectionConfig: React.FC<RegimeDetectionConfigProps> = ({
   const [actionOpen, setActionOpen] = useState(false);
   const [recoveryOpen, setRecoveryOpen] = useState(false);
 
-  const conditionLabel = REGIME_CONDITIONS.find(c => c.value === rule.condition)?.label || '>';
-  const actionLabel = REGIME_ACTIONS.find(a => a.value === rule.action)?.label || 'Reduce All';
-  const recoveryLabel = RECOVERY_MODES.find(r => r.value === rule.recovery)?.label || 'Auto';
+  const conditionLabel = REGIME_CONDITIONS.find(c => c.value === rule.condition)?.label || t('ui.regimeDetectionConfig.conditionDefault');
+  const actionLabel = REGIME_ACTIONS.find(a => a.value === rule.action)?.label || t('ui.regimeDetectionConfig.actionDefault');
+  const recoveryLabel = RECOVERY_MODES.find(r => r.value === rule.recovery)?.label || t('ui.regimeDetectionConfig.recoveryDefault');
 
   const handleFieldChange = useCallback((field: string, value: unknown) => {
     onChange({ ...rule, [field]: value });
@@ -96,17 +98,17 @@ export const RegimeDetectionConfig: React.FC<RegimeDetectionConfigProps> = ({
     <div className="space-y-4">
       {/* Indicator Selector */}
       <RawIndicatorSelector
-        title="REGIME INDICATOR"
+        title={t('ui.regimeDetectionConfig.title')}
         indicators={indicatorData as IndicatorDefinition[]}
         blocks={indicatorBlocks}
         onChange={handleIndicatorChange}
-        addButtonLabel="+ Select Indicator"
+        addButtonLabel={t('ui.regimeDetectionConfig.addButton')}
       />
 
       {/* Condition Selector */}
       <div>
         <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-1.5">
-          Condition
+          {t('ui.regimeDetectionConfig.condition')}
         </label>
         <button
           ref={conditionRef}
@@ -130,20 +132,20 @@ export const RegimeDetectionConfig: React.FC<RegimeDetectionConfigProps> = ({
 
       {/* Threshold */}
       <SliderInputGroup
-        label="Threshold"
+        label={t('ui.regimeDetectionConfig.threshold')}
         value={rule.threshold}
         onChange={(v) => handleFieldChange('threshold', v)}
         min={0}
         max={100}
         step={0.5}
         decimals={1}
-        rangeText={`Default: ${RULE_DEFAULTS.regime_detection.threshold}`}
+        rangeText={t('ui.sliderInputGroup.rangeText', { min: 0, max: 100 })}
       />
 
       {/* Action Selector */}
       <div>
         <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-1.5">
-          Action
+          {t('ui.regimeDetectionConfig.action')}
         </label>
         <button
           ref={actionRef}
@@ -168,7 +170,7 @@ export const RegimeDetectionConfig: React.FC<RegimeDetectionConfigProps> = ({
       {/* Reduce Percent (conditional) */}
       {rule.action === 'reduce_all' && (
         <SliderInputGroup
-          label="Reduce By"
+          label={t('ui.regimeDetectionConfig.reduceBy')}
           value={rule.reducePercent ?? RULE_DEFAULTS.regime_detection.reducePercent}
           onChange={(v) => handleFieldChange('reducePercent', v)}
           min={10}
@@ -181,7 +183,7 @@ export const RegimeDetectionConfig: React.FC<RegimeDetectionConfigProps> = ({
       {/* Recovery Selector */}
       <div>
         <label className="block text-[10px] font-bold uppercase tracking-wider text-color-terminal-text-secondary mb-1.5">
-          Recovery Mode
+          {t('ui.regimeDetectionConfig.recoveryMode')}
         </label>
         <button
           ref={recoveryRef}

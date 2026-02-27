@@ -9,6 +9,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FolderOpen, Save, Trash2, Plus } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -111,7 +112,13 @@ export const TemplateToolbar: React.FC<TemplateToolbarProps> = ({
   disabled = false,
   className,
 }) => {
-  const mergedLabels = { ...DEFAULT_LABELS, ...labels };
+  const { t } = useTranslation('strategy-builder');
+  const mergedLabels = {
+    loadTemplate: labels.loadTemplate || t('ui.templateToolbar.loadLabel'),
+    save: labels.save || t('ui.templateToolbar.saveLabel'),
+    clearAll: labels.clearAll || t('ui.templateToolbar.clearLabel'),
+    add: labels.add || t('ui.templateToolbar.addLabel'),
+  };
 
   const handleLoadTemplate = useCallback(() => {
     if (!disabled) onLoadTemplate();

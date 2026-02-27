@@ -24,10 +24,6 @@ export type { ConversationSearchProps } from './ConversationSearch';
 export { ConversationList } from './ConversationList';
 export type { ConversationListProps, Conversation } from './ConversationList';
 
-// component19E: SessionInfoPanel
-export { SessionInfoPanel } from './SessionInfoPanel';
-export type { SessionInfoPanelProps, TokenUsage } from './SessionInfoPanel';
-
 // component19F: MessagesContainer
 export { MessagesContainer } from './MessagesContainer';
 export type { MessagesContainerProps } from './MessagesContainer';

@@ -136,7 +136,10 @@
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
-    "close": "Close"
+    "close": "Close",
+    "load": "Load",
+    "add": "Add",
+    "clear": "Clear All"
   },
   "pages": {
     "common": {
@@ -316,9 +319,9 @@
       "welcomeTitle": "AI Strategy Studio",
       "welcomeSubtitle": "Describe your trading strategy in natural language. I'll help you build entry rules, exit conditions, and risk management.",
       "chatPlaceholder": "Describe your trading strategy...",
-      "chatPlaceholderDisabled": "Create a new chat to start...",
-      "newStrategyTitle": "New Strategy",
-      "newStrategyPreview": "Start describing your strategy...",
+      "chatPlaceholderDisabled": "Start describing your strategy...",
+      "newChatTitle": "New Strategy",
+      "newChatPreview": "Start describing your strategy...",
       "actions": {
         "generateCode": "Generate Code",
         "saveStrategy": "Save Strategy",
@@ -555,7 +558,8 @@
       "customizeParams": "Customize Parameters",
       "predictionConfig": "Prediction Configuration",
       "custom": "Custom",
-      "reset": "Reset"
+      "reset": "Reset",
+      "rangeText": "Range: {{min}} - {{max}}"
     },
     "watchlistConfig": {
       "title": "WATCHLIST CONFIGURATION",
@@ -563,7 +567,19 @@
       "symbolPlaceholder": "Enter symbol (e.g., BTCUSDT)",
       "add": "Add",
       "timeframe": "Timeframe",
-      "dataSource": "Data Source"
+      "dataSource": "Data Source",
+      "timeframes": {
+        "1M": "1M",
+        "5M": "5M",
+        "15M": "15M",
+        "1H": "1H",
+        "4H": "4H",
+        "1D": "1D"
+      },
+      "dataSources": {
+        "clickhouse": "CLICKHOUSE",
+        "local": "LOCAL"
+      }
     },
     "bespokeConfig": {
       "title": "BESPOKE PARAMETERS",
@@ -572,7 +588,8 @@
       "leverage": "Leverage",
       "tradingFrequency": "Trading Frequency",
       "typicalYield": "Typical Yield",
-      "maxDrawdown": "Max Drawdown"
+      "maxDrawdown": "Max Drawdown",
+      "rangeText": "Range: {{min}} - {{max}}"
     },
     "modeDetails": {
       "baselineTitle": "Baseline Mode",
@@ -623,6 +640,181 @@
       "bespokeRiskMetrics": "User defined",
       "bespokeDecisionInputs": "User defined",
       "bespokeModelRequirements": "Tailored to specific needs"
+    },
+    "directionalIndicatorSelector": {
+      "title": "ENTRY SIGNAL CONFIGURATION",
+      "addButton": "+ Add Entry Signal",
+      "long": "Long",
+      "short": "Short",
+      "selectIndicator": "Select Entry Indicator",
+      "selectDirectionFirst": "Please select Long or Short direction first",
+      "indicatorType": "Indicator Type",
+      "selectIndicatorPlaceholder": "Select an indicator...",
+      "parameters": "Parameters",
+      "strategyTemplate": "Strategy Template",
+      "templateType": "Template Type",
+      "selectTemplate": "Select template...",
+      "templateInfoType": "Type:",
+      "templateInfoDesc": "Description:",
+      "ruleLogic": "Rule Logic",
+      "whenIndicator": "When Indicator",
+      "selectOperator": "Select...",
+      "thresholdValue": "Threshold Value"
+    },
+    "circuitBreakerConfig": {
+      "scopeLabel": "Scope",
+      "actionLabel": "Action",
+      "triggerPnL": "Trigger PnL",
+      "lossThreshold": "loss threshold",
+      "closeAll": "Close All",
+      "reduceTo": "Reduce To %",
+      "reduceToLabel": "Reduce To",
+      "cooldown": "Cooldown",
+      "barsBeforeReentry": "bars before re-entry",
+      "scopeDefault": "Per Position",
+      "actionDefault": "Close All"
+    },
+    "drawdownLimitConfig": {
+      "actionReduceAll": "Reduce All Positions",
+      "actionCloseAll": "Close All",
+      "actionHalt": "Halt Trading",
+      "actionDefault": "Halt Trading",
+      "recoveryDefault": "Auto",
+      "maxDrawdown": "Max Drawdown",
+      "fromPeakEquity": "from peak equity",
+      "action": "Action",
+      "recoveryMode": "Recovery Mode",
+      "reduceBy": "Reduce By",
+      "recoveryAfter": "Recovery After",
+      "barsOfStability": "bars of stability"
+    },
+    "hardSafetyConfig": {
+      "title": "Hard Safety Net",
+      "badge": "Always Active",
+      "description": "Absolute emergency stop. Last resort protection that activates when all other rules fail.",
+      "descriptionNote": "This cannot be disabled.",
+      "maxLoss": "Max Loss",
+      "fromEntry": "from entry"
+    },
+    "indicatorGuardConfig": {
+      "title": "GUARD INDICATOR",
+      "addButton": "+ Select Indicator",
+      "conditionDefault": ">",
+      "appliesToDefault": "Both",
+      "actionDefault": "Close Position",
+      "condition": "Condition",
+      "threshold": "Threshold",
+      "appliesTo": "Applies To",
+      "action": "Action",
+      "closePosition": "Close Position",
+      "reduceToPercent": "Reduce To %",
+      "reduceTo": "Reduce To"
+    },
+    "indicatorTemplateDialog": {
+      "title": "Load Indicator Template",
+      "emptyMessage": "No templates available",
+      "searchPlaceholder": "Search templates...",
+      "cancel": "Cancel",
+      "load": "Load Template",
+      "indicatorsCount": "{{count}} indicators"
+    },
+    "presetButtonGroup": {
+      "test": "Test",
+      "aggressive": "Aggressive",
+      "balanced": "Balanced",
+      "conservative": "Conservative"
+    },
+    "rawIndicatorSelector": {
+      "title": "INDICATOR CONFIGURATION",
+      "addButton": "+ Add Indicator",
+      "newIndicator": "New Indicator",
+      "deleteTitle": "Delete indicator",
+      "indicatorType": "Indicator Type",
+      "selectIndicator": "Select an indicator...",
+      "dataField": "Data Field",
+      "parameters": "Parameters",
+      "fields": {
+        "close": "Close",
+        "open": "Open",
+        "high": "High",
+        "low": "Low",
+        "volume": "Volume"
+      }
+    },
+    "regimeDetectionConfig": {
+      "title": "REGIME INDICATOR",
+      "addButton": "+ Select Indicator",
+      "conditionDefault": ">",
+      "actionReduceAll": "Reduce All Positions",
+      "actionCloseAll": "Close All",
+      "actionHalt": "Halt New Entry",
+      "actionDefault": "Reduce All",
+      "recoveryDefault": "Auto",
+      "condition": "Condition",
+      "threshold": "Threshold",
+      "action": "Action",
+      "reduceBy": "Reduce By",
+      "recoveryMode": "Recovery Mode"
+    },
+    "riskOverrideRuleCard": {
+      "ruleCircuitBreaker": "Circuit Breaker",
+      "ruleTimeLimit": "Time Limit",
+      "ruleRegimeDetection": "Regime Detection",
+      "ruleDrawdownLimit": "Drawdown Limit",
+      "ruleIndicatorGuard": "Indicator Guard",
+      "scopePerPosition": "Per Position",
+      "scopePerGroup": "Per Group",
+      "scopePortfolio": "Portfolio",
+      "noDecay": "No decay",
+      "decay": "decay",
+      "na": "N/A",
+      "reduce": "Reduce",
+      "closeAll": "Close All",
+      "haltEntry": "Halt Entry",
+      "recovery": "recovery",
+      "haltTrading": "Halt Trading",
+      "closePosition": "Close Position",
+      "drawdownLabel": "DD <"
+    },
+    "strategyCard": {
+      "headerLabel": "Custom Strategy",
+      "deleteTitle": "Delete"
+    },
+    "templateToolbar": {
+      "loadLabel": "Load Template",
+      "saveLabel": "Save",
+      "clearLabel": "Clear All",
+      "addLabel": "+ Add Indicator"
+    },
+    "timeLimitConfig": {
+      "unitDefault": "Hours",
+      "decayDefault": "None",
+      "actionDefault": "Close All",
+      "maxHolding": "Max Holding",
+      "unit": "Unit",
+      "decaySchedule": "Decay Schedule",
+      "actionAtExpiry": "Action at Expiry",
+      "closeAll": "Close All",
+      "reduceToPercent": "Reduce To %",
+      "reduceTo": "Reduce To"
+    },
+    "validateInput": {
+      "errorDefault": "Please add at least one indicator",
+      "consolePrefix": "[ValidateInputBeforeGenerate]",
+      "hookConsolePrefix": "[useValidateBeforeGenerate]"
+    },
+    "sliderInputGroup": {
+      "rangeText": "Range: {{min}} - {{max}}"
+    },
+    "generateContentWrapper": {
+      "loadingMessage": "Generating..."
+    },
+    "ohlcvFields": {
+      "close": "Close",
+      "open": "Open",
+      "high": "High",
+      "low": "Low",
+      "volume": "Volume"
     }
   }
 }

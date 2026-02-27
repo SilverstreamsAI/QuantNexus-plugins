@@ -16,6 +16,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Play, Loader2, RotateCcw, ArrowLeft } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -31,9 +32,16 @@ export const GenerateActionBar: React.FC<GenerateActionBarProps> = ({
   isGenerating,
   hasResult,
   onGenerate,
-  generateLabel = 'Start Generate',
-  generatingLabel = 'Generating...',
+  generateLabel,
+  generatingLabel,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+  const genLabel = generateLabel || t('ui.generateActionBarLabels.startGenerate');
+  const geningLabel = generatingLabel || t('ui.generateActionBarLabels.generating');
+  const regenerateLabel = t('ui.generateActionBarLabels.regenerate');
+  const returnLabel = t('ui.generateActionBarLabels.return');
+  const regenerateConfirmMsg = t('ui.generateActionBarLabels.regenerateConfirmMsg');
+  const regenerateConfirmTitle = t('ui.generateActionBarLabels.regenerateConfirmTitle');
   // TICKET_300: Only navigate - breadcrumbs auto-derived from view state
   const handleReturn = useCallback(() => {
     globalThis.nexus?.window?.openView('strategy.hub');
@@ -41,13 +49,13 @@ export const GenerateActionBar: React.FC<GenerateActionBarProps> = ({
 
   const handleRegenerate = useCallback(async () => {
     const confirmed = await globalThis.nexus?.window?.showConfirm(
-      'This will overwrite the current strategy. Continue?',
-      { title: 'Regenerate Strategy' }
+      regenerateConfirmMsg,
+      { title: regenerateConfirmTitle }
     );
     if (confirmed) {
       onGenerate();
     }
-  }, [onGenerate]);
+  }, [onGenerate, regenerateConfirmMsg, regenerateConfirmTitle]);
 
   return (
     <div className="flex-shrink-0 border-t border-color-terminal-border bg-color-terminal-surface/50 p-4">
@@ -61,7 +69,7 @@ export const GenerateActionBar: React.FC<GenerateActionBarProps> = ({
           )}
         >
           <Loader2 className="w-4 h-4 animate-spin" />
-          {generatingLabel}
+          {geningLabel}
         </button>
       ) : hasResult ? (
         // Success state: dual layout - REGENERATE (left) + RETURN (right)
@@ -74,7 +82,7 @@ export const GenerateActionBar: React.FC<GenerateActionBarProps> = ({
             )}
           >
             <RotateCcw className="w-4 h-4" />
-            Regenerate
+            {regenerateLabel}
           </button>
           <button
             onClick={handleReturn}
@@ -84,7 +92,7 @@ export const GenerateActionBar: React.FC<GenerateActionBarProps> = ({
             )}
           >
             <ArrowLeft className="w-4 h-4" />
-            Return
+            {returnLabel}
           </button>
         </div>
       ) : (
@@ -97,7 +105,7 @@ export const GenerateActionBar: React.FC<GenerateActionBarProps> = ({
           )}
         >
           <Play className="w-4 h-4" />
-          {generateLabel}
+          {genLabel}
         </button>
       )}
     </div>

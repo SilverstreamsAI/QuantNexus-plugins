@@ -62,6 +62,8 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
   onSelect,
   onDelete,
 }) => {
+  const { t } = useTranslation('strategy-builder');
+
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
