@@ -3,10 +3,12 @@
  *
  * PLUGIN_TICKET_006: Extracted from QuantLabPage.tsx
  * PLUGIN_TICKET_008: Migrated from host to plugin
+ * TICKET_422_6: Internationalized with i18n translations
  * Hub landing page with header, feature cards, and status display.
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { FlaskConical, Layers, Cpu } from 'lucide-react';
 import { FeatureCard } from '../components/FeatureCard';
 
@@ -16,6 +18,8 @@ interface QuantLabHubProps {
 }
 
 export const QuantLabHub: React.FC<QuantLabHubProps> = ({ onNavigateToFactory, onNavigateToEngineStore }) => {
+  const { t } = useTranslation('quant-lab');
+
   return (
     <div className="flex-1 overflow-auto p-6">
       <div className="max-w-4xl mx-auto">
@@ -26,10 +30,10 @@ export const QuantLabHub: React.FC<QuantLabHubProps> = ({ onNavigateToFactory, o
           </div>
           <div>
             <h1 className="text-2xl font-bold text-color-terminal-text-primary">
-              QUANT LAB
+              {t('hub.title')}
             </h1>
             <p className="text-color-terminal-text-secondary">
-              Alpha Factory - Multi-strategy signal combination
+              {t('hub.subtitle')}
             </p>
           </div>
         </div>
@@ -38,14 +42,14 @@ export const QuantLabHub: React.FC<QuantLabHubProps> = ({ onNavigateToFactory, o
         <div className="grid grid-cols-2 gap-4 mb-8">
           <FeatureCard
             icon={Layers}
-            title="Signal Factory"
-            description="Create and manage multiple signal sources for alpha generation"
+            title={t('hub.signalFactory.title')}
+            description={t('hub.signalFactory.description')}
             onClick={onNavigateToFactory}
           />
           <FeatureCard
             icon={Cpu}
-            title="Engine Store"
-            description="Install and manage factor evaluation engines"
+            title={t('hub.engineStore.title')}
+            description={t('hub.engineStore.description')}
             onClick={onNavigateToEngineStore}
           />
         </div>
@@ -55,7 +59,7 @@ export const QuantLabHub: React.FC<QuantLabHubProps> = ({ onNavigateToFactory, o
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-green-500" />
             <span className="text-sm text-color-terminal-text-secondary">
-              Plugin ready. Click Combinator to configure signal combination.
+              {t('hub.status.ready')}
             </span>
           </div>
         </div>

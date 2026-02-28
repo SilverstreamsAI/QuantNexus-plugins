@@ -2,11 +2,13 @@
  * ConfigSidebar Component
  *
  * PLUGIN_TICKET_012: Left sidebar for browsing/managing Alpha Factory configurations.
+ * TICKET_422_6: Internationalized with i18n translations
  * Composes NewConfigButton, ConfigSearch, and ConfigList.
  * Follows ConversationSidebar (TICKET_077) pattern.
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ConfigSummary } from '../types';
 import { NewConfigButton } from './NewConfigButton';
 import { ConfigSearch } from './ConfigSearch';
@@ -34,6 +36,7 @@ export const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
   className = '',
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { t } = useTranslation('quant-lab');
 
   const handleSearchChange = useCallback((query: string) => {
     setSearchQuery(query);
@@ -80,8 +83,8 @@ export const ConfigSidebar: React.FC<ConfigSidebarProps> = ({
         onDelete={onDeleteConfig}
         emptyText={
           searchQuery
-            ? 'No configs match your search'
-            : 'No saved configurations'
+            ? t('configSidebar.noSearchResults')
+            : t('configSidebar.noConfigs')
         }
       />
 

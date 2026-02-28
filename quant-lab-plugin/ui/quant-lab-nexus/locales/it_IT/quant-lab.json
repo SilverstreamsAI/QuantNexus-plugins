@@ -1,0 +1,204 @@
+{
+  "hub": {
+    "title": "QUANT LAB",
+    "subtitle": "Alpha Factory - Combinazione di segnali multi-strategia",
+    "signalFactory": {
+      "title": "Fabbrica di Segnali",
+      "description": "Creare e gestire più fonti di segnali per la generazione di alpha"
+    },
+    "engineStore": {
+      "title": "Negozio di Motori",
+      "description": "Installare e gestire motori di valutazione dei fattori"
+    },
+    "status": {
+      "ready": "Plugin pronto. Fare clic su Combinatore per configurare la combinazione di segnali."
+    }
+  },
+  "signalFactory": {
+    "title": "FABBRICA DI SEGNALI (Ingresso)",
+    "addSignal": "Aggiungi Segnale",
+    "combinator": "Combinatore:",
+    "lookback": "Lookback:",
+    "days": "giorni"
+  },
+  "factorFactory": {
+    "title": "FABBRICA DI FATTORI (Punteggi Alpha)",
+    "addFactor": "Aggiungi Fattore",
+    "combinator": "Combinatore:",
+    "lookback": "Lookback:",
+    "days": "giorni"
+  },
+  "exitFactory": {
+    "title": "FABBRICA DI USCITA (Sovrascrittura Rischio)",
+    "combinator": "Combinatore:",
+    "hardSafety": "Limiti di Sicurezza Rigidi",
+    "alwaysOn": "SEMPRE ATTIVO",
+    "rules": {
+      "circuitBreaker": "Interruttore di Circuito",
+      "timeLimit": "Limite di Tempo",
+      "regimeDetection": "Rilevamento Regime",
+      "drawdownLimit": "Limite di Drawdown",
+      "correlationCap": "Tetto di Correlazione"
+    },
+    "params": {
+      "pnl": "PnL <",
+      "cooldown": "Raffreddamento",
+      "bars": "barre",
+      "action": "Azione",
+      "maxHolding": "Max. Mantenimento",
+      "hours": "ore",
+      "period": "Periodo",
+      "threshold": ">",
+      "maxDD": "Max. DD",
+      "maxCorr": "Max. Corr",
+      "lookback": "Lookback",
+      "maxLoss": "Max. Perdita",
+      "reduceTo": "Riduci al %"
+    },
+    "actions": {
+      "closeAll": "Chiudi Tutto",
+      "reduceTo": "Riduci al %",
+      "reduceAll": "Riduci Tutto",
+      "haltTrading": "Ferma Trading",
+      "haltNewEntry": "Ferma Nuovo Ingresso",
+      "skipEntry": "Salta Ingresso",
+      "reduceHalf": "Riduci del 50%"
+    },
+    "indicators": {
+      "atr": "ATR",
+      "vix": "VIX",
+      "realizedVol": "Volatilità Realizzata"
+    },
+    "timeUnits": {
+      "hours": "Ore",
+      "bars": "Barre"
+    }
+  },
+  "dataConfig": {
+    "title": "Configurazione Dati",
+    "dataSource": "Fonte Dati",
+    "symbol": "Simbolo",
+    "searchSymbol": "Cerca simbolo...",
+    "startDate": "Data Inizio",
+    "endDate": "Data Fine",
+    "initialCapital": "Capitale Iniziale",
+    "orderSize": "Dimensione Ordine",
+    "unit": "Unità",
+    "units": {
+      "percent": "Percentuale",
+      "cash": "Contanti",
+      "shares": "Azioni"
+    },
+    "errors": {
+      "loginRequired": "Accedi per cercare simboli",
+      "serviceUnavailable": "Servizio non disponibile"
+    }
+  },
+  "actionBar": {
+    "validate": "Convalida",
+    "saveAs": "Salva Con Nome",
+    "runBacktest": "Esegui Backtest",
+    "running": "In esecuzione..."
+  },
+  "resultSection": {
+    "backtestFailed": "Backtest fallito",
+    "noResults": "Nessun risultato disponibile"
+  },
+  "signalSummary": {
+    "signals": "Segnali:",
+    "exit": "Uscita:",
+    "noneEnabled": "Nessuno attivato",
+    "lookback": "Lookback"
+  },
+  "metrics": {
+    "totalPnl": "PnL Totale",
+    "return": "Rendimento",
+    "sharpe": "Sharpe",
+    "maxDD": "Max. DD",
+    "winRate": "Tasso di Vittoria",
+    "trades": "Operazioni"
+  },
+  "configSidebar": {
+    "newConfig": "Nuova Configurazione",
+    "searchConfigs": "Cerca configurazioni...",
+    "noConfigs": "Nessuna configurazione salvata",
+    "noSearchResults": "Nessuna configurazione corrisponde alla tua ricerca",
+    "createNew": "Crea una nuova configurazione per iniziare",
+    "signals": "segnale",
+    "signalsPlural": "segnali",
+    "rules": "regola",
+    "rulesPlural": "regole",
+    "active": "attiva",
+    "delete": "Elimina configurazione"
+  },
+  "signalChip": {
+    "analysis": "Analisi",
+    "entry": "Ingresso",
+    "exit": "Uscita",
+    "condition": "Condizione",
+    "trigger": "Innesco",
+    "action": "Azione"
+  },
+  "factorChip": {
+    "ic": "IC",
+    "icir": "ICIR",
+    "sharpe": "Sharpe"
+  },
+  "timeframeDownload": {
+    "title": "Download Dati"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "Ponderazione Uguale",
+      "equalDesc": "Media semplice di tutti i segnali",
+      "sharpeWeighted": "Ponderato per Sharpe",
+      "sharpeWeightedDesc": "Ponderazione per rapporto di Sharpe storico",
+      "correlationAdjusted": "Aggiustato per Correlazione",
+      "correlationAdjustedDesc": "Penalizza segnali altamente correlati",
+      "regimeBased": "Basato su Regime",
+      "regimeBasedDesc": "Ponderazioni dipendenti dal regime"
+    },
+    "factor": {
+      "equalWeight": "Ponderazione Uguale",
+      "equalWeightDesc": "Media semplice di tutti i punteggi dei fattori",
+      "icWeighted": "Ponderato per IC",
+      "icWeightedDesc": "Ponderazione per Coefficiente di Informazione storico",
+      "regression": "Regressione Statistica",
+      "regressionDesc": "Regressione OLS sui punteggi dei fattori",
+      "pca": "Composto PCA",
+      "pcaDesc": "Punteggio composito di Analisi delle Componenti Principali"
+    },
+    "exit": {
+      "any": "Qualsiasi",
+      "anyDesc": "Qualsiasi regola attiva l'uscita (conservativo)",
+      "all": "Tutte",
+      "allDesc": "Tutte le regole devono attivarsi (aggressivo)",
+      "majority": "Maggioranza",
+      "majorityDesc": "Più del 50% delle regole si attiva",
+      "priority": "Priorità",
+      "priorityDesc": "Verifica in ordine di priorità, la prima che si attiva vince"
+    }
+  },
+  "factorCategories": {
+    "momentum": "Momentum",
+    "meanReversion": "Reversione alla Media",
+    "volatility": "Volatilità",
+    "value": "Valore",
+    "volume": "Volume",
+    "technical": "Tecnico",
+    "pattern": "Pattern",
+    "cycle": "Ciclo",
+    "statistic": "Statistica"
+  },
+  "translationStatus": {
+    "ok": "Valutabili",
+    "structured": "Pipeline",
+    "unsupported": "Non supportato"
+  },
+  "common": {
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "save": "Salva",
+    "close": "Chiudi"
+  }
+}

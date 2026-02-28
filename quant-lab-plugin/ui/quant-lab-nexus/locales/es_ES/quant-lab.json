@@ -1,0 +1,204 @@
+{
+  "hub": {
+    "title": "QUANT LAB",
+    "subtitle": "Alpha Factory - Combinación de señales multi-estrategia",
+    "signalFactory": {
+      "title": "Fábrica de Señales",
+      "description": "Crear y gestionar múltiples fuentes de señales para generación de alpha"
+    },
+    "engineStore": {
+      "title": "Tienda de Motores",
+      "description": "Instalar y gestionar motores de evaluación de factores"
+    },
+    "status": {
+      "ready": "Plugin listo. Haga clic en Combinador para configurar la combinación de señales."
+    }
+  },
+  "signalFactory": {
+    "title": "FÁBRICA DE SEÑALES (Entrada)",
+    "addSignal": "Añadir Señal",
+    "combinator": "Combinador:",
+    "lookback": "Retroceso:",
+    "days": "días"
+  },
+  "factorFactory": {
+    "title": "FÁBRICA DE FACTORES (Puntuaciones Alpha)",
+    "addFactor": "Añadir Factor",
+    "combinator": "Combinador:",
+    "lookback": "Retroceso:",
+    "days": "días"
+  },
+  "exitFactory": {
+    "title": "FÁBRICA DE SALIDA (Anulación de Riesgo)",
+    "combinator": "Combinador:",
+    "hardSafety": "Límites de Seguridad Duros",
+    "alwaysOn": "SIEMPRE ACTIVO",
+    "rules": {
+      "circuitBreaker": "Interruptor de Circuito",
+      "timeLimit": "Límite de Tiempo",
+      "regimeDetection": "Detección de Régimen",
+      "drawdownLimit": "Límite de Drawdown",
+      "correlationCap": "Límite de Correlación"
+    },
+    "params": {
+      "pnl": "PnL <",
+      "cooldown": "Enfriamiento",
+      "bars": "barras",
+      "action": "Acción",
+      "maxHolding": "Máx. Tenencia",
+      "hours": "horas",
+      "period": "Período",
+      "threshold": ">",
+      "maxDD": "Máx. DD",
+      "maxCorr": "Máx. Corr",
+      "lookback": "Retroceso",
+      "maxLoss": "Máx. Pérdida",
+      "reduceTo": "Reducir a %"
+    },
+    "actions": {
+      "closeAll": "Cerrar Todo",
+      "reduceTo": "Reducir a %",
+      "reduceAll": "Reducir Todo",
+      "haltTrading": "Detener Trading",
+      "haltNewEntry": "Detener Nueva Entrada",
+      "skipEntry": "Omitir Entrada",
+      "reduceHalf": "Reducir 50%"
+    },
+    "indicators": {
+      "atr": "ATR",
+      "vix": "VIX",
+      "realizedVol": "Volatilidad Realizada"
+    },
+    "timeUnits": {
+      "hours": "Horas",
+      "bars": "Barras"
+    }
+  },
+  "dataConfig": {
+    "title": "Configuración de Datos",
+    "dataSource": "Fuente de Datos",
+    "symbol": "Símbolo",
+    "searchSymbol": "Buscar símbolo...",
+    "startDate": "Fecha de Inicio",
+    "endDate": "Fecha de Fin",
+    "initialCapital": "Capital Inicial",
+    "orderSize": "Tamaño de Orden",
+    "unit": "Unidad",
+    "units": {
+      "percent": "Porcentaje",
+      "cash": "Efectivo",
+      "shares": "Acciones"
+    },
+    "errors": {
+      "loginRequired": "Inicie sesión para buscar símbolos",
+      "serviceUnavailable": "Servicio no disponible"
+    }
+  },
+  "actionBar": {
+    "validate": "Validar",
+    "saveAs": "Guardar Como",
+    "runBacktest": "Ejecutar Backtest",
+    "running": "Ejecutando..."
+  },
+  "resultSection": {
+    "backtestFailed": "Backtest fallido",
+    "noResults": "No hay resultados disponibles"
+  },
+  "signalSummary": {
+    "signals": "Señales:",
+    "exit": "Salida:",
+    "noneEnabled": "Ninguna activada",
+    "lookback": "Retroceso"
+  },
+  "metrics": {
+    "totalPnl": "PnL Total",
+    "return": "Retorno",
+    "sharpe": "Sharpe",
+    "maxDD": "Máx. DD",
+    "winRate": "Tasa de Acierto",
+    "trades": "Operaciones"
+  },
+  "configSidebar": {
+    "newConfig": "Nueva Configuración",
+    "searchConfigs": "Buscar configuraciones...",
+    "noConfigs": "No hay configuraciones guardadas",
+    "noSearchResults": "Ninguna configuración coincide con su búsqueda",
+    "createNew": "Cree una nueva configuración para comenzar",
+    "signals": "señal",
+    "signalsPlural": "señales",
+    "rules": "regla",
+    "rulesPlural": "reglas",
+    "active": "activa",
+    "delete": "Eliminar configuración"
+  },
+  "signalChip": {
+    "analysis": "Análisis",
+    "entry": "Entrada",
+    "exit": "Salida",
+    "condition": "Condición",
+    "trigger": "Disparador",
+    "action": "Acción"
+  },
+  "factorChip": {
+    "ic": "IC",
+    "icir": "ICIR",
+    "sharpe": "Sharpe"
+  },
+  "timeframeDownload": {
+    "title": "Descargando Datos"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "Peso Igual",
+      "equalDesc": "Promedio simple de todas las señales",
+      "sharpeWeighted": "Ponderado por Sharpe",
+      "sharpeWeightedDesc": "Ponderar por ratio de Sharpe histórico",
+      "correlationAdjusted": "Ajustado por Correlación",
+      "correlationAdjustedDesc": "Penalizar señales altamente correlacionadas",
+      "regimeBased": "Basado en Régimen",
+      "regimeBasedDesc": "Pesos dependientes del régimen"
+    },
+    "factor": {
+      "equalWeight": "Peso Igual",
+      "equalWeightDesc": "Promedio simple de todas las puntuaciones de factores",
+      "icWeighted": "Ponderado por IC",
+      "icWeightedDesc": "Ponderar por Coeficiente de Información histórico",
+      "regression": "Regresión Estadística",
+      "regressionDesc": "Regresión MCO en puntuaciones de factores",
+      "pca": "Compuesto PCA",
+      "pcaDesc": "Puntuación compuesta de Análisis de Componentes Principales"
+    },
+    "exit": {
+      "any": "Cualquiera",
+      "anyDesc": "Cualquier regla activa la salida (conservador)",
+      "all": "Todas",
+      "allDesc": "Todas las reglas deben activarse (agresivo)",
+      "majority": "Mayoría",
+      "majorityDesc": "Más del 50% de las reglas activan",
+      "priority": "Prioridad",
+      "priorityDesc": "Verificar en orden de prioridad, la primera que activa gana"
+    }
+  },
+  "factorCategories": {
+    "momentum": "Momentum",
+    "meanReversion": "Reversión a la Media",
+    "volatility": "Volatilidad",
+    "value": "Valor",
+    "volume": "Volumen",
+    "technical": "Técnico",
+    "pattern": "Patrón",
+    "cycle": "Ciclo",
+    "statistic": "Estadística"
+  },
+  "translationStatus": {
+    "ok": "Evaluables",
+    "structured": "Pipeline",
+    "unsupported": "No soportado"
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "save": "Guardar",
+    "close": "Cerrar"
+  }
+}

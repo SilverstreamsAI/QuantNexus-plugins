@@ -2,10 +2,12 @@
  * ExitFactorySection Component
  *
  * TICKET_275: Rewritten from card grid to built-in risk override panel.
+ * TICKET_422_6: Internationalized with i18n translations
  * 5x RiskRuleRow (toggle + inline parameters) + Hard Safety + Combinator.
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ShieldAlert,
   Zap,
@@ -110,6 +112,8 @@ export const ExitFactorySection: React.FC<ExitFactorySectionProps> = ({
   onExitRulesChange,
   onMethodChange,
 }) => {
+  const { t } = useTranslation('quant-lab');
+
   // Helper: shallow-merge a single rule key
   const updateRule = useCallback(
     <K extends keyof ExitRules>(key: K, patch: Partial<ExitRules[K]>) => {
@@ -125,7 +129,7 @@ export const ExitFactorySection: React.FC<ExitFactorySectionProps> = ({
     <section className="p-6 rounded-lg border border-color-terminal-border bg-color-terminal-surface/30">
       <h2 className="text-lg font-semibold text-color-terminal-text-primary mb-4 flex items-center gap-2">
         <ShieldAlert className="w-5 h-5 text-color-terminal-accent-teal" />
-        EXIT FACTORY (Risk Override)
+        {t('exitFactory.title')}
       </h2>
 
       <div className="space-y-3 mb-4">
@@ -292,14 +296,14 @@ export const ExitFactorySection: React.FC<ExitFactorySectionProps> = ({
 
       {/* Combinator Config */}
       <div className="flex items-center gap-4 p-3 rounded-lg bg-color-terminal-surface/10 border border-color-terminal-border/50">
-        <label className="text-sm text-color-terminal-text-secondary">Combinator:</label>
+        <label className="text-sm text-color-terminal-text-secondary">{t('exitFactory.combinator')}</label>
         <select
           value={exitMethod}
           onChange={e => onMethodChange(e.target.value)}
           className="px-3 py-2 rounded-lg bg-color-terminal-surface border border-color-terminal-border text-color-terminal-text-primary text-sm focus:outline-none focus:border-color-terminal-accent-primary"
         >
           {EXIT_COMBINATOR_METHODS.map(m => (
-            <option key={m.id} value={m.id}>{m.name}</option>
+            <option key={m.id} value={m.id}>{t(`combinatorMethods.exit.${m.id}`)}</option>
           ))}
         </select>
       </div>

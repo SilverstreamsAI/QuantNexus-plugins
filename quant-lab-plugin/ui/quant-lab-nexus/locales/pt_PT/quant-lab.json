@@ -1,0 +1,204 @@
+{
+  "hub": {
+    "title": "QUANT LAB",
+    "subtitle": "Alpha Factory - Combinação de sinais multi-estratégia",
+    "signalFactory": {
+      "title": "Fábrica de Sinais",
+      "description": "Criar e gerenciar múltiplas fontes de sinais para geração de alpha"
+    },
+    "engineStore": {
+      "title": "Loja de Motores",
+      "description": "Instalar e gerenciar motores de avaliação de fatores"
+    },
+    "status": {
+      "ready": "Plugin pronto. Clique em Combinador para configurar a combinação de sinais."
+    }
+  },
+  "signalFactory": {
+    "title": "FÁBRICA DE SINAIS (Entrada)",
+    "addSignal": "Adicionar Sinal",
+    "combinator": "Combinador:",
+    "lookback": "Lookback:",
+    "days": "dias"
+  },
+  "factorFactory": {
+    "title": "FÁBRICA DE FATORES (Pontuações Alpha)",
+    "addFactor": "Adicionar Fator",
+    "combinator": "Combinador:",
+    "lookback": "Lookback:",
+    "days": "dias"
+  },
+  "exitFactory": {
+    "title": "FÁBRICA DE SAÍDA (Substituição de Risco)",
+    "combinator": "Combinador:",
+    "hardSafety": "Limites de Segurança Rígidos",
+    "alwaysOn": "SEMPRE ATIVO",
+    "rules": {
+      "circuitBreaker": "Disjuntor",
+      "timeLimit": "Limite de Tempo",
+      "regimeDetection": "Detecção de Regime",
+      "drawdownLimit": "Limite de Drawdown",
+      "correlationCap": "Teto de Correlação"
+    },
+    "params": {
+      "pnl": "PnL <",
+      "cooldown": "Resfriamento",
+      "bars": "barras",
+      "action": "Ação",
+      "maxHolding": "Máx. Manutenção",
+      "hours": "horas",
+      "period": "Período",
+      "threshold": ">",
+      "maxDD": "Máx. DD",
+      "maxCorr": "Máx. Corr",
+      "lookback": "Lookback",
+      "maxLoss": "Máx. Perda",
+      "reduceTo": "Reduzir para %"
+    },
+    "actions": {
+      "closeAll": "Fechar Tudo",
+      "reduceTo": "Reduzir para %",
+      "reduceAll": "Reduzir Tudo",
+      "haltTrading": "Parar Negociação",
+      "haltNewEntry": "Parar Nova Entrada",
+      "skipEntry": "Pular Entrada",
+      "reduceHalf": "Reduzir 50%"
+    },
+    "indicators": {
+      "atr": "ATR",
+      "vix": "VIX",
+      "realizedVol": "Volatilidade Realizada"
+    },
+    "timeUnits": {
+      "hours": "Horas",
+      "bars": "Barras"
+    }
+  },
+  "dataConfig": {
+    "title": "Configuração de Dados",
+    "dataSource": "Fonte de Dados",
+    "symbol": "Símbolo",
+    "searchSymbol": "Pesquisar símbolo...",
+    "startDate": "Data de Início",
+    "endDate": "Data de Fim",
+    "initialCapital": "Capital Inicial",
+    "orderSize": "Tamanho da Ordem",
+    "unit": "Unidade",
+    "units": {
+      "percent": "Porcentagem",
+      "cash": "Dinheiro",
+      "shares": "Ações"
+    },
+    "errors": {
+      "loginRequired": "Faça login para pesquisar símbolos",
+      "serviceUnavailable": "Serviço indisponível"
+    }
+  },
+  "actionBar": {
+    "validate": "Validar",
+    "saveAs": "Salvar Como",
+    "runBacktest": "Executar Backtest",
+    "running": "Executando..."
+  },
+  "resultSection": {
+    "backtestFailed": "Falha no backtest",
+    "noResults": "Nenhum resultado disponível"
+  },
+  "signalSummary": {
+    "signals": "Sinais:",
+    "exit": "Saída:",
+    "noneEnabled": "Nenhum ativado",
+    "lookback": "Lookback"
+  },
+  "metrics": {
+    "totalPnl": "PnL Total",
+    "return": "Retorno",
+    "sharpe": "Sharpe",
+    "maxDD": "Máx. DD",
+    "winRate": "Taxa de Acerto",
+    "trades": "Negócios"
+  },
+  "configSidebar": {
+    "newConfig": "Nova Configuração",
+    "searchConfigs": "Pesquisar configurações...",
+    "noConfigs": "Nenhuma configuração salva",
+    "noSearchResults": "Nenhuma configuração corresponde à sua pesquisa",
+    "createNew": "Crie uma nova configuração para começar",
+    "signals": "sinal",
+    "signalsPlural": "sinais",
+    "rules": "regra",
+    "rulesPlural": "regras",
+    "active": "ativa",
+    "delete": "Excluir configuração"
+  },
+  "signalChip": {
+    "analysis": "Análise",
+    "entry": "Entrada",
+    "exit": "Saída",
+    "condition": "Condição",
+    "trigger": "Gatilho",
+    "action": "Ação"
+  },
+  "factorChip": {
+    "ic": "IC",
+    "icir": "ICIR",
+    "sharpe": "Sharpe"
+  },
+  "timeframeDownload": {
+    "title": "Baixando Dados"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "Peso Igual",
+      "equalDesc": "Média simples de todos os sinais",
+      "sharpeWeighted": "Ponderado por Sharpe",
+      "sharpeWeightedDesc": "Ponderar pelo ratio de Sharpe histórico",
+      "correlationAdjusted": "Ajustado por Correlação",
+      "correlationAdjustedDesc": "Penalizar sinais altamente correlacionados",
+      "regimeBased": "Baseado em Regime",
+      "regimeBasedDesc": "Pesos dependentes do regime"
+    },
+    "factor": {
+      "equalWeight": "Peso Igual",
+      "equalWeightDesc": "Média simples de todas as pontuações de fatores",
+      "icWeighted": "Ponderado por IC",
+      "icWeightedDesc": "Ponderar pelo Coeficiente de Informação histórico",
+      "regression": "Regressão Estatística",
+      "regressionDesc": "Regressão OLS nas pontuações de fatores",
+      "pca": "Composto PCA",
+      "pcaDesc": "Pontuação composta de Análise de Componentes Principais"
+    },
+    "exit": {
+      "any": "Qualquer",
+      "anyDesc": "Qualquer regra aciona saída (conservador)",
+      "all": "Todas",
+      "allDesc": "Todas as regras devem acionar (agressivo)",
+      "majority": "Maioria",
+      "majorityDesc": "Mais de 50% das regras acionam",
+      "priority": "Prioridade",
+      "priorityDesc": "Verificar em ordem de prioridade, primeira que aciona ganha"
+    }
+  },
+  "factorCategories": {
+    "momentum": "Momentum",
+    "meanReversion": "Reversão à Média",
+    "volatility": "Volatilidade",
+    "value": "Valor",
+    "volume": "Volume",
+    "technical": "Técnico",
+    "pattern": "Padrão",
+    "cycle": "Ciclo",
+    "statistic": "Estatística"
+  },
+  "translationStatus": {
+    "ok": "Avaliáveis",
+    "structured": "Pipeline",
+    "unsupported": "Não suportado"
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "save": "Salvar",
+    "close": "Fechar"
+  }
+}

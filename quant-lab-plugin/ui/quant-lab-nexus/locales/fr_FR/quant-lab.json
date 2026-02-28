@@ -1,0 +1,204 @@
+{
+  "hub": {
+    "title": "QUANT LAB",
+    "subtitle": "Alpha Factory - Combinaison de signaux multi-stratégie",
+    "signalFactory": {
+      "title": "Usine de Signaux",
+      "description": "Créer et gérer plusieurs sources de signaux pour la génération d'alpha"
+    },
+    "engineStore": {
+      "title": "Magasin de Moteurs",
+      "description": "Installer et gérer les moteurs d'évaluation de facteurs"
+    },
+    "status": {
+      "ready": "Plugin prêt. Cliquez sur Combinateur pour configurer la combinaison de signaux."
+    }
+  },
+  "signalFactory": {
+    "title": "USINE DE SIGNAUX (Entrée)",
+    "addSignal": "Ajouter un Signal",
+    "combinator": "Combinateur:",
+    "lookback": "Regard en arrière:",
+    "days": "jours"
+  },
+  "factorFactory": {
+    "title": "USINE DE FACTEURS (Scores Alpha)",
+    "addFactor": "Ajouter un Facteur",
+    "combinator": "Combinateur:",
+    "lookback": "Regard en arrière:",
+    "days": "jours"
+  },
+  "exitFactory": {
+    "title": "USINE DE SORTIE (Dépassement de Risque)",
+    "combinator": "Combinateur:",
+    "hardSafety": "Limites de Sécurité Dures",
+    "alwaysOn": "TOUJOURS ACTIF",
+    "rules": {
+      "circuitBreaker": "Disjoncteur",
+      "timeLimit": "Limite de Temps",
+      "regimeDetection": "Détection de Régime",
+      "drawdownLimit": "Limite de Drawdown",
+      "correlationCap": "Plafond de Corrélation"
+    },
+    "params": {
+      "pnl": "PnL <",
+      "cooldown": "Refroidissement",
+      "bars": "barres",
+      "action": "Action",
+      "maxHolding": "Max. Maintien",
+      "hours": "heures",
+      "period": "Période",
+      "threshold": ">",
+      "maxDD": "Max. DD",
+      "maxCorr": "Max. Corr",
+      "lookback": "Regard en arrière",
+      "maxLoss": "Max. Perte",
+      "reduceTo": "Réduire à %"
+    },
+    "actions": {
+      "closeAll": "Tout Fermer",
+      "reduceTo": "Réduire à %",
+      "reduceAll": "Tout Réduire",
+      "haltTrading": "Arrêter le Trading",
+      "haltNewEntry": "Arrêter Nouvelle Entrée",
+      "skipEntry": "Ignorer l'Entrée",
+      "reduceHalf": "Réduire de 50%"
+    },
+    "indicators": {
+      "atr": "ATR",
+      "vix": "VIX",
+      "realizedVol": "Volatilité Réalisée"
+    },
+    "timeUnits": {
+      "hours": "Heures",
+      "bars": "Barres"
+    }
+  },
+  "dataConfig": {
+    "title": "Configuration des Données",
+    "dataSource": "Source de Données",
+    "symbol": "Symbole",
+    "searchSymbol": "Rechercher un symbole...",
+    "startDate": "Date de Début",
+    "endDate": "Date de Fin",
+    "initialCapital": "Capital Initial",
+    "orderSize": "Taille d'Ordre",
+    "unit": "Unité",
+    "units": {
+      "percent": "Pourcentage",
+      "cash": "Espèces",
+      "shares": "Actions"
+    },
+    "errors": {
+      "loginRequired": "Veuillez vous connecter pour rechercher des symboles",
+      "serviceUnavailable": "Service indisponible"
+    }
+  },
+  "actionBar": {
+    "validate": "Valider",
+    "saveAs": "Enregistrer Sous",
+    "runBacktest": "Exécuter Backtest",
+    "running": "En cours..."
+  },
+  "resultSection": {
+    "backtestFailed": "Échec du backtest",
+    "noResults": "Aucun résultat disponible"
+  },
+  "signalSummary": {
+    "signals": "Signaux:",
+    "exit": "Sortie:",
+    "noneEnabled": "Aucun activé",
+    "lookback": "Regard en arrière"
+  },
+  "metrics": {
+    "totalPnl": "PnL Total",
+    "return": "Rendement",
+    "sharpe": "Sharpe",
+    "maxDD": "Max. DD",
+    "winRate": "Taux de Réussite",
+    "trades": "Transactions"
+  },
+  "configSidebar": {
+    "newConfig": "Nouvelle Configuration",
+    "searchConfigs": "Rechercher des configurations...",
+    "noConfigs": "Aucune configuration enregistrée",
+    "noSearchResults": "Aucune configuration ne correspond à votre recherche",
+    "createNew": "Créez une nouvelle configuration pour commencer",
+    "signals": "signal",
+    "signalsPlural": "signaux",
+    "rules": "règle",
+    "rulesPlural": "règles",
+    "active": "active",
+    "delete": "Supprimer la configuration"
+  },
+  "signalChip": {
+    "analysis": "Analyse",
+    "entry": "Entrée",
+    "exit": "Sortie",
+    "condition": "Condition",
+    "trigger": "Déclencheur",
+    "action": "Action"
+  },
+  "factorChip": {
+    "ic": "IC",
+    "icir": "ICIR",
+    "sharpe": "Sharpe"
+  },
+  "timeframeDownload": {
+    "title": "Téléchargement des Données"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "Pondération Égale",
+      "equalDesc": "Moyenne simple de tous les signaux",
+      "sharpeWeighted": "Pondéré par Sharpe",
+      "sharpeWeightedDesc": "Pondération par le ratio de Sharpe historique",
+      "correlationAdjusted": "Ajusté pour la Corrélation",
+      "correlationAdjustedDesc": "Pénaliser les signaux hautement corrélés",
+      "regimeBased": "Basé sur le Régime",
+      "regimeBasedDesc": "Pondérations dépendant du régime"
+    },
+    "factor": {
+      "equalWeight": "Pondération Égale",
+      "equalWeightDesc": "Moyenne simple de tous les scores de facteurs",
+      "icWeighted": "Pondéré par IC",
+      "icWeightedDesc": "Pondération par le Coefficient d'Information historique",
+      "regression": "Régression Statistique",
+      "regressionDesc": "Régression MCO sur les scores de facteurs",
+      "pca": "Composé ACP",
+      "pcaDesc": "Score composé d'Analyse en Composantes Principales"
+    },
+    "exit": {
+      "any": "N'importe",
+      "anyDesc": "N'importe quelle règle déclenche la sortie (conservateur)",
+      "all": "Toutes",
+      "allDesc": "Toutes les règles doivent se déclencher (agressif)",
+      "majority": "Majorité",
+      "majorityDesc": "Plus de 50% des règles se déclenchent",
+      "priority": "Priorité",
+      "priorityDesc": "Vérifier dans l'ordre de priorité, la première qui se déclenche gagne"
+    }
+  },
+  "factorCategories": {
+    "momentum": "Momentum",
+    "meanReversion": "Retour à la Moyenne",
+    "volatility": "Volatilité",
+    "value": "Valeur",
+    "volume": "Volume",
+    "technical": "Technique",
+    "pattern": "Motif",
+    "cycle": "Cycle",
+    "statistic": "Statistique"
+  },
+  "translationStatus": {
+    "ok": "Évaluables",
+    "structured": "Pipeline",
+    "unsupported": "Non pris en charge"
+  },
+  "common": {
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "close": "Fermer"
+  }
+}

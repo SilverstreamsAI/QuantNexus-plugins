@@ -5,10 +5,12 @@
  * PLUGIN_TICKET_008: Migrated from host to plugin
  * PLUGIN_TICKET_011: "Save Workflow" -> "Save As" (auto-save handles persistence)
  * PLUGIN_TICKET_015: Added isRunning/canRun props for backtest state
+ * TICKET_422_6: Internationalized with i18n translations
  * Validate / Save As / Run buttons for Alpha Factory.
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ActionBarProps {
   onValidate: () => void;
@@ -21,6 +23,8 @@ interface ActionBarProps {
 export const ActionBar: React.FC<ActionBarProps> = ({
   onValidate, onSaveAs, onRunBacktest, isRunning = false, canRun = true,
 }) => {
+  const { t } = useTranslation('quant-lab');
+
   return (
     <div className="flex justify-center gap-4">
       <button
@@ -28,14 +32,14 @@ export const ActionBar: React.FC<ActionBarProps> = ({
         disabled={isRunning}
         className="px-6 py-3 rounded-lg border border-color-terminal-border text-color-terminal-text-secondary hover:border-color-terminal-accent-primary hover:text-color-terminal-accent-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Validate
+        {t('actionBar.validate')}
       </button>
       <button
         onClick={onSaveAs}
         disabled={isRunning}
         className="px-6 py-3 rounded-lg border border-color-terminal-border text-color-terminal-text-secondary hover:border-color-terminal-accent-primary hover:text-color-terminal-accent-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Save As
+        {t('actionBar.saveAs')}
       </button>
       <button
         onClick={onRunBacktest}
@@ -45,7 +49,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
         {isRunning && (
           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
         )}
-        {isRunning ? 'Running...' : 'Run Backtest'}
+        {isRunning ? t('actionBar.running') : t('actionBar.runBacktest')}
       </button>
     </div>
   );

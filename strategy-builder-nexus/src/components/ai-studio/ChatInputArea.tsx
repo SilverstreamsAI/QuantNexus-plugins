@@ -249,7 +249,7 @@ export const ChatInputArea: React.FC<ChatInputAreaProps> = ({
 
       {/* Helper Text */}
       <p className="text-[10px] text-color-terminal-text-muted/60 mt-2 text-center">
-        Press <kbd className="px-1 py-0.5 bg-color-terminal-surface rounded text-[9px]">{t('aiStudio.helperEnter')}</kbd> {t('aiStudio.helperSendText')}{' '}
+        {t('aiStudio.helperPress')} <kbd className="px-1 py-0.5 bg-color-terminal-surface rounded text-[9px]">{t('aiStudio.helperEnter')}</kbd> {t('aiStudio.helperSendText')}{' '}
         <kbd className="px-1 py-0.5 bg-color-terminal-surface rounded text-[9px]">{t('aiStudio.helperShiftEnter')}</kbd> {t('aiStudio.helperNewLineText')}
       </p>
     </div>

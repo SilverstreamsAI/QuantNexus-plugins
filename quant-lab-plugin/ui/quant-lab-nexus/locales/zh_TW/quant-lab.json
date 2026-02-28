@@ -1,0 +1,204 @@
+{
+  "hub": {
+    "title": "QUANT LAB",
+    "subtitle": "Alpha Factory - 多策略信號組合",
+    "signalFactory": {
+      "title": "信號工廠",
+      "description": "建立和管理多個信號源以生成 alpha"
+    },
+    "engineStore": {
+      "title": "引擎商店",
+      "description": "安裝和管理因子評估引擎"
+    },
+    "status": {
+      "ready": "插件已準備就緒。點擊組合器配置信號組合。"
+    }
+  },
+  "signalFactory": {
+    "title": "信號工廠（入場）",
+    "addSignal": "添加信號",
+    "combinator": "組合器:",
+    "lookback": "回看:",
+    "days": "天"
+  },
+  "factorFactory": {
+    "title": "因子工廠（Alpha 分數）",
+    "addFactor": "添加因子",
+    "combinator": "組合器:",
+    "lookback": "回看:",
+    "days": "天"
+  },
+  "exitFactory": {
+    "title": "退出工廠（風險覆蓋）",
+    "combinator": "組合器:",
+    "hardSafety": "硬性安全限制",
+    "alwaysOn": "始終開啟",
+    "rules": {
+      "circuitBreaker": "熔斷器",
+      "timeLimit": "時間限制",
+      "regimeDetection": "制度檢測",
+      "drawdownLimit": "回撤限制",
+      "correlationCap": "相關性上限"
+    },
+    "params": {
+      "pnl": "PnL <",
+      "cooldown": "冷卻",
+      "bars": "K 線",
+      "action": "操作",
+      "maxHolding": "最大持倉",
+      "hours": "小時",
+      "period": "週期",
+      "threshold": ">",
+      "maxDD": "最大回撤",
+      "maxCorr": "最大相關性",
+      "lookback": "回看",
+      "maxLoss": "最大損失",
+      "reduceTo": "減倉至%"
+    },
+    "actions": {
+      "closeAll": "全部平倉",
+      "reduceTo": "減倉至%",
+      "reduceAll": "全部減倉",
+      "haltTrading": "停止交易",
+      "haltNewEntry": "停止新開倉",
+      "skipEntry": "跳過入場",
+      "reduceHalf": "減倉 50%"
+    },
+    "indicators": {
+      "atr": "ATR",
+      "vix": "VIX",
+      "realizedVol": "實現波動率"
+    },
+    "timeUnits": {
+      "hours": "小時",
+      "bars": "K 線"
+    }
+  },
+  "dataConfig": {
+    "title": "數據配置",
+    "dataSource": "數據源",
+    "symbol": "標的",
+    "searchSymbol": "搜索標的...",
+    "startDate": "開始日期",
+    "endDate": "結束日期",
+    "initialCapital": "初始資金",
+    "orderSize": "訂單大小",
+    "unit": "單位",
+    "units": {
+      "percent": "百分比",
+      "cash": "現金",
+      "shares": "股數"
+    },
+    "errors": {
+      "loginRequired": "請登錄以搜索標的",
+      "serviceUnavailable": "服務不可用"
+    }
+  },
+  "actionBar": {
+    "validate": "驗證",
+    "saveAs": "另存為",
+    "runBacktest": "運行回測",
+    "running": "運行中..."
+  },
+  "resultSection": {
+    "backtestFailed": "回測失敗",
+    "noResults": "無可用結果"
+  },
+  "signalSummary": {
+    "signals": "信號:",
+    "exit": "退出:",
+    "noneEnabled": "無啟用",
+    "lookback": "回看"
+  },
+  "metrics": {
+    "totalPnl": "總 PnL",
+    "return": "回報",
+    "sharpe": "夏普比率",
+    "maxDD": "最大回撤",
+    "winRate": "勝率",
+    "trades": "交易數"
+  },
+  "configSidebar": {
+    "newConfig": "新配置",
+    "searchConfigs": "搜索配置...",
+    "noConfigs": "無保存的配置",
+    "noSearchResults": "沒有配置與您的搜索匹配",
+    "createNew": "創建新配置以開始",
+    "signals": "信號",
+    "signalsPlural": "信號",
+    "rules": "規則",
+    "rulesPlural": "規則",
+    "active": "激活",
+    "delete": "刪除配置"
+  },
+  "signalChip": {
+    "analysis": "分析",
+    "entry": "入場",
+    "exit": "退出",
+    "condition": "條件",
+    "trigger": "觸發器",
+    "action": "操作"
+  },
+  "factorChip": {
+    "ic": "IC",
+    "icir": "ICIR",
+    "sharpe": "夏普比率"
+  },
+  "timeframeDownload": {
+    "title": "下載數據中"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "等權重",
+      "equalDesc": "所有信號的簡單平均",
+      "sharpeWeighted": "夏普加權",
+      "sharpeWeightedDesc": "按歷史夏普比率加權",
+      "correlationAdjusted": "相關性調整",
+      "correlationAdjustedDesc": "懲罰高相關信號",
+      "regimeBased": "制度基礎",
+      "regimeBasedDesc": "依賴制度的權重"
+    },
+    "factor": {
+      "equalWeight": "等權重",
+      "equalWeightDesc": "所有因子分數的簡單平均",
+      "icWeighted": "IC 加權",
+      "icWeightedDesc": "按歷史信息係數加權",
+      "regression": "統計回歸",
+      "regressionDesc": "因子分數的 OLS 回歸",
+      "pca": "PCA 複合",
+      "pcaDesc": "主成分分析複合分數"
+    },
+    "exit": {
+      "any": "任意",
+      "anyDesc": "任意規則觸發退出（保守）",
+      "all": "全部",
+      "allDesc": "所有規則必須觸發（激進）",
+      "majority": "多數",
+      "majorityDesc": "超過 50% 規則觸發",
+      "priority": "優先級",
+      "priorityDesc": "按優先級順序檢查，首先觸發的獲勝"
+    }
+  },
+  "factorCategories": {
+    "momentum": "動量",
+    "meanReversion": "均值回歸",
+    "volatility": "波動率",
+    "value": "價值",
+    "volume": "成交量",
+    "technical": "技術",
+    "pattern": "形態",
+    "cycle": "週期",
+    "statistic": "統計"
+  },
+  "translationStatus": {
+    "ok": "可評估",
+    "structured": "管道",
+    "unsupported": "不支持"
+  },
+  "common": {
+    "cancel": "取消",
+    "delete": "刪除",
+    "save": "保存",
+    "close": "關閉"
+  }
+}

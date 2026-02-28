@@ -1,0 +1,204 @@
+{
+  "hub": {
+    "title": "QUANT LAB",
+    "subtitle": "Alpha Factory - Multi-strategy signal combination",
+    "signalFactory": {
+      "title": "Signal Factory",
+      "description": "Create and manage multiple signal sources for alpha generation"
+    },
+    "engineStore": {
+      "title": "Engine Store",
+      "description": "Install and manage factor evaluation engines"
+    },
+    "status": {
+      "ready": "Plugin ready. Click Combinator to configure signal combination."
+    }
+  },
+  "signalFactory": {
+    "title": "SIGNAL FACTORY (Entry)",
+    "addSignal": "Add Signal",
+    "combinator": "Combinator:",
+    "lookback": "Lookback:",
+    "days": "days"
+  },
+  "factorFactory": {
+    "title": "FACTOR FACTORY (Alpha Scores)",
+    "addFactor": "Add Factor",
+    "combinator": "Combinator:",
+    "lookback": "Lookback:",
+    "days": "days"
+  },
+  "exitFactory": {
+    "title": "EXIT FACTORY (Risk Override)",
+    "combinator": "Combinator:",
+    "hardSafety": "Hard Safety Limits",
+    "alwaysOn": "ALWAYS ON",
+    "rules": {
+      "circuitBreaker": "Circuit Breaker",
+      "timeLimit": "Time Limit",
+      "regimeDetection": "Regime Detection",
+      "drawdownLimit": "Drawdown Limit",
+      "correlationCap": "Correlation Cap"
+    },
+    "params": {
+      "pnl": "PnL <",
+      "cooldown": "Cooldown",
+      "bars": "bars",
+      "action": "Action",
+      "maxHolding": "Max Holding",
+      "hours": "hours",
+      "period": "Period",
+      "threshold": ">",
+      "maxDD": "Max DD",
+      "maxCorr": "Max Corr",
+      "lookback": "Lookback",
+      "maxLoss": "Max Loss",
+      "reduceTo": "Reduce to %"
+    },
+    "actions": {
+      "closeAll": "Close All",
+      "reduceTo": "Reduce To %",
+      "reduceAll": "Reduce All",
+      "haltTrading": "Halt Trading",
+      "haltNewEntry": "Halt New Entry",
+      "skipEntry": "Skip Entry",
+      "reduceHalf": "Reduce 50%"
+    },
+    "indicators": {
+      "atr": "ATR",
+      "vix": "VIX",
+      "realizedVol": "Realized Vol"
+    },
+    "timeUnits": {
+      "hours": "Hours",
+      "bars": "Bars"
+    }
+  },
+  "dataConfig": {
+    "title": "Data Configuration",
+    "dataSource": "Data Source",
+    "symbol": "Symbol",
+    "searchSymbol": "Search symbol...",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "initialCapital": "Initial Capital",
+    "orderSize": "Order Size",
+    "unit": "Unit",
+    "units": {
+      "percent": "Percent",
+      "cash": "Cash",
+      "shares": "Shares"
+    },
+    "errors": {
+      "loginRequired": "Please log in to search symbols",
+      "serviceUnavailable": "Service unavailable"
+    }
+  },
+  "actionBar": {
+    "validate": "Validate",
+    "saveAs": "Save As",
+    "runBacktest": "Run Backtest",
+    "running": "Running..."
+  },
+  "resultSection": {
+    "backtestFailed": "Backtest failed",
+    "noResults": "No results available"
+  },
+  "signalSummary": {
+    "signals": "Signals:",
+    "exit": "Exit:",
+    "noneEnabled": "None enabled",
+    "lookback": "Lookback"
+  },
+  "metrics": {
+    "totalPnl": "Total PnL",
+    "return": "Return",
+    "sharpe": "Sharpe",
+    "maxDD": "Max DD",
+    "winRate": "Win Rate",
+    "trades": "Trades"
+  },
+  "configSidebar": {
+    "newConfig": "New Configuration",
+    "searchConfigs": "Search configs...",
+    "noConfigs": "No saved configurations",
+    "noSearchResults": "No configs match your search",
+    "createNew": "Create a new config to begin",
+    "signals": "signal",
+    "signalsPlural": "signals",
+    "rules": "rule",
+    "rulesPlural": "rules",
+    "active": "active",
+    "delete": "Delete configuration"
+  },
+  "signalChip": {
+    "analysis": "Analysis",
+    "entry": "Entry",
+    "exit": "Exit",
+    "condition": "Condition",
+    "trigger": "Trigger",
+    "action": "Action"
+  },
+  "factorChip": {
+    "ic": "IC",
+    "icir": "ICIR",
+    "sharpe": "Sharpe"
+  },
+  "timeframeDownload": {
+    "title": "Downloading Data"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "Equal Weight",
+      "equalDesc": "Simple average of all signals",
+      "sharpeWeighted": "Sharpe Weighted",
+      "sharpeWeightedDesc": "Weight by historical Sharpe ratio",
+      "correlationAdjusted": "Correlation Adjusted",
+      "correlationAdjustedDesc": "Penalize highly correlated signals",
+      "regimeBased": "Regime Based",
+      "regimeBasedDesc": "Regime-dependent weights"
+    },
+    "factor": {
+      "equalWeight": "Equal Weight",
+      "equalWeightDesc": "Simple average of all factor scores",
+      "icWeighted": "IC Weighted",
+      "icWeightedDesc": "Weight by historical Information Coefficient",
+      "regression": "Statistical Regression",
+      "regressionDesc": "OLS regression on factor scores",
+      "pca": "PCA Composite",
+      "pcaDesc": "Principal Component Analysis composite score"
+    },
+    "exit": {
+      "any": "Any",
+      "anyDesc": "Any rule triggers exit (conservative)",
+      "all": "All",
+      "allDesc": "All rules must trigger (aggressive)",
+      "majority": "Majority",
+      "majorityDesc": "More than 50% rules trigger",
+      "priority": "Priority",
+      "priorityDesc": "Check in priority order, first trigger wins"
+    }
+  },
+  "factorCategories": {
+    "momentum": "Momentum",
+    "meanReversion": "Mean Reversion",
+    "volatility": "Volatility",
+    "value": "Value",
+    "volume": "Volume",
+    "technical": "Technical",
+    "pattern": "Pattern",
+    "cycle": "Cycle",
+    "statistic": "Statistic"
+  },
+  "translationStatus": {
+    "ok": "Evaluable",
+    "structured": "Pipeline",
+    "unsupported": "Unsupported"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "save": "Save",
+    "close": "Close"
+  }
+}

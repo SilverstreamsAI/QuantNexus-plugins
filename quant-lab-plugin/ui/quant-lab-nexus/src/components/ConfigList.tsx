@@ -2,10 +2,12 @@
  * ConfigList Component
  *
  * PLUGIN_TICKET_012: Scrollable list of saved Alpha Factory configurations.
+ * TICKET_422_6: Internationalized with i18n translations
  * Follows ConversationList (TICKET_077) pattern.
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FolderOpen, Trash2, Layers } from 'lucide-react';
 import { ConfigSummary } from '../types';
 import { SIGNAL_COMBINATOR_METHODS } from '../constants';
@@ -141,6 +143,8 @@ export const ConfigList: React.FC<ConfigListProps> = ({
   emptyText = 'No saved configurations',
   className = '',
 }) => {
+  const { t } = useTranslation('quant-lab');
+
   if (configs.length === 0) {
     return (
       <div
@@ -151,9 +155,9 @@ export const ConfigList: React.FC<ConfigListProps> = ({
         ].join(' ')}
       >
         <FolderOpen className="w-10 h-10 text-color-terminal-text-muted/50 mb-3" />
-        <p className="text-sm text-color-terminal-text-muted">{emptyText}</p>
+        <p className="text-sm text-color-terminal-text-muted">{emptyText || t('configSidebar.noConfigs')}</p>
         <p className="text-xs text-color-terminal-text-muted/70 mt-1">
-          Create a new config to begin
+          {t('configSidebar.createNew')}
         </p>
       </div>
     );

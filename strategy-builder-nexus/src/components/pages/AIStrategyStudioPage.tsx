@@ -138,7 +138,7 @@ async function cleanupEmptyConversations(
 // -----------------------------------------------------------------------------
 
 export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
-  pageTitle = 'AI Strategy Studio',
+  pageTitle,
   strategyName: initialStrategyName = '',
   strategyId = '',
   onStrategyNameChange,
@@ -148,6 +148,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
   onSettingsClick,
 }) => {
   const { t } = useTranslation('strategy-builder');
+  const displayPageTitle = pageTitle ?? t('pages.aiStrategyStudio.welcomeTitle');
   // -------------------------------------------------------------------------
   // User State
   // -------------------------------------------------------------------------
@@ -234,8 +235,8 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
         // TICKET_235: Always create a new chat on page load
         const createResult = await conversationService.createConversation({
           userId: currentUserId,
-          title: t('pages.aiStrategyStudio.newStrategyTitle'),
-          preview: t('pages.aiStrategyStudio.newStrategyPreview'),
+          title: t('pages.aiStrategyStudio.newChatTitle'),
+          preview: t('pages.aiStrategyStudio.newChatPreview'),
         });
 
         if (createResult.success && createResult.data) {
@@ -274,8 +275,8 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
       // Create conversation in SQLite
       const result = await conversationService.createConversation({
         userId,
-        title: t('pages.aiStrategyStudio.newStrategyTitle'),
-        preview: t('pages.aiStrategyStudio.newStrategyPreview'),
+        title: t('pages.aiStrategyStudio.newChatTitle'),
+        preview: t('pages.aiStrategyStudio.newChatPreview'),
       });
 
       if (result.success && result.data) {
@@ -422,7 +423,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
         const response: VibingChatResponse = await executeVibingChat({
           session_id: sessionId,
           message: content,
-          strategy_name: initialStrategyName || t('pages.aiStrategyStudio.newStrategyTitle'),
+          strategy_name: initialStrategyName || t('pages.aiStrategyStudio.newChatTitle'),
           strategy_id: strategyId,
           current_strategy_rules: currentRules,
           output_format: 'v3',
@@ -477,7 +478,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
                 id: generateLocalId(),
                 type: 'entry',
                 condition: ec.condition,
-                description: ec.action || `Entry: ${ec.type}`,
+                description: ec.action || t('pages.aiStrategyStudio.entryDescription', { type: ec.type }),
                 enabled: true,
               });
             });
@@ -488,7 +489,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
                 id: generateLocalId(),
                 type: 'exit',
                 condition: ec.condition,
-                description: `Exit: ${ec.type}`,
+                description: t('pages.aiStrategyStudio.exitDescription', { type: ec.type }),
                 enabled: true,
               });
             });
@@ -536,7 +537,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
         console.error('[AIStrategyStudio] API call failed:', error);
 
         // Handle network/auth errors
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : t('pages.aiStrategyStudio.unknownError');
         try {
           const errorResult = await conversationService.addMessage({
             conversationId: activeDbId,
@@ -668,7 +669,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
     } catch (error) {
       console.error('[AIStrategyStudio] Action failed:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : t('pages.aiStrategyStudio.unknownError');
       try {
         const errorResult = await conversationService.addMessage({
           conversationId: activeDbId,
@@ -767,7 +768,7 @@ export const AIStrategyStudioPage: React.FC<AIStrategyStudioPageProps> = ({
       {/* ================================================================== */}
       <div className="flex-shrink-0 h-12 px-6 flex items-center justify-between border-b border-color-terminal-border bg-color-terminal-surface">
         <h1 className="text-sm font-bold terminal-mono uppercase tracking-wider text-color-terminal-accent-gold">
-          {pageTitle}
+          {displayPageTitle}
         </h1>
         <button
           onClick={onSettingsClick}

@@ -334,6 +334,9 @@
       },
       "errorPrefix": "錯誤：{{message}}",
       "actionFailedPrefix": "操作失敗：{{message}}",
+      "unknownError": "未知錯誤",
+      "entryDescription": "入場: {{type}}",
+      "exitDescription": "出場: {{type}}",
       "newRuleCondition": "新 {{type}} 規則條件",
       "newRuleDescription": "在此新增您的 {{type}} 條件"
     }
@@ -365,6 +368,7 @@
     "helperEnter": "Enter",
     "helperShiftEnter": "Shift+Enter",
     "helperSendText": "傳送，",
+    "helperPress": "按",
     "helperNewLineText": "換行",
     "strategyRules": "策略規則",
     "noRulesDefined": "尚未定義規則",

@@ -1,0 +1,204 @@
+{
+  "hub": {
+    "title": "QUANT LAB",
+    "subtitle": "Alpha Factory - Multi-Strategie-Signalkombination",
+    "signalFactory": {
+      "title": "Signalfabrik",
+      "description": "Erstellen und verwalten Sie mehrere Signalquellen für Alpha-Generierung"
+    },
+    "engineStore": {
+      "title": "Engine-Store",
+      "description": "Installieren und verwalten Sie Faktor-Auswertungsmotoren"
+    },
+    "status": {
+      "ready": "Plugin bereit. Klicken Sie auf Kombinator, um die Signalkombination zu konfigurieren."
+    }
+  },
+  "signalFactory": {
+    "title": "SIGNALFABRIK (Eingang)",
+    "addSignal": "Signal hinzufügen",
+    "combinator": "Kombinator:",
+    "lookback": "Rückblick:",
+    "days": "Tage"
+  },
+  "factorFactory": {
+    "title": "FAKTORFABRIK (Alpha-Scores)",
+    "addFactor": "Faktor hinzufügen",
+    "combinator": "Kombinator:",
+    "lookback": "Rückblick:",
+    "days": "Tage"
+  },
+  "exitFactory": {
+    "title": "EXIT-FABRIK (Risiko-Override)",
+    "combinator": "Kombinator:",
+    "hardSafety": "Harte Sicherheitsgrenzen",
+    "alwaysOn": "IMMER AKTIV",
+    "rules": {
+      "circuitBreaker": "Schutzschalter",
+      "timeLimit": "Zeitlimit",
+      "regimeDetection": "Regime-Erkennung",
+      "drawdownLimit": "Drawdown-Limit",
+      "correlationCap": "Korrelationsgrenze"
+    },
+    "params": {
+      "pnl": "PnL <",
+      "cooldown": "Abkühlung",
+      "bars": "Balken",
+      "action": "Aktion",
+      "maxHolding": "Max. Haltung",
+      "hours": "Stunden",
+      "period": "Periode",
+      "threshold": ">",
+      "maxDD": "Max. DD",
+      "maxCorr": "Max. Korr",
+      "lookback": "Rückblick",
+      "maxLoss": "Max. Verlust",
+      "reduceTo": "Reduzieren auf %"
+    },
+    "actions": {
+      "closeAll": "Alle schließen",
+      "reduceTo": "Reduzieren auf %",
+      "reduceAll": "Alle reduzieren",
+      "haltTrading": "Handel stoppen",
+      "haltNewEntry": "Neuen Einstieg stoppen",
+      "skipEntry": "Einstieg überspringen",
+      "reduceHalf": "50% reduzieren"
+    },
+    "indicators": {
+      "atr": "ATR",
+      "vix": "VIX",
+      "realizedVol": "Realisierte Volatilität"
+    },
+    "timeUnits": {
+      "hours": "Stunden",
+      "bars": "Balken"
+    }
+  },
+  "dataConfig": {
+    "title": "Datenkonfiguration",
+    "dataSource": "Datenquelle",
+    "symbol": "Symbol",
+    "searchSymbol": "Symbol suchen...",
+    "startDate": "Startdatum",
+    "endDate": "Enddatum",
+    "initialCapital": "Anfangskapital",
+    "orderSize": "Ordergröße",
+    "unit": "Einheit",
+    "units": {
+      "percent": "Prozent",
+      "cash": "Bargeld",
+      "shares": "Aktien"
+    },
+    "errors": {
+      "loginRequired": "Bitte melden Sie sich an, um Symbole zu suchen",
+      "serviceUnavailable": "Dienst nicht verfügbar"
+    }
+  },
+  "actionBar": {
+    "validate": "Validieren",
+    "saveAs": "Speichern unter",
+    "runBacktest": "Backtest ausführen",
+    "running": "Läuft..."
+  },
+  "resultSection": {
+    "backtestFailed": "Backtest fehlgeschlagen",
+    "noResults": "Keine Ergebnisse verfügbar"
+  },
+  "signalSummary": {
+    "signals": "Signale:",
+    "exit": "Exit:",
+    "noneEnabled": "Keine aktiviert",
+    "lookback": "Rückblick"
+  },
+  "metrics": {
+    "totalPnl": "Gesamt-PnL",
+    "return": "Rendite",
+    "sharpe": "Sharpe",
+    "maxDD": "Max. DD",
+    "winRate": "Gewinnrate",
+    "trades": "Trades"
+  },
+  "configSidebar": {
+    "newConfig": "Neue Konfiguration",
+    "searchConfigs": "Konfigurationen suchen...",
+    "noConfigs": "Keine gespeicherten Konfigurationen",
+    "noSearchResults": "Keine Konfigurationen entsprechen Ihrer Suche",
+    "createNew": "Erstellen Sie eine neue Konfiguration, um zu beginnen",
+    "signals": "Signal",
+    "signalsPlural": "Signale",
+    "rules": "Regel",
+    "rulesPlural": "Regeln",
+    "active": "aktiv",
+    "delete": "Konfiguration löschen"
+  },
+  "signalChip": {
+    "analysis": "Analyse",
+    "entry": "Einstieg",
+    "exit": "Exit",
+    "condition": "Bedingung",
+    "trigger": "Auslöser",
+    "action": "Aktion"
+  },
+  "factorChip": {
+    "ic": "IC",
+    "icir": "ICIR",
+    "sharpe": "Sharpe"
+  },
+  "timeframeDownload": {
+    "title": "Daten herunterladen"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "Gleichgewichtung",
+      "equalDesc": "Einfacher Durchschnitt aller Signale",
+      "sharpeWeighted": "Sharpe-gewichtet",
+      "sharpeWeightedDesc": "Gewichtung nach historischem Sharpe-Verhältnis",
+      "correlationAdjusted": "Korrelationsadjustiert",
+      "correlationAdjustedDesc": "Bestrafung hoch korrelierter Signale",
+      "regimeBased": "Regime-basiert",
+      "regimeBasedDesc": "Regime-abhängige Gewichtung"
+    },
+    "factor": {
+      "equalWeight": "Gleichgewichtung",
+      "equalWeightDesc": "Einfacher Durchschnitt aller Faktor-Scores",
+      "icWeighted": "IC-gewichtet",
+      "icWeightedDesc": "Gewichtung nach historischem Informationskoeffizient",
+      "regression": "Statistische Regression",
+      "regressionDesc": "OLS-Regression auf Faktor-Scores",
+      "pca": "PCA-Komposite",
+      "pcaDesc": "Hauptkomponentenanalyse-Komposite-Score"
+    },
+    "exit": {
+      "any": "Beliebige",
+      "anyDesc": "Beliebige Regel löst Exit aus (konservativ)",
+      "all": "Alle",
+      "allDesc": "Alle Regeln müssen auslösen (aggressiv)",
+      "majority": "Mehrheit",
+      "majorityDesc": "Mehr als 50% der Regeln lösen aus",
+      "priority": "Priorität",
+      "priorityDesc": "In Prioritätsreihenfolge prüfen, erste Auslösung gewinnt"
+    }
+  },
+  "factorCategories": {
+    "momentum": "Momentum",
+    "meanReversion": "Mittelwertrückkehr",
+    "volatility": "Volatilität",
+    "value": "Wert",
+    "volume": "Volumen",
+    "technical": "Technisch",
+    "pattern": "Muster",
+    "cycle": "Zyklus",
+    "statistic": "Statistik"
+  },
+  "translationStatus": {
+    "ok": "Auswertbar",
+    "structured": "Pipeline",
+    "unsupported": "Nicht unterstützt"
+  },
+  "common": {
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "close": "Schließen"
+  }
+}

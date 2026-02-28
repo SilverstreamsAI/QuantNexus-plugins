@@ -334,6 +334,9 @@
       },
       "errorPrefix": "Errore: {{message}}",
       "actionFailedPrefix": "Azione fallita: {{message}}",
+      "unknownError": "Errore sconosciuto",
+      "entryDescription": "Ingresso: {{type}}",
+      "exitDescription": "Uscita: {{type}}",
       "newRuleCondition": "Nuova condizione regola {{type}}",
       "newRuleDescription": "Aggiungi la tua condizione {{type}} qui"
     }
@@ -365,6 +368,7 @@
     "helperEnter": "Enter",
     "helperShiftEnter": "Shift+Enter",
     "helperSendText": "per inviare,",
+    "helperPress": "Premi",
     "helperNewLineText": "per nuova riga",
     "strategyRules": "Regole Strategia",
     "noRulesDefined": "Nessuna regola definita ancora",

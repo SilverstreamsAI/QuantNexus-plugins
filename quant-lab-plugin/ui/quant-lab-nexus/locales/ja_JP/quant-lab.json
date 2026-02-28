@@ -1,0 +1,204 @@
+{
+  "hub": {
+    "title": "QUANT LAB",
+    "subtitle": "Alpha Factory - マルチストラテジーシグナル組み合わせ",
+    "signalFactory": {
+      "title": "シグナルファクトリー",
+      "description": "アルファ生成のための複数のシグナルソースを作成および管理"
+    },
+    "engineStore": {
+      "title": "エンジンストア",
+      "description": "ファクター評価エンジンインストールおよび管理"
+    },
+    "status": {
+      "ready": "プラグイン準備完了。コンビネーターをクリックしてシグナル組み合わせを設定してください。"
+    }
+  },
+  "signalFactory": {
+    "title": "シグナルファクトリー（エントリー）",
+    "addSignal": "シグナルを追加",
+    "combinator": "コンビネーター:",
+    "lookback": "ルックバック:",
+    "days": "日"
+  },
+  "factorFactory": {
+    "title": "ファクターファクトリー（アルファスコア）",
+    "addFactor": "ファクターを追加",
+    "combinator": "コンビネーター:",
+    "lookback": "ルックバック:",
+    "days": "日"
+  },
+  "exitFactory": {
+    "title": "イグジットファクトリー（リスクオーバーライド）",
+    "combinator": "コンビネーター:",
+    "hardSafety": "ハードセーフティ制限",
+    "alwaysOn": "常にオン",
+    "rules": {
+      "circuitBreaker": "サーキットブレーカー",
+      "timeLimit": "時間制限",
+      "regimeDetection": "レジーム検出",
+      "drawdownLimit": "ドローダウン制限",
+      "correlationCap": "相関キャップ"
+    },
+    "params": {
+      "pnl": "PnL <",
+      "cooldown": "クールダウン",
+      "bars": "バー",
+      "action": "アクション",
+      "maxHolding": "最大保有",
+      "hours": "時間",
+      "period": "期間",
+      "threshold": ">",
+      "maxDD": "最大 DD",
+      "maxCorr": "最大相関",
+      "lookback": "ルックバック",
+      "maxLoss": "最大損失",
+      "reduceTo": "％に削減"
+    },
+    "actions": {
+      "closeAll": "すべて決済",
+      "reduceTo": "％に削減",
+      "reduceAll": "すべて削減",
+      "haltTrading": "取引停止",
+      "haltNewEntry": "新規エントリー停止",
+      "skipEntry": "エントリースキップ",
+      "reduceHalf": "50% 削減"
+    },
+    "indicators": {
+      "atr": "ATR",
+      "vix": "VIX",
+      "realizedVol": "実現ボラティリティ"
+    },
+    "timeUnits": {
+      "hours": "時間",
+      "bars": "バー"
+    }
+  },
+  "dataConfig": {
+    "title": "データ設定",
+    "dataSource": "データソース",
+    "symbol": "シンボル",
+    "searchSymbol": "シンボルを検索...",
+    "startDate": "開始日",
+    "endDate": "終了日",
+    "initialCapital": "初期資本",
+    "orderSize": "注文サイズ",
+    "unit": "単位",
+    "units": {
+      "percent": "パーセント",
+      "cash": "現金",
+      "shares": "株式"
+    },
+    "errors": {
+      "loginRequired": "シンボルを検索するにはログインしてください",
+      "serviceUnavailable": "サービス利用不可"
+    }
+  },
+  "actionBar": {
+    "validate": "検証",
+    "saveAs": "名前を付けて保存",
+    "runBacktest": "バックテスト実行",
+    "running": "実行中..."
+  },
+  "resultSection": {
+    "backtestFailed": "バックテスト失敗",
+    "noResults": "利用可能な結果がありません"
+  },
+  "signalSummary": {
+    "signals": "シグナル:",
+    "exit": "イグジット:",
+    "noneEnabled": "有効なものなし",
+    "lookback": "ルックバック"
+  },
+  "metrics": {
+    "totalPnl": "総 PnL",
+    "return": "リターン",
+    "sharpe": "シャープレシオ",
+    "maxDD": "最大ドローダウン",
+    "winRate": "勝率",
+    "trades": "取引数"
+  },
+  "configSidebar": {
+    "newConfig": "新しい設定",
+    "searchConfigs": "設定を検索...",
+    "noConfigs": "保存された設定がありません",
+    "noSearchResults": "検索に一致する設定がありません",
+    "createNew": "開始するには新しい設定を作成してください",
+    "signals": "シグナル",
+    "signalsPlural": "シグナル",
+    "rules": "ルール",
+    "rulesPlural": "ルール",
+    "active": "アクティブ",
+    "delete": "設定を削除"
+  },
+  "signalChip": {
+    "analysis": "分析",
+    "entry": "エントリー",
+    "exit": "イグジット",
+    "condition": "条件",
+    "trigger": "トリガー",
+    "action": "アクション"
+  },
+  "factorChip": {
+    "ic": "IC",
+    "icir": "ICIR",
+    "sharpe": "シャープレシオ"
+  },
+  "timeframeDownload": {
+    "title": "データダウンロード中"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "均等加重",
+      "equalDesc": "すべてのシグナルの単純平均",
+      "sharpeWeighted": "シャープレシオ加重",
+      "sharpeWeightedDesc": "過去のシャープレシオによる加重",
+      "correlationAdjusted": "相関調整",
+      "correlationAdjustedDesc": "相関の高いシグナルをペナルティ",
+      "regimeBased": "レジームベース",
+      "regimeBasedDesc": "レジーム依存の加重"
+    },
+    "factor": {
+      "equalWeight": "均等加重",
+      "equalWeightDesc": "すべてのファクタースコアの単純平均",
+      "icWeighted": "IC 加重",
+      "icWeightedDesc": "過去の情報係数による加重",
+      "regression": "統計的回帰",
+      "regressionDesc": "ファクタースコアの OLS 回帰",
+      "pca": "PCA 複合",
+      "pcaDesc": "主成分分析複合スコア"
+    },
+    "exit": {
+      "any": "いずれか",
+      "anyDesc": "いずれかのルールがイグジットを発動（保守的）",
+      "all": "すべて",
+      "allDesc": "すべてのルールが発動する必要あり（攻撃的）",
+      "majority": "過半数",
+      "majorityDesc": "50% 以上のルールが発動",
+      "priority": "優先度",
+      "priorityDesc": "優先順に確認、最初に発動したものが有効"
+    }
+  },
+  "factorCategories": {
+    "momentum": "モメンタム",
+    "meanReversion": "平均回帰",
+    "volatility": "ボラティリティ",
+    "value": "バリュー",
+    "volume": "ボリューム",
+    "technical": "テクニカル",
+    "pattern": "パターン",
+    "cycle": "サイクル",
+    "statistic": "統計"
+  },
+  "translationStatus": {
+    "ok": "評価可能",
+    "structured": "パイプライン",
+    "unsupported": "未サポート"
+  },
+  "common": {
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "save": "保存",
+    "close": "閉じる"
+  }
+}

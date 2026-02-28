@@ -334,6 +334,9 @@
       },
       "errorPrefix": "エラー：{{message}}",
       "actionFailedPrefix": "アクション失敗：{{message}}",
+      "unknownError": "不明なエラー",
+      "entryDescription": "エントリー: {{type}}",
+      "exitDescription": "イグジット: {{type}}",
       "newRuleCondition": "新しい {{type}} ルール条件",
       "newRuleDescription": "ここに {{type}} 条件を追加してください"
     }
@@ -365,6 +368,7 @@
     "helperEnter": "Enter",
     "helperShiftEnter": "Shift+Enter",
     "helperSendText": "で送信、",
+    "helperPress": "押す",
     "helperNewLineText": "で改行",
     "strategyRules": "戦略ルール",
     "noRulesDefined": "まだルールが定義されていません",

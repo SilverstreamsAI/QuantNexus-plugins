@@ -334,6 +334,9 @@
       },
       "errorPrefix": "Erreur: {{message}}",
       "actionFailedPrefix": "Action echouee: {{message}}",
+      "unknownError": "Erreur inconnue",
+      "entryDescription": "Entree: {{type}}",
+      "exitDescription": "Sortie: {{type}}",
       "newRuleCondition": "Nouvelle condition de regle {{type}}",
       "newRuleDescription": "Ajoutez votre condition {{type}} ici"
     }
@@ -365,6 +368,7 @@
     "helperEnter": "Enter",
     "helperShiftEnter": "Shift+Enter",
     "helperSendText": "pour envoyer,",
+    "helperPress": "Appuyez sur",
     "helperNewLineText": "pour nouvelle ligne",
     "strategyRules": "Regles de Strategie",
     "noRulesDefined": "Aucune regle definie pour le moment",
