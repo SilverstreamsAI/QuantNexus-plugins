@@ -81,12 +81,20 @@
     "backtesting": "BACKTESTING",
     "loading": "Loading...",
     "noHistory": "No backtest history",
-    "testing": "testing..."
+    "testing": "testing...",
+    "capLabel": "Cap.:",
+    "sizeLabel": "Dim.:",
+    "testedLabel": "Testato:",
+    "delete": "Elimina",
+    "checkpointTooltip": "Checkpoint: {{percent}}% completato"
   },
   "page": {
     "loadingAlgorithms": "Loading algorithms...",
     "workflowTitle": "WORKFLOW CONFIGURATION",
-    "workflowStep": "Workflow Step"
+    "workflowStep": "Workflow Step",
+    "noResults": "Nessun risultato di backtest disponibile.",
+    "startBacktest": "Avvia un backtest dalla pagina di Configurazione.",
+    "realtimeChartPending": "Il grafico in tempo reale apparira quando i dati saranno disponibili"
   },
   "buttons": {
     "newBacktest": "New Backtest",
@@ -97,7 +105,10 @@
     "executing": "Executing...",
     "cancel": "Cancel",
     "delete": "Delete",
+    "backToConfig": "Torna alla Configurazione",
     "runInBackground": "Run in Background",
+    "exportToQuantLab": "Esporta in Quant Lab",
+    "exporting": "Esportazione...",
     "return": "Indietro"
   },
   "workflowSteps": {
@@ -156,6 +167,12 @@
     "confirm": "Cancel Backtest",
     "keep": "Keep Running"
   },
+  "cancelledDialog": {
+    "title": "Backtest Annullato",
+    "message": "Il backtest e stato annullato. Cosa desideri fare?",
+    "stay": "Resta Qui",
+    "goBack": "Torna Indietro"
+  },
   "workflowSelector": {
     "selectAlgorithm": "Market Analysis",
     "preCondition": "Entry Filter",
@@ -165,7 +182,39 @@
   },
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
-    "result": "Result"
+    "indicatorsCockpit": "Cockpit Indicatori",
+    "kronosCockpit": "Cockpit Kronos",
+    "traderCockpit": "Cockpit Trader",
+    "result": "Risultato",
+    "backtestResult": "Risultato del Backtest"
+  },
+  "kronos": {
+    "title": "STRATEGIE KRONOS",
+    "subtitle": "Seleziona una strategia generata da Kronos per il backtest",
+    "noStrategies": "Nessuna Strategia Kronos",
+    "noStrategiesHint": "Genera strategie usando la funzione Kronos nello Strategy Builder per vederle qui.",
+    "columnName": "Nome Strategia",
+    "columnType": "Tipo",
+    "columnCreated": "Creato",
+    "columnAction": "Seleziona",
+    "execute": "Esegui",
+    "executing": "Esecuzione...",
+    "selectAlgorithmFirst": "Seleziona prima una strategia",
+    "executionStarted": "Esecuzione avviata",
+    "executionFailed": "Esecuzione fallita"
+  },
+  "locked": {
+    "requiresTier": "Questa funzione richiede un abbonamento {{tier}}"
+  },
+  "auth": {
+    "loginToUnlock": "Accedi per sbloccare",
+    "viewPlans": "Visualizza piani"
+  },
+  "common": {
+    "cancel": "Annulla"
+  },
+  "notification": {
+    "backtestCompleted": "Backtest completato con successo"
   },
   "cockpitSelector": {
     "title": "SELEZIONA COCKPIT",
@@ -187,6 +236,12 @@
     "closeTab": "Chiudi scheda",
     "close": "Chiudi",
     "closeAll": "Chiudi tutto"
+  },
+  "duplicateDialog": {
+    "title": "Casi Duplicati Rilevati",
+    "message": "{{duplicateText}} hanno configurazioni identiche.\nEseguire casi duplicati produrra gli stessi risultati.",
+    "caseAndCase": "Caso {{a}} e Caso {{b}}",
+    "continueAnyway": "Continua Comunque"
   },
   "messages": {
     "resumeApiNotAvailable": "API di ripresa non disponibile",
@@ -213,7 +268,9 @@
     "endDateRequired": "La data di fine e obbligatoria",
     "endDateAfterStart": "La data di fine deve essere successiva alla data di inizio",
     "initialCapitalPositive": "Il capitale iniziale deve essere positivo",
-    "orderSizePositive": "La dimensione dell'ordine deve essere positiva"
+    "orderSizePositive": "La dimensione dell'ordine deve essere positiva",
+    "lookbackExceeded": "Intervallo {{timeframe}}: max {{lookback}} lookback ({{selected}}g selezionati)",
+    "lookbackWarning": "L'intervallo selezionato ({{selected}}g) supera il lookback massimo ({{max}}g)"
   },
   "settings": {
     "back": "Indietro",
@@ -223,7 +280,43 @@
     "deleteSecretConfirm": "Sei sicuro di voler eliminare",
     "deleteSecretWarning": "Questa azione non puo essere annullata.",
     "save": "Salva",
-    "saving": "Salvataggio..."
+    "saving": "Salvataggio...",
+    "secretsPageTitle": "Segreti",
+    "secretsPageDescription": "Gestisci le chiavi API e le credenziali dei provider di dati",
+    "refresh": "Aggiorna",
+    "securityStatus": "Stato di Sicurezza",
+    "securityStatusDescription": "{{configured}} di {{total}} segreti configurati. I segreti sono crittografati con AES-256-GCM e archiviati in modo sicuro.",
+    "searchSecrets": "Cerca segreti...",
+    "storedSecrets": "Segreti Memorizzati",
+    "noSecretsMatch": "Nessun segreto corrisponde alla ricerca",
+    "noSecretsConfigured": "Nessun segreto configurato",
+    "recentActivity": "Attivita Recente",
+    "noActivityRecorded": "Nessuna attivita registrata",
+    "navStatus": "Stato",
+    "navCredentials": "Credenziali",
+    "navActivity": "Attivita",
+    "required": "Obbligatorio",
+    "copyToClipboard": "Copia negli appunti",
+    "hideValue": "Nascondi valore",
+    "showValue": "Mostra valore",
+    "editValue": "Modifica",
+    "setValue": "Imposta valore",
+    "testApiKey": "Testa chiave API",
+    "deleteCredential": "Elimina credenziale",
+    "testing": "Test in corso...",
+    "enterSecretValue": "Inserisci il valore del segreto",
+    "getApiKey": "Ottieni chiave API",
+    "valueCannotBeEmpty": "Il valore non puo essere vuoto",
+    "failedToSave": "Salvataggio fallito",
+    "missingCredential": "Credenziale mancante: {{key}}",
+    "failedToRetrieveApiKey": "Impossibile recuperare la chiave API",
+    "verifiedKeyType": "Verificata ({{keyType}})",
+    "verified": "Verificata",
+    "invalidApiKey": "Chiave API non valida",
+    "validationFailed": "Validazione fallita",
+    "keyTypePaper": "Paper",
+    "keyTypeLive": "Live",
+    "deleteButton": "Elimina"
   },
   "resultPanel": {
     "tabs": {
@@ -237,7 +330,9 @@
       "bars": "{{count}} barre",
       "noEquityData": "Nessun dato equity",
       "noKlineData": "Nessun dato K-Line",
-      "processing": "Elaborazione... ({{count}} punti)"
+      "processing": "Elaborazione... ({{count}} punti)",
+      "backtesting": "Backtesting...",
+      "noTrades": "Nessuna operazione"
     },
     "summary": {
       "equity": "Equity: {{count}} punti",
@@ -268,7 +363,8 @@
       "pending": " - In attesa",
       "tradesCount": "({{count}} operazioni)",
       "collectingData": "Raccolta dati...",
-      "waiting": "In attesa..."
+      "waiting": "In attesa...",
+      "cancelled": "Annullato"
     },
     "comparison": {
       "title": "Confronto Prestazioni",
@@ -284,5 +380,43 @@
       "equityOverlay": "Sovrapposizione Curve",
       "noResults": "Nessun risultato da confrontare"
     }
+  },
+  "configSummary": {
+    "dataSource": "Fonte Dati",
+    "symbol": "Simbolo",
+    "startDate": "Data di Inizio",
+    "endDate": "Data di Fine",
+    "capital": "Capitale",
+    "orderSize": "Dimensione Ordine",
+    "sharesUnit": "{{size}} azioni"
+  },
+  "namingDialog": {
+    "titleBuilder": "Nomina Strategia",
+    "titleExport": "Esporta in Quant Lab",
+    "titleBacktest": "Nomina Backtest",
+    "confirmBuilder": "Conferma e Genera",
+    "confirmExport": "Conferma ed Esporta",
+    "confirmBacktest": "Conferma ed Esegui",
+    "suggestedName": "Nome suggerito:",
+    "useThis": "Usa Questo",
+    "or": "o",
+    "customName": "Nome personalizzato:",
+    "placeholder": "Inserisci il tuo nome personalizzato...",
+    "finalName": "Nome finale:",
+    "cancel": "Annulla"
+  },
+  "dryRunExecute": {
+    "execute": "ESEGUI",
+    "executing": "ESECUZIONE...",
+    "dryRun": "ESECUZIONE A SECCO",
+    "direct": "DIRETTO"
+  },
+  "workflowDropdown": {
+    "searchPlaceholder": "Cerca...",
+    "noAlgorithmsFound": "Nessun algoritmo trovato"
+  },
+  "backtestDataConfig": {
+    "placeholderSearchSymbol": "Cerca simbolo...",
+    "placeholderInitialCapital": "10000"
   }
 }

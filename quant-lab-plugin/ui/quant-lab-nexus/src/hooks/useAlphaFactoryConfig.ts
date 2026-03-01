@@ -72,6 +72,11 @@ interface UseAlphaFactoryConfigReturn {
   setFactorMethod: React.Dispatch<React.SetStateAction<string>>;
   factorLookback: number;
   setFactorLookback: React.Dispatch<React.SetStateAction<number>>;
+  // TICKET_426_3: Persona constraint
+  persona: string | null;
+  setPersona: React.Dispatch<React.SetStateAction<string | null>>;
+  preference: string;
+  setPreference: React.Dispatch<React.SetStateAction<string>>;
   configName: string;
   saveAs: () => Promise<void>;
 
@@ -100,6 +105,9 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
   const [factors, setFactors] = useState<FactorChip[]>([]);
   const [factorMethod, setFactorMethod] = useState(DEFAULT_FACTOR_METHOD);
   const [factorLookback, setFactorLookback] = useState(DEFAULT_FACTOR_LOOKBACK);
+  // TICKET_426_3: Persona constraint state
+  const [persona, setPersona] = useState<string | null>(null);
+  const [preference, setPreference] = useState('');
   const [configId, setConfigId] = useState<string | undefined>();
   const [configName, setConfigName] = useState('');
 
@@ -113,6 +121,8 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
   const signalsRef = useRef(signals);
   const exitRulesRef = useRef(exitRules);
   const factorsRef = useRef(factors);
+  const personaRef = useRef(persona);
+  const preferenceRef = useRef(preference);
   const mountedRef = useRef(false);
   // Skip auto-save when state changes are from config switching (not user edits)
   const skipAutoSaveRef = useRef(false);
@@ -122,6 +132,8 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
   signalsRef.current = signals;
   exitRulesRef.current = exitRules;
   factorsRef.current = factors;
+  personaRef.current = persona;
+  preferenceRef.current = preference;
 
   // ---------------------------------------------------------------------------
   // PLUGIN_TICKET_012: Refresh config list from DB
@@ -169,6 +181,9 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
         setFactorLookback(response.data.factorLookback ?? DEFAULT_FACTOR_LOOKBACK);
         setConfigId(response.data.id);
         setConfigName(response.data.name);
+        // TICKET_426_3: Persona constraint
+        setPersona((response.data as any).persona ?? null);
+        setPreference((response.data as any).preference ?? '');
       }
       // Mark mounted after initial load completes to enable auto-save
       mountedRef.current = true;
@@ -209,6 +224,9 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
         factors,
         factorMethod,
         factorLookback,
+        // TICKET_426_3: Persona constraint
+        persona: personaRef.current,
+        preference: preferenceRef.current,
       });
 
       if (response.success && response.id) {
@@ -222,7 +240,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [signals, signalMethod, lookback, exitRules, exitMethod, factors, factorMethod, factorLookback, refreshConfigList]);
+  }, [signals, signalMethod, lookback, exitRules, exitMethod, factors, factorMethod, factorLookback, persona, preference, refreshConfigList]);
 
   // ---------------------------------------------------------------------------
   // Save As: prompt for name, create new config
@@ -245,6 +263,9 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       factors,
       factorMethod,
       factorLookback,
+      // TICKET_426_3: Persona constraint
+      persona,
+      preference,
     });
 
     if (response.success && response.id) {
@@ -253,7 +274,7 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       setConfigName(name);
       await refreshConfigList();
     }
-  }, [signalMethod, lookback, signals, exitMethod, exitRules, factors, factorMethod, factorLookback, refreshConfigList]);
+  }, [signalMethod, lookback, signals, exitMethod, exitRules, factors, factorMethod, factorLookback, persona, preference, refreshConfigList]);
 
   // ---------------------------------------------------------------------------
   // PLUGIN_TICKET_012: Switch to a different config
@@ -280,6 +301,9 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     setFactors((data.factors as FactorChip[]) || []);
     setFactorMethod(data.factorMethod || DEFAULT_FACTOR_METHOD);
     setFactorLookback(data.factorLookback ?? DEFAULT_FACTOR_LOOKBACK);
+    // TICKET_426_3: Persona constraint
+    setPersona((data as any).persona ?? null);
+    setPreference((data as any).preference ?? '');
     setConfigId(data.id);
     setConfigName(data.name);
 
@@ -296,6 +320,9 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       factors: (data.factors as FactorChip[]) || [],
       factorMethod: data.factorMethod || DEFAULT_FACTOR_METHOD,
       factorLookback: data.factorLookback ?? DEFAULT_FACTOR_LOOKBACK,
+      // TICKET_426_3: Persona constraint
+      persona: (data as any).persona ?? null,
+      preference: (data as any).preference ?? '',
     });
 
     // Update list locally: remove cleaned config + toggle isActive (preserve order)
@@ -334,6 +361,9 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       factors: defaultFactors,
       factorMethod: DEFAULT_FACTOR_METHOD,
       factorLookback: DEFAULT_FACTOR_LOOKBACK,
+      // TICKET_426_3: Persona constraint
+      persona: null,
+      preference: '',
     });
 
     if (response.success && response.id) {
@@ -348,6 +378,9 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
       setFactors(defaultFactors);
       setFactorMethod(DEFAULT_FACTOR_METHOD);
       setFactorLookback(DEFAULT_FACTOR_LOOKBACK);
+      // TICKET_426_3: Reset persona state
+      setPersona(null);
+      setPreference('');
       setConfigId(response.id);
       setConfigName('Untitled');
       await refreshConfigList();
@@ -383,6 +416,9 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
           setFactors((data.factors as FactorChip[]) || []);
           setFactorMethod(data.factorMethod || DEFAULT_FACTOR_METHOD);
           setFactorLookback(data.factorLookback ?? DEFAULT_FACTOR_LOOKBACK);
+          // TICKET_426_3: Persona constraint
+          setPersona((data as any).persona ?? null);
+          setPreference((data as any).preference ?? '');
           setConfigId(data.id);
           setConfigName(data.name);
           // Mark as active
@@ -397,6 +433,9 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
             factors: (data.factors as FactorChip[]) || [],
             factorMethod: data.factorMethod || DEFAULT_FACTOR_METHOD,
             factorLookback: data.factorLookback ?? DEFAULT_FACTOR_LOOKBACK,
+            // TICKET_426_3: Persona constraint
+            persona: (data as any).persona ?? null,
+            preference: (data as any).preference ?? '',
           });
         }
       } else {
@@ -411,6 +450,9 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
         setFactors([]);
         setFactorMethod(DEFAULT_FACTOR_METHOD);
         setFactorLookback(DEFAULT_FACTOR_LOOKBACK);
+        // TICKET_426_3: Reset persona state
+        setPersona(null);
+        setPreference('');
         setConfigId(undefined);
         setConfigName('');
       }
@@ -441,6 +483,11 @@ export function useAlphaFactoryConfig(): UseAlphaFactoryConfigReturn {
     setFactorMethod,
     factorLookback,
     setFactorLookback,
+    // TICKET_426_3: Persona constraint
+    persona,
+    setPersona,
+    preference,
+    setPreference,
     configName,
     saveAs,
     // PLUGIN_TICKET_012

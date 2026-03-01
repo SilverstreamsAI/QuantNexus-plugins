@@ -31,6 +31,7 @@ import { ResultSection } from '../components/ResultSection';
 import { SignalSourcePicker, SignalSourceItem } from '../components/SignalSourcePicker';
 import { FactorSourcePicker } from '../components/FactorSourcePicker';
 import { ConfigSidebar } from '../components/ConfigSidebar';
+import { PersonaSection } from '../components/PersonaSection';
 import { useAlphaFactoryConfig } from '../hooks/useAlphaFactoryConfig';
 import { useAlphaFactoryBacktest } from '../hooks/useAlphaFactoryBacktest';
 
@@ -68,6 +69,9 @@ export const AlphaFactoryPage: React.FC<AlphaFactoryPageProps> = ({ onActiveTask
     factors, setFactors,
     factorMethod, setFactorMethod,
     factorLookback, setFactorLookback,
+    // TICKET_426_3: Persona constraint
+    persona, setPersona,
+    preference, setPreference,
     saveAs,
     // PLUGIN_TICKET_012: Sidebar props
     configId,
@@ -153,6 +157,9 @@ export const AlphaFactoryPage: React.FC<AlphaFactoryPageProps> = ({ onActiveTask
     factors,
     factorMethod,
     factorLookback,
+    // TICKET_426_3: Persona constraint
+    persona,
+    preference,
     dataConfig,
     // TICKET_384: Pipeline phase callback for host-level rendering
     onPipelinePhase,
@@ -275,6 +282,14 @@ export const AlphaFactoryPage: React.FC<AlphaFactoryPageProps> = ({ onActiveTask
       <div className="flex-1 flex flex-col min-h-0">
         <div className="flex-1 overflow-auto p-6">
           <div className="max-w-4xl mx-auto space-y-6">
+            {/* TICKET_426_3: Persona constraint section */}
+            <PersonaSection
+              persona={persona}
+              setPersona={setPersona}
+              preference={preference}
+              setPreference={setPreference}
+            />
+
             <SignalFactorySection
               signals={signals}
               method={signalMethod}

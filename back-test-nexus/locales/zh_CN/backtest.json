@@ -81,7 +81,12 @@
     "backtesting": "回测中",
     "loading": "加载中...",
     "noHistory": "暂无回测历史",
-    "testing": "测试中..."
+    "testing": "测试中...",
+    "capLabel": "资金:",
+    "sizeLabel": "规模:",
+    "testedLabel": "测试:",
+    "delete": "删除",
+    "checkpointTooltip": "检查点: {{percent}}% 已完成"
   },
   "page": {
     "loadingAlgorithms": "加载算法中...",
@@ -102,6 +107,8 @@
     "delete": "删除",
     "backToConfig": "返回配置",
     "runInBackground": "后台运行",
+    "exportToQuantLab": "导出到 Quant Lab",
+    "exporting": "导出中...",
     "return": "返回"
   },
   "workflowSteps": {
@@ -230,6 +237,12 @@
     "close": "关闭",
     "closeAll": "全部关闭"
   },
+  "duplicateDialog": {
+    "title": "检测到重复案例",
+    "message": "{{duplicateText}} 具有相同的配置。\n运行重复案例将产生相同的结果。",
+    "caseAndCase": "案例 {{a}} 和 案例 {{b}}",
+    "continueAnyway": "继续执行"
+  },
   "messages": {
     "resumeApiNotAvailable": "恢复API不可用",
     "resumingFromCheckpoint": "正在从检查点恢复回测...",
@@ -255,7 +268,9 @@
     "endDateRequired": "结束日期为必填项",
     "endDateAfterStart": "结束日期必须晚于开始日期",
     "initialCapitalPositive": "初始资金必须为正数",
-    "orderSizePositive": "订单大小必须为正数"
+    "orderSizePositive": "订单大小必须为正数",
+    "lookbackExceeded": "{{timeframe}} 周期: 最大回溯 {{lookback}} (已选 {{selected}}d)",
+    "lookbackWarning": "选择范围 ({{selected}}d) 超过最大回溯 ({{max}}d)"
   },
   "settings": {
     "back": "返回",
@@ -265,7 +280,43 @@
     "deleteSecretConfirm": "确定要删除吗",
     "deleteSecretWarning": "此操作无法撤销。",
     "save": "保存",
-    "saving": "保存中..."
+    "saving": "保存中...",
+    "secretsPageTitle": "密钥管理",
+    "secretsPageDescription": "管理数据提供商 API 密钥和凭证",
+    "refresh": "刷新",
+    "securityStatus": "安全状态",
+    "securityStatusDescription": "已配置 {{configured}} / {{total}} 个密钥。密钥使用 AES-256-GCM 加密并安全存储。",
+    "searchSecrets": "搜索密钥...",
+    "storedSecrets": "已存储的密钥",
+    "noSecretsMatch": "没有匹配的密钥",
+    "noSecretsConfigured": "暂无配置的密钥",
+    "recentActivity": "最近活动",
+    "noActivityRecorded": "暂无活动记录",
+    "navStatus": "状态",
+    "navCredentials": "凭证",
+    "navActivity": "活动",
+    "required": "必需",
+    "copyToClipboard": "复制到剪贴板",
+    "hideValue": "隐藏值",
+    "showValue": "显示值",
+    "editValue": "编辑",
+    "setValue": "设置值",
+    "testApiKey": "测试 API 密钥",
+    "deleteCredential": "删除凭证",
+    "testing": "测试中...",
+    "enterSecretValue": "输入密钥值",
+    "getApiKey": "获取 API 密钥",
+    "valueCannotBeEmpty": "值不能为空",
+    "failedToSave": "保存失败",
+    "missingCredential": "缺少凭证: {{key}}",
+    "failedToRetrieveApiKey": "获取 API 密钥失败",
+    "verifiedKeyType": "已验证 ({{keyType}})",
+    "verified": "已验证",
+    "invalidApiKey": "无效的 API 密钥",
+    "validationFailed": "验证失败",
+    "keyTypePaper": "模拟",
+    "keyTypeLive": "实盘",
+    "deleteButton": "删除"
   },
   "resultPanel": {
     "tabs": {
@@ -312,7 +363,8 @@
       "pending": " - 等待中",
       "tradesCount": "({{count}} 笔交易)",
       "collectingData": "收集数据中...",
-      "waiting": "等待中..."
+      "waiting": "等待中...",
+      "cancelled": "已取消"
     },
     "comparison": {
       "title": "性能对比",
@@ -328,5 +380,43 @@
       "equityOverlay": "权益曲线叠加",
       "noResults": "无可对比结果"
     }
+  },
+  "configSummary": {
+    "dataSource": "数据源",
+    "symbol": "交易品种",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "capital": "资金",
+    "orderSize": "订单大小",
+    "sharesUnit": "{{size}} 股"
+  },
+  "namingDialog": {
+    "titleBuilder": "命名策略",
+    "titleExport": "导出到 Quant Lab",
+    "titleBacktest": "命名回测",
+    "confirmBuilder": "确认并生成",
+    "confirmExport": "确认并导出",
+    "confirmBacktest": "确认并执行",
+    "suggestedName": "建议名称：",
+    "useThis": "使用此名称",
+    "or": "或",
+    "customName": "自定义名称：",
+    "placeholder": "输入您的自定义名称...",
+    "finalName": "最终名称：",
+    "cancel": "取消"
+  },
+  "dryRunExecute": {
+    "execute": "执行",
+    "executing": "执行中...",
+    "dryRun": "模拟运行",
+    "direct": "直接执行"
+  },
+  "workflowDropdown": {
+    "searchPlaceholder": "搜索...",
+    "noAlgorithmsFound": "未找到算法"
+  },
+  "backtestDataConfig": {
+    "placeholderSearchSymbol": "搜索品种...",
+    "placeholderInitialCapital": "10000"
   }
 }

@@ -11,6 +11,7 @@
  */
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { DataConfig, OrderSizeUnit } from '../types';
 import { DataSourceSelectField, DEFAULT_DATA_SOURCE } from '@plugins/data-plugin/index';
 import type { DataSourceOption } from '@plugins/data-plugin/index';
@@ -127,6 +128,7 @@ const ORDER_UNIT_OPTIONS = [
 ];
 
 export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChange, disabled, dataSources = [], isAuthenticated = false }) => {
+  const { t } = useTranslation('quant-lab');
   const [query, setQuery] = useState(value.symbol);
   const [searchResults, setSearchResults] = useState<SymbolSearchResult[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -313,13 +315,13 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
     <div className="rounded-lg border border-color-terminal-border p-4 space-y-4"
          style={{ backgroundColor: 'rgba(10, 25, 47, 0.7)' }}>
       <h3 className="text-sm font-medium text-color-terminal-text-secondary terminal-mono uppercase tracking-wider">
-        Data Configuration
+        {t('dataConfig.dataSource')}
       </h3>
 
       {/* Row 1: Data Source + Symbol Search */}
       <div className="grid grid-cols-2 gap-4">
         <DataSourceSelectField
-          label="Data Source"
+          label={t('dataConfig.dataSource')}
           value={value.dataSource || DEFAULT_DATA_SOURCE}
           onChange={handleDataSourceChange}
           dataSources={dataSources}
@@ -328,7 +330,7 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
         />
       <div className="flex flex-col gap-1 relative">
         <label className="text-[10px] uppercase tracking-wider text-color-terminal-text-muted terminal-mono">
-          Symbol
+          {t('dataConfig.symbol')}
         </label>
         <div className="relative">
           <input
@@ -338,7 +340,7 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
             onKeyDown={handleKeyDown}
             onBlur={() => { setTimeout(() => setShowResults(false), 200); setHighlightedIndex(-1); }}
             onFocus={() => query.length >= 2 && searchResults.length > 0 && setShowResults(true)}
-            placeholder="Search symbol..."
+            placeholder={t('dataConfig.symbol')}
             disabled={disabled}
             className="w-full h-9 px-3 rounded border text-sm terminal-mono placeholder-[#495670] focus:outline-none focus:ring-1 focus:ring-color-terminal-accent-primary focus:border-color-terminal-accent-primary transition-colors border-color-terminal-border"
             style={{ backgroundColor: '#112240', borderColor: '#233554', color: '#e6f1ff' }}
@@ -381,14 +383,14 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
       {/* Row 2: Start Date + End Date */}
       <div className="grid grid-cols-2 gap-4">
         <InputField
-          label="Start Date"
+          label={t('dataConfig.startDate')}
           type="date"
           value={value.startDate}
           onChange={(v) => update('startDate', v)}
           disabled={disabled}
         />
         <InputField
-          label="End Date"
+          label={t('dataConfig.endDate')}
           type="date"
           value={value.endDate}
           onChange={(v) => update('endDate', v)}
@@ -399,7 +401,7 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
       {/* Row 3: Initial Capital + Order Size + Unit */}
       <div className="grid grid-cols-3 gap-4">
         <InputField
-          label="Initial Capital"
+          label={t('dataConfig.initialCapital')}
           type="number"
           value={value.initialCapital}
           onChange={(v) => update('initialCapital', Number(v))}
@@ -408,7 +410,7 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
           step={1000}
         />
         <InputField
-          label="Order Size"
+          label={t('dataConfig.orderSize')}
           type="number"
           value={value.orderSize}
           onChange={(v) => update('orderSize', Number(v))}
@@ -416,7 +418,7 @@ export const DataConfigPanel: React.FC<DataConfigPanelProps> = ({ value, onChang
           min={0}
         />
         <SelectField
-          label="Unit"
+          label={t('dataConfig.orderSizeUnit')}
           value={value.orderSizeUnit}
           onChange={(v) => update('orderSizeUnit', v as OrderSizeUnit)}
           options={ORDER_UNIT_OPTIONS}

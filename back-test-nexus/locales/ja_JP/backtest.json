@@ -77,27 +77,38 @@
     "shares": "Shares"
   },
   "sidebar": {
-    "history": "History",
-    "backtesting": "BACKTESTING",
-    "loading": "Loading...",
-    "noHistory": "No backtest history",
-    "testing": "testing..."
+    "history": "履歴",
+    "backtesting": "バックテスト中",
+    "loading": "読み込み中...",
+    "noHistory": "バックテスト履歴なし",
+    "testing": "テスト中...",
+    "capLabel": "資金:",
+    "sizeLabel": "規模:",
+    "testedLabel": "テスト:",
+    "delete": "削除",
+    "checkpointTooltip": "チェックポイント: {{percent}}% 完了"
   },
   "page": {
-    "loadingAlgorithms": "Loading algorithms...",
-    "workflowTitle": "WORKFLOW CONFIGURATION",
-    "workflowStep": "Workflow Step"
+    "loadingAlgorithms": "アルゴリズムを読み込み中...",
+    "workflowTitle": "ワークフロー設定",
+    "workflowStep": "ワークフローステップ",
+    "noResults": "バックテスト結果がありません。",
+    "startBacktest": "設定ページからバックテストを開始してください。",
+    "realtimeChartPending": "データが利用可能になるとリアルタイムチャートが表示されます"
   },
   "buttons": {
-    "newBacktest": "New Backtest",
-    "keep": "Keep",
-    "discard": "Discard",
-    "reset": "Reset",
-    "execute": "Execute",
-    "executing": "Executing...",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "runInBackground": "Run in Background",
+    "newBacktest": "新規バックテスト",
+    "keep": "保持",
+    "discard": "破棄",
+    "reset": "リセット",
+    "execute": "実行",
+    "executing": "実行中...",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "backToConfig": "設定に戻る",
+    "runInBackground": "バックグラウンドで実行",
+    "exportToQuantLab": "Quant Lab にエクスポート",
+    "exporting": "エクスポート中...",
     "return": "戻る"
   },
   "workflowSteps": {
@@ -147,25 +158,69 @@
     "recently": "最近"
   },
   "dialog": {
-    "deleteTitle": "Delete History Record",
-    "deleteMessage": "This will permanently delete the backtest result, including all trade records and equity curve data."
+    "deleteTitle": "履歴を削除",
+    "deleteMessage": "バックテスト結果を完全に削除します。すべての取引記録と資産曲線データが含まれます。"
   },
   "cancelDialog": {
-    "title": "Cancel Backtest",
-    "message": "Are you sure you want to cancel the running backtest? This action cannot be undone.",
-    "confirm": "Cancel Backtest",
-    "keep": "Keep Running"
+    "title": "バックテストをキャンセル",
+    "message": "実行中のバックテストをキャンセルしますか？この操作は元に戻せません。",
+    "confirm": "バックテストをキャンセル",
+    "keep": "実行を続ける"
+  },
+  "cancelledDialog": {
+    "title": "バックテストがキャンセルされました",
+    "message": "バックテストがキャンセルされました。どうしますか？",
+    "stay": "ここに留まる",
+    "goBack": "戻る"
+  },
+  "duplicateDialog": {
+    "title": "重複ケースが検出されました",
+    "message": "{{duplicateText}} は同一の設定です。\n重複ケースを実行しても同じ結果になります。",
+    "caseAndCase": "ケース {{a}} と ケース {{b}}",
+    "continueAnyway": "続行する"
   },
   "workflowSelector": {
-    "selectAlgorithm": "Market Analysis",
-    "preCondition": "Entry Filter",
-    "selectSteps": "Entry Signal",
-    "postCondition": "Exit Strategy",
-    "search": "Search..."
+    "selectAlgorithm": "市場分析",
+    "preCondition": "エントリーフィルター",
+    "selectSteps": "エントリーシグナル",
+    "postCondition": "イグジット戦略",
+    "search": "検索..."
   },
   "breadcrumb": {
-    "backtestNexus": "Backtest Nexus",
-    "result": "Result"
+    "backtestNexus": "バックテスト Nexus",
+    "indicatorsCockpit": "インジケーターコックピット",
+    "kronosCockpit": "クロノスコックピット",
+    "traderCockpit": "トレーダーコックピット",
+    "result": "結果",
+    "backtestResult": "バックテスト結果"
+  },
+  "kronos": {
+    "title": "クロノス戦略",
+    "subtitle": "バックテストするクロノス生成戦略を選択",
+    "noStrategies": "クロノス戦略なし",
+    "noStrategiesHint": "Strategy Builderのクロノス機能で戦略を生成すると、ここに表示されます。",
+    "columnName": "戦略名",
+    "columnType": "タイプ",
+    "columnCreated": "作成日",
+    "columnAction": "選択",
+    "execute": "実行",
+    "executing": "実行中...",
+    "selectAlgorithmFirst": "まず戦略を選択してください",
+    "executionStarted": "実行を開始しました",
+    "executionFailed": "実行に失敗しました"
+  },
+  "locked": {
+    "requiresTier": "この機能には {{tier}} サブスクリプションが必要です"
+  },
+  "auth": {
+    "loginToUnlock": "ログインして解除",
+    "viewPlans": "プランを見る"
+  },
+  "common": {
+    "cancel": "キャンセル"
+  },
+  "notification": {
+    "backtestCompleted": "バックテストが正常に完了しました"
   },
   "cockpitSelector": {
     "title": "コックピット選択",
@@ -213,7 +268,9 @@
     "endDateRequired": "終了日は必須です",
     "endDateAfterStart": "終了日は開始日より後でなければなりません",
     "initialCapitalPositive": "初期資金は正の値でなければなりません",
-    "orderSizePositive": "注文サイズは正の値でなければなりません"
+    "orderSizePositive": "注文サイズは正の値でなければなりません",
+    "lookbackExceeded": "{{timeframe}} 間隔: 最大ルックバック {{lookback}} ({{selected}}d 選択済)",
+    "lookbackWarning": "選択範囲 ({{selected}}d) が最大ルックバック ({{max}}d) を超えています"
   },
   "settings": {
     "back": "戻る",
@@ -223,7 +280,43 @@
     "deleteSecretConfirm": "本当に削除しますか",
     "deleteSecretWarning": "この操作は元に戻せません。",
     "save": "保存",
-    "saving": "保存中..."
+    "saving": "保存中...",
+    "secretsPageTitle": "シークレット",
+    "secretsPageDescription": "データプロバイダーのAPIキーと認証情報を管理",
+    "refresh": "更新",
+    "securityStatus": "セキュリティ状態",
+    "securityStatusDescription": "{{configured}} / {{total}} 個のシークレットが設定済み。シークレットはAES-256-GCMで暗号化され安全に保管されています。",
+    "searchSecrets": "シークレットを検索...",
+    "storedSecrets": "保存されたシークレット",
+    "noSecretsMatch": "検索に一致するシークレットがありません",
+    "noSecretsConfigured": "シークレットが設定されていません",
+    "recentActivity": "最近のアクティビティ",
+    "noActivityRecorded": "アクティビティなし",
+    "navStatus": "ステータス",
+    "navCredentials": "認証情報",
+    "navActivity": "アクティビティ",
+    "required": "必須",
+    "copyToClipboard": "クリップボードにコピー",
+    "hideValue": "値を隠す",
+    "showValue": "値を表示",
+    "editValue": "編集",
+    "setValue": "値を設定",
+    "testApiKey": "APIキーをテスト",
+    "deleteCredential": "認証情報を削除",
+    "testing": "テスト中...",
+    "enterSecretValue": "シークレット値を入力",
+    "getApiKey": "APIキーを取得",
+    "valueCannotBeEmpty": "値は空にできません",
+    "failedToSave": "保存に失敗しました",
+    "missingCredential": "認証情報がありません: {{key}}",
+    "failedToRetrieveApiKey": "APIキーの取得に失敗しました",
+    "verifiedKeyType": "検証済み ({{keyType}})",
+    "verified": "検証済み",
+    "invalidApiKey": "無効なAPIキー",
+    "validationFailed": "検証に失敗しました",
+    "keyTypePaper": "ペーパー",
+    "keyTypeLive": "ライブ",
+    "deleteButton": "削除"
   },
   "resultPanel": {
     "tabs": {
@@ -237,7 +330,9 @@
       "bars": "{{count}} 本",
       "noEquityData": "資産データなし",
       "noKlineData": "K線データなし",
-      "processing": "処理中... ({{count}} ポイント)"
+      "processing": "処理中... ({{count}} ポイント)",
+      "backtesting": "バックテスト中...",
+      "noTrades": "取引なし"
     },
     "summary": {
       "equity": "資産: {{count}} ポイント",
@@ -268,7 +363,8 @@
       "pending": " - 待機中",
       "tradesCount": "({{count}} 件)",
       "collectingData": "データ収集中...",
-      "waiting": "待機中..."
+      "waiting": "待機中...",
+      "cancelled": "キャンセル済み"
     },
     "comparison": {
       "title": "パフォーマンス比較",
@@ -284,5 +380,43 @@
       "equityOverlay": "資産曲線オーバーレイ",
       "noResults": "比較する結果がありません"
     }
+  },
+  "configSummary": {
+    "dataSource": "データソース",
+    "symbol": "シンボル",
+    "startDate": "開始日",
+    "endDate": "終了日",
+    "capital": "資本",
+    "orderSize": "注文サイズ",
+    "sharesUnit": "{{size}} 株"
+  },
+  "namingDialog": {
+    "titleBuilder": "戦略の名前",
+    "titleExport": "Quant Lab にエクスポート",
+    "titleBacktest": "バックテストの名前",
+    "confirmBuilder": "確認して生成",
+    "confirmExport": "確認してエクスポート",
+    "confirmBacktest": "確認して実行",
+    "suggestedName": "推奨名：",
+    "useThis": "これを使用",
+    "or": "または",
+    "customName": "カスタム名：",
+    "placeholder": "カスタム名を入力してください...",
+    "finalName": "最終名：",
+    "cancel": "キャンセル"
+  },
+  "dryRunExecute": {
+    "execute": "実行",
+    "executing": "実行中...",
+    "dryRun": "ドライラン",
+    "direct": "ダイレクト"
+  },
+  "workflowDropdown": {
+    "searchPlaceholder": "検索...",
+    "noAlgorithmsFound": "アルゴリズムが見つかりません"
+  },
+  "backtestDataConfig": {
+    "placeholderSearchSymbol": "シンボルを検索...",
+    "placeholderInitialCapital": "10000"
   }
 }

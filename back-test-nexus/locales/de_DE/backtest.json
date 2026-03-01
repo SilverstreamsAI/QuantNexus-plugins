@@ -81,12 +81,20 @@
     "backtesting": "BACKTESTING",
     "loading": "Loading...",
     "noHistory": "No backtest history",
-    "testing": "testing..."
+    "testing": "testing...",
+    "capLabel": "Kap.:",
+    "sizeLabel": "Groesse:",
+    "testedLabel": "Getestet:",
+    "delete": "Loeschen",
+    "checkpointTooltip": "Checkpoint: {{percent}}% abgeschlossen"
   },
   "page": {
     "loadingAlgorithms": "Loading algorithms...",
     "workflowTitle": "WORKFLOW CONFIGURATION",
-    "workflowStep": "Workflow Step"
+    "workflowStep": "Workflow Step",
+    "noResults": "Keine Backtest-Ergebnisse verfuegbar.",
+    "startBacktest": "Starten Sie einen Backtest von der Konfigurationsseite.",
+    "realtimeChartPending": "Echtzeit-Chart wird angezeigt, wenn Daten verfuegbar sind"
   },
   "buttons": {
     "newBacktest": "New Backtest",
@@ -97,7 +105,10 @@
     "executing": "Executing...",
     "cancel": "Cancel",
     "delete": "Delete",
+    "backToConfig": "Zurueck zur Konfiguration",
     "runInBackground": "Run in Background",
+    "exportToQuantLab": "Nach Quant Lab exportieren",
+    "exporting": "Exportieren...",
     "return": "Zurueck"
   },
   "workflowSteps": {
@@ -156,6 +167,12 @@
     "confirm": "Cancel Backtest",
     "keep": "Keep Running"
   },
+  "cancelledDialog": {
+    "title": "Backtest abgebrochen",
+    "message": "Der Backtest wurde abgebrochen. Was moechten Sie tun?",
+    "stay": "Hier bleiben",
+    "goBack": "Zurueck"
+  },
   "workflowSelector": {
     "selectAlgorithm": "Market Analysis",
     "preCondition": "Entry Filter",
@@ -165,7 +182,39 @@
   },
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
-    "result": "Result"
+    "indicatorsCockpit": "Indikatoren-Cockpit",
+    "kronosCockpit": "Kronos-Cockpit",
+    "traderCockpit": "Trader-Cockpit",
+    "result": "Ergebnis",
+    "backtestResult": "Backtest-Ergebnis"
+  },
+  "kronos": {
+    "title": "KRONOS-STRATEGIEN",
+    "subtitle": "Waehlen Sie eine Kronos-generierte Strategie zum Backtesten",
+    "noStrategies": "Keine Kronos-Strategien",
+    "noStrategiesHint": "Generieren Sie Strategien mit der Kronos-Funktion im Strategy Builder, um sie hier zu sehen.",
+    "columnName": "Strategiename",
+    "columnType": "Typ",
+    "columnCreated": "Erstellt",
+    "columnAction": "Auswaehlen",
+    "execute": "Ausfuehren",
+    "executing": "Ausfuehren...",
+    "selectAlgorithmFirst": "Bitte waehlen Sie zuerst eine Strategie",
+    "executionStarted": "Ausfuehrung gestartet",
+    "executionFailed": "Ausfuehrung fehlgeschlagen"
+  },
+  "locked": {
+    "requiresTier": "Diese Funktion erfordert ein {{tier}}-Abonnement"
+  },
+  "auth": {
+    "loginToUnlock": "Anmelden zum Freischalten",
+    "viewPlans": "Plaene anzeigen"
+  },
+  "common": {
+    "cancel": "Abbrechen"
+  },
+  "notification": {
+    "backtestCompleted": "Backtest erfolgreich abgeschlossen"
   },
   "cockpitSelector": {
     "title": "COCKPIT AUSWAHLEN",
@@ -187,6 +236,12 @@
     "closeTab": "Tab schliessen",
     "close": "Schliessen",
     "closeAll": "Alle schliessen"
+  },
+  "duplicateDialog": {
+    "title": "Doppelte Faelle erkannt",
+    "message": "{{duplicateText}} haben identische Konfigurationen.\nDoppelte Faelle ausfuehren ergibt dieselben Ergebnisse.",
+    "caseAndCase": "Fall {{a}} und Fall {{b}}",
+    "continueAnyway": "Trotzdem fortfahren"
   },
   "messages": {
     "resumeApiNotAvailable": "Resume-API nicht verfuegbar",
@@ -213,7 +268,9 @@
     "endDateRequired": "Enddatum ist erforderlich",
     "endDateAfterStart": "Enddatum muss nach dem Startdatum liegen",
     "initialCapitalPositive": "Anfangskapital muss positiv sein",
-    "orderSizePositive": "Ordergroesse muss positiv sein"
+    "orderSizePositive": "Ordergroesse muss positiv sein",
+    "lookbackExceeded": "{{timeframe}} Intervall: max. {{lookback}} Lookback ({{selected}}d ausgewaehlt)",
+    "lookbackWarning": "Ausgewaehlter Bereich ({{selected}}d) ueberschreitet max. Lookback ({{max}}d)"
   },
   "settings": {
     "back": "Zurueck",
@@ -223,7 +280,43 @@
     "deleteSecretConfirm": "Sind Sie sicher, dass Sie loeschen moechten",
     "deleteSecretWarning": "Diese Aktion kann nicht rueckgaengig gemacht werden.",
     "save": "Speichern",
-    "saving": "Speichern..."
+    "saving": "Speichern...",
+    "secretsPageTitle": "Geheimnisse",
+    "secretsPageDescription": "API-Schluessel und Anmeldeinformationen fuer Datenanbieter verwalten",
+    "refresh": "Aktualisieren",
+    "securityStatus": "Sicherheitsstatus",
+    "securityStatusDescription": "{{configured}} von {{total}} Geheimnissen konfiguriert. Geheimnisse werden mit AES-256-GCM verschluesselt und sicher gespeichert.",
+    "searchSecrets": "Geheimnisse suchen...",
+    "storedSecrets": "Gespeicherte Geheimnisse",
+    "noSecretsMatch": "Keine Geheimnisse entsprechen Ihrer Suche",
+    "noSecretsConfigured": "Keine Geheimnisse konfiguriert",
+    "recentActivity": "Letzte Aktivitaet",
+    "noActivityRecorded": "Keine Aktivitaet aufgezeichnet",
+    "navStatus": "Status",
+    "navCredentials": "Anmeldeinformationen",
+    "navActivity": "Aktivitaet",
+    "required": "Erforderlich",
+    "copyToClipboard": "In Zwischenablage kopieren",
+    "hideValue": "Wert ausblenden",
+    "showValue": "Wert anzeigen",
+    "editValue": "Bearbeiten",
+    "setValue": "Wert setzen",
+    "testApiKey": "API-Schluessel testen",
+    "deleteCredential": "Anmeldeinformation loeschen",
+    "testing": "Testen...",
+    "enterSecretValue": "Geheimniswert eingeben",
+    "getApiKey": "API-Schluessel erhalten",
+    "valueCannotBeEmpty": "Wert darf nicht leer sein",
+    "failedToSave": "Speichern fehlgeschlagen",
+    "missingCredential": "Fehlende Anmeldeinformation: {{key}}",
+    "failedToRetrieveApiKey": "API-Schluessel konnte nicht abgerufen werden",
+    "verifiedKeyType": "Verifiziert ({{keyType}})",
+    "verified": "Verifiziert",
+    "invalidApiKey": "Ungueltiger API-Schluessel",
+    "validationFailed": "Validierung fehlgeschlagen",
+    "keyTypePaper": "Paper",
+    "keyTypeLive": "Live",
+    "deleteButton": "Loeschen"
   },
   "resultPanel": {
     "tabs": {
@@ -237,7 +330,9 @@
       "bars": "{{count}} Balken",
       "noEquityData": "Keine Eigenkapitaldaten",
       "noKlineData": "Keine K-Linien-Daten",
-      "processing": "Verarbeitung... ({{count}} Punkte)"
+      "processing": "Verarbeitung... ({{count}} Punkte)",
+      "backtesting": "Backtesting...",
+      "noTrades": "Keine Trades"
     },
     "summary": {
       "equity": "Eigenkapital: {{count}} Punkte",
@@ -268,7 +363,8 @@
       "pending": " - Ausstehend",
       "tradesCount": "({{count}} Trades)",
       "collectingData": "Daten sammeln...",
-      "waiting": "Warten..."
+      "waiting": "Warten...",
+      "cancelled": "Abgebrochen"
     },
     "comparison": {
       "title": "Leistungsvergleich",
@@ -284,5 +380,43 @@
       "equityOverlay": "Eigenkapitalkurven Overlay",
       "noResults": "Keine Ergebnisse zum Vergleichen"
     }
+  },
+  "configSummary": {
+    "dataSource": "Datenquelle",
+    "symbol": "Symbol",
+    "startDate": "Startdatum",
+    "endDate": "Enddatum",
+    "capital": "Kapital",
+    "orderSize": "Ordergroesse",
+    "sharesUnit": "{{size}} Aktien"
+  },
+  "namingDialog": {
+    "titleBuilder": "Strategie benennen",
+    "titleExport": "Nach Quant Lab exportieren",
+    "titleBacktest": "Backtest benennen",
+    "confirmBuilder": "Bestaetigen & Generieren",
+    "confirmExport": "Bestaetigen & Exportieren",
+    "confirmBacktest": "Bestaetigen & Ausfuehren",
+    "suggestedName": "Vorgeschlagener Name:",
+    "useThis": "Verwenden",
+    "or": "oder",
+    "customName": "Benutzerdefinierter Name:",
+    "placeholder": "Geben Sie Ihren benutzerdefinierten Namen ein...",
+    "finalName": "Endgueltiger Name:",
+    "cancel": "Abbrechen"
+  },
+  "dryRunExecute": {
+    "execute": "AUSFUEHREN",
+    "executing": "AUSFUEHREN...",
+    "dryRun": "TROCKENLAUF",
+    "direct": "DIREKT"
+  },
+  "workflowDropdown": {
+    "searchPlaceholder": "Suchen...",
+    "noAlgorithmsFound": "Keine Algorithmen gefunden"
+  },
+  "backtestDataConfig": {
+    "placeholderSearchSymbol": "Symbol suchen...",
+    "placeholderInitialCapital": "10000"
   }
 }

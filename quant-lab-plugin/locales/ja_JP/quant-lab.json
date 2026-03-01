@@ -1,0 +1,187 @@
+{
+  "hub": {
+    "title": "Quant Lab",
+    "subtitle": "Alpha Factory - 信号の組み合わせと評価",
+    "signalFactory": {
+      "title": "信号ファクトリー",
+      "description": "複数のエントリー信号を組み合わせる",
+      "addSignal": "信号を追加",
+      "combinator": "コンビネーター:",
+      "lookback": "ルックバック:",
+      "days": "日"
+    },
+    "engineStore": {
+      "title": "エンジンストア",
+      "description": "バックテスト設定を管理"
+    },
+    "status": {
+      "ready": "システム準備完了"
+    }
+  },
+  "factorFactory": {
+    "title": "ファクターファクトリー",
+    "addFactor": "ファクターを追加",
+    "combinator": "コンビネーター:",
+    "lookback": "ルックバック:",
+    "days": "日"
+  },
+  "exitFactory": {
+    "title": "イグジットファクトリー",
+    "combinator": "コンビネーター:"
+  },
+  "signalFactory": {
+    "title": "信号ファクトリー",
+    "addSignal": "信号を追加",
+    "combinator": "コンビネーター:",
+    "lookback": "ルックバック:",
+    "days": "日"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "等しい重み",
+      "sharpe_weighted": "シャープレシオ加重",
+      "correlation_adjusted": "相関調整",
+      "regime_based": "レジームベース"
+    },
+    "factor": {
+      "equal_weight": "等しい重み",
+      "ic_weighted": "IC 加重",
+      "regression": "統計的回帰",
+      "pca": "PCA 合成"
+    },
+    "exit": {
+      "any": "いずれか",
+      "all": "すべて",
+      "majority": "過半数",
+      "priority": "優先度"
+    }
+  },
+  "actionBar": {
+    "validate": "検証",
+    "saveAs": "名前を付けて保存",
+    "runBacktest": "バックテストを実行",
+    "running": "実行中..."
+  },
+  "configSidebar": {
+    "noConfigs": "保存された設定はありません",
+    "createNew": "新しい設定を作成して開始",
+    "noSearchResults": "検索に一致する設定はありません"
+  },
+  "newConfigButton": {
+    "placeholder": "新しい設定...",
+    "create": "新しい設定を作成"
+  },
+  "configSearch": {
+    "placeholder": "設定を検索...",
+    "clear": "検索をクリア"
+  },
+  "configList": {
+    "noConfigs": "保存された設定はありません",
+    "signals": "信号",
+    "signalsPlural": "信号",
+    "rules": "ルール",
+    "rulesPlural": "ルール",
+    "active": "アクティブ"
+  },
+  "factorCategories": {
+    "momentum": "モメンタム",
+    "mean_reversion": "平均回帰",
+    "volatility": "ボラティリティ",
+    "value": "バリュー",
+    "volume": "ボリューム",
+    "technical": "テクニカル",
+    "pattern": "パターン",
+    "cycle": "サイクル",
+    "statistic": "統計"
+  },
+  "translationStatus": {
+    "ok": "評価可能",
+    "structured": "パイプライン",
+    "unsupported": "未サポート"
+  },
+  "riskRules": {
+    "circuitBreaker": "サーキットブレーカー",
+    "timeLimit": "時間制限",
+    "regimeDetection": "レジーム検出",
+    "drawdownLimit": "ドローダウン制限",
+    "correlationCap": "相関キャップ",
+    "hardSafety": "ハードセーフティ制限",
+    "alwaysOn": "常にオン"
+  },
+  "ruleActions": {
+    "closeAll": "すべて決済",
+    "reduceTo": "% に削減",
+    "reduceAll": "すべて削減",
+    "haltTrading": "取引停止",
+    "haltNewEntry": "新規エントリー停止",
+    "skipEntry": "エントリーをスキップ",
+    "reduceHalf": "50% 削減"
+  },
+  "ruleParams": {
+    "pnl": "PnL <",
+    "cooldown": "クールダウン",
+    "bars": "バー",
+    "action": "アクション",
+    "maxHolding": "最大保有期間",
+    "hours": "時間",
+    "period": "期間",
+    "threshold": "閾値",
+    "maxDrawdown": "最大ドローダウン",
+    "maxCorr": "最大相関",
+    "lookback": "ルックバック",
+    "days": "日",
+    "maxLoss": "最大損失",
+    "fromEntry": "エントリーから",
+    "reduceToLabel": "削減先",
+    "reduceBy": "削減率"
+  },
+  "indicators": {
+    "atr": "ATR",
+    "vix": "VIX",
+    "realizedVol": "実現ボラティリティ"
+  },
+  "timeUnits": {
+    "hours": "時間",
+    "bars": "バー"
+  },
+  "dataConfig": {
+    "dataSource": "データソース",
+    "symbol": "シンボル",
+    "startDate": "開始日",
+    "endDate": "終了日",
+    "initialCapital": "初期資金",
+    "orderSize": "注文サイズ",
+    "orderSizeUnit": "注文サイズ単位",
+    "percent": "パーセント"
+  },
+  "errors": {
+    "validationFailed": "検証に失敗しました",
+    "saveFailed": "保存に失敗しました",
+    "loadFailed": "読み込みに失敗しました",
+    "backtestFailed": "バックテストに失敗しました"
+  },
+  "persona": {
+    "title": "Trading Persona",
+    "noPersona": "No persona constraint",
+    "preferencePlaceholder": "Optional: describe your generation preference, e.g. 'focus on AUD/JPY pairs, tighter stop-loss'",
+    "preferenceLabel": "Generation Preference",
+    "charCount": "{{current}}/{{max}}",
+    "mustInclude": "Must Include",
+    "regimeBias": "Regime Bias",
+    "holdingPeriod": "Holding Period",
+    "riskStyle": "Risk Style",
+    "forbidden": "Forbidden",
+    "loadError": "Failed to load personas",
+    "requiresAuth": "Login required to load personas"
+  },
+  "common": {
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる",
+    "add": "追加",
+    "remove": "削除"
+  }
+}

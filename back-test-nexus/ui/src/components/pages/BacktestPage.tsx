@@ -1327,7 +1327,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
         if (match) {
           const maxDays = parseInt(match[1], 10);
           if (selectedDays > maxDays) {
-            errors.startDate = `${tf} interval: max ${lb} lookback (${selectedDays}d selected)`;
+            errors.startDate = t('validation.lookbackExceeded', { timeframe: tf, lookback: lb, selected: selectedDays });
             break;
           }
         }
@@ -1381,13 +1381,13 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     if (activeWorkflows.length > 1) {
       const duplicates = findDuplicateWorkflows(activeWorkflows);
       if (duplicates.length > 0) {
-        const duplicateText = duplicates.map(([a, b]) => `Case ${a} and Case ${b}`).join(', ');
+        const duplicateText = duplicates.map(([a, b]) => t('duplicateDialog.caseAndCase', { a, b })).join(', ');
         const confirmed = await messageAPI?.confirm(
-          `${duplicateText} have identical configurations.\nRunning duplicate cases will produce the same results.`,
+          t('duplicateDialog.message', { duplicateText }),
           {
-            title: 'Duplicate Cases Detected',
-            okText: 'Continue Anyway',
-            cancelText: 'Cancel',
+            title: t('duplicateDialog.title'),
+            okText: t('duplicateDialog.continueAnyway'),
+            cancelText: t('common.cancel'),
           }
         );
         if (!confirmed) {
@@ -1447,7 +1447,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     } catch (error) {
       messageAPI?.error(t('messages.executionFailed'));
       console.error('[BacktestPage] Execute error:', error);
-      setExecuteError(error instanceof Error ? error.message : 'Execution failed');
+      setExecuteError(error instanceof Error ? error.message : t('messages.executionFailed'));
       setIsExecuting(false);
     }
   }, [dataConfig, workflowRows, hasWorkflowContent, findDuplicateWorkflows, runIndependentCase, dataAPI, executorAPI, messageAPI, onExecutionBegin, cockpitMode]);
@@ -1461,7 +1461,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
     <div className="h-full flex flex-col bg-color-terminal-bg text-color-terminal-text">
       {/* Zone A: Page Header - TICKET_308 (full width, above sidebar + content) */}
       <PageHeader
-        title={pageTitle || 'Backtest Nexus'}
+        title={pageTitle || t('breadcrumb.backtestNexus')}
         onSettingsClick={onSettingsClick}
       />
 
@@ -1525,13 +1525,13 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                   {/* Row 2: Cap, Size, Test Time */}
                   <div className="flex items-center justify-between text-[11px] text-color-terminal-text-muted">
                     <div className="flex items-center gap-4">
-                      <span>Cap: <span className="text-color-terminal-text-secondary">
+                      <span>{t('sidebar.capLabel')} <span className="text-color-terminal-text-secondary">
                         ${selectedHistoryItem.initialCapital >= 1000
                           ? `${(selectedHistoryItem.initialCapital / 1000).toFixed(0)}K`
                           : selectedHistoryItem.initialCapital}
                       </span></span>
                       {selectedHistoryItem.orderSize !== null && selectedHistoryItem.orderSizeUnit && (
-                        <span>Size: <span className="text-color-terminal-text-secondary">
+                        <span>{t('sidebar.sizeLabel')} <span className="text-color-terminal-text-secondary">
                           {selectedHistoryItem.orderSizeUnit === 'percent'
                             ? `${selectedHistoryItem.orderSize}%`
                             : selectedHistoryItem.orderSizeUnit === 'cash'
@@ -1540,7 +1540,7 @@ export const BacktestPage: React.FC<BacktestPageProps> = ({
                         </span></span>
                       )}
                     </div>
-                    <span>Tested: <span className="text-color-terminal-text-secondary">{selectedHistoryItem.createdAt}</span></span>
+                    <span>{t('sidebar.testedLabel')} <span className="text-color-terminal-text-secondary">{selectedHistoryItem.createdAt}</span></span>
                   </div>
                 </div>
               )}

@@ -1,0 +1,187 @@
+{
+  "hub": {
+    "title": "Quant Lab",
+    "subtitle": "Alpha Factory - 信号组合与评估",
+    "signalFactory": {
+      "title": "信号工厂",
+      "description": "组合多个入场信号",
+      "addSignal": "添加信号",
+      "combinator": "组合器:",
+      "lookback": "回溯:",
+      "days": "天"
+    },
+    "engineStore": {
+      "title": "引擎商店",
+      "description": "管理回测配置"
+    },
+    "status": {
+      "ready": "系统就绪"
+    }
+  },
+  "factorFactory": {
+    "title": "因子工厂",
+    "addFactor": "添加因子",
+    "combinator": "组合器:",
+    "lookback": "回溯:",
+    "days": "天"
+  },
+  "exitFactory": {
+    "title": "退出工厂",
+    "combinator": "组合器:"
+  },
+  "signalFactory": {
+    "title": "信号工厂",
+    "addSignal": "添加信号",
+    "combinator": "组合器:",
+    "lookback": "回溯:",
+    "days": "天"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "等权重",
+      "sharpe_weighted": "夏普比率加权",
+      "correlation_adjusted": "相关性调整",
+      "regime_based": "基于状态"
+    },
+    "factor": {
+      "equal_weight": "等权重",
+      "ic_weighted": "IC 加权",
+      "regression": "统计回归",
+      "pca": "PCA 合成"
+    },
+    "exit": {
+      "any": "任意",
+      "all": "全部",
+      "majority": "多数",
+      "priority": "优先级"
+    }
+  },
+  "actionBar": {
+    "validate": "验证",
+    "saveAs": "另存为",
+    "runBacktest": "运行回测",
+    "running": "运行中..."
+  },
+  "configSidebar": {
+    "noConfigs": "没有保存的配置",
+    "createNew": "创建新配置以开始",
+    "noSearchResults": "没有匹配搜索的配置"
+  },
+  "newConfigButton": {
+    "placeholder": "新配置...",
+    "create": "创建新配置"
+  },
+  "configSearch": {
+    "placeholder": "搜索配置...",
+    "clear": "清除搜索"
+  },
+  "configList": {
+    "noConfigs": "没有保存的配置",
+    "signals": "个信号",
+    "signalsPlural": "个信号",
+    "rules": "条规则",
+    "rulesPlural": "条规则",
+    "active": "已启用"
+  },
+  "factorCategories": {
+    "momentum": "动量",
+    "mean_reversion": "均值回归",
+    "volatility": "波动率",
+    "value": "价值",
+    "volume": "成交量",
+    "technical": "技术",
+    "pattern": "形态",
+    "cycle": "周期",
+    "statistic": "统计"
+  },
+  "translationStatus": {
+    "ok": "可评估",
+    "structured": "流程中",
+    "unsupported": "不支持"
+  },
+  "riskRules": {
+    "circuitBreaker": "熔断器",
+    "timeLimit": "时间限制",
+    "regimeDetection": "状态检测",
+    "drawdownLimit": "回撤限制",
+    "correlationCap": "相关性上限",
+    "hardSafety": "硬安全限制",
+    "alwaysOn": "始终激活"
+  },
+  "ruleActions": {
+    "closeAll": "全部平仓",
+    "reduceTo": "减仓至 %",
+    "reduceAll": "减少所有持仓",
+    "haltTrading": "停止交易",
+    "haltNewEntry": "停止新入场",
+    "skipEntry": "跳过入场",
+    "reduceHalf": "减少 50%"
+  },
+  "ruleParams": {
+    "pnl": "盈亏 <",
+    "cooldown": "冷却时间",
+    "bars": "K 线数",
+    "action": "操作",
+    "maxHolding": "最大持仓时间",
+    "hours": "小时",
+    "period": "周期",
+    "threshold": "阈值",
+    "maxDrawdown": "最大回撤",
+    "maxCorr": "最大相关性",
+    "lookback": "回溯",
+    "days": "天",
+    "maxLoss": "最大损失",
+    "fromEntry": "从入场",
+    "reduceToLabel": "减仓至",
+    "reduceBy": "减少比例"
+  },
+  "indicators": {
+    "atr": "ATR",
+    "vix": "VIX",
+    "realizedVol": "实现波动率"
+  },
+  "timeUnits": {
+    "hours": "小时",
+    "bars": "K 线"
+  },
+  "dataConfig": {
+    "dataSource": "数据源",
+    "symbol": "交易对",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "initialCapital": "初始资金",
+    "orderSize": "订单大小",
+    "orderSizeUnit": "订单大小单位",
+    "percent": "百分比"
+  },
+  "errors": {
+    "validationFailed": "验证失败",
+    "saveFailed": "保存失败",
+    "loadFailed": "加载失败",
+    "backtestFailed": "回测失败"
+  },
+  "persona": {
+    "title": "Trading Persona",
+    "noPersona": "No persona constraint",
+    "preferencePlaceholder": "Optional: describe your generation preference",
+    "preferenceLabel": "Generation Preference",
+    "charCount": "{{current}}/{{max}}",
+    "mustInclude": "Must Include",
+    "regimeBias": "Regime Bias",
+    "holdingPeriod": "Holding Period",
+    "riskStyle": "Risk Style",
+    "forbidden": "Forbidden",
+    "loadError": "Failed to load personas",
+    "requiresAuth": "Login required to load personas"
+  },
+  "common": {
+    "cancel": "取消",
+    "confirm": "确认",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "close": "关闭",
+    "add": "添加",
+    "remove": "移除"
+  }
+}

@@ -1,0 +1,187 @@
+{
+  "hub": {
+    "title": "Quant Lab",
+    "subtitle": "Alpha Factory - 信號組合與評估",
+    "signalFactory": {
+      "title": "信號工廠",
+      "description": "組合多個入場信號",
+      "addSignal": "添加信號",
+      "combinator": "組合器:",
+      "lookback": "回溯:",
+      "days": "天"
+    },
+    "engineStore": {
+      "title": "引擎商店",
+      "description": "管理回測配置"
+    },
+    "status": {
+      "ready": "系統就緒"
+    }
+  },
+  "factorFactory": {
+    "title": "因子工廠",
+    "addFactor": "添加因子",
+    "combinator": "組合器:",
+    "lookback": "回溯:",
+    "days": "天"
+  },
+  "exitFactory": {
+    "title": "退出工廠",
+    "combinator": "組合器:"
+  },
+  "signalFactory": {
+    "title": "信號工廠",
+    "addSignal": "添加信號",
+    "combinator": "組合器:",
+    "lookback": "回溯:",
+    "days": "天"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "等權重",
+      "sharpe_weighted": "夏普比率加權",
+      "correlation_adjusted": "相關性調整",
+      "regime_based": "基於狀態"
+    },
+    "factor": {
+      "equal_weight": "等權重",
+      "ic_weighted": "IC 加權",
+      "regression": "統計回歸",
+      "pca": "PCA 合成"
+    },
+    "exit": {
+      "any": "任意",
+      "all": "全部",
+      "majority": "多數",
+      "priority": "優先級"
+    }
+  },
+  "actionBar": {
+    "validate": "驗證",
+    "saveAs": "另存為",
+    "runBacktest": "運行回測",
+    "running": "運行中..."
+  },
+  "configSidebar": {
+    "noConfigs": "沒有保存的配置",
+    "createNew": "創建新配置以開始",
+    "noSearchResults": "沒有匹配搜索的配置"
+  },
+  "newConfigButton": {
+    "placeholder": "新配置...",
+    "create": "創建新配置"
+  },
+  "configSearch": {
+    "placeholder": "搜索配置...",
+    "clear": "清除搜索"
+  },
+  "configList": {
+    "noConfigs": "沒有保存的配置",
+    "signals": "個信號",
+    "signalsPlural": "個信號",
+    "rules": "條規則",
+    "rulesPlural": "條規則",
+    "active": "已啟用"
+  },
+  "factorCategories": {
+    "momentum": "動量",
+    "mean_reversion": "均值回歸",
+    "volatility": "波動率",
+    "value": "價值",
+    "volume": "成交量",
+    "technical": "技術",
+    "pattern": "形態",
+    "cycle": "週期",
+    "statistic": "統計"
+  },
+  "translationStatus": {
+    "ok": "可評估",
+    "structured": "流程中",
+    "unsupported": "不支持"
+  },
+  "riskRules": {
+    "circuitBreaker": "熔斷器",
+    "timeLimit": "時間限制",
+    "regimeDetection": "狀態檢測",
+    "drawdownLimit": "回撤限制",
+    "correlationCap": "相關性上限",
+    "hardSafety": "硬安全限制",
+    "alwaysOn": "始終激活"
+  },
+  "ruleActions": {
+    "closeAll": "全部平倉",
+    "reduceTo": "減倉至 %",
+    "reduceAll": "減少所有持倉",
+    "haltTrading": "停止交易",
+    "haltNewEntry": "停止新入場",
+    "skipEntry": "跳過入場",
+    "reduceHalf": "減少 50%"
+  },
+  "ruleParams": {
+    "pnl": "盈虧 <",
+    "cooldown": "冷卻時間",
+    "bars": "K 線數",
+    "action": "操作",
+    "maxHolding": "最大持倉時間",
+    "hours": "小時",
+    "period": "週期",
+    "threshold": "閾值",
+    "maxDrawdown": "最大回撤",
+    "maxCorr": "最大相關性",
+    "lookback": "回溯",
+    "days": "天",
+    "maxLoss": "最大損失",
+    "fromEntry": "從入場",
+    "reduceToLabel": "減倉至",
+    "reduceBy": "減少比例"
+  },
+  "indicators": {
+    "atr": "ATR",
+    "vix": "VIX",
+    "realizedVol": "實現波動率"
+  },
+  "timeUnits": {
+    "hours": "小時",
+    "bars": "K 線"
+  },
+  "dataConfig": {
+    "dataSource": "數據源",
+    "symbol": "交易對",
+    "startDate": "開始日期",
+    "endDate": "結束日期",
+    "initialCapital": "初始資金",
+    "orderSize": "訂單大小",
+    "orderSizeUnit": "訂單大小單位",
+    "percent": "百分比"
+  },
+  "errors": {
+    "validationFailed": "驗證失敗",
+    "saveFailed": "保存失敗",
+    "loadFailed": "加載失敗",
+    "backtestFailed": "回測失敗"
+  },
+  "persona": {
+    "title": "Trading Persona",
+    "noPersona": "No persona constraint",
+    "preferencePlaceholder": "Optional: describe your generation preference, e.g. 'focus on AUD/JPY pairs, tighter stop-loss'",
+    "preferenceLabel": "Generation Preference",
+    "charCount": "{{current}}/{{max}}",
+    "mustInclude": "Must Include",
+    "regimeBias": "Regime Bias",
+    "holdingPeriod": "Holding Period",
+    "riskStyle": "Risk Style",
+    "forbidden": "Forbidden",
+    "loadError": "Failed to load personas",
+    "requiresAuth": "Login required to load personas"
+  },
+  "common": {
+    "cancel": "取消",
+    "confirm": "確認",
+    "save": "保存",
+    "delete": "刪除",
+    "edit": "編輯",
+    "close": "關閉",
+    "add": "添加",
+    "remove": "移除"
+  }
+}

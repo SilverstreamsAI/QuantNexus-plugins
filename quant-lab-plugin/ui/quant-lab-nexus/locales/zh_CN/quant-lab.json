@@ -195,6 +195,20 @@
     "structured": "管道",
     "unsupported": "不支持"
   },
+  "persona": {
+    "title": "Trading Persona",
+    "noPersona": "No persona constraint",
+    "preferencePlaceholder": "Optional: describe your generation preference",
+    "preferenceLabel": "Generation Preference",
+    "charCount": "{{current}}/{{max}}",
+    "mustInclude": "Must Include",
+    "regimeBias": "Regime Bias",
+    "holdingPeriod": "Holding Period",
+    "riskStyle": "Risk Style",
+    "forbidden": "Forbidden",
+    "loadError": "Failed to load personas",
+    "requiresAuth": "Login required to load personas"
+  },
   "common": {
     "cancel": "取消",
     "delete": "删除",

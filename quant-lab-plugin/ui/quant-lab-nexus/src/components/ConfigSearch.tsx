@@ -3,9 +3,11 @@
  *
  * PLUGIN_TICKET_012: Search input for filtering saved configurations.
  * Follows ConversationSearch (TICKET_077) pattern.
+ * TICKET_422_6: Internationalized with i18n translations
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, X } from 'lucide-react';
 
 export interface ConfigSearchProps {
@@ -21,10 +23,12 @@ export const ConfigSearch: React.FC<ConfigSearchProps> = ({
   value,
   onChange,
   onClear,
-  placeholder = 'Search configs...',
+  placeholder,
   disabled = false,
   className = '',
 }) => {
+  const { t } = useTranslation('quant-lab');
+  const displayPlaceholder = placeholder || t('configSearch.placeholder');
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       onChange(e.target.value);
@@ -53,10 +57,10 @@ export const ConfigSearch: React.FC<ConfigSearchProps> = ({
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder}
+        placeholder={displayPlaceholder}
         disabled={disabled}
         autoComplete="off"
-        aria-label="Search configurations"
+        aria-label={t('configSearch.placeholder')}
         className={[
           'w-full',
           'pl-10 pr-8 py-2',
@@ -85,7 +89,7 @@ export const ConfigSearch: React.FC<ConfigSearchProps> = ({
             'hover:text-color-terminal-text',
             'hover:bg-color-terminal-surface-hover',
           ].join(' ')}
-          aria-label="Clear search"
+          aria-label={t('configSearch.clear')}
         >
           <X className="w-3.5 h-3.5" />
         </button>

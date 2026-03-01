@@ -81,12 +81,20 @@
     "backtesting": "BACKTESTING",
     "loading": "Loading...",
     "noHistory": "No backtest history",
-    "testing": "testing..."
+    "testing": "testing...",
+    "capLabel": "자본:",
+    "sizeLabel": "크기:",
+    "testedLabel": "테스트:",
+    "delete": "삭제",
+    "checkpointTooltip": "체크포인트: {{percent}}% 완료"
   },
   "page": {
     "loadingAlgorithms": "Loading algorithms...",
     "workflowTitle": "WORKFLOW CONFIGURATION",
-    "workflowStep": "Workflow Step"
+    "workflowStep": "Workflow Step",
+    "noResults": "백테스트 결과가 없습니다.",
+    "startBacktest": "설정 페이지에서 백테스트를 시작하세요.",
+    "realtimeChartPending": "데이터가 준비되면 실시간 차트가 표시됩니다"
   },
   "buttons": {
     "newBacktest": "New Backtest",
@@ -97,7 +105,10 @@
     "executing": "Executing...",
     "cancel": "Cancel",
     "delete": "Delete",
+    "backToConfig": "설정으로 돌아가기",
     "runInBackground": "Run in Background",
+    "exportToQuantLab": "Quant Lab으로 내보내기",
+    "exporting": "내보내는 중...",
     "return": "돌아가기"
   },
   "workflowSteps": {
@@ -156,6 +167,12 @@
     "confirm": "Cancel Backtest",
     "keep": "Keep Running"
   },
+  "cancelledDialog": {
+    "title": "백테스트 취소됨",
+    "message": "백테스트가 취소되었습니다. 어떻게 하시겠습니까?",
+    "stay": "여기에 머무르기",
+    "goBack": "돌아가기"
+  },
   "workflowSelector": {
     "selectAlgorithm": "Market Analysis",
     "preCondition": "Entry Filter",
@@ -165,7 +182,39 @@
   },
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
-    "result": "Result"
+    "indicatorsCockpit": "지표 콕핏",
+    "kronosCockpit": "크로노스 콕핏",
+    "traderCockpit": "트레이더 콕핏",
+    "result": "결과",
+    "backtestResult": "백테스트 결과"
+  },
+  "kronos": {
+    "title": "크로노스 전략",
+    "subtitle": "백테스트할 Kronos 생성 전략을 선택하세요",
+    "noStrategies": "크로노스 전략 없음",
+    "noStrategiesHint": "Strategy Builder의 Kronos 기능을 사용하여 전략을 생성하면 여기에 표시됩니다.",
+    "columnName": "전략 이름",
+    "columnType": "유형",
+    "columnCreated": "생성일",
+    "columnAction": "선택",
+    "execute": "실행",
+    "executing": "실행 중...",
+    "selectAlgorithmFirst": "먼저 전략을 선택하세요",
+    "executionStarted": "실행 시작됨",
+    "executionFailed": "실행 실패"
+  },
+  "locked": {
+    "requiresTier": "이 기능은 {{tier}} 구독이 필요합니다"
+  },
+  "auth": {
+    "loginToUnlock": "로그인하여 잠금 해제",
+    "viewPlans": "플랜 보기"
+  },
+  "common": {
+    "cancel": "취소"
+  },
+  "notification": {
+    "backtestCompleted": "백테스트가 성공적으로 완료되었습니다"
   },
   "cockpitSelector": {
     "title": "콕핏 선택",
@@ -187,6 +236,12 @@
     "closeTab": "탭 닫기",
     "close": "닫기",
     "closeAll": "모두 닫기"
+  },
+  "duplicateDialog": {
+    "title": "중복 케이스 감지",
+    "message": "{{duplicateText}}의 구성이 동일합니다.\n중복 케이스를 실행하면 동일한 결과가 생성됩니다.",
+    "caseAndCase": "케이스 {{a}}와 케이스 {{b}}",
+    "continueAnyway": "계속 진행"
   },
   "messages": {
     "resumeApiNotAvailable": "재개 API를 사용할 수 없습니다",
@@ -213,7 +268,9 @@
     "endDateRequired": "종료일은 필수입니다",
     "endDateAfterStart": "종료일은 시작일 이후여야 합니다",
     "initialCapitalPositive": "초기 자본은 양수여야 합니다",
-    "orderSizePositive": "주문 크기는 양수여야 합니다"
+    "orderSizePositive": "주문 크기는 양수여야 합니다",
+    "lookbackExceeded": "{{timeframe}} 간격: 최대 {{lookback}} 룩백 ({{selected}}일 선택됨)",
+    "lookbackWarning": "선택된 범위 ({{selected}}일)가 최대 룩백 ({{max}}일)을 초과합니다"
   },
   "settings": {
     "back": "뒤로",
@@ -223,7 +280,43 @@
     "deleteSecretConfirm": "정말 삭제하시겠습니까",
     "deleteSecretWarning": "이 작업은 되돌릴 수 없습니다.",
     "save": "저장",
-    "saving": "저장 중..."
+    "saving": "저장 중...",
+    "secretsPageTitle": "시크릿",
+    "secretsPageDescription": "데이터 제공자 API 키 및 자격 증명 관리",
+    "refresh": "새로고침",
+    "securityStatus": "보안 상태",
+    "securityStatusDescription": "{{total}}개 중 {{configured}}개의 시크릿이 구성되었습니다. 시크릿은 AES-256-GCM으로 암호화되어 안전하게 저장됩니다.",
+    "searchSecrets": "시크릿 검색...",
+    "storedSecrets": "저장된 시크릿",
+    "noSecretsMatch": "검색과 일치하는 시크릿이 없습니다",
+    "noSecretsConfigured": "구성된 시크릿이 없습니다",
+    "recentActivity": "최근 활동",
+    "noActivityRecorded": "기록된 활동이 없습니다",
+    "navStatus": "상태",
+    "navCredentials": "자격 증명",
+    "navActivity": "활동",
+    "required": "필수",
+    "copyToClipboard": "클립보드에 복사",
+    "hideValue": "값 숨기기",
+    "showValue": "값 표시",
+    "editValue": "편집",
+    "setValue": "값 설정",
+    "testApiKey": "API 키 테스트",
+    "deleteCredential": "자격 증명 삭제",
+    "testing": "테스트 중...",
+    "enterSecretValue": "시크릿 값 입력",
+    "getApiKey": "API 키 받기",
+    "valueCannotBeEmpty": "값은 비워둘 수 없습니다",
+    "failedToSave": "저장 실패",
+    "missingCredential": "누락된 자격 증명: {{key}}",
+    "failedToRetrieveApiKey": "API 키를 가져오지 못했습니다",
+    "verifiedKeyType": "확인됨 ({{keyType}})",
+    "verified": "확인됨",
+    "invalidApiKey": "유효하지 않은 API 키",
+    "validationFailed": "검증 실패",
+    "keyTypePaper": "Paper",
+    "keyTypeLive": "Live",
+    "deleteButton": "삭제"
   },
   "resultPanel": {
     "tabs": {
@@ -237,7 +330,9 @@
       "bars": "{{count}} 봉",
       "noEquityData": "자산 데이터 없음",
       "noKlineData": "K선 데이터 없음",
-      "processing": "처리 중... ({{count}} 포인트)"
+      "processing": "처리 중... ({{count}} 포인트)",
+      "backtesting": "백테스팅...",
+      "noTrades": "거래 없음"
     },
     "summary": {
       "equity": "자산: {{count}} 포인트",
@@ -268,7 +363,8 @@
       "pending": " - 대기 중",
       "tradesCount": "({{count}} 건)",
       "collectingData": "데이터 수집 중...",
-      "waiting": "대기 중..."
+      "waiting": "대기 중...",
+      "cancelled": "취소됨"
     },
     "comparison": {
       "title": "성과 비교",
@@ -284,5 +380,43 @@
       "equityOverlay": "자산 곡선 오버레이",
       "noResults": "비교할 결과 없음"
     }
+  },
+  "configSummary": {
+    "dataSource": "데이터 소스",
+    "symbol": "심볼",
+    "startDate": "시작일",
+    "endDate": "종료일",
+    "capital": "자본",
+    "orderSize": "주문 크기",
+    "sharesUnit": "{{size}} 주"
+  },
+  "namingDialog": {
+    "titleBuilder": "전략 이름 지정",
+    "titleExport": "Quant Lab 으로 내보내기",
+    "titleBacktest": "백테스트 이름 지정",
+    "confirmBuilder": "확인 및 생성",
+    "confirmExport": "확인 및 내보내기",
+    "confirmBacktest": "확인 및 실행",
+    "suggestedName": "추천 이름:",
+    "useThis": "이름 사용",
+    "or": "또는",
+    "customName": "사용자 지정 이름:",
+    "placeholder": "사용자 지정 이름을 입력하세요...",
+    "finalName": "최종 이름:",
+    "cancel": "취소"
+  },
+  "dryRunExecute": {
+    "execute": "실행",
+    "executing": "실행 중...",
+    "dryRun": "드라이 런",
+    "direct": "다이렉트"
+  },
+  "workflowDropdown": {
+    "searchPlaceholder": "검색...",
+    "noAlgorithmsFound": "알고리즘을 찾을 수 없습니다"
+  },
+  "backtestDataConfig": {
+    "placeholderSearchSymbol": "심볼 검색...",
+    "placeholderInitialCapital": "10000"
   }
 }

@@ -9,6 +9,7 @@
 
 import React, { useState, useCallback, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 // -----------------------------------------------------------------------------
@@ -123,9 +124,10 @@ export const WorkflowDropdown: React.FC<WorkflowDropdownProps> = ({
   disabled = false,
   multiSelect = true,
   showSearch = true,
-  searchPlaceholder = 'Search...',
+  searchPlaceholder,
   className,
 }) => {
+  const { t } = useTranslation('backtest');
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -135,6 +137,9 @@ export const WorkflowDropdown: React.FC<WorkflowDropdownProps> = ({
   const [openUpward, setOpenUpward] = useState(false);
 
   const themeColors = THEME_COLORS[theme];
+  
+  // Resolve search placeholder - use prop or fall back to translation
+  const resolvedSearchPlaceholder = searchPlaceholder ?? t('workflowDropdown.searchPlaceholder');
 
   // Filter options by search
   const filteredOptions = useMemo(() => {
@@ -314,7 +319,7 @@ export const WorkflowDropdown: React.FC<WorkflowDropdownProps> = ({
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={searchPlaceholder}
+                    placeholder={resolvedSearchPlaceholder}
                     className="w-full pl-8 pr-8 py-2 text-xs bg-[#0a192f] border border-color-terminal-border rounded text-color-terminal-text placeholder-color-terminal-text-muted focus:outline-none focus:border-color-terminal-accent-primary"
                     autoFocus
                   />
@@ -334,7 +339,7 @@ export const WorkflowDropdown: React.FC<WorkflowDropdownProps> = ({
             <div className="max-h-[400px] overflow-y-auto">
               {filteredOptions.length === 0 ? (
                 <div className="px-3 py-4 text-center text-xs text-color-terminal-text-muted">
-                  No algorithms found
+                  {t('workflowDropdown.noAlgorithmsFound')}
                 </div>
               ) : (
                 filteredOptions.map((option) => {

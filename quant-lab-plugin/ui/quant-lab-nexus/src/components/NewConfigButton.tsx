@@ -3,9 +3,11 @@
  *
  * PLUGIN_TICKET_012: Button to create a new Alpha Factory configuration.
  * Follows NewChatButton (TICKET_077) pattern.
+ * TICKET_422_6: Internationalized with i18n translations
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { FolderPlus } from 'lucide-react';
 
 export interface NewConfigButtonProps {
@@ -18,9 +20,11 @@ export interface NewConfigButtonProps {
 export const NewConfigButton: React.FC<NewConfigButtonProps> = ({
   onClick,
   disabled = false,
-  label = 'New Config',
+  label,
   className = '',
 }) => {
+  const { t } = useTranslation('quant-lab');
+  const displayLabel = label || t('newConfigButton.create');
   return (
     <button
       type="button"
@@ -43,10 +47,10 @@ export const NewConfigButton: React.FC<NewConfigButtonProps> = ({
         'disabled:active:scale-100',
         className,
       ].join(' ')}
-      aria-label={label}
+      aria-label={displayLabel}
     >
       <FolderPlus className="w-4 h-4" />
-      <span>{label}</span>
+      <span>{displayLabel}</span>
     </button>
   );
 };

@@ -63,7 +63,7 @@ const SingleCaseCharts: React.FC<SingleCaseChartsProps> = ({
           <div className="flex flex-col items-center justify-center h-full gap-2">
             <CancelledIcon className="w-8 h-8 text-red-400" />
             <span className="text-xs text-red-400 font-mono uppercase tracking-wider">
-              {t('resultPanel.status.cancelled', 'Cancelled')}
+              {t('resultPanel.status.cancelled')}
             </span>
           </div>
         );

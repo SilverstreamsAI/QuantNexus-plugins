@@ -1,0 +1,187 @@
+{
+  "hub": {
+    "title": "Quant Lab",
+    "subtitle": "Alpha Factory - Combinación y evaluación de señales",
+    "signalFactory": {
+      "title": "Fábrica de Señales",
+      "description": "Combinar múltiples señales de entrada",
+      "addSignal": "Añadir Señal",
+      "combinator": "Combinador:",
+      "lookback": "Retroceso:",
+      "days": "días"
+    },
+    "engineStore": {
+      "title": "Tienda de Motor",
+      "description": "Gestionar configuraciones de backtest"
+    },
+    "status": {
+      "ready": "Sistema Listo"
+    }
+  },
+  "factorFactory": {
+    "title": "Fábrica de Factores",
+    "addFactor": "Añadir Factor",
+    "combinator": "Combinador:",
+    "lookback": "Retroceso:",
+    "days": "días"
+  },
+  "exitFactory": {
+    "title": "Fábrica de Salida",
+    "combinator": "Combinador:"
+  },
+  "signalFactory": {
+    "title": "Fábrica de Señales",
+    "addSignal": "Añadir Señal",
+    "combinator": "Combinador:",
+    "lookback": "Retroceso:",
+    "days": "días"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "Peso Igual",
+      "sharpe_weighted": "Ponderado por Sharpe",
+      "correlation_adjusted": "Ajustado por Correlación",
+      "regime_based": "Basado en Régimen"
+    },
+    "factor": {
+      "equal_weight": "Peso Igual",
+      "ic_weighted": "Ponderado por IC",
+      "regression": "Regresión Estadística",
+      "pca": "Compuesto PCA"
+    },
+    "exit": {
+      "any": "Cualquiera",
+      "all": "Todos",
+      "majority": "Mayoría",
+      "priority": "Prioridad"
+    }
+  },
+  "actionBar": {
+    "validate": "Validar",
+    "saveAs": "Guardar Como",
+    "runBacktest": "Ejecutar Backtest",
+    "running": "Ejecutando..."
+  },
+  "configSidebar": {
+    "noConfigs": "No hay configuraciones guardadas",
+    "createNew": "Crear una nueva configuración para comenzar",
+    "noSearchResults": "No hay configuraciones que coincidan con su búsqueda"
+  },
+  "newConfigButton": {
+    "placeholder": "Nueva Configuración...",
+    "create": "Crear Nueva Configuración"
+  },
+  "configSearch": {
+    "placeholder": "Buscar configuraciones...",
+    "clear": "Limpiar búsqueda"
+  },
+  "configList": {
+    "noConfigs": "No hay configuraciones guardadas",
+    "signals": "señal",
+    "signalsPlural": "señales",
+    "rules": "regla",
+    "rulesPlural": "reglas",
+    "active": "activa"
+  },
+  "factorCategories": {
+    "momentum": "Momentum",
+    "mean_reversion": "Reversión a la Media",
+    "volatility": "Volatilidad",
+    "value": "Valor",
+    "volume": "Volumen",
+    "technical": "Técnico",
+    "pattern": "Patrón",
+    "cycle": "Ciclo",
+    "statistic": "Estadístico"
+  },
+  "translationStatus": {
+    "ok": "Evaluables",
+    "structured": "Pipeline",
+    "unsupported": "No soportado"
+  },
+  "riskRules": {
+    "circuitBreaker": "Interruptor de Circuito",
+    "timeLimit": "Límite de Tiempo",
+    "regimeDetection": "Detección de Régimen",
+    "drawdownLimit": "Límite de Drawdown",
+    "correlationCap": "Límite de Correlación",
+    "hardSafety": "Límites de Seguridad Duros",
+    "alwaysOn": "SIEMPRE ACTIVO"
+  },
+  "ruleActions": {
+    "closeAll": "Cerrar Todo",
+    "reduceTo": "Reducir a %",
+    "reduceAll": "Reducir Todo",
+    "haltTrading": "Detener Trading",
+    "haltNewEntry": "Detener Nueva Entrada",
+    "skipEntry": "Omitir Entrada",
+    "reduceHalf": "Reducir 50%"
+  },
+  "ruleParams": {
+    "pnl": "PnL <",
+    "cooldown": "Enfriamiento",
+    "bars": "barras",
+    "action": "Acción",
+    "maxHolding": "Máx. Tenencia",
+    "hours": "horas",
+    "period": "Período",
+    "threshold": "Umbral",
+    "maxDrawdown": "Máx. DD",
+    "maxCorr": "Máx. Corr.",
+    "lookback": "Retroceso",
+    "days": "días",
+    "maxLoss": "Máx. Pérdida",
+    "fromEntry": "desde entrada",
+    "reduceToLabel": "reducir a",
+    "reduceBy": "Reducir en"
+  },
+  "indicators": {
+    "atr": "ATR",
+    "vix": "VIX",
+    "realizedVol": "Vol. Realizada"
+  },
+  "timeUnits": {
+    "hours": "Horas",
+    "bars": "Barras"
+  },
+  "dataConfig": {
+    "dataSource": "Fuente de Datos",
+    "symbol": "Símbolo",
+    "startDate": "Fecha de Inicio",
+    "endDate": "Fecha de Fin",
+    "initialCapital": "Capital Inicial",
+    "orderSize": "Tamaño de Orden",
+    "orderSizeUnit": "Unidad de Tamaño de Orden",
+    "percent": "porcentaje"
+  },
+  "errors": {
+    "validationFailed": "Validación fallida",
+    "saveFailed": "Guardado fallido",
+    "loadFailed": "Carga fallida",
+    "backtestFailed": "Backtest fallido"
+  },
+  "persona": {
+    "title": "Trading Persona",
+    "noPersona": "No persona constraint",
+    "preferencePlaceholder": "Optional: describe your generation preference, e.g. 'focus on AUD/JPY pairs, tighter stop-loss'",
+    "preferenceLabel": "Generation Preference",
+    "charCount": "{{current}}/{{max}}",
+    "mustInclude": "Must Include",
+    "regimeBias": "Regime Bias",
+    "holdingPeriod": "Holding Period",
+    "riskStyle": "Risk Style",
+    "forbidden": "Forbidden",
+    "loadError": "Failed to load personas",
+    "requiresAuth": "Login required to load personas"
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "add": "Añadir",
+    "remove": "Eliminar"
+  }
+}

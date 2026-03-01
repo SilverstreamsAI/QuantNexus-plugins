@@ -81,12 +81,20 @@
     "backtesting": "BACKTESTING",
     "loading": "Loading...",
     "noHistory": "No backtest history",
-    "testing": "testing..."
+    "testing": "testing...",
+    "capLabel": "資金：",
+    "sizeLabel": "大小：",
+    "testedLabel": "已測試：",
+    "delete": "刪除",
+    "checkpointTooltip": "檢查點：{{percent}}% 已完成"
   },
   "page": {
     "loadingAlgorithms": "Loading algorithms...",
     "workflowTitle": "WORKFLOW CONFIGURATION",
-    "workflowStep": "Workflow Step"
+    "workflowStep": "Workflow Step",
+    "noResults": "暫無回測結果。",
+    "startBacktest": "請從設定頁面啟動回測。",
+    "realtimeChartPending": "資料可用時將顯示即時圖表"
   },
   "buttons": {
     "newBacktest": "New Backtest",
@@ -97,7 +105,10 @@
     "executing": "Executing...",
     "cancel": "Cancel",
     "delete": "Delete",
+    "backToConfig": "返回設定",
     "runInBackground": "Run in Background",
+    "exportToQuantLab": "匯出到 Quant Lab",
+    "exporting": "匯出中...",
     "return": "返回"
   },
   "workflowSteps": {
@@ -156,6 +167,12 @@
     "confirm": "Cancel Backtest",
     "keep": "Keep Running"
   },
+  "cancelledDialog": {
+    "title": "回測已取消",
+    "message": "回測已被取消。您想要做什麼？",
+    "stay": "留在此處",
+    "goBack": "返回"
+  },
   "workflowSelector": {
     "selectAlgorithm": "Market Analysis",
     "preCondition": "Entry Filter",
@@ -165,7 +182,39 @@
   },
   "breadcrumb": {
     "backtestNexus": "Backtest Nexus",
-    "result": "Result"
+    "indicatorsCockpit": "指標駕駛艙",
+    "kronosCockpit": "克洛諾斯駕駛艙",
+    "traderCockpit": "交易員駕駛艙",
+    "result": "結果",
+    "backtestResult": "回測結果"
+  },
+  "kronos": {
+    "title": "克洛諾斯策略",
+    "subtitle": "選擇一個 Kronos 生成的策略進行回測",
+    "noStrategies": "沒有克洛諾斯策略",
+    "noStrategiesHint": "在 Strategy Builder 中使用 Kronos 功能生成策略後即可在此顯示。",
+    "columnName": "策略名稱",
+    "columnType": "類型",
+    "columnCreated": "建立時間",
+    "columnAction": "選擇",
+    "execute": "執行",
+    "executing": "執行中...",
+    "selectAlgorithmFirst": "請先選擇一個策略",
+    "executionStarted": "執行已開始",
+    "executionFailed": "執行失敗"
+  },
+  "locked": {
+    "requiresTier": "此功能需要 {{tier}} 訂閱"
+  },
+  "auth": {
+    "loginToUnlock": "登入以解鎖",
+    "viewPlans": "查看方案"
+  },
+  "common": {
+    "cancel": "取消"
+  },
+  "notification": {
+    "backtestCompleted": "回測已成功完成"
   },
   "cockpitSelector": {
     "title": "選擇駕駛艙",
@@ -187,6 +236,12 @@
     "closeTab": "關閉分頁",
     "close": "關閉",
     "closeAll": "全部關閉"
+  },
+  "duplicateDialog": {
+    "title": "偵測到重複案例",
+    "message": "{{duplicateText}} 具有相同的設定。\n執行重複案例將產生相同的結果。",
+    "caseAndCase": "案例 {{a}} 和案例 {{b}}",
+    "continueAnyway": "仍然繼續"
   },
   "messages": {
     "resumeApiNotAvailable": "恢復API不可用",
@@ -213,7 +268,9 @@
     "endDateRequired": "結束日期為必填項",
     "endDateAfterStart": "結束日期必須晚於開始日期",
     "initialCapitalPositive": "初始資金必須為正數",
-    "orderSizePositive": "訂單大小必須為正數"
+    "orderSizePositive": "訂單大小必須為正數",
+    "lookbackExceeded": "{{timeframe}} 間隔：最大 {{lookback}} 回顧期（已選擇 {{selected}} 天）",
+    "lookbackWarning": "所選範圍（{{selected}} 天）超過最大回顧期（{{max}} 天）"
   },
   "settings": {
     "back": "返回",
@@ -223,7 +280,43 @@
     "deleteSecretConfirm": "確定要刪除嗎",
     "deleteSecretWarning": "此操作無法撤銷。",
     "save": "儲存",
-    "saving": "儲存中..."
+    "saving": "儲存中...",
+    "secretsPageTitle": "密鑰",
+    "secretsPageDescription": "管理資料提供者 API 金鑰和憑證",
+    "refresh": "重新整理",
+    "securityStatus": "安全狀態",
+    "securityStatusDescription": "已設定 {{configured}} / {{total}} 個密鑰。密鑰使用 AES-256-GCM 加密並安全儲存。",
+    "searchSecrets": "搜尋密鑰...",
+    "storedSecrets": "已儲存的密鑰",
+    "noSecretsMatch": "沒有符合搜尋條件的密鑰",
+    "noSecretsConfigured": "尚未設定任何密鑰",
+    "recentActivity": "近期活動",
+    "noActivityRecorded": "沒有記錄的活動",
+    "navStatus": "狀態",
+    "navCredentials": "憑證",
+    "navActivity": "活動",
+    "required": "必要",
+    "copyToClipboard": "複製到剪貼簿",
+    "hideValue": "隱藏值",
+    "showValue": "顯示值",
+    "editValue": "編輯",
+    "setValue": "設定值",
+    "testApiKey": "測試 API 金鑰",
+    "deleteCredential": "刪除憑證",
+    "testing": "測試中...",
+    "enterSecretValue": "輸入密鑰值",
+    "getApiKey": "取得 API 金鑰",
+    "valueCannotBeEmpty": "值不能為空",
+    "failedToSave": "儲存失敗",
+    "missingCredential": "缺少憑證：{{key}}",
+    "failedToRetrieveApiKey": "無法取得 API 金鑰",
+    "verifiedKeyType": "已驗證（{{keyType}}）",
+    "verified": "已驗證",
+    "invalidApiKey": "無效的 API 金鑰",
+    "validationFailed": "驗證失敗",
+    "keyTypePaper": "Paper",
+    "keyTypeLive": "Live",
+    "deleteButton": "刪除"
   },
   "resultPanel": {
     "tabs": {
@@ -237,7 +330,9 @@
       "bars": "{{count}} 根K線",
       "noEquityData": "無權益數據",
       "noKlineData": "無K線數據",
-      "processing": "處理中... ({{count}} 點)"
+      "processing": "處理中... ({{count}} 點)",
+      "backtesting": "回測中...",
+      "noTrades": "無交易記錄"
     },
     "summary": {
       "equity": "權益: {{count}} 點",
@@ -268,7 +363,8 @@
       "pending": " - 等待中",
       "tradesCount": "({{count}} 筆交易)",
       "collectingData": "收集數據中...",
-      "waiting": "等待中..."
+      "waiting": "等待中...",
+      "cancelled": "已取消"
     },
     "comparison": {
       "title": "績效對比",
@@ -284,5 +380,43 @@
       "equityOverlay": "權益曲線疊加",
       "noResults": "無可對比結果"
     }
+  },
+  "configSummary": {
+    "dataSource": "數據源",
+    "symbol": "交易品種",
+    "startDate": "開始日期",
+    "endDate": "結束日期",
+    "capital": "資金",
+    "orderSize": "訂單大小",
+    "sharesUnit": "{{size}} 股"
+  },
+  "namingDialog": {
+    "titleBuilder": "命名策略",
+    "titleExport": "匯出到 Quant Lab",
+    "titleBacktest": "命名回測",
+    "confirmBuilder": "確認並生成",
+    "confirmExport": "確認並匯出",
+    "confirmBacktest": "確認並執行",
+    "suggestedName": "建議名稱：",
+    "useThis": "使用此名稱",
+    "or": "或",
+    "customName": "自訂名稱：",
+    "placeholder": "輸入您的自訂名稱...",
+    "finalName": "最終名稱：",
+    "cancel": "取消"
+  },
+  "dryRunExecute": {
+    "execute": "執行",
+    "executing": "執行中...",
+    "dryRun": "模擬執行",
+    "direct": "直接執行"
+  },
+  "workflowDropdown": {
+    "searchPlaceholder": "搜尋...",
+    "noAlgorithmsFound": "未找到演算法"
+  },
+  "backtestDataConfig": {
+    "placeholderSearchSymbol": "搜尋品種...",
+    "placeholderInitialCapital": "10000"
   }
 }

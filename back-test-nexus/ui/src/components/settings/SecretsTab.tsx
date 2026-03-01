@@ -261,7 +261,7 @@ function DeleteConfirmDialog({ visible, secretKey, onConfirm, onCancel }: Delete
             )}
             autoFocus
           >
-            Delete
+            {t('settings.deleteButton')}
           </button>
         </div>
       </div>
@@ -311,17 +311,11 @@ interface ActivityLogEntry {
 // Navigation
 // =============================================================================
 
-interface NavItem {
-  id: string;
-  label: string;
-  icon: React.FC<{ className?: string }>;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { id: 'status', label: 'Status', icon: ShieldCheckIcon },
-  { id: 'credentials', label: 'Credentials', icon: KeyIcon },
-  { id: 'activity', label: 'Activity', icon: ClipboardListIcon },
-];
+const NAV_ITEM_KEYS = [
+  { id: 'status', labelKey: 'settings.navStatus', icon: ShieldCheckIcon },
+  { id: 'credentials', labelKey: 'settings.navCredentials', icon: KeyIcon },
+  { id: 'activity', labelKey: 'settings.navActivity', icon: ClipboardListIcon },
+] as const;
 
 // =============================================================================
 // CredentialItem Component
@@ -380,7 +374,7 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
 
   const handleSave = async () => {
     if (!inputValue.trim()) {
-      setError('Value cannot be empty');
+      setError(t('settings.valueCannotBeEmpty'));
       return;
     }
     setLoading(true);
@@ -393,7 +387,7 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
         onTestResultChange({ status: 'idle' });
         onUpdate();
       } else {
-        setError(result.errorMessage || 'Failed to save');
+        setError(result.errorMessage || t('settings.failedToSave'));
       }
     } catch (e) {
       setError(`Error: ${e}`);
@@ -433,7 +427,7 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
         for (const secretKey of provider.secretKeys) {
           const res = await window.electronAPI.credential.get(pluginId, secretKey);
           if (!res.success || !res.value) {
-            onTestResultChange({ status: 'error', message: `Missing credential: ${secretKey}` });
+            onTestResultChange({ status: 'error', message: t('settings.missingCredential', { key: secretKey }) });
             setTimeout(() => onTestResultChange({ status: 'idle' }), 5000);
             return;
           }
@@ -444,7 +438,7 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
         // Single-key provider: use the credential value directly
         const getResult = await window.electronAPI.credential.get(pluginId, credential.key);
         if (!getResult.success || !getResult.value) {
-          onTestResultChange({ status: 'error', message: 'Failed to retrieve API key' });
+          onTestResultChange({ status: 'error', message: t('settings.failedToRetrieveApiKey') });
           return;
         }
         validationKey = getResult.value;
@@ -457,16 +451,18 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
       if (result.success && result.data) {
         if (result.data.valid) {
           // TICKET_311: Show key type (Paper/Live) for Alpaca
-          const keyTypeLabel = result.data.keyType
-            ? ` (${result.data.keyType === 'paper' ? 'Paper' : 'Live'})`
-            : '';
-          onTestResultChange({ status: 'success', message: `Verified${keyTypeLabel}` });
+          if (result.data.keyType) {
+            const keyTypeStr = result.data.keyType === 'paper' ? t('settings.keyTypePaper') : t('settings.keyTypeLive');
+            onTestResultChange({ status: 'success', message: t('settings.verifiedKeyType', { keyType: keyTypeStr }) });
+          } else {
+            onTestResultChange({ status: 'success', message: t('settings.verified') });
+          }
         } else {
-          onTestResultChange({ status: 'error', message: result.data.error || 'Invalid API key' });
+          onTestResultChange({ status: 'error', message: result.data.error || t('settings.invalidApiKey') });
           setTimeout(() => onTestResultChange({ status: 'idle' }), 5000);
         }
       } else {
-        onTestResultChange({ status: 'error', message: result.errorMessage || 'Validation failed' });
+        onTestResultChange({ status: 'error', message: result.errorMessage || t('settings.validationFailed') });
         setTimeout(() => onTestResultChange({ status: 'idle' }), 5000);
       }
     } catch (e) {
@@ -494,7 +490,7 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
               )}
               {credential.fromManifest && (
                 <span className="text-[10px] px-1.5 py-0.5 bg-color-terminal-accent-teal/20 rounded text-color-terminal-accent-teal">
-                  Required
+                  {t('settings.required')}
                 </span>
               )}
             </div>
@@ -510,19 +506,19 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
               <code className="text-sm font-mono">
                 {value.length > 20 ? `${value.substring(0, 20)}...` : value}
               </code>
-              <button onClick={handleCopy} className="rounded p-1 hover:bg-white/10" title="Copy to clipboard">
+              <button onClick={handleCopy} className="rounded p-1 hover:bg-white/10" title={t('settings.copyToClipboard')}>
                 <CopyIcon className="h-4 w-4" />
               </button>
             </div>
           )}
 
           {credential.hasValue && (
-            <button onClick={handleView} disabled={loading} className="rounded-lg p-2 hover:bg-white/5" title={showValue ? 'Hide value' : 'Show value'}>
+            <button onClick={handleView} disabled={loading} className="rounded-lg p-2 hover:bg-white/5" title={showValue ? t('settings.hideValue') : t('settings.showValue')}>
               {loading ? <RefreshIcon className="h-4 w-4 animate-spin" /> : showValue ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
             </button>
           )}
 
-          <button onClick={() => setEditing(true)} className="rounded-lg p-2 hover:bg-white/5 text-color-terminal-accent-teal" title={credential.hasValue ? 'Edit' : 'Set value'}>
+          <button onClick={() => setEditing(true)} className="rounded-lg p-2 hover:bg-white/5 text-color-terminal-accent-teal" title={credential.hasValue ? t('settings.editValue') : t('settings.setValue')}>
             <EditIcon className="h-4 w-4" />
           </button>
 
@@ -537,7 +533,7 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
                 testResult.status === 'success' && 'text-color-terminal-accent-teal bg-color-terminal-accent-teal/10',
                 testResult.status === 'error' && 'text-red-500 bg-red-500/10'
               )}
-              title={testResult.message || 'Test API key'}
+              title={testResult.message || t('settings.testApiKey')}
             >
               {testResult.status === 'testing' ? <LoaderIcon className="h-4 w-4 animate-spin" /> :
                testResult.status === 'success' ? <CheckCircleIcon className="h-4 w-4" /> :
@@ -547,7 +543,7 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
           )}
 
           {credential.hasValue && (
-            <button onClick={() => setDeleteConfirmVisible(true)} className="rounded-lg p-2 text-red-500 hover:bg-red-500/10" title="Delete credential">
+            <button onClick={() => setDeleteConfirmVisible(true)} className="rounded-lg p-2 text-red-500 hover:bg-red-500/10" title={t('settings.deleteCredential')}>
               <TrashIcon className="h-4 w-4" />
             </button>
           )}
@@ -561,7 +557,7 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
           testResult.status === 'error' && 'bg-red-500/10 text-red-500',
           testResult.status === 'testing' && 'bg-color-terminal-accent-teal/10 text-color-terminal-accent-teal'
         )}>
-          {testResult.status === 'testing' ? 'Testing...' : testResult.message}
+          {testResult.status === 'testing' ? t('settings.testing') : testResult.message}
         </div>
       )}
 
@@ -573,7 +569,7 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
                 type="password"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Enter secret value"
+                placeholder={t('settings.enterSecretValue')}
                 className="w-full rounded-lg border border-white/20 bg-black/50 px-3 py-2 text-sm focus:border-color-terminal-accent-teal focus:outline-none"
                 autoFocus
               />
@@ -597,7 +593,7 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-xs text-color-terminal-accent-teal hover:underline"
             >
-              Get API key <ExternalLinkIcon className="h-3 w-3" />
+              {t('settings.getApiKey')} <ExternalLinkIcon className="h-3 w-3" />
             </a>
           )}
         </div>
@@ -618,15 +614,16 @@ function CredentialItem({ credential, pluginId, allCredentials, testResult, onTe
 // =============================================================================
 
 function ActivityLog({ entries }: { entries: ActivityLogEntry[] }): JSX.Element {
+  const { t } = useTranslation('backtest');
   return (
     <div className="rounded-lg border border-white/10">
       <div className="border-b border-white/10 px-4 py-3">
-        <h3 className="font-medium">Recent Activity</h3>
+        <h3 className="font-medium">{t('settings.recentActivity')}</h3>
       </div>
       <div className="max-h-64 overflow-y-auto">
         {entries.length === 0 ? (
           <div className="px-4 py-8 text-center text-muted-foreground">
-            No activity recorded
+            {t('settings.noActivityRecorded')}
           </div>
         ) : (
           <div className="divide-y divide-white/5">
@@ -660,6 +657,7 @@ function ActivityLog({ entries }: { entries: ActivityLogEntry[] }): JSX.Element 
 // =============================================================================
 
 export function SecretsTab({ pluginId }: SecretsTabProps): JSX.Element {
+  const { t } = useTranslation('backtest');
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [activityLog, setActivityLog] = useState<ActivityLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -768,7 +766,7 @@ export function SecretsTab({ pluginId }: SecretsTabProps): JSX.Element {
       {/* Left Navigation */}
       <nav className="w-48 flex-shrink-0 border-r border-white/10 p-4">
         <div className="space-y-1">
-          {NAV_ITEMS.map((item) => {
+          {NAV_ITEM_KEYS.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
             return (
@@ -783,7 +781,7 @@ export function SecretsTab({ pluginId }: SecretsTabProps): JSX.Element {
                 )}
               >
                 <Icon className="w-4 h-4" />
-                <span>{item.label}</span>
+                <span>{t(item.labelKey)}</span>
               </button>
             );
           })}
@@ -800,9 +798,9 @@ export function SecretsTab({ pluginId }: SecretsTabProps): JSX.Element {
                 <ShieldIcon className="h-6 w-6 text-color-terminal-accent-teal" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">Secrets</h1>
+                <h1 className="text-2xl font-bold">{t('settings.secretsPageTitle')}</h1>
                 <p className="text-muted-foreground">
-                  Manage data provider API keys and credentials
+                  {t('settings.secretsPageDescription')}
                 </p>
               </div>
             </div>
@@ -812,7 +810,7 @@ export function SecretsTab({ pluginId }: SecretsTabProps): JSX.Element {
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
             >
               <RefreshIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
+              {t('settings.refresh')}
             </button>
           </div>
 
@@ -821,10 +819,9 @@ export function SecretsTab({ pluginId }: SecretsTabProps): JSX.Element {
             <div className="flex items-center gap-3">
               <ShieldCheckIcon className="h-8 w-8 text-color-terminal-accent-teal" />
               <div>
-                <h3 className="font-medium">Security Status</h3>
+                <h3 className="font-medium">{t('settings.securityStatus')}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {configuredCount} of {credentials.length} secrets configured.
-                  Secrets are encrypted with AES-256-GCM and stored securely.
+                  {t('settings.securityStatusDescription', { configured: configuredCount, total: credentials.length })}
                 </p>
               </div>
             </div>
@@ -838,13 +835,13 @@ export function SecretsTab({ pluginId }: SecretsTabProps): JSX.Element {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search secrets..."
+                placeholder={t('settings.searchSecrets')}
                 className="w-full rounded-lg border border-white/10 bg-transparent py-2 pl-10 pr-4 text-sm focus:border-color-terminal-accent-teal focus:outline-none"
               />
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-lg font-semibold">Stored Secrets</h2>
+              <h2 className="text-lg font-semibold">{t('settings.storedSecrets')}</h2>
               {loading ? (
                 <div className="flex items-center justify-center py-12">
                   <RefreshIcon className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -853,7 +850,7 @@ export function SecretsTab({ pluginId }: SecretsTabProps): JSX.Element {
                 <div className="rounded-lg border border-dashed border-white/10 py-12 text-center">
                   <KeyIcon className="mx-auto h-12 w-12 text-muted-foreground/50" />
                   <p className="mt-4 text-muted-foreground">
-                    {searchQuery ? 'No secrets match your search' : 'No secrets configured'}
+                    {searchQuery ? t('settings.noSecretsMatch') : t('settings.noSecretsConfigured')}
                   </p>
                 </div>
               ) : (

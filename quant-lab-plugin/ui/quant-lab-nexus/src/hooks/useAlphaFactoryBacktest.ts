@@ -60,6 +60,9 @@ interface UseAlphaFactoryBacktestParams {
   factors: FactorChip[];
   factorMethod: string;
   factorLookback: number;
+  // TICKET_426_3: Persona constraint
+  persona: string | null;
+  preference: string;
   dataConfig: DataConfig;
   // TICKET_384: Callback for host-level pipeline phase updates
   onPipelinePhase?: (taskId: string, phase: string) => void;
@@ -93,6 +96,8 @@ export function useAlphaFactoryBacktest({
   factors,
   factorMethod,
   factorLookback,
+  persona,
+  preference,
   dataConfig,
   onPipelinePhase,
   recoveredState,
@@ -525,6 +530,9 @@ export function useAlphaFactoryBacktest({
         factorIds: factors.map((f) => f.id),
         factorMethod,
         factorLookback,
+        // TICKET_426_3: Persona constraint
+        persona,
+        preference,
       });
 
       if (!genResult.success || !genResult.strategyPath) {
@@ -684,7 +692,7 @@ export function useAlphaFactoryBacktest({
       setStatus('error');
       cleanupSubscriptions();
     }
-  }, [signals, signalMethod, lookback, exitMethod, exitRules, factors, factorMethod, factorLookback, dataConfig, cleanupSubscriptions, flushBuffer, onPipelinePhase]);
+  }, [signals, signalMethod, lookback, exitMethod, exitRules, factors, factorMethod, factorLookback, persona, preference, dataConfig, cleanupSubscriptions, flushBuffer, onPipelinePhase]);
 
   return { status, progress, result, error, timeframeStatus, runBacktest, activeTaskId: activeTaskIdRef.current, processedBars, totalBars };
 }

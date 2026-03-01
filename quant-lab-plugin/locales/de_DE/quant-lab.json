@@ -1,0 +1,187 @@
+{
+  "hub": {
+    "title": "Quant Lab",
+    "subtitle": "Alpha Factory - Signalkombination und -auswertung",
+    "signalFactory": {
+      "title": "Signalfabrik",
+      "description": "Mehrere Einstiegssignale kombinieren",
+      "addSignal": "Signal hinzufügen",
+      "combinator": "Kombinator:",
+      "lookback": "Rückblick:",
+      "days": "Tage"
+    },
+    "engineStore": {
+      "title": "Engine-Store",
+      "description": "Backtest-Konfigurationen verwalten"
+    },
+    "status": {
+      "ready": "System bereit"
+    }
+  },
+  "factorFactory": {
+    "title": "Faktorenfabrik",
+    "addFactor": "Faktor hinzufügen",
+    "combinator": "Kombinator:",
+    "lookback": "Rückblick:",
+    "days": "Tage"
+  },
+  "exitFactory": {
+    "title": "Exit-Fabrik",
+    "combinator": "Kombinator:"
+  },
+  "signalFactory": {
+    "title": "Signalfabrik",
+    "addSignal": "Signal hinzufügen",
+    "combinator": "Kombinator:",
+    "lookback": "Rückblick:",
+    "days": "Tage"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "Gleichgewichtung",
+      "sharpe_weighted": "Sharpe-gewichtet",
+      "correlation_adjusted": "Korrelationsadjustiert",
+      "regime_based": "Regimebasiert"
+    },
+    "factor": {
+      "equal_weight": "Gleichgewichtung",
+      "ic_weighted": "IC-gewichtet",
+      "regression": "Statistische Regression",
+      "pca": "PCA-Komposite"
+    },
+    "exit": {
+      "any": "Beliebig",
+      "all": "Alle",
+      "majority": "Mehrheit",
+      "priority": "Priorität"
+    }
+  },
+  "actionBar": {
+    "validate": "Validieren",
+    "saveAs": "Speichern unter",
+    "runBacktest": "Backtest starten",
+    "running": "Läuft..."
+  },
+  "configSidebar": {
+    "noConfigs": "Keine gespeicherten Konfigurationen",
+    "createNew": "Erstellen Sie eine neue Konfiguration",
+    "noSearchResults": "Keine Konfigurationen entsprechen Ihrer Suche"
+  },
+  "newConfigButton": {
+    "placeholder": "Neue Konfiguration...",
+    "create": "Neue Konfiguration erstellen"
+  },
+  "configSearch": {
+    "placeholder": "Konfigurationen suchen...",
+    "clear": "Suche löschen"
+  },
+  "configList": {
+    "noConfigs": "Keine gespeicherten Konfigurationen",
+    "signals": "Signal",
+    "signalsPlural": "Signale",
+    "rules": "Regel",
+    "rulesPlural": "Regeln",
+    "active": "aktiv"
+  },
+  "factorCategories": {
+    "momentum": "Momentum",
+    "mean_reversion": "Mean Reversion",
+    "volatility": "Volatilität",
+    "value": "Wert",
+    "volume": "Volumen",
+    "technical": "Technisch",
+    "pattern": "Muster",
+    "cycle": "Zyklus",
+    "statistic": "Statistik"
+  },
+  "translationStatus": {
+    "ok": "Auswertbar",
+    "structured": "Pipeline",
+    "unsupported": "Nicht unterstützt"
+  },
+  "riskRules": {
+    "circuitBreaker": "Circuit Breaker",
+    "timeLimit": "Zeitlimit",
+    "regimeDetection": "Regimeerkennung",
+    "drawdownLimit": "Drawdown-Limit",
+    "correlationCap": "Korrelationsobergrenze",
+    "hardSafety": "Harte Sicherheitsgrenzen",
+    "alwaysOn": "IMMER AKTIV"
+  },
+  "ruleActions": {
+    "closeAll": "Alle schließen",
+    "reduceTo": "Reduzieren auf %",
+    "reduceAll": "Alle reduzieren",
+    "haltTrading": "Handel stoppen",
+    "haltNewEntry": "Neuen Einstieg stoppen",
+    "skipEntry": "Einstieg überspringen",
+    "reduceHalf": "50% reduzieren"
+  },
+  "ruleParams": {
+    "pnl": "GuV <",
+    "cooldown": "Abkühlung",
+    "bars": "Bars",
+    "action": "Aktion",
+    "maxHolding": "Max. Haltedauer",
+    "hours": "Stunden",
+    "period": "Periode",
+    "threshold": "Schwellenwert",
+    "maxDrawdown": "Max. Drawdown",
+    "maxCorr": "Max. Korrelation",
+    "lookback": "Rückblick",
+    "days": "Tage",
+    "maxLoss": "Max. Verlust",
+    "fromEntry": "vom Einstieg",
+    "reduceToLabel": "reduzieren auf",
+    "reduceBy": "Reduzieren um"
+  },
+  "indicators": {
+    "atr": "ATR",
+    "vix": "VIX",
+    "realizedVol": "Realisierte Volatilität"
+  },
+  "timeUnits": {
+    "hours": "Stunden",
+    "bars": "Bars"
+  },
+  "dataConfig": {
+    "dataSource": "Datenquelle",
+    "symbol": "Symbol",
+    "startDate": "Startdatum",
+    "endDate": "Enddatum",
+    "initialCapital": "Startkapital",
+    "orderSize": "Auftragsgröße",
+    "orderSizeUnit": "Auftragsgrößeneinheit",
+    "percent": "Prozent"
+  },
+  "errors": {
+    "validationFailed": "Validierung fehlgeschlagen",
+    "saveFailed": "Speichern fehlgeschlagen",
+    "loadFailed": "Laden fehlgeschlagen",
+    "backtestFailed": "Backtest fehlgeschlagen"
+  },
+  "persona": {
+    "title": "Trading Persona",
+    "noPersona": "No persona constraint",
+    "preferencePlaceholder": "Optional: describe your generation preference, e.g. 'focus on AUD/JPY pairs, tighter stop-loss'",
+    "preferenceLabel": "Generation Preference",
+    "charCount": "{{current}}/{{max}}",
+    "mustInclude": "Must Include",
+    "regimeBias": "Regime Bias",
+    "holdingPeriod": "Holding Period",
+    "riskStyle": "Risk Style",
+    "forbidden": "Forbidden",
+    "loadError": "Failed to load personas",
+    "requiresAuth": "Login required to load personas"
+  },
+  "common": {
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "add": "Hinzufügen",
+    "remove": "Entfernen"
+  }
+}

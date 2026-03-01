@@ -241,8 +241,13 @@ const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
   error,
   disabled,
   className,
-  placeholder = 'Search symbol...',
+  placeholder,
 }) => {
+  const { t } = useTranslation('backtest');
+  
+  // Use provided placeholder or fall back to translation
+  const resolvedPlaceholder = placeholder ?? t('backtestDataConfig.placeholderSearchSymbol');
+  
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<SymbolSearchResult[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -371,7 +376,7 @@ const SymbolSearchField: React.FC<SymbolSearchFieldProps> = ({
               }
             }
           }}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           disabled={disabled}
           className={cn(
             'w-full h-9 px-3 pr-8 rounded border text-sm terminal-mono placeholder-[#495670]',
@@ -552,7 +557,7 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
     if (isNaN(startMs) || isNaN(endMs) || endMs <= startMs) return null;
     const selectedDays = Math.ceil((endMs - startMs) / (1000 * 60 * 60 * 24));
     if (selectedDays <= mostRestrictiveLookbackDays) return null;
-    return `Selected range (${selectedDays}d) exceeds max lookback (${mostRestrictiveLookbackDays}d)`;
+    return t('validation.lookbackWarning', { selected: selectedDays, max: mostRestrictiveLookbackDays });
   }, [mostRestrictiveLookbackDays, value.startDate, value.endDate]);
 
   // Generate order size unit options with translations
@@ -714,7 +719,7 @@ export const BacktestDataConfigPanel: React.FC<BacktestDataConfigPanelProps> = (
             type="number"
             value={value.initialCapital}
             onChange={(v) => handleChange('initialCapital', parseFloat(v) || 0)}
-            placeholder="10000"
+            placeholder={t('backtestDataConfig.placeholderInitialCapital')}
             error={errors.initialCapital}
             disabled={disabled}
             min={0}

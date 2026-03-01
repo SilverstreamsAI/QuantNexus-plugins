@@ -81,7 +81,12 @@
     "backtesting": "BACKTESTING",
     "loading": "Loading...",
     "noHistory": "No backtest history",
-    "testing": "testing..."
+    "testing": "testing...",
+    "capLabel": "Cap:",
+    "sizeLabel": "Size:",
+    "testedLabel": "Tested:",
+    "delete": "Delete",
+    "checkpointTooltip": "Checkpoint: {{percent}}% completed"
   },
   "page": {
     "loadingAlgorithms": "Loading algorithms...",
@@ -232,6 +237,12 @@
     "close": "Close",
     "closeAll": "Close All"
   },
+  "duplicateDialog": {
+    "title": "Duplicate Cases Detected",
+    "message": "{{duplicateText}} have identical configurations.\nRunning duplicate cases will produce the same results.",
+    "caseAndCase": "Case {{a}} and Case {{b}}",
+    "continueAnyway": "Continue Anyway"
+  },
   "messages": {
     "resumeApiNotAvailable": "Resume API not available",
     "resumingFromCheckpoint": "Resuming backtest from checkpoint...",
@@ -257,7 +268,9 @@
     "endDateRequired": "End date is required",
     "endDateAfterStart": "End date must be after start date",
     "initialCapitalPositive": "Initial capital must be positive",
-    "orderSizePositive": "Order size must be positive"
+    "orderSizePositive": "Order size must be positive",
+    "lookbackExceeded": "{{timeframe}} interval: max {{lookback}} lookback ({{selected}}d selected)",
+    "lookbackWarning": "Selected range ({{selected}}d) exceeds max lookback ({{max}}d)"
   },
   "settings": {
     "back": "Back",
@@ -267,7 +280,43 @@
     "deleteSecretConfirm": "Are you sure you want to delete",
     "deleteSecretWarning": "This action cannot be undone.",
     "save": "Save",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "secretsPageTitle": "Secrets",
+    "secretsPageDescription": "Manage data provider API keys and credentials",
+    "refresh": "Refresh",
+    "securityStatus": "Security Status",
+    "securityStatusDescription": "{{configured}} of {{total}} secrets configured. Secrets are encrypted with AES-256-GCM and stored securely.",
+    "searchSecrets": "Search secrets...",
+    "storedSecrets": "Stored Secrets",
+    "noSecretsMatch": "No secrets match your search",
+    "noSecretsConfigured": "No secrets configured",
+    "recentActivity": "Recent Activity",
+    "noActivityRecorded": "No activity recorded",
+    "navStatus": "Status",
+    "navCredentials": "Credentials",
+    "navActivity": "Activity",
+    "required": "Required",
+    "copyToClipboard": "Copy to clipboard",
+    "hideValue": "Hide value",
+    "showValue": "Show value",
+    "editValue": "Edit",
+    "setValue": "Set value",
+    "testApiKey": "Test API key",
+    "deleteCredential": "Delete credential",
+    "testing": "Testing...",
+    "enterSecretValue": "Enter secret value",
+    "getApiKey": "Get API key",
+    "valueCannotBeEmpty": "Value cannot be empty",
+    "failedToSave": "Failed to save",
+    "missingCredential": "Missing credential: {{key}}",
+    "failedToRetrieveApiKey": "Failed to retrieve API key",
+    "verifiedKeyType": "Verified ({{keyType}})",
+    "verified": "Verified",
+    "invalidApiKey": "Invalid API key",
+    "validationFailed": "Validation failed",
+    "keyTypePaper": "Paper",
+    "keyTypeLive": "Live",
+    "deleteButton": "Delete"
   },
   "resultPanel": {
     "tabs": {
@@ -314,7 +363,8 @@
       "pending": " - Pending",
       "tradesCount": "({{count}} trades)",
       "collectingData": "Collecting data...",
-      "waiting": "Waiting..."
+      "waiting": "Waiting...",
+      "cancelled": "Cancelled"
     },
     "comparison": {
       "title": "Performance Comparison",
@@ -330,5 +380,43 @@
       "equityOverlay": "Equity Curves Overlay",
       "noResults": "No results to compare"
     }
+  },
+  "configSummary": {
+    "dataSource": "Data Source",
+    "symbol": "Symbol",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "capital": "Capital",
+    "orderSize": "Order Size",
+    "sharesUnit": "{{size}} shares"
+  },
+  "namingDialog": {
+    "titleBuilder": "Name Your Strategy",
+    "titleExport": "Export to Quant Lab",
+    "titleBacktest": "Name Your Backtest",
+    "confirmBuilder": "Confirm & Generate",
+    "confirmExport": "Confirm & Export",
+    "confirmBacktest": "Confirm & Execute",
+    "suggestedName": "Suggested name:",
+    "useThis": "Use This",
+    "or": "or",
+    "customName": "Custom name:",
+    "placeholder": "Enter your custom name...",
+    "finalName": "Final name:",
+    "cancel": "Cancel"
+  },
+  "dryRunExecute": {
+    "execute": "EXECUTE",
+    "executing": "EXECUTING",
+    "dryRun": "DRY RUN",
+    "direct": "DIRECT"
+  },
+  "workflowDropdown": {
+    "searchPlaceholder": "Search...",
+    "noAlgorithmsFound": "No algorithms found"
+  },
+  "backtestDataConfig": {
+    "placeholderSearchSymbol": "Search symbol...",
+    "placeholderInitialCapital": "10000"
   }
 }

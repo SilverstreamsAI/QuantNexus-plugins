@@ -238,6 +238,26 @@ interface ElectronAPI {
     }) => void) => () => void;
   };
 
+  // TICKET_426_2: Persona Constraint System API
+  persona: {
+    list: () => Promise<{
+      success: boolean;
+      data?: Array<{
+        id: string;
+        label: string;
+        description: {
+          must_include: string[];
+          regime_bias: string[];
+          holding_period: string;
+          risk_style: string;
+          forbidden: string[];
+        };
+      }>;
+      total?: number;
+      error?: string;
+    }>;
+  };
+
   // PLUGIN_TICKET_011: Alpha Factory config persistence
   alphaFactory: {
     saveConfig: (config: {
@@ -253,6 +273,9 @@ interface ElectronAPI {
       factors?: import('../types').FactorChip[];
       factorMethod?: string;
       factorLookback?: number;
+      // TICKET_426_3: Persona constraint
+      persona?: string | null;
+      preference?: string;
     }) => Promise<{
       success: boolean;
       id?: string;
@@ -366,6 +389,9 @@ interface ElectronAPI {
       factorIds?: string[];
       factorMethod?: string;
       factorLookback?: number;
+      // TICKET_426_3: Persona constraint
+      persona?: string | null;
+      preference?: string;
     }) => Promise<{
       success: boolean;
       taskId?: string;

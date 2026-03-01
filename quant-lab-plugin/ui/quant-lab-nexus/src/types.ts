@@ -8,6 +8,23 @@
 export type QuantLabSubPage = 'hub' | 'factory' | 'engineStore';
 
 /**
+ * TICKET_426_3: Persona constraint types for Alpha Factory persona selection.
+ */
+export interface PersonaDescription {
+  must_include: string[];
+  regime_bias: string[];
+  holding_period: string;
+  risk_style: string;
+  forbidden: string[];
+}
+
+export interface PersonaItem {
+  id: string;
+  label: string;
+  description: PersonaDescription;
+}
+
+/**
  * PLUGIN_TICKET_010: Component detail for each slot (Analysis/Entry/Exit)
  */
 export interface SignalChipComponent {

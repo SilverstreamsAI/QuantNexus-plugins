@@ -234,7 +234,7 @@ export const BacktestHistorySidebar: React.FC<BacktestHistorySidebarProps> = ({
                 'bg-amber-500/15 border border-amber-500/50 text-amber-400',
                 'hover:bg-amber-500/25 transition-colors'
               )}
-              title={`Checkpoint: ${checkpointInfo.progressPercent}% completed`}
+              title={t('sidebar.checkpointTooltip', { percent: checkpointInfo.progressPercent })}
             >
               <PauseIcon className="w-3 h-3" />
               <span>{checkpointInfo.progressPercent}%</span>
@@ -400,6 +400,7 @@ const HistoryItemCard: React.FC<HistoryItemCardProps> = ({
   onClick,
   onDeleteClick,
 }) => {
+  const { t } = useTranslation('backtest');
   const isProfit = (item.totalReturn ?? 0) >= 0;
   const returnStr = formatReturn(item.totalReturn);
   const capitalStr = formatCapital(item.initialCapital);
@@ -434,9 +435,9 @@ const HistoryItemCard: React.FC<HistoryItemCardProps> = ({
 
       {/* Row 3: Capital + OrderSize */}
       <div className="flex items-center gap-3 text-[9px] text-color-terminal-text-muted/80 mb-1">
-        <span>Cap: <span className="text-color-terminal-text-secondary">{capitalStr}</span></span>
+        <span>{t('sidebar.capLabel')} <span className="text-color-terminal-text-secondary">{capitalStr}</span></span>
         {orderSizeStr && (
-          <span>Size: <span className="text-color-terminal-text-secondary">{orderSizeStr}</span></span>
+          <span>{t('sidebar.sizeLabel')} <span className="text-color-terminal-text-secondary">{orderSizeStr}</span></span>
         )}
       </div>
 
@@ -460,7 +461,7 @@ const HistoryItemCard: React.FC<HistoryItemCardProps> = ({
             'text-color-terminal-text-muted opacity-50',
             'hover:opacity-100 hover:text-red-400 hover:bg-red-400/10'
           )}
-          title="Delete"
+          title={t('sidebar.delete')}
         >
           <TrashIcon className="w-2.5 h-2.5" />
         </button>

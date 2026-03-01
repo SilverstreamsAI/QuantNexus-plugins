@@ -11,6 +11,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { PlayIcon, LoaderIcon } from 'lucide-react';
 
 export interface DryRunExecuteButtonProps {
@@ -27,9 +28,15 @@ export const DryRunExecuteButton: React.FC<DryRunExecuteButtonProps> = ({
   onToggle,
   onExecute,
   isExecuting,
-  executeLabel = 'EXECUTE',
-  executingLabel = 'EXECUTING',
+  executeLabel,
+  executingLabel,
 }) => {
+  const { t } = useTranslation('backtest');
+  
+  // Use provided labels or fall back to translations
+  const resolvedExecuteLabel = executeLabel ?? t('dryRunExecute.execute');
+  const resolvedExecutingLabel = executingLabel ?? t('dryRunExecute.executing');
+
   return (
     <div className="flex items-center gap-2">
       {/* Toggle pill */}
@@ -65,7 +72,7 @@ export const DryRunExecuteButton: React.FC<DryRunExecuteButtonProps> = ({
             dryRunEnabled ? 'text-color-terminal-accent-primary' : 'text-color-terminal-text-muted',
           ].join(' ')}
         >
-          DRY RUN
+          {t('dryRunExecute.dryRun')}
         </span>
         <span
           className={[
@@ -73,7 +80,7 @@ export const DryRunExecuteButton: React.FC<DryRunExecuteButtonProps> = ({
             !dryRunEnabled ? 'text-color-terminal-accent-gold' : 'text-color-terminal-text-muted',
           ].join(' ')}
         >
-          DIRECT
+          {t('dryRunExecute.direct')}
         </span>
       </button>
 
@@ -94,12 +101,12 @@ export const DryRunExecuteButton: React.FC<DryRunExecuteButtonProps> = ({
         {isExecuting ? (
           <>
             <LoaderIcon className="w-3 h-3 animate-spin" />
-            {executingLabel}
+            {resolvedExecutingLabel}
           </>
         ) : (
           <>
             <PlayIcon className="w-3 h-3" />
-            {executeLabel}
+            {resolvedExecuteLabel}
           </>
         )}
       </button>

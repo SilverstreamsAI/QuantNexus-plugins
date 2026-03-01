@@ -1,0 +1,187 @@
+{
+  "hub": {
+    "title": "Quant Lab",
+    "subtitle": "Alpha Factory - 신호 조합 및 평가",
+    "signalFactory": {
+      "title": "신호 팩토리",
+      "description": "여러 진입 신호 조합",
+      "addSignal": "신호 추가",
+      "combinator": "조합기:",
+      "lookback": "룩백:",
+      "days": "일"
+    },
+    "engineStore": {
+      "title": "엔진 스토어",
+      "description": "백테스트 설정 관리"
+    },
+    "status": {
+      "ready": "시스템 준비됨"
+    }
+  },
+  "factorFactory": {
+    "title": "팩터 팩토리",
+    "addFactor": "팩터 추가",
+    "combinator": "조합기:",
+    "lookback": "룩백:",
+    "days": "일"
+  },
+  "exitFactory": {
+    "title": "이그짓 팩토리",
+    "combinator": "조합기:"
+  },
+  "signalFactory": {
+    "title": "신호 팩토리",
+    "addSignal": "신호 추가",
+    "combinator": "조합기:",
+    "lookback": "룩백:",
+    "days": "일"
+  },
+  "combinatorMethods": {
+    "signal": {
+      "equal": "균등 가중치",
+      "sharpe_weighted": "샤프 비율 가중치",
+      "correlation_adjusted": "상관관계 조정",
+      "regime_based": "레짐 기반"
+    },
+    "factor": {
+      "equal_weight": "균등 가중치",
+      "ic_weighted": "IC 가중치",
+      "regression": "통계적 회귀",
+      "pca": "PCA 합성"
+    },
+    "exit": {
+      "any": "임의",
+      "all": "모두",
+      "majority": "다수",
+      "priority": "우선순위"
+    }
+  },
+  "actionBar": {
+    "validate": "검증",
+    "saveAs": "다른 이름으로 저장",
+    "runBacktest": "백테스트 실행",
+    "running": "실행 중..."
+  },
+  "configSidebar": {
+    "noConfigs": "저장된 설정 없음",
+    "createNew": "새 설정을 만들어 시작하세요",
+    "noSearchResults": "검색과 일치하는 설정 없음"
+  },
+  "newConfigButton": {
+    "placeholder": "새 설정...",
+    "create": "새 설정 만들기"
+  },
+  "configSearch": {
+    "placeholder": "설정 검색...",
+    "clear": "검색 지우기"
+  },
+  "configList": {
+    "noConfigs": "저장된 설정 없음",
+    "signals": "신호",
+    "signalsPlural": "신호",
+    "rules": "규칙",
+    "rulesPlural": "규칙",
+    "active": "활성"
+  },
+  "factorCategories": {
+    "momentum": "모멘텀",
+    "mean_reversion": "평균 회귀",
+    "volatility": "변동성",
+    "value": "가치",
+    "volume": "거래량",
+    "technical": "기술적",
+    "pattern": "패턴",
+    "cycle": "사이클",
+    "statistic": "통계적"
+  },
+  "translationStatus": {
+    "ok": "평가 가능",
+    "structured": "파이프라인",
+    "unsupported": "지원되지 않음"
+  },
+  "riskRules": {
+    "circuitBreaker": "서킷 브레이커",
+    "timeLimit": "시간 제한",
+    "regimeDetection": "레짐 감지",
+    "drawdownLimit": "드로우다운 제한",
+    "correlationCap": "상관관계 캡",
+    "hardSafety": "하드 안전 제한",
+    "alwaysOn": "항상 켜짐"
+  },
+  "ruleActions": {
+    "closeAll": "모두 결제",
+    "reduceTo": "% 로 축소",
+    "reduceAll": "모두 축소",
+    "haltTrading": "거래 중지",
+    "haltNewEntry": "신규 진입 중지",
+    "skipEntry": "진입 건너뛰기",
+    "reduceHalf": "50% 축소"
+  },
+  "ruleParams": {
+    "pnl": "PnL <",
+    "cooldown": "쿨다운",
+    "bars": "바",
+    "action": "동작",
+    "maxHolding": "최대 보유 기간",
+    "hours": "시간",
+    "period": "기간",
+    "threshold": "임계값",
+    "maxDrawdown": "최대 드로우다운",
+    "maxCorr": "최대 상관관계",
+    "lookback": "룩백",
+    "days": "일",
+    "maxLoss": "최대 손실",
+    "fromEntry": "진입 기준",
+    "reduceToLabel": "축소 대상",
+    "reduceBy": "축소 비율"
+  },
+  "indicators": {
+    "atr": "ATR",
+    "vix": "VIX",
+    "realizedVol": "실현 변동성"
+  },
+  "timeUnits": {
+    "hours": "시간",
+    "bars": "바"
+  },
+  "dataConfig": {
+    "dataSource": "데이터 소스",
+    "symbol": "심볼",
+    "startDate": "시작일",
+    "endDate": "종료일",
+    "initialCapital": "초기 자본",
+    "orderSize": "주문 크기",
+    "orderSizeUnit": "주문 크기 단위",
+    "percent": "퍼센트"
+  },
+  "errors": {
+    "validationFailed": "검증 실패",
+    "saveFailed": "저장 실패",
+    "loadFailed": "로드 실패",
+    "backtestFailed": "백테스트 실패"
+  },
+  "persona": {
+    "title": "Trading Persona",
+    "noPersona": "No persona constraint",
+    "preferencePlaceholder": "Optional: describe your generation preference, e.g. 'focus on AUD/JPY pairs, tighter stop-loss'",
+    "preferenceLabel": "Generation Preference",
+    "charCount": "{{current}}/{{max}}",
+    "mustInclude": "Must Include",
+    "regimeBias": "Regime Bias",
+    "holdingPeriod": "Holding Period",
+    "riskStyle": "Risk Style",
+    "forbidden": "Forbidden",
+    "loadError": "Failed to load personas",
+    "requiresAuth": "Login required to load personas"
+  },
+  "common": {
+    "cancel": "취소",
+    "confirm": "확인",
+    "save": "저장",
+    "delete": "삭제",
+    "edit": "편집",
+    "close": "닫기",
+    "add": "추가",
+    "remove": "제거"
+  }
+}

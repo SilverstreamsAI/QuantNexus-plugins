@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 // -----------------------------------------------------------------------------
@@ -115,28 +116,28 @@ export function generateFinalName(baseName: string): string {
 /**
  * Get dialog title based on context
  */
-function getDialogTitle(context: NamingDialogContext): string {
+function getDialogTitle(context: NamingDialogContext, t: (key: string) => string): string {
   switch (context) {
     case 'builder':
-      return 'Name Your Strategy';
+      return t('namingDialog.titleBuilder');
     case 'export':
-      return 'Export to Quant Lab';
+      return t('namingDialog.titleExport');
     default:
-      return 'Name Your Backtest';
+      return t('namingDialog.titleBacktest');
   }
 }
 
 /**
  * Get confirm button text based on context
  */
-function getConfirmButtonText(context: NamingDialogContext): string {
+function getConfirmButtonText(context: NamingDialogContext, t: (key: string) => string): string {
   switch (context) {
     case 'builder':
-      return 'Confirm & Generate';
+      return t('namingDialog.confirmBuilder');
     case 'export':
-      return 'Confirm & Export';
+      return t('namingDialog.confirmExport');
     default:
-      return 'Confirm & Execute';
+      return t('namingDialog.confirmBacktest');
   }
 }
 
@@ -151,6 +152,7 @@ export const NamingDialog: React.FC<NamingDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation('backtest');
   const [customName, setCustomName] = useState('');
   const [useCustom, setUseCustom] = useState(false);
 
@@ -223,7 +225,7 @@ export const NamingDialog: React.FC<NamingDialogProps> = ({
         <div className="flex items-center gap-2 px-4 py-3 border-b border-color-terminal-border border-l-[3px] border-l-color-terminal-accent-teal bg-color-terminal-panel rounded-t-lg">
           <EditIcon className="w-[18px] h-[18px] text-color-terminal-accent-teal" />
           <span className="flex-1 font-mono text-xs font-semibold text-color-terminal-text uppercase tracking-wider">
-            {getDialogTitle(context)}
+            {getDialogTitle(context, t)}
           </span>
           <button
             onClick={onCancel}
@@ -238,7 +240,7 @@ export const NamingDialog: React.FC<NamingDialogProps> = ({
           {/* Suggested Name Section */}
           <div className="space-y-2">
             <label className="block text-[11px] text-color-terminal-text-muted uppercase tracking-wider">
-              Suggested name:
+              {t('namingDialog.suggestedName')}
             </label>
             <div className="flex items-center gap-2">
               <div className={cn(
@@ -259,7 +261,7 @@ export const NamingDialog: React.FC<NamingDialogProps> = ({
                 )}
               >
                 <CheckIcon className="w-3 h-3" />
-                Use This
+                {t('namingDialog.useThis')}
               </button>
             </div>
           </div>
@@ -267,20 +269,20 @@ export const NamingDialog: React.FC<NamingDialogProps> = ({
           {/* Divider */}
           <div className="flex items-center gap-3 text-[10px] text-color-terminal-text-muted">
             <div className="flex-1 border-t border-dashed border-color-terminal-border" />
-            <span>or</span>
+            <span>{t('namingDialog.or')}</span>
             <div className="flex-1 border-t border-dashed border-color-terminal-border" />
           </div>
 
           {/* Custom Name Section */}
           <div className="space-y-2">
             <label className="block text-[11px] text-color-terminal-text-muted uppercase tracking-wider">
-              Custom name:
+              {t('namingDialog.customName')}
             </label>
             <input
               type="text"
               value={customName}
               onChange={handleCustomChange}
-              placeholder="Enter your custom name..."
+              placeholder={t('namingDialog.placeholder')}
               className={cn(
                 "w-full px-3 py-2 rounded border font-mono text-sm",
                 "bg-color-terminal-panel text-color-terminal-text",
@@ -297,7 +299,7 @@ export const NamingDialog: React.FC<NamingDialogProps> = ({
           {/* Final Name Preview */}
           <div className="pt-2 border-t border-color-terminal-border">
             <div className="text-[11px] text-color-terminal-text-muted">
-              Final name: <span className="text-color-terminal-text-secondary font-mono">{finalNamePreview}</span>
+              {t('namingDialog.finalName')} <span className="text-color-terminal-text-secondary font-mono">{finalNamePreview}</span>
             </div>
           </div>
         </div>
@@ -308,13 +310,13 @@ export const NamingDialog: React.FC<NamingDialogProps> = ({
             onClick={onCancel}
             className="min-w-[80px] px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider rounded border border-color-terminal-border bg-transparent text-color-terminal-text-secondary hover:border-color-terminal-text-muted hover:text-color-terminal-text transition-all"
           >
-            Cancel
+            {t('namingDialog.cancel')}
           </button>
           <button
             onClick={handleConfirm}
             className="min-w-[120px] px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider rounded border border-color-terminal-accent-gold bg-color-terminal-accent-gold/20 text-color-terminal-accent-gold hover:bg-color-terminal-accent-gold/30 transition-all"
           >
-            {getConfirmButtonText(context)}
+            {getConfirmButtonText(context, t)}
           </button>
         </div>
       </div>
