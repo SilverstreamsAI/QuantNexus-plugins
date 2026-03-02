@@ -18,8 +18,11 @@ export { AlphaFactoryPage } from './pages/AlphaFactoryPage';
 export { QuantLabHub } from './pages/QuantLabHub';
 export { SignalLibraryPage } from './pages/SignalLibrary';
 export { EngineStorePage } from './pages/EngineStorePage';
+export { AlgorithmBrowserPage } from './pages/AlgorithmBrowserPage';
+export { BatchGenerationPage } from './pages/BatchGenerationPage';
 
 // Export components
+export { BatchGenerationSection } from './components/BatchGenerationSection';
 export { SignalSourceCard } from './components/SignalSourceCard';
 export { CombinatorConfig } from './components/CombinatorConfig';
 export { SignalFlowCanvas } from './components/SignalFlowCanvas';

@@ -10,6 +10,14 @@
       "title": "Tienda de Motores",
       "description": "Instalar y gestionar motores de evaluación de factores"
     },
+    "algorithmBrowser": {
+      "title": "Algorithm Browser",
+      "description": "Browse, search and export generated algorithms"
+    },
+    "batchGeneration": {
+      "title": "Generacion por lotes",
+      "description": "Generacion de estrategias por lotes impulsada por IA con restricciones de persona"
+    },
     "status": {
       "ready": "Plugin listo. Haga clic en Combinador para configurar la combinación de señales."
     }
@@ -208,6 +216,42 @@
     "forbidden": "Forbidden",
     "loadError": "Failed to load personas",
     "requiresAuth": "Login required to load personas"
+  },
+  "algorithmBrowser": {
+    "title": "Algorithm Browser",
+    "searchPlaceholder": "Search algorithms...",
+    "allTypes": "All Types",
+    "selected": "{{count}} selected",
+    "loading": "Loading...",
+    "empty": "No algorithms found",
+    "colName": "Name",
+    "colType": "Type",
+    "colSignalSource": "Signal Source",
+    "colRegime": "Regime",
+    "colDate": "Created",
+    "exportTitle": "Export as Signal Source",
+    "exportName": "Signal Source Name",
+    "exportNamePlaceholder": "Enter signal source name...",
+    "roleAnalysis": "Analysis Algorithm",
+    "roleEntry": "Entry Algorithm",
+    "roleExit": "Exit Algorithm",
+    "selectAlgorithm": "Select algorithm...",
+    "noExit": "No exit algorithm",
+    "optional": "optional",
+    "timeframe": "Timeframe",
+    "exportButton": "Export"
+  },
+  "batchGeneration": {
+    "title": "Batch Generation",
+    "preferenceLabel": "Generation Preference (Optional)",
+    "preferencePlaceholder": "Optional: describe batch generation preference, e.g. 'conservative risk, tight stop-loss'",
+    "regimeLabel": "Market Regime",
+    "indicatorsLabel": "Indicator Pool",
+    "quantityLabel": "Quantity",
+    "generateButton": "Generate",
+    "generating": "Generating...",
+    "errorNoIndicators": "Please select at least one indicator before generating.",
+    "cancelButton": "Cancel"
   },
   "common": {
     "cancel": "Cancelar",

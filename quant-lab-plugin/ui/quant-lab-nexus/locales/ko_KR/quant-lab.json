@@ -10,6 +10,14 @@
       "title": "엔진 스토어",
       "description": "팩터 평가 엔진 설치 및 관리"
     },
+    "algorithmBrowser": {
+      "title": "Algorithm Browser",
+      "description": "Browse, search and export generated algorithms"
+    },
+    "batchGeneration": {
+      "title": "Batch Generation",
+      "description": "AI Batch Generation with Persona Constraints"
+    },
     "status": {
       "ready": "플러그인 준비됨. 시그널 조합을 구성하려면 콤비네이터를 클릭하세요."
     }
@@ -208,6 +216,42 @@
     "forbidden": "Forbidden",
     "loadError": "Failed to load personas",
     "requiresAuth": "Login required to load personas"
+  },
+  "algorithmBrowser": {
+    "title": "Algorithm Browser",
+    "searchPlaceholder": "Search algorithms...",
+    "allTypes": "All Types",
+    "selected": "{{count}} selected",
+    "loading": "Loading...",
+    "empty": "No algorithms found",
+    "colName": "Name",
+    "colType": "Type",
+    "colSignalSource": "Signal Source",
+    "colRegime": "Regime",
+    "colDate": "Created",
+    "exportTitle": "Export as Signal Source",
+    "exportName": "Signal Source Name",
+    "exportNamePlaceholder": "Enter signal source name...",
+    "roleAnalysis": "Analysis Algorithm",
+    "roleEntry": "Entry Algorithm",
+    "roleExit": "Exit Algorithm",
+    "selectAlgorithm": "Select algorithm...",
+    "noExit": "No exit algorithm",
+    "optional": "optional",
+    "timeframe": "Timeframe",
+    "exportButton": "Export"
+  },
+  "batchGeneration": {
+    "title": "Batch Generation",
+    "preferenceLabel": "Generation Preference (Optional)",
+    "preferencePlaceholder": "Optional: describe batch generation preference, e.g. 'conservative risk, tight stop-loss'",
+    "regimeLabel": "Market Regime",
+    "indicatorsLabel": "Indicator Pool",
+    "quantityLabel": "Quantity",
+    "generateButton": "Generate",
+    "generating": "Generating...",
+    "errorNoIndicators": "Please select at least one indicator before generating.",
+    "cancelButton": "Cancel"
   },
   "common": {
     "cancel": "취소",

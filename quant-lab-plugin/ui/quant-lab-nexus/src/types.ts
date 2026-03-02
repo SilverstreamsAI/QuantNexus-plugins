@@ -5,7 +5,7 @@
  * PLUGIN_TICKET_008: Migrated from host to plugin
  */
 
-export type QuantLabSubPage = 'hub' | 'factory' | 'engineStore';
+export type QuantLabSubPage = 'hub' | 'factory' | 'engineStore' | 'algorithmBrowser' | 'batchGeneration';
 
 /**
  * TICKET_426_3: Persona constraint types for Alpha Factory persona selection.
@@ -23,6 +23,38 @@ export interface PersonaItem {
   label: string;
   description: PersonaDescription;
 }
+
+/**
+ * TICKET_426_1: Algorithm Browser item from nona_algorithms table.
+ */
+export interface AlgorithmBrowserItem {
+  id: number;
+  code: string;
+  strategy_name: string;
+  strategy_type: number;
+  classification_metadata: string | null;
+  strategy_rules: string | null;
+  status: number;
+  create_time: string;
+}
+
+/**
+ * TICKET_426_1: Batch generation configuration for Alpha Factory.
+ */
+export interface BatchGenerationConfig {
+  preference: string;
+  regime: string;
+  indicators: string[];
+  quantity: number;
+  persona: string | null;
+  llmProvider: string;
+  llmModel: string;
+}
+
+/**
+ * TICKET_426_1: Batch generation status.
+ */
+export type BatchGenerationStatus = 'idle' | 'generating' | 'completed' | 'error';
 
 /**
  * PLUGIN_TICKET_010: Component detail for each slot (Analysis/Entry/Exit)

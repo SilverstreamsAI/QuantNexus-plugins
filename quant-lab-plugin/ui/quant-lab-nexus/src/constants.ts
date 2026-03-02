@@ -6,7 +6,7 @@
  * TICKET_275: Exit Factory risk rule defaults and metadata
  */
 
-import { CombinatorMethod, DataConfig, ExitRules } from './types';
+import { CombinatorMethod, DataConfig, ExitRules, BatchGenerationConfig } from './types';
 
 /**
  * PLUGIN_TICKET_010: Timeframe options for signal component dropdowns.
@@ -15,6 +15,140 @@ import { CombinatorMethod, DataConfig, ExitRules } from './types';
 export const TIMEFRAME_OPTIONS = [
   '1m', '5m', '15m', '30m', '1h', '2h', '4h', '1d', '1w', '1M',
 ] as const;
+
+/**
+ * TICKET_426_1: Strategy type labels for Algorithm Browser display.
+ */
+export const STRATEGY_TYPE_LABELS: Record<number, string> = {
+  1: 'Execution',
+  3: 'Entry Signal',
+  6: 'Exit Signal',
+  9: 'Analysis',
+};
+
+/**
+ * TICKET_426_1: Regime type options for batch generation.
+ * Must match backend valid case_types via REGIME_TO_CASE_TYPE mapping
+ * in batch-generation-handlers.ts (TREND_DETECTION, RANGE_DETECTION,
+ * CONSOLIDATION_DETECTION, OSCILLATION_DETECTION).
+ */
+export const REGIME_TYPE_OPTIONS = [
+  { value: 'trend', label: 'Trend' },
+  { value: 'range', label: 'Range' },
+  { value: 'consolidation', label: 'Consolidation' },
+  { value: 'oscillation', label: 'Oscillation' },
+] as const;
+
+/**
+ * TICKET_426_1: Indicator pool options for batch generation.
+ */
+export const INDICATOR_POOL_OPTIONS = [
+  { value: 'RSI', label: 'RSI' },
+  { value: 'MACD', label: 'MACD' },
+  { value: 'SMA', label: 'SMA' },
+  { value: 'EMA', label: 'EMA' },
+  { value: 'Bollinger', label: 'Bollinger Bands' },
+  { value: 'ADX', label: 'ADX' },
+  { value: 'Stochastic', label: 'Stochastic' },
+  { value: 'ATR', label: 'ATR' },
+] as const;
+
+/**
+ * TICKET_426_1: Default values for batch generation.
+ */
+export const BATCH_GENERATION_DEFAULTS: Omit<BatchGenerationConfig, 'llmProvider' | 'llmModel'> = {
+  preference: '',
+  regime: 'mean_reversion',
+  indicators: [],
+  quantity: 5,
+  persona: null,
+};
+
+/**
+ * TICKET_426_2: LLM provider options for batch generation model selector.
+ * Minimal subset for UI dropdown rendering. Cross-plugin imports prohibited
+ * (Tier 1 -> Tier 1), so provider config is defined locally.
+ * Must stay in sync with strategy-builder-nexus/src/config/llm-providers.ts.
+ */
+export interface LlmModelOption {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface LlmProviderOption {
+  id: string;
+  name: string;
+  models: LlmModelOption[];
+}
+
+export const LLM_PROVIDER_OPTIONS: LlmProviderOption[] = [
+  {
+    id: 'NONA',
+    name: 'Nona',
+    models: [
+      { id: 'nona-nexus', name: 'Nona Nexus', description: 'Default recommended' },
+      { id: 'gpt-5.2', name: 'GPT-5.2', description: 'OpenAI flagship' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', description: 'OpenAI fast' },
+      { id: 'claude-4-5-opus-latest', name: 'Claude 4.5 Opus', description: 'Best intelligence' },
+      { id: 'claude-4-5-sonnet-latest', name: 'Claude 4.5 Sonnet', description: 'Balanced' },
+      { id: 'claude-4-5-haiku-latest', name: 'Claude 4.5 Haiku', description: 'Fast' },
+      { id: 'deepseek-chat', name: 'DeepSeek V3', description: 'Best value' },
+      { id: 'deepseek-reasoner', name: 'DeepSeek R1', description: 'Reasoning' },
+      { id: 'gemini-3-pro-latest', name: 'Gemini 3 Pro', description: 'Google flagship' },
+      { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', description: 'Google fast' },
+      { id: 'grok-4', name: 'Grok-4', description: 'xAI flagship' },
+      { id: 'qwen3-max', name: 'Qwen 3 Max', description: 'Best Chinese' },
+    ],
+  },
+  {
+    id: 'CLAUDE',
+    name: 'Claude (Anthropic)',
+    models: [
+      { id: 'claude-4-5-opus-latest', name: 'Claude 4.5 Opus', description: 'Best intelligence' },
+      { id: 'claude-4-5-sonnet-latest', name: 'Claude 4.5 Sonnet', description: 'Balanced' },
+      { id: 'claude-4-5-haiku-latest', name: 'Claude 4.5 Haiku', description: 'Fast' },
+    ],
+  },
+  {
+    id: 'OPENAI',
+    name: 'OpenAI',
+    models: [
+      { id: 'gpt-5.2', name: 'GPT-5.2', description: 'Most advanced' },
+      { id: 'gpt-5-mini', name: 'GPT-5 Mini', description: 'Faster' },
+    ],
+  },
+  {
+    id: 'GEMINI',
+    name: 'Google Gemini',
+    models: [
+      { id: 'gemini-3-pro-latest', name: 'Gemini 3 Pro', description: 'Flagship' },
+      { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', description: 'Fast' },
+    ],
+  },
+  {
+    id: 'DEEPSEEK',
+    name: 'DeepSeek',
+    models: [
+      { id: 'deepseek-chat', name: 'DeepSeek V3', description: 'Best value' },
+      { id: 'deepseek-reasoner', name: 'DeepSeek R1', description: 'Reasoning' },
+    ],
+  },
+  {
+    id: 'GROK',
+    name: 'xAI Grok',
+    models: [
+      { id: 'grok-4', name: 'Grok-4', description: 'Flagship' },
+    ],
+  },
+  {
+    id: 'QWEN',
+    name: 'Alibaba Qwen',
+    models: [
+      { id: 'qwen3-max', name: 'Qwen 3 Max', description: 'Best Chinese' },
+    ],
+  },
+];
 
 export const SIGNAL_COMBINATOR_METHODS: CombinatorMethod[] = [
   { id: 'equal', name: 'Equal Weight', description: 'Simple average of all signals' },

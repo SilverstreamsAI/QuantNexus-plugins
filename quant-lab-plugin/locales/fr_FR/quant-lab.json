@@ -14,6 +14,10 @@
       "title": "Magasin Moteur",
       "description": "Gérer les configurations de backtest"
     },
+    "algorithmBrowser": {
+      "title": "Algorithm Browser",
+      "description": "Browse, search, and export generated algorithms"
+    },
     "status": {
       "ready": "Système Prêt"
     }
@@ -173,6 +177,42 @@
     "forbidden": "Forbidden",
     "loadError": "Failed to load personas",
     "requiresAuth": "Login required to load personas"
+  },
+  "algorithmBrowser": {
+    "title": "Algorithm Browser",
+    "searchPlaceholder": "Search algorithms...",
+    "allTypes": "All Types",
+    "selected": "{{count}} selected",
+    "loading": "Loading algorithms...",
+    "empty": "No algorithms found",
+    "colName": "Name",
+    "colType": "Type",
+    "colSignalSource": "Signal Source",
+    "colRegime": "Regime",
+    "colDate": "Created",
+    "exportTitle": "Export as Signal Source",
+    "exportName": "Signal Source Name",
+    "exportNamePlaceholder": "Enter signal source name...",
+    "roleAnalysis": "Analysis Algorithm",
+    "roleEntry": "Entry Algorithm",
+    "roleExit": "Exit Algorithm",
+    "selectAlgorithm": "Select algorithm...",
+    "noExit": "No exit algorithm",
+    "optional": "optional",
+    "timeframe": "Timeframe",
+    "exportButton": "Export"
+  },
+  "batchGeneration": {
+    "title": "Batch Generation",
+    "preferenceLabel": "Generation Preference",
+    "preferencePlaceholder": "Describe batch generation preference...",
+    "regimeLabel": "Market Regime",
+    "indicatorsLabel": "Indicator Pool",
+    "quantityLabel": "Quantity",
+    "generateButton": "Generate",
+    "generating": "Generating...",
+    "errorNoIndicators": "Please select at least one indicator before generating.",
+    "cancelButton": "Cancel"
   },
   "common": {
     "cancel": "Annuler",

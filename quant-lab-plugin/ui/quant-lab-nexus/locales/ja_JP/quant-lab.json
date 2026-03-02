@@ -10,6 +10,14 @@
       "title": "エンジンストア",
       "description": "ファクター評価エンジンインストールおよび管理"
     },
+    "algorithmBrowser": {
+      "title": "Algorithm Browser",
+      "description": "Browse, search and export generated algorithms"
+    },
+    "batchGeneration": {
+      "title": "Batch Generation",
+      "description": "AI Batch Generation with Persona Constraints"
+    },
     "status": {
       "ready": "プラグイン準備完了。コンビネーターをクリックしてシグナル組み合わせを設定してください。"
     }
@@ -208,6 +216,42 @@
     "forbidden": "Forbidden",
     "loadError": "Failed to load personas",
     "requiresAuth": "Login required to load personas"
+  },
+  "algorithmBrowser": {
+    "title": "Algorithm Browser",
+    "searchPlaceholder": "Search algorithms...",
+    "allTypes": "All Types",
+    "selected": "{{count}} selected",
+    "loading": "Loading...",
+    "empty": "No algorithms found",
+    "colName": "Name",
+    "colType": "Type",
+    "colSignalSource": "Signal Source",
+    "colRegime": "Regime",
+    "colDate": "Created",
+    "exportTitle": "Export as Signal Source",
+    "exportName": "Signal Source Name",
+    "exportNamePlaceholder": "Enter signal source name...",
+    "roleAnalysis": "Analysis Algorithm",
+    "roleEntry": "Entry Algorithm",
+    "roleExit": "Exit Algorithm",
+    "selectAlgorithm": "Select algorithm...",
+    "noExit": "No exit algorithm",
+    "optional": "optional",
+    "timeframe": "Timeframe",
+    "exportButton": "Export"
+  },
+  "batchGeneration": {
+    "title": "Batch Generation",
+    "preferenceLabel": "Generation Preference (Optional)",
+    "preferencePlaceholder": "Optional: describe batch generation preference, e.g. 'conservative risk, tight stop-loss'",
+    "regimeLabel": "Market Regime",
+    "indicatorsLabel": "Indicator Pool",
+    "quantityLabel": "Quantity",
+    "generateButton": "Generate",
+    "generating": "Generating...",
+    "errorNoIndicators": "Please select at least one indicator before generating.",
+    "cancelButton": "Cancel"
   },
   "common": {
     "cancel": "キャンセル",

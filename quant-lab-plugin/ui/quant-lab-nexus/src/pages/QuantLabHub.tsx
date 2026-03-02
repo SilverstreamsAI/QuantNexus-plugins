@@ -9,15 +9,17 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlaskConical, Layers, Cpu } from 'lucide-react';
+import { FlaskConical, Layers, Cpu, Database, Sparkles } from 'lucide-react';
 import { FeatureCard } from '../components/FeatureCard';
 
 interface QuantLabHubProps {
   onNavigateToFactory: () => void;
   onNavigateToEngineStore: () => void;
+  onNavigateToAlgorithmBrowser: () => void;
+  onNavigateToBatchGeneration: () => void;
 }
 
-export const QuantLabHub: React.FC<QuantLabHubProps> = ({ onNavigateToFactory, onNavigateToEngineStore }) => {
+export const QuantLabHub: React.FC<QuantLabHubProps> = ({ onNavigateToFactory, onNavigateToEngineStore, onNavigateToAlgorithmBrowser, onNavigateToBatchGeneration }) => {
   const { t } = useTranslation('quant-lab');
 
   return (
@@ -51,6 +53,18 @@ export const QuantLabHub: React.FC<QuantLabHubProps> = ({ onNavigateToFactory, o
             title={t('hub.engineStore.title')}
             description={t('hub.engineStore.description')}
             onClick={onNavigateToEngineStore}
+          />
+          <FeatureCard
+            icon={Database}
+            title={t('hub.algorithmBrowser.title')}
+            description={t('hub.algorithmBrowser.description')}
+            onClick={onNavigateToAlgorithmBrowser}
+          />
+          <FeatureCard
+            icon={Sparkles}
+            title={t('hub.batchGeneration.title')}
+            description={t('hub.batchGeneration.description')}
+            onClick={onNavigateToBatchGeneration}
           />
         </div>
 

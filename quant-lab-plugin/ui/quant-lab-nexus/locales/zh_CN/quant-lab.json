@@ -10,6 +10,14 @@
       "title": "引擎商店",
       "description": "安装和管理因子评估引擎"
     },
+    "algorithmBrowser": {
+      "title": "Algorithm Browser",
+      "description": "Browse, search and export generated algorithms"
+    },
+    "batchGeneration": {
+      "title": "批量生成",
+      "description": "基于AI的批量策略生成，支持角色约束"
+    },
     "status": {
       "ready": "插件已准备就绪。点击组合器配置信号组合。"
     }
@@ -208,6 +216,42 @@
     "forbidden": "Forbidden",
     "loadError": "Failed to load personas",
     "requiresAuth": "Login required to load personas"
+  },
+  "algorithmBrowser": {
+    "title": "Algorithm Browser",
+    "searchPlaceholder": "Search algorithms...",
+    "allTypes": "All Types",
+    "selected": "{{count}} selected",
+    "loading": "Loading...",
+    "empty": "No algorithms found",
+    "colName": "Name",
+    "colType": "Type",
+    "colSignalSource": "Signal Source",
+    "colRegime": "Regime",
+    "colDate": "Created",
+    "exportTitle": "Export as Signal Source",
+    "exportName": "Signal Source Name",
+    "exportNamePlaceholder": "Enter signal source name...",
+    "roleAnalysis": "Analysis Algorithm",
+    "roleEntry": "Entry Algorithm",
+    "roleExit": "Exit Algorithm",
+    "selectAlgorithm": "Select algorithm...",
+    "noExit": "No exit algorithm",
+    "optional": "optional",
+    "timeframe": "Timeframe",
+    "exportButton": "Export"
+  },
+  "batchGeneration": {
+    "title": "Batch Generation",
+    "preferenceLabel": "Generation Preference (Optional)",
+    "preferencePlaceholder": "Optional: describe batch generation preference, e.g. 'conservative risk, tight stop-loss'",
+    "regimeLabel": "Market Regime",
+    "indicatorsLabel": "Indicator Pool",
+    "quantityLabel": "Quantity",
+    "generateButton": "Generate",
+    "generating": "Generating...",
+    "errorNoIndicators": "Please select at least one indicator before generating.",
+    "cancelButton": "Cancel"
   },
   "common": {
     "cancel": "取消",

@@ -238,6 +238,35 @@ interface ElectronAPI {
     }) => void) => () => void;
   };
 
+  // TICKET_426_1: Algorithm Browser API
+  algorithm: {
+    list: (options: { userId: string; strategy_type?: number }) => Promise<{
+      success: boolean;
+      data?: Array<{
+        id: number;
+        code: string;
+        strategy_name: string;
+        strategy_type: number;
+        classification_metadata: string | null;
+        strategy_rules: string | null;
+        status: number;
+        create_time: string;
+      }>;
+      error?: unknown;
+    }>;
+    exportAsSignalSource: (data: {
+      name: string;
+      analysisId: number;
+      entryId: number;
+      exitId?: number;
+      timeframe: string;
+    }) => Promise<{
+      success: boolean;
+      data?: { id: string; name: string };
+      error?: string;
+    }>;
+  };
+
   // TICKET_426_2: Persona Constraint System API
   persona: {
     list: () => Promise<{
@@ -398,6 +427,44 @@ interface ElectronAPI {
       strategyPath?: string;
       error?: string;
     }>;
+  };
+
+  // TICKET_426_1: Batch Strategy Generation
+  batchGeneration: {
+    start: (config: {
+      regime: string;
+      indicators: string[];
+      quantity: number;
+      preference?: string;
+      persona?: string | null;
+      llmProvider?: string;
+      llmModel?: string;
+    }) => Promise<{ success: boolean; error?: string }>;
+
+    cancel: () => Promise<{ success: boolean }>;
+
+    onProgress: (callback: (data: {
+      completed: number;
+      total: number;
+      currentName: string;
+      algorithmId?: number;
+      error?: string;
+    }) => void) => () => void;
+
+    onComplete: (callback: (data: {
+      total: number;
+      succeeded: number;
+      failed: number;
+      results: Array<{ algorithmId: number; strategyName: string }>;
+      errors: Array<{ index: number; error: string }>;
+    }) => void) => () => void;
+
+    onError: (callback: (data: {
+      message: string;
+      partial?: boolean;
+      completed?: number;
+      total?: number;
+    }) => void) => () => void;
   };
 }
 
